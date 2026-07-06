@@ -181,7 +181,8 @@ export default function Navbar() {
                                     {user.photo ? <img src={user.photo} alt="Profile" className="w-full h-full object-cover" /> : user.role[0]}
                                 </div>
                                 <Link
-                                    href={`/dashboard/${user.role.toLowerCase()}`}
+                                    // href={`/dashboard/${user.role.toLowerCase()}`}
+                                    href={`/dashboard/admin`}
                                     className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-md text-xs xl:text-sm shadow transition transform hover:-translate-y-0.5"
                                 >
                                     ড্যাশবোর্ড
