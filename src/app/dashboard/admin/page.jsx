@@ -1,34 +1,21 @@
 "use client";
 
-import { useState } from "react";
-// import Sidebar from "./Sidebar";
-
 export default function Dashboard() {
-    const [sidebarOpen, setSidebarOpen] = useState(false);
-
     return (
-        <div className="flex min-h-screen bg-[#f7f6f0] text-slate-800 antialiased font-sans">
-            {/* ১. সাইডবার ইনস্ট্যান্স */}
-            <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
-
-            {/* ২. মেইন কন্টেন্ট উইন্ডো */}
+        <div className="flex min-h-screen bg-[#f7f6f0] text-slate-800 antialiased font-sans w-full">
+            
+            {/* মেইন কন্টেন্ট উইন্ডো */}
             <div className="flex-1 flex flex-col min-w-0 max-h-screen overflow-y-auto">
 
-                {/* টপ মোবাইল নেভিগেশন বার */}
+                {/* টপ মোবাইল নেভিগেশন বার (সাইডবার টগল বাটন ছাড়া) */}
                 <header className="bg-white border-b border-slate-200 p-4 flex items-center justify-between lg:hidden sticky top-0 z-30">
-                    <button
-                        onClick={() => setSidebarOpen(true)}
-                        className="bg-[#064e3b] text-white p-2 rounded-lg text-sm"
-                    >
-                        ☰ মেনু
-                    </button>
                     <h2 className="font-bold text-sm text-[#064e3b]">এহরাহুল নূরানি হাফিজিয়া মাদ্রাসা</h2>
                 </header>
 
                 {/* ড্যাশবোর্ড বডি কন্টেনার */}
                 <main className="p-4 sm:p-6 md:p-8 space-y-8 max-w-7xl w-full mx-auto">
 
-                    {/* মাদ্রাসা প্রোফাইল কার্ড (শীর্ষ ব্যানার) */}
+                    {/* মাদ্রাসা প্রোফাইলカード (শীর্ষ ব্যানার) */}
                     <div className="bg-[#064e3b] text-white p-6 rounded-2xl border-t-4 border-amber-500 shadow-sm relative overflow-hidden">
                         <div className="relative z-10 space-y-2">
                             <span className="bg-emerald-700 text-amber-300 text-xs px-2.5 py-1 rounded-full font-bold">নতুন আপডেট এসেছে</span>
@@ -57,10 +44,10 @@ export default function Dashboard() {
                             {[
                                 { label: "মোট শিক্ষার্থী", value: "277", icon: "👥" },
                                 { label: "সর্বমোট সংগ্রহ", value: "৳১,৪১৭,১৯৭", icon: "💵" },
-                                { label: "সর্বমোট খরচ", value: "৳১,৪৬৩,৯৫৮", icon: "💸" },
+                                { icon: "💸", label: "সর্বমোট খরচ", value: "৳১,৪৬৩,৯৫৮" },
                                 { label: "বর্তমান ব্যালেন্স", value: "৳-৩০,৯৮১", icon: "💳" },
                                 { label: "মোট শিক্ষক", value: "18", icon: "🕌" },
-                                { label: "মোট স্টাফ/কর্মচারী", value: "23", icon: "👤" }
+                                { label: "মোট স্টাফ/कर्मচারী", value: "23", icon: "👤" }
                             ].map((card, i) => (
                                 <div key={i} className="bg-white p-4 rounded-xl border-t-2 border-[#064e3b] shadow-xs text-center">
                                     <span className="text-lg block mb-1">{card.icon}</span>
@@ -154,7 +141,7 @@ export default function Dashboard() {
                             <div className="space-y-2 text-xs">
                                 {[
                                     { name: "ভর্তি ফান্ড", amt: "৳৫১,৮৮৩", prg: "50.7%" },
-                                    { name: "বেতন ফান্ড", amt: "৳३৭,৯৭৫", prg: "37.1%" },
+                                    { name: "বেতন ফান্ড", amt: "৳৩৭,৯৭৫", prg: "37.1%" },
                                     { name: "যাকাত ফান্ড", amt: "৳১২,৫২০", prg: "12.2%" }
                                 ].map((f, idx) => (
                                     <div key={idx} className="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
