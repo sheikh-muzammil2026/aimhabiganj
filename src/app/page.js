@@ -1,11 +1,18 @@
-import HomePage from '@/components/public/home/homePage';
+import FeaturedSections from '@/components/public/home/featuredSection';
+import HeroSection from '@/components/public/home/hero';
+import ReviewSection from '@/components/public/home/reviews';
+import StatsSection from '@/components/public/home/statsSection';
+import WhyChooseUs from '@/components/public/home/whyChooseUs';
 import React from 'react';
 
 const page = () => {
   return (
     <div>
-
-      <HomePage />
+      <HeroSection />
+      <WhyChooseUs />
+      <FeaturedSections />
+      <StatsSection />
+      <ReviewSection />
     </div>
   );
 };
