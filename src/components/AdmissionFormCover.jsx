@@ -7,35 +7,61 @@ export default function AdmissionFormCover({ formData, handleChange }) {
   return (
     <div className="w-full aspect-[1/1.414] md:w-[8.27in] md:h-[11.69in] bg-[#fafafa] p-6 sm:p-14 flex flex-col justify-between box-border relative font-bengali print:w-full print:h-screen print:p-14 overflow-hidden select-none shadow-sm">
       
-      {/* ================= TOP MODERN GEOMETRIC RIBBON BORDER ================= */}
-      <div className="absolute top-0 left-0 right-0 h-24 sm:h-36 pointer-events-none z-0">
-        {/* ডার্ক চকোলেট/ব্ল্যাক মেইন টপ বার */}
-        <div className="absolute top-0 left-0 w-full h-[35%] bg-[#231f20]" style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 22% 100%, 0 35%)" }}></div>
-        {/* অরেঞ্জ সেকেন্ডারি বার */}
-        <div className="absolute top-[34%] left-0 w-full h-[25%] bg-[#e36d27]" style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 26% 100%, 4.5% 0)" }}></div>
-        {/* বামের ইন্টারলকিং জ্যামিতিক ওভারল্যাপ "V" স্ট্রিপসমূহ */}
-        <div className="absolute top-0 left-0 w-[30%] h-full bg-[#231f20]" style={{ clipPath: "polygon(0 0, 4% 0, 24% 100%, 15% 100%, 0 25%)" }}></div>
-        <div className="absolute top-0 left-0 w-[30%] h-full bg-[#e36d27]" style={{ clipPath: "polygon(4.5% 0, 10.5% 0, 28.5% 100%, 24.5% 100%)" }}></div>
-        <div className="absolute top-0 left-0 w-[35%] h-full bg-[#231f20]" style={{ clipPath: "polygon(14% 0, 19% 0, 36% 100%, 29% 100%)" }}></div>
+      {/* ================= TOP PERFECT GEOMETRIC RIBBON BORDER (ছবি অনুযায়ী হুবহু ২/৩ অংশ ও ত্রিভুজ ভাঁজ) ================= */}
+      <div className="absolute top-0 left-0 right-0 h-28 sm:h-40 pointer-events-none z-0">
+        {/* মেইন ডার্ক চকোলেট/ব্ল্যাক বার: ডান থেকে ২/৩ অংশ সোজা এসে বামে উল্টো ত্রিভুজ হয়ে কোণায় উঠেছে */}
+        <div 
+          className="absolute inset-0 bg-[#231f20]" 
+          style={{ clipPath: "polygon(100% 0, 100% 28%, 35% 28%, 20% 70%, 0 24%, 0 0)" }}
+        ></div>
+        
+        {/* মেইন উজ্জ্বল কমলা বার: ঠিক কালো বারের সমান্তরালে নিচে নিচে চলেছে */}
+        <div 
+          className="absolute inset-0 bg-[#e36d27]" 
+          style={{ clipPath: "polygon(100% 27%, 100% 48%, 37% 48%, 21% 92%, 0 45%, 0 23%)" }}
+        ></div>
+
+        {/* বামের কোণায় যে এক্সট্রা ট্রায়াঙ্গেল বর্ডার স্ট্রাইপ তৈরি হয়েছে */}
+        <div 
+          className="absolute inset-0 bg-[#231f20]" 
+          style={{ clipPath: "polygon(0 44%, 18% 82%, 23% 82%, 0 35%)" }}
+        ></div>
+        <div 
+          className="absolute inset-0 bg-[#e36d27]" 
+          style={{ clipPath: "polygon(0 34%, 14% 64%, 18% 64%, 0 25%)" }}
+        ></div>
       </div>
 
-      {/* ================= BOTTOM MODERN GEOMETRIC RIBBON BORDER ================= */}
-      <div className="absolute bottom-0 left-0 right-0 h-24 sm:h-36 pointer-events-none z-0">
-        {/* ডার্ক চকোলেট/ব্ল্যাক মেইন বটম বার */}
-        <div className="absolute bottom-0 left-0 w-full h-[35%] bg-[#231f20]" style={{ clipPath: "polygon(0 0, 78% 0, 100% 65%, 100% 100%, 0 100%)" }}></div>
-        {/* অরেঞ্জ সেকেন্ডারি বার */}
-        <div className="absolute bottom-[34%] left-0 w-full h-[25%] bg-[#e36d27]" style={{ clipPath: "polygon(74% 0, 95.5% 100%, 100% 100%, 100% 0)" }}></div>
-        {/* ডানের ইন্টারলকিং জ্যামিতিক ওভারল্যাপ "V" স্ট্রিপসমূহ */}
-        <div className="absolute bottom-0 right-0 w-[30%] h-full bg-[#231f20]" style={{ clipPath: "polygon(96% 100%, 0 0, 9% 0, 100% 75%, 100% 100%)" }}></div>
-        <div className="absolute bottom-0 right-0 w-[30%] h-full bg-[#e36d27]" style={{ clipPath: "polygon(89.5% 100%, 0 0, 4% 0, 95.5% 100%)" }}></div >
-        <div className="absolute bottom-0 right-0 w-[35%] h-full bg-[#231f20]" style={{ clipPath: "polygon(86% 100%, 0 0, 7% 0, 91% 100%)" }}></div>
+      {/* ================= BOTTOM PERFECT GEOMETRIC RIBBON BORDER (বাম থেকে ২/৩ অংশ ও ডানের ত্রিভুজ ভাঁজ) ================= */}
+      <div className="absolute bottom-0 left-0 right-0 h-28 sm:h-40 pointer-events-none z-0">
+        {/* মেইন ডার্ক চকোলেট/ব্ল্যাক বার: বাম থেকে ২/৩ অংশ সোজা এসে ডানে উল্টো ত্রিভুজ হয়ে কোণায় নেমেছে */}
+        <div 
+          className="absolute inset-0 bg-[#231f20]" 
+          style={{ clipPath: "polygon(0 100%, 0 72%, 65% 72%, 80% 30%, 100% 76%, 100% 100%)" }}
+        ></div>
+        
+        {/* মেইন উজ্জ্বল কমলা বার: ঠিক কালো বারের সমান্তরালে উপরে উপরে চলেছে */}
+        <div 
+          className="absolute inset-0 bg-[#e36d27]" 
+          style={{ clipPath: "polygon(0 73%, 0 52%, 63% 52%, 79% 8%, 100% 55%, 100% 77%)" }}
+        ></div>
+
+        {/* ডানের কোণায় যে এক্সট্রা ট্রায়াঙ্গেল বর্ডার স্ট্রাইপ তৈরি হয়েছে */}
+        <div 
+          className="absolute inset-0 bg-[#231f20]" 
+          style={{ clipPath: "polygon(100% 56%, 82% 18%, 77% 18%, 100% 65%)" }}
+        ></div>
+        <div 
+          className="absolute inset-0 bg-[#e36d27]" 
+          style={{ clipPath: "polygon(100% 66%, 86% 36%, 82% 36%, 100% 75%)" }}
+        ></div>
       </div>
 
       {/* ================= CONTENT BODY ================= */}
       <div className="z-10 flex flex-col items-center justify-between h-full flex-1 py-6 sm:py-10 text-center">
         
         {/* হেডার সেকশন */}
-        <div className="flex flex-col items-center text-center w-full mt-10 sm:mt-16">
+        <div className="flex flex-col items-center text-center w-full mt-12 sm:mt-20">
           {/* মনোগ্রাম লোগো ফ্রেম */}
           <div className="w-24 h-24 sm:w-32 sm:h-32 border-[3px] border-[#1b2d56] rounded-full flex items-center justify-center bg-white mb-4 p-1 shadow-sm">
             <div className="w-full h-full rounded-full border border-dashed border-[#e36d27] flex flex-col items-center justify-center p-1">
@@ -56,16 +82,22 @@ export default function AdmissionFormCover({ formData, handleChange }) {
           <h2 className="text-xl sm:text-[29px] font-black text-[#231f20] font-sans tracking-tight mb-1">
             As-Salam Ideal Madrasah
           </h2>
-          {/* স্লোগান */}
-          <p className="text-[11px] sm:text-fbase font-extrabold text-[#006cb7] font-sans italic tracking-wide">
-            A<span className="text-[#cc1e29]">&</span>M For Ultimate Success
+          
+          {/* স্লোগান সেকশন: Aİ M (আই-এর মাথায় পানির ফোঁটার মতো কাস্টম ডিজাইন ড্রপ) */}
+          <p className="text-[11px] sm:text-[15px] font-black text-[#006cb7] font-sans italic tracking-wide flex items-center justify-center gap-0.5">
+            <span>A</span>
+            <span className="relative inline-block text-[#cc1e29] font-serif not-italic font-black mx-[1px]">
+              I
+              {/* পানির ফোঁটার মতো ডট ইফেক্ট */}
+              <span className="absolute -top-[3px] left-1/2 -translate-x-1/2 w-[5px] h-[7px] bg-[#cc1e29] rounded-b-full rounded-tl-full rotate-45"></span>
+            </span>
+            <span>M For Ultimate Success</span>
           </p>
         </div>
 
         {/* ভর্তি ফরম টাইটেল (মিডল সেকশন) */}
         <div className="my-8 text-center w-full flex justify-center">
           <div className="relative px-12 py-2 sm:px-16 sm:py-3.5 text-white font-black text-2xl sm:text-4xl tracking-widest select-none">
-            {/* ব্যাকগ্রাউন্ড রিফাইনড সলিড ব্যানার (যা ব্রাশ ইফেক্টের বিকল্প হিসেবে স্ট্যান্ডার্ড লুক দেয়) */}
             <span className="relative z-10 drop-shadow-md">ভর্তি ফরম</span>
             <div className="absolute inset-0 bg-[#1b509f] transform -skew-x-12 rounded-[4px] shadow-sm"></div>
             <div className="absolute -inset-1 border border-[#1b509f]/20 transform -skew-x-12 rounded-[6px]"></div>
@@ -119,13 +151,13 @@ export default function AdmissionFormCover({ formData, handleChange }) {
           </div>
         </div>
 
-        {/* ফুটো সেকশন (ঠিকানা ও সোশ্যাল মিডিয়া লিংক) */}
+        {/* ফুটোর সেকশন (ঠিকানা ও সোশ্যাল মিডিয়া লিংক) */}
         <div className="w-full text-center mt-4 sm:mt-8 px-6 mb-8 sm:mb-12">
           <h4 className="text-base sm:text-xl font-extrabold text-[#cc1e29] tracking-wide mb-1">
-            এইম ক্যাম্পাস, দক্ষিণ श्यामলী আ/এ, হবিগঞ্জ-৩৩০০
+            এইম ক্যাম্পাস, দক্ষিণ শ্যামলী আ/এ, হবিগঞ্জ-৩৩০০
           </h4>
           <p className="text-sm sm:text-lg font-black text-[#1b2d56] font-mono mb-3 tracking-wide">
-            মোবাইল (অফিস): ০১৩১৬ ২০১ ২০১, ০১৭৪৮ ৮৬৮ ১৬১
+            মোবাইল (অফিস): ০১৩১৬ ২০১ ২০১, ০১৭৪৮ Ramadan ৮৬৮ ১৬১
           </p>
 
           {/* সোশ্যাল বার */}
