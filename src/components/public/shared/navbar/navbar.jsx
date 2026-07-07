@@ -79,7 +79,7 @@ export default function Navbar() {
                 { name: "ভর্তি প্রক্রিয়া", href: "/admission#process" },
                 { name: "ভর্তি ফি", href: "/admission#fees" },
                 { name: "ভর্তির শর্তাবলী", href: "/admission#terms" },
-                { name: "অনলাইন ভর্তি ফরম", href: "/admission/apply" },
+                { name: "অনলাইন ভর্তি ফরম", href: "/admission" },
             ],
         },
         {
