@@ -166,45 +166,50 @@ export default function AdmissionPage() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-slate-100 py-10 px-4 flex flex-col items-center justify-center font-sans antialiased print:bg-white print:py-0 print:px-0">
+    return (
+    <div className="min-h-screen bg-slate-100 py-4 sm:py-10 px-2 sm:px-4 flex flex-col items-center justify-center font-sans antialiased print:bg-white print:py-0 print:px-0">
       
-      {/* পুরো ৪ পৃষ্ঠার ফরমটি একটিমাত্র ফর্ম ট্যাগের ভেতরে থাকবে */}
-      <form 
-        onSubmit={handleSubmit} 
-        className="w-full max-w-[8.27in] bg-white shadow-2xl rounded-sm print:shadow-none print:rounded-none flex flex-col gap-12 print:gap-0"
-      >
+      {/* মোবাইল এবং ছোট ডিভাইসের জন্য রেসপনসিভ স্ক্রোল কন্টেইনার */}
+      <div className="w-full overflow-x-auto pb-6 print:overflow-visible print:pb-0 flex justify-center">
         
-        {/* পৃষ্ঠা ১: কভার পেজ কম্পোনেন্ট */}
-        <AdmissionFormCover formData={formData} handleChange={handleChange} />
-        <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} />
+        {/* পুরো ৪ পৃষ্ঠার ফরমের মূল কন্টেইনার (যা ছোট স্ক্রিনে সর্বনিম্ন ৭৬৮ পিক্সেল উইডথ ধরে রাখবে যাতে লেআউট না ভাঙে) */}
+        <form 
+          onSubmit={handleSubmit} 
+          className="w-full min-w-[768px] max-w-[8.27in] bg-white shadow-2xl rounded-sm print:shadow-none print:rounded-none flex flex-col gap-12 print:gap-0 print:min-w-full"
+        >
+          
+          {/* পৃষ্ঠা ১: কভার পেজ কম্পোনেন্ট */}
+          <AdmissionFormCover formData={formData} handleChange={handleChange} />
+          <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} />
 
-        {/* পৃষ্ঠা ২: ভর্তি ফরমের মূল প্রথম পেজ */}
-        <AdmissionFormPage1 formData={formData} handleChange={handleChange} /> 
-        <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} />
+          {/* পৃষ্ঠা ২: ভর্তি ফরমের মূল প্রথম পেজ */}
+          <AdmissionFormPage1 formData={formData} handleChange={handleChange} /> 
+          <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} />
 
-        {/* পৃষ্ঠা ৩: ভর্তি ফরমের মূল দ্বিতীয় পেজ */}
-        <AdmissionFormPage2 formData={formData} handleChange={handleChange} /> 
-        <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} /> 
+          {/* পৃষ্ঠা ৩: ভর্তি ফরমের মূল দ্বিতীয় পেজ */}
+          <AdmissionFormPage2 formData={formData} handleChange={handleChange} /> 
+          <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} /> 
 
-        {/* পৃষ্ঠা ৪: একদম শেষ পৃষ্ঠা / ব্যাক কভার পেজ */}
-        <AdmissionFormPage3 
-          formData={formData} 
-          handleChange={handleChange} 
-          handleCheckboxChange={handleCheckboxChange} 
-        />
+          {/* পৃষ্ঠা ৪: একদম শেষ পৃষ্ঠা / ব্যাক কভার পেজ */}
+          <AdmissionFormPage3 
+            formData={formData} 
+            handleChange={handleChange} 
+            handleCheckboxChange={handleCheckboxChange} 
+          />
 
-        {/* সাবমিট বাটন (প্রিন্ট করার সময় এই বাটনটি স্বয়ংক্রিয়ভাবে লুকিয়ে যাবে) */}
-        <div className="p-8 bg-gray-50 border-t border-gray-200 text-right print:hidden rounded-b-sm">
-          <button 
-            type="submit" 
-            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg px-10 py-3.5 rounded-lg shadow-md transition-all duration-150 active:scale-95"
-          >
-            ভর্তি ফরমটি ডাটাবেজে সংরক্ষণ করুন
-          </button>
-        </div>
+          {/* সাবমিট বাটন */}
+          <div className="p-8 bg-gray-50 border-t border-gray-200 text-right print:hidden rounded-b-sm min-w-full">
+            <button 
+              type="submit" 
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base sm:text-lg px-8 sm:px-10 py-3 sm:py-3.5 rounded-lg shadow-md transition-all duration-150 active:scale-95 w-full sm:w-auto"
+            >
+              ভর্তি ফরমটি ডাটাবেজে সংরক্ষণ করুন
+            </button>
+          </div>
 
-      </form>
+        </form>
+      </div>
     </div>
   );
+
 }
