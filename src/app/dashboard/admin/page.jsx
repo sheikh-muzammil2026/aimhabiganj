@@ -32,12 +32,12 @@ export default function Dashboard() {
 
     return (
         <div className="flex min-h-screen bg-[#f7f6f0] text-slate-800 antialiased font-sans w-full selection:bg-emerald-800 selection:text-white">
-            
+
             {/* মেইন কন্টেন্ট উইন্ডো */}
             <div className="flex-1 flex flex-col min-w-0 max-h-screen overflow-y-auto">
 
                 {/* টপ মোবাইল ও জেনারেল নেভিগেশন বার (ইসলামিক ক্যালিগ্রাফিক ভাইবসহ প্রফেশনাল হেডার) */}
-                <header className="bg-white border-b border-emerald-900/10 p-4 flex items-center justify-between sticky top-0 z-30 shadow-xs">
+                {/* <header className="bg-white border-b border-emerald-900/10 p-4 flex items-center justify-between sticky top-0 z-30 shadow-xs">
                     <div className="flex items-center gap-3">
                         <span className="text-2xl">🕌</span>
                         <div>
@@ -50,7 +50,7 @@ export default function Dashboard() {
                         <span className="text-emerald-300">|</span>
                         <span>সাপোর্ট সময়: সকাল ১০টা - সন্ধ্যা ৭টা</span>
                     </div>
-                </header>
+                </header>*/}
 
                 {/* ড্যাশবোর্ড বডি কন্টেনার */}
                 <main className="p-4 sm:p-6 md:p-8 space-y-8 max-w-7xl w-full mx-auto">
@@ -159,12 +159,12 @@ export default function Dashboard() {
                                     <h3 className="text-xs sm:text-sm font-bold text-[#064e3b] flex items-center gap-1.5">📊 মাসভিত্তিক সংগ্রহ ও খরচ</h3>
                                     <p className="text-[10px] text-slate-400">নির্দিষ্ট বারের ওপর মাউস (Hover) রাখলে ডাটা দেখতে পাবেন</p>
                                 </div>
-                                
+
                                 {/* কাস্টম হোভার বার চার্ট */}
                                 <div className="pt-10 pb-2 h-56 flex items-end justify-between gap-3 border-b border-slate-100 relative">
                                     {monthlyAnalysis.map((bar, i) => (
                                         <div key={i} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group relative">
-                                            
+
                                             {/* ডাইনামিক রিয়েলিস্টিক টুলটিপ (Hover-only) */}
                                             <div className="absolute bottom-full mb-2 bg-slate-900 text-white text-[10px] p-2 rounded-lg shadow-xl z-30 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-1 group-hover:translate-y-0 pointer-events-none whitespace-nowrap min-w-[110px]">
                                                 <p className="font-bold border-b border-slate-700 pb-1 mb-1 text-amber-400 text-center">{bar.month}</p>
@@ -196,19 +196,19 @@ export default function Dashboard() {
                                     <h3 className="text-xs sm:text-sm font-bold text-[#064e3b]">📈 মাসভিত্তিক বকেয়ার হিসাব (ট্র্যাকিং)</h3>
                                     <p className="text-[10px] text-slate-400">বিগত মাসগুলোর বকেয়া দেখতে বারের ওপর মাউস রাখুন</p>
                                 </div>
-                                
+
                                 <div className="h-56 flex items-end justify-between gap-1 border-b border-slate-100 pt-8 relative">
                                     {monthlyDues.map((bar, i) => (
                                         <div key={i} className="flex-1 flex flex-col items-center h-full justify-end group relative">
-                                            
+
                                             {/* ডাইনামিক হোভার টুলটিপ */}
                                             <div className="absolute bottom-full mb-1 bg-emerald-950 text-white text-[10px] p-2 rounded-md shadow-lg z-30 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 transform translate-y-1 group-hover:translate-y-0 pointer-events-none whitespace-nowrap">
                                                 <span className="text-amber-400 font-bold">{bar.label}:</span> {bar.amount}
                                             </div>
 
                                             {/* সিঙ্গেল মেম্বার বার */}
-                                            <div 
-                                                style={{ height: `${bar.height}%` }} 
+                                            <div
+                                                style={{ height: `${bar.height}%` }}
                                                 className={`w-full max-w-[14px] rounded-t-xs transition-all duration-200 cursor-pointer ${bar.isCurrent ? 'bg-emerald-700 hover:bg-emerald-600' : 'bg-amber-500 hover:bg-amber-400'}`}
                                             ></div>
                                         </div>
