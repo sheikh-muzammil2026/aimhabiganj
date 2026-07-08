@@ -2,7 +2,7 @@
 
 export default function TopHeader() {
   return (
-    <div className="w-full bg-gradient-to-r from-emerald-900 via-emerald-850 to-emerald-900 text-white py-4 px-4 border-b border-amber-500/30 relative overflow-hidden transition-colors duration-300 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 dark:border-emerald-800">
+    <div className="w-full print:hidden bg-gradient-to-r from-emerald-900 via-emerald-850 to-emerald-900 text-white py-4 px-4 border-b border-amber-500/30 relative overflow-hidden transition-colors duration-300 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 dark:border-emerald-800">
 
       {/* ব্যাকগ্রাউন্ড জলছাপ/মেহরাব ইফেক্ট (Luxury Islamic Custom SVG Pattern) */}
       <div className="absolute inset-0 opacity-10 pointer-events-none mix-blend-overlay">
