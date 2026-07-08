@@ -116,7 +116,7 @@ export default function Navbar() {
 
     return (
         /* এখানে bg-emerald-850 বদলে bg-emerald-900 করা হয়েছে যাতে লাইট মোডেও সুন্দর গাঢ় ইসলামিক গ্রিন কালার থাকে */
-        <nav className="bg-emerald-900 text-white shadow-md sticky top-0 z-50 transition-colors duration-300 dark:bg-slate-900 border-b border-emerald-800 dark:border-slate-800">
+        <nav className="bg-emerald-900 print:hidden text-white shadow-md sticky top-0 z-50 transition-colors duration-300 dark:bg-slate-900 border-b border-emerald-800 dark:border-slate-800">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-20">
 
