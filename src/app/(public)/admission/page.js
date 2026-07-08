@@ -22,7 +22,7 @@ export default function AdmissionPage() {
     studentNameArabic: "",
     dateOfBirth: "",
     age: "",
-    gender: "", // पुरुष / महिला
+    gender: "", 
     birthCertificateNo: "",
     bloodGroup: "",
     weight: "",
@@ -59,14 +59,14 @@ export default function AdmissionPage() {
     fatherNameEnglish: "",
     fatherNid: "",
     fatherMobile: "",
-    fatherStatus: "", // জীবিত / মৃত
+    fatherStatus: "", 
     fatherProfession: "",
     fatherEmail: "",
     motherNameBangla: "",
     motherNameEnglish: "",
     motherNid: "",
     motherMobile: "",
-    motherStatus: "", // জীবিত / মৃত
+    motherStatus: "", 
     motherProfession: "",
     motherEmail: "",
     guardianNameAbsentParents: "",
@@ -152,64 +152,61 @@ export default function AdmissionPage() {
     try {
       console.log("মঙ্গোডিবি-তে সেভ হওয়ার জন্য প্রস্তুত ডেটা:", formData);
       alert("কনসোলে ডেটা চেক করুন! ডাটাবেজ এপিআই যুক্ত থাকলে সফলভাবে সেভ হয়ে যেত।");
-      
-      // আপনার API Route-এ ডেটা পাঠানোর কোড এখানে হবে:
-      // const response = await fetch('/api/admission', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData)
-      // });
-      // if(response.ok) alert("ভর্তি ফরম সফলভাবে সাবমিট হয়েছে!");
-      
     } catch (error) {
       console.error("ডেটা সাবমিট করার সময় ত্রুটি ঘটেছে:", error);
     }
   };
 
-    return (
+  return (
     <div className="min-h-screen bg-slate-100 py-4 sm:py-10 px-2 sm:px-4 flex flex-col items-center justify-center font-sans antialiased print:bg-white print:py-0 print:px-0">
       
-      {/* মোবাইল এবং ছোট ডিভাইসের জন্য রেসপনসিভ স্ক্রোল কন্টেইনার */}
-      <div className="w-full overflow-x-auto pb-6 print:overflow-visible print:pb-0 flex justify-center">
-        
-        {/* পুরো ৪ পৃষ্ঠার ফরমের মূল কন্টেইনার (যা ছোট স্ক্রিনে সর্বনিম্ন ৭৬৮ পিক্সেল উইডথ ধরে রাখবে যাতে লেআউট না ভাঙে) */}
-        <form 
-          onSubmit={handleSubmit} 
-          className="w-full min-w-[768px] max-w-[8.27in] bg-white shadow-2xl rounded-sm print:shadow-none print:rounded-none flex flex-col gap-12 print:gap-0 print:min-w-full"
+      {/* অ্যাকশন বাটন এরিয়া (প্রিন্ট করার জন্য) - মোবাইলে বা ডেক্সটপে কাজের সুবিধা বাড়াবে */}
+      <div className="w-full max-w-[8.27in] flex justify-end gap-3 mb-4 print:hidden px-2">
+        <button
+          type="button"
+          onClick={() => window.print()}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-5 py-2 rounded-lg shadow-sm transition-all duration-150 active:scale-95 flex items-center gap-2"
         >
-          
-          {/* পৃষ্ঠা ১: কভার পেজ কম্পোনেন্ট */}
-          <AdmissionFormCover formData={formData} handleChange={handleChange} />
-          <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} />
-
-          {/* পৃষ্ঠা ২: ভর্তি ফরমের মূল প্রথম পেজ */}
-          <AdmissionFormPage1 formData={formData} handleChange={handleChange} /> 
-          <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} />
-
-          {/* পৃষ্ঠা ৩: ভর্তি ফরমের মূল দ্বিতীয় পেজ */}
-          <AdmissionFormPage2 formData={formData} handleChange={handleChange} /> 
-          <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} /> 
-
-          {/* পৃষ্ঠা ৪: একদম শেষ পৃষ্ঠা / ব্যাক কভার পেজ */}
-          <AdmissionFormPage3 
-            formData={formData} 
-            handleChange={handleChange} 
-            handleCheckboxChange={handleCheckboxChange} 
-          />
-
-          {/* সাবমিট বাটন */}
-          <div className="p-8 bg-gray-50 border-t border-gray-200 text-right print:hidden rounded-b-sm min-w-full">
-            <button 
-              type="submit" 
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base sm:text-lg px-8 sm:px-10 py-3 sm:py-3.5 rounded-lg shadow-md transition-all duration-150 active:scale-95 w-full sm:w-auto"
-            >
-              ভর্তি ফরমটি ডাটাবেজে সংরক্ষণ করুন
-            </button>
-          </div>
-
-        </form>
+          🖨️ প্রিন্ট / PDF সেভ করুন
+        </button>
       </div>
+
+      {/* মূল ফর্ম কন্টেইনার (মোবাইলে ফুল-উইডথ এবং ডেক্সটপে স্ট্যান্ডার্ড A4 রেশিও বজায় রাখবে) */}
+      <form 
+        onSubmit={handleSubmit} 
+        className="w-full md:w-[8.27in] max-w-full bg-white shadow-2xl rounded-sm print:shadow-none print:rounded-none flex flex-col gap-12 print:gap-0"
+      >
+        
+        {/* পৃষ্ঠা ১: কভার পেজ কম্পোনেন্ট */}
+        <AdmissionFormCover formData={formData} handleChange={handleChange} />
+        <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} />
+
+        {/* পৃষ্ঠা ২: ভর্তি ফরমের মূল প্রথম পেজ */}
+        <AdmissionFormPage1 formData={formData} handleChange={handleChange} /> 
+        <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} />
+
+        {/* পৃষ্ঠা ৩: ভর্তি ফরমের মূল দ্বিতীয় পেজ */}
+        <AdmissionFormPage2 formData={formData} handleChange={handleChange} /> 
+        <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} /> 
+
+        {/* পৃষ্ঠা ৪: একদম শেষ পৃষ্ঠা / ব্যাক কভার পেজ */}
+        <AdmissionFormPage3 
+          formData={formData} 
+          handleChange={handleChange} 
+          handleCheckboxChange={handleCheckboxChange} 
+        />
+
+        {/* সাবমিট বাটন */}
+        <div className="p-4 sm:p-8 bg-gray-50 border-t border-gray-200 text-right print:hidden rounded-b-sm w-full">
+          <button 
+            type="submit" 
+            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base sm:text-lg px-8 sm:px-10 py-3 sm:py-3.5 rounded-lg shadow-md transition-all duration-150 active:scale-95 w-full sm:w-auto"
+          >
+            ভর্তি ফরমটি ডাটাবেজে সংরক্ষণ করুন
+          </button>
+        </div>
+
+      </form>
     </div>
   );
-
 }
