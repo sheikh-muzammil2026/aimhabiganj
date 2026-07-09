@@ -19,7 +19,7 @@ export default function HeroSection() {
             subtitle: "ছাত্রদের মননশীল ও নৈতিক বিকাশে আমরা অঙ্গীকারাবদ্ধ",
         },
         {
-            url: "https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=1200",
+            url: "/hifj_academy.png",
             title: "হিফজ ও একাডেমিক শিক্ষার চমৎকার সমন্বয়",
             subtitle: "অভিজ্ঞ উলামা ও দক্ষ শিক্ষক মণ্ডলী দ্বারা পরিচালিত",
         },
