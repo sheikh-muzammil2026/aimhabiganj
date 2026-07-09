@@ -9,7 +9,7 @@ export default function HeroSection() {
 
     const carouselImages = [
         {
-            url: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1200",
+            url: "/deenishikka.png",
             title: "দ্বীনি শিক্ষার এক অনন্য নির্ভরযোগ্য প্রতিষ্ঠান",
             subtitle: "জ্ঞানের আলোয় আলোকিত হোক আগামী প্রজন্ম",
         },
