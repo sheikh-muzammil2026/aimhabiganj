@@ -43,7 +43,7 @@ export default function HeroSection() {
                 </div>
                 <div className="relative w-full overflow-hidden flex items-center">
                     <p className="animate-marquee whitespace-nowrap text-sm md:text-base font-semibold">
-                        📢 আস-সালাম আইডিয়াল মাদ্রাসা (AIM)-এ ২০২৬ শিক্ষাবর্ষে হিফজ ও একাডেমিক বিভাগে ভর্তি চলছে! আসন সংখ্যা সীমিত। বিস্তারিত জানতে ভর্তি মেনু ভিজিট করুন। 🌟 আগামী ১৫ই জুলাই থেকে প্রথম সাময়িক পরীক্ষা শুরু হতে যাচ্ছে। সকল ছাত্রদের যথাসময়ে উপস্থিত থাকার নির্দেশ দেওয়া হলো।
+                        📢 আস-সালাম আইডিয়াল মাদ্রাসা (AIM)-এ ২০২৬ শিক্ষাবর্ষে হিফজ ও একাডেমিক বিভাগে ভর্তি চলছে! আসন সংখ্যা সীমিত। বিস্তারিত জানতে ভর্তি মেনু ভিজিট করুন। 🌟 আগামী ২৩ আগস্ট থেকে দ্বিতীয় সাময়িক পরীক্ষা শুরু হতে যাচ্ছে। সকল ছাত্রদের যথাসময়ে উপস্থিত থাকার নির্দেশ দেওয়া হলো।
                     </p>
                 </div>
             </div>
@@ -76,7 +76,7 @@ export default function HeroSection() {
 
                             <div className="flex flex-wrap gap-4">
                                 <Link
-                                    href="/admission/apply"
+                                    href="/admission"
                                     className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white font-bold px-6 py-3 rounded-xl shadow-md transition transform hover:-translate-y-0.5 text-sm md:text-base"
                                 >
                                     অনলাইন ভর্তি ফরম
