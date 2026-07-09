@@ -67,8 +67,8 @@ export default function Navbar() {
         {
             name: "বিভাগসমূহ",
             dropdown: [
-                { name: "হিফজ বিভাগ", href: "/departments/hifz" },
-                { name: "একাডেমিক বিভাগ", href: "/departments/academic" },
+                { name: "হিফজ বিভাগ", href: "/#hifz" },
+                { name: "একাডেমিক বিভাগ", href: "/#academic" },
             ],
         },
         {
