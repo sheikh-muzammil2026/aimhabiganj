@@ -53,6 +53,7 @@ export default function FeaturedSections() {
                     {departments.map((dept, index) => (
                         <div
                             key={index}
+							id={dept.id}
                             className={`relative overflow-hidden rounded-3xl ${dept.cardBg} p-6 sm:p-10 shadow-md dark:shadow-none border-2 ${dept.borderStyle} flex flex-col justify-between group transition-all duration-300 hover:shadow-xl`}
                         >
                             {/* ব্যাকগ্রাউন্ড ডেকোরেশন আইকন */}
