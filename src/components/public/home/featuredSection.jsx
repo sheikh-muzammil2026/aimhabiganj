@@ -5,6 +5,7 @@ import Link from "next/link";
 export default function FeaturedSections() {
     const departments = [
         {
+            id: "hifz",
             title: "হিফজুল কুরআন বিভাগ",
             sub: "Hifz Department",
             tag: "তাহফীযুল কুরআন",
@@ -17,7 +18,8 @@ export default function FeaturedSections() {
             points: ["নূরানী ও নাজেরা ইবতিদায়ী", "আন্তর্জাতিক মানের তাজবীদ", "হিফজ রিভিশন (দাউর)", "খাস দোয়া ও ইবাদত প্রশিক্ষণ"],
             icon: "🕌"
         },
-        {
+        {	
+			id: "academic",
             title: "একাডেমিক ও জেনারেল বিভাগ",
             sub: "Academic & General Department",
             tag: "আধুনিক শিক্ষা",
