@@ -54,7 +54,7 @@ export default function FeaturedSections() {
                         <div
                             key={index}
 							id={dept.id}
-                            className={`relative overflow-hidden rounded-3xl ${dept.cardBg} p-6 sm:p-10 shadow-md dark:shadow-none border-2 ${dept.borderStyle} flex flex-col justify-between group transition-all duration-300 hover:shadow-xl`}
+                            className={`relative overflow-hidden rounded-3xl ${dept.cardBg} p-6 sm:p-10 shadow-md dark:shadow-none border-2 ${dept.borderStyle} flex flex-col justify-between group transition-all duration-300 hover:shadow-xl scroll-mt-24`}
                         >
                             {/* ব্যাকগ্রাউন্ড ডেকোরেশন আইকন */}
                             <div className="absolute right-6 bottom-6 text-8xl text-slate-100 dark:text-slate-800/20 pointer-events-none font-bold select-none transition-transform duration-500 group-hover:scale-110">
