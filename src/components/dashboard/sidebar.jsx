@@ -62,12 +62,12 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             title: "ভর্তি ব্যবস্থাপনা",
             icon: "📝",
             roles: ["admin"],
-            dropdown: [
+             dropdown: [
                 { title: "ভর্তির সময়", href: "/dashboard/admin/admission?section=timeline" },
                 { title: "ভর্তি পরীক্ষা", href: "/dashboard/admin/admission?section=test" },
-                { title: "ভর্তি প্রক্রিয়া", href: "/dashboard/admin/admission?section=process" },
+                { title: "ভর্তি প্রক্রিয়া", href: "/dashboard/admin/admission?section=test" }, // গাইডলাইনের আওতাভুক্ত
                 { title: "ভর্তি ফি", href: "/dashboard/admin/admission?section=fees" },
-                { title: "অনলাইন ভর্তি ফরম", href: "/dashboard/admin/admission/applications" },
+                { title: "সকল আবেদন", href: "/dashboard/admin/admission" },
             ]
         },
         {
