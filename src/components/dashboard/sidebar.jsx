@@ -8,17 +8,15 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     const pathname = usePathname();
     const [openDropdown, setOpenDropdown] = useState(null);
 
-    // ডামি ইউজার (Better Auth এর জন্য রেডি)
     const dummyUser = {
         name: "মুফতি আব্দুল্লাহ",
         role: "admin", 
         avatarLetter: "আ"
     };
 
-    // ইসলামিক ও প্রফেশনাল টাইটেলসহ মেনু কনফিগারেশন
     const menuConfig = [
         { 
-            title: "মারকাযি ড্যাশবোর্ড", // 'অফিসিয়াল' পরিবর্তন করে ইসলামিক স্ট্যান্ডার্ড করা হয়েছে
+            title: "মারকাযি ড্যাশবোর্ড", 
             icon: "🕌", 
             href: "/dashboard/admin", 
             roles: ["admin"] 
@@ -45,7 +43,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             roles: ["admin", "teacher"],
             dropdown: [
                 { title: "শিক্ষা স্তর", href: "/dashboard/admin/academics?section=levels" },
-                { title: "পাঠ্যক্রম (Syllabus)", href: "/dashboard/admin/academics?section=syllabus" },
+                { title: "পাঠ্যक्रम (Syllabus)", href: "/dashboard/admin/academics?section=syllabus" },
                 { title: "ক্লাস রুটিন", href: "/dashboard/admin/academics?section=class-routine" },
                 { title: "পরীক্ষা রুটিন", href: "/dashboard/admin/academics?section=exam-routine" },
                 { title: "সহ-পাঠ্যক্রম", href: "/dashboard/admin/academics?section=co-curricular" },
@@ -73,6 +71,15 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             ]
         },
         {
+            title: "মিডিয়া গ্যালারি",
+            icon: "🖼️",
+            roles: ["admin"],
+            dropdown: [
+                { title: "গ্যালারি নিয়ন্ত্রণ", href: "/dashboard/admin/gallery" },
+                { title: "ফটো এবং ভিডিও লিস্ট", href: "/dashboard/admin/gallery/list" },
+            ]
+        },
+        {
             title: "আবাসন (হোস্টেল)",
             icon: "🛏️",
             roles: ["admin"],
@@ -90,7 +97,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 { title: "লাইভ ক্লাস লিংক", href: "/dashboard/admin/smart-classroom/live" },
                 { title: "রেকর্ডেড ক্লাস আপলোড", href: "/dashboard/admin/smart-classroom/recorded" },
                 { title: "ই-বুক / লেকচার শিট", href: "/dashboard/admin/smart-classroom/ebooks" },
-                { title: "অনলাইন এক্সাম কন্ট্রোল", href: "/dashboard/admin/smart-classroom/exam" },
+                { title: "অনলাইন এক্সাম... কন্ট্রোল", href: "/dashboard/admin/smart-classroom/exam" },
             ]
         },
         { title: "ডিজিটাল হাজিরা", icon: "📅", href: "/dashboard/attendance", roles: ["admin", "teacher"] },
@@ -105,7 +112,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 { title: "রশিদ ব্যবস্থাপনা", href: "/dashboard/finance/receipts" },
                 { title: "সদকা ও অনুদান", href: "/dashboard/finance/donations" },
                 { title: "ঋণ ও বকেয়া", href: "/dashboard/finance/dues" },
-                { title: "অ্যাকাউন্टिंग রিপোর্টস", href: "/dashboard/finance/reports" },
+                { title: "অ্যাকাউন্টিং রিপোর্টস", href: "/dashboard/finance/reports" },
             ]
         }
     ];
@@ -114,7 +121,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
     return (
         <>
-            {/* মোবাইল স্ক্রিনের ব্যাকড্রপ */}
             {isOpen && (
                 <div
                     className="fixed inset-0 bg-emerald-950/40 backdrop-blur-xs z-40 lg:hidden transition-opacity duration-300"
@@ -129,7 +135,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
             `}>
 
-                {/* হেডার ব্র্যান্ডিং */}
                 <div className="p-4 border-b border-emerald-800/40 flex items-center justify-between bg-emerald-950/30">
                     <Link href="/" className="group flex items-center gap-2.5 focus:outline-hidden">
                         <span className="text-xl p-2 bg-emerald-900/50 rounded-xl group-hover:bg-amber-500 group-hover:text-[#043e30] transition-all duration-300 group-hover:scale-105 shadow-sm">
@@ -143,7 +148,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                     <button onClick={() => setIsOpen(false)} className="lg:hidden text-emerald-300 hover:text-white text-base p-1">✕</button>
                 </div>
 
-                {/* স্ক্রলযোগ্য আইটেম লিস্ট - মসৃণ স্ক্রলিং যুক্ত */}
                 <div className="flex-1 overflow-y-auto p-3 space-y-1.5 scroll-smooth scrollbar-thin scrollbar-thumb-emerald-900/60 scrollbar-track-transparent">
                     {allowedMenuItems.map((item, idx) => {
                         const isDropdownOpen = openDropdown === idx;
@@ -182,7 +186,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                     </Link>
                                 )}
 
-                                {/* ড্রপডাউন সাব-মেনু (স্মুথ ম্যাক্স-হাইট ট্রানজিশন ইফেক্ট) */}
                                 {hasDropdown && (
                                     <div className={`pl-4 space-y-1 border-l-2 border-emerald-800/50 ml-5 overflow-hidden transition-all duration-300 ease-in-out
                                         ${isDropdownOpen ? "max-h-[400px] opacity-100 py-1" : "max-h-0 opacity-0"}`}>
@@ -209,7 +212,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                     })}
                 </div>
 
-                {/* প্রোফাইল ফুটার */}
                 <div className="p-3 border-t border-emerald-800/40 bg-emerald-950/40">
                     <div className="flex items-center gap-3 px-2 py-2 rounded-xl bg-emerald-900/30 border border-emerald-800/30 shadow-xs">
                         <div className="w-8 h-8 rounded-full bg-amber-400 text-[#043e30] flex items-center justify-center font-black text-sm shadow-inner transform hover:rotate-12 transition-transform duration-300">
