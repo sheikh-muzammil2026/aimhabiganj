@@ -1,212 +1,90 @@
 // app/admission/page.js
 "use client";
+import Link from "next/link";
 
-import React, { useState } from "react";
-import AdmissionFormCover from "@/components/AdmissionFormCover";
-import AdmissionFormPage1 from "@/components/AdmissionFormPage1";
-import AdmissionFormPage2 from "@/components/AdmissionFormPage2";
-import AdmissionFormPage3 from "@/components/AdmissionFormPage3";
-
-export default function AdmissionPage() {
-  // মঙ্গোডিবি-তে সেভ করার জন্য পুরো ৪ পৃষ্ঠার সব ইনপুট ফিল্ডের সেন্ট্রাল স্টেট
-  const [formData, setFormData] = useState({
-    // --- ১. কভার পেজের ফিল্ডস ---
-    formNo: "",
-    sessionYear: "২০২৬-২০২৭",
-
-    // --- ২. মূল প্রথম পেজের ফিল্ডস (AdmissionFormPage1) ---
-    serialNo: "",
-    status: "", // নতুন / আবাসিক / অনাবাসিক / ডে-কেয়ার
-    studentNameBangla: "",
-    studentNameEnglish: "",
-    studentNameArabic: "",
-    dateOfBirth: "",
-    age: "",
-    gender: "", 
-    birthCertificateNo: "",
-    bloodGroup: "",
-    weight: "",
-    height: "",
-    nationality: "বাংলাদেশী",
-    currentAddress: { house: "", road: "", village: "", postOffice: "", thana: "", district: "" },
-    permanentAddress: { house: "", road: "", village: "", postOffice: "", thana: "", district: "" },
-    referenceName: "",
-    referenceMobile: "",
-    divisionPreHifz: { active: false, type: "", class: "" },
-    divisionHifz: { active: false, type: "", class: "" },
-    divisionAcademic: { active: false, type: "", class: "" },
-    divisionArabicCourse: { active: false, type: "", class: "" },
-    prevInstituteName: "",
-    prevInstituteAddress: "",
-    prevPrincipalMobile: "",
-    prevInstituteLeaveReason: "",
-    prevClass: "",
-    prevTransferCertificateNo: "",
-    prevTcDate: "",
-
-    // --- ৩. মূল দ্বিতীয় পেজের ফিল্ডস (AdmissionFormPage2) ---
-    physicalProblem: "",
-    physicalProblemDetails: "",
-    cleanlinessLover: "",
-    foodReluctance: "",
-    favFoodType: "",
-    prayerAddicted: "",
-    sleepTime: "",
-    wakeUpTime: "",
-    favThing: "",
-    anxietyReason: "",
-    fatherNameBangla: "",
-    fatherNameEnglish: "",
-    fatherNid: "",
-    fatherMobile: "",
-    fatherStatus: "", 
-    fatherProfession: "",
-    fatherEmail: "",
-    motherNameBangla: "",
-    motherNameEnglish: "",
-    motherNid: "",
-    motherMobile: "",
-    motherStatus: "", 
-    motherProfession: "",
-    motherEmail: "",
-    guardianNameAbsentParents: "",
-    guardianRelation: "",
-    guardianNid: "",
-    guardianProfession: "",
-    guardianEmail: "",
-    guardianMobile: "",
-    guardianAnnualIncome: "",
-    guardianAnnualIncomeWords: "",
-    admissionReason: "",
-
-    // --- ৪. ৩য় পেজের ফিল্ডস (AdmissionFormPage3) ---
-    applicantSignatureDate: "",
-    studentSignatureDate: "",
-    attachments: { 
-      attachStudentPhoto: false, 
-      attachParentsPhoto: false, 
-      attachBirthCertificate: false, 
-      attachParentsNid: false, 
-      attachReportCard: false 
-    },
-    officeUse: {
-      studentIdOffice: "",
-      examMark: "",
-      meritPosition: "",
-      officeRollNo: "",
-      admittedClass: "",
-      admittedSection: "",
-      academicSession: "",
-      admissionDate: ""
-    }
-  });
-
-  // ইনপুট ফিল্ডের ডেটা পরিবর্তনের সাথে সাথে স্টেট আপডেট করার হ্যান্ডলার
-  const handleChange = (e, section = null) => {
-    const { name, value, type, checked } = e.target;
-    
-    // যদি বিশেষ কোনো নেস্টেড অবজেক্ট (যেমন: officeUse) পাস করা হয়
-    if (section) {
-      setFormData((prev) => ({
-        ...prev,
-        [section]: {
-          ...prev[section],
-          [name]: type === "checkbox" ? checked : value
-        }
-      }));
-      return;
-    }
-
-    // ডট নোটিশনের নেস্টেড অবজেক্ট (যেমন: currentAddress.house) হ্যান্ডেল করার জন্য
-    if (name.includes(".")) {
-      const [outerKey, innerKey] = name.split(".");
-      setFormData((prev) => ({
-        ...prev,
-        [outerKey]: {
-          ...prev[outerKey],
-          [innerKey]: type === "checkbox" ? checked : value
-        }
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: type === "checkbox" ? checked : value
-      }));
-    }
-  };
-
-  // ৩ নম্বর পেজের সংযুক্তিসমূহ (Attachments) চেকবক্স হ্যান্ডেল করার বিশেষ ফাংশন
-  const handleCheckboxChange = (section, field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value
-      }
-    }));
-  };
-
-  // মঙ্গোডিবি-তে ডেটা সাবমিট করার ফাইনাল হ্যান্ডলার
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      console.log("মঙ্গোডিবি-তে সেভ হওয়ার জন্য প্রস্তুত ডেটা:", formData);
-      alert("কনসোলে ডেটা চেক করুন! ডাটাবেজ এপিআই যুক্ত থাকলে সফলভাবে সেভ হয়ে যেত।");
-    } catch (error) {
-      console.error("ডেটা সাবমিট করার সময় ত্রুটি ঘটেছে:", error);
-    }
-  };
-
+export default function AdmissionInfoPage() {
   return (
-    <div className="min-h-screen bg-slate-100 py-4 sm:py-10 px-2 sm:px-4 flex flex-col items-center justify-center font-sans antialiased print:bg-white print:py-0 print:px-0">
-      
-      {/* অ্যাকশন বাটন এরিয়া (প্রিন্ট করার জন্য) - মোবাইলে বা ডেক্সটপে কাজের সুবিধা বাড়াবে */}
-      <div className="w-full max-w-[8.27in] flex justify-end gap-3 mb-4 print:hidden px-2">
-        <button
-          type="button"
-          onClick={() => window.print()}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-5 py-2 rounded-lg shadow-sm transition-all duration-150 active:scale-95 flex items-center gap-2"
-        >
-          🖨️ প্রিন্ট / PDF সেভ করুন
-        </button>
-      </div>
-
-      {/* মূল ফর্ম কন্টেইনার (মোবাইলে ফুল-উইডথ এবং ডেক্সটপে স্ট্যান্ডার্ড A4 রেশিও বজায় রাখবে) */}
-      <form 
-        onSubmit={handleSubmit} 
-        className="w-full md:w-[8.27in] max-w-full bg-white shadow-2xl rounded-sm print:shadow-none print:rounded-none flex flex-col gap-12 print:gap-0"
-      >
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 py-12 px-4 sm:px-6">
+      <div className="max-w-4xl mx-auto space-y-12">
         
-        {/* পৃষ্ঠা ১: কভার পেজ কম্পোনেন্ট */}
-        <AdmissionFormCover formData={formData} handleChange={handleChange} />
-        <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} />
-
-        {/* পৃষ্ঠা ২: ভর্তি ফরমের মূল প্রথম পেজ */}
-        <AdmissionFormPage1 formData={formData} handleChange={handleChange} /> 
-        <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} />
-
-        {/* পৃষ্ঠা ৩: ভর্তি ফরমের মূল দ্বিতীয় পেজ */}
-        <AdmissionFormPage2 formData={formData} handleChange={handleChange} /> 
-        <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} /> 
-
-        {/* পৃষ্ঠা ৪: একদম শেষ পৃষ্ঠা / ব্যাক কভার পেজ */}
-        <AdmissionFormPage3 
-          formData={formData} 
-          handleChange={handleChange} 
-          handleCheckboxChange={handleCheckboxChange} 
-        />
-
-        {/* সাবমিট বাটন */}
-        <div className="p-4 sm:p-8 bg-gray-50 border-t border-gray-200 text-right print:hidden rounded-b-sm w-full">
-          <button 
-            type="submit" 
-            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base sm:text-lg px-8 sm:px-10 py-3 sm:py-3.5 rounded-lg shadow-md transition-all duration-150 active:scale-95 w-full sm:w-auto"
-          >
-            ভর্তি ফরমটি ডাটাবেজে সংরক্ষণ করুন
-          </button>
+        {/* হেডার */}
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-bold text-emerald-900 dark:text-emerald-400 flex items-center justify-center gap-2">
+            <span className="text-amber-500">❖</span> ভর্তি নির্দেশিকা ও তথ্যাবলী <span className="text-amber-500">❖</span>
+          </h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">নতুন শিক্ষাবর্ষে ভর্তির যাবতীয় নিয়ম ও সময়সূচী</p>
         </div>
 
-      </form>
+        {/* ১. ভর্তির সময় (Timeline) */}
+        <section id="timeline" className="scroll-mt-24 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-100 dark:border-slate-700/60 shadow-sm">
+          <h3 className="text-lg font-bold text-emerald-800 dark:text-emerald-400 mb-3 flex items-center gap-2">📅 ভর্তির সময়সূচী</h3>
+          <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300 font-medium">
+            <li className="flex justify-between border-b border-gray-100 dark:border-slate-700/50 pb-2"><span>ভর্তি ফরম বিতরণ শুরু:</span> <span className="text-amber-600">০১ শাওয়াল থেকে</span></li>
+            <li className="flex justify-between border-b border-gray-100 dark:border-slate-700/50 pb-2"><span>ভর্তি পরীক্ষার তারিখ:</span> <span className="text-amber-600">১০ শাওয়াল, সকাল ৯:০০ টা</span></li>
+            <li className="flex justify-between pb-1"><span>ক্লাস শুরু:</span> <span className="text-emerald-600 font-bold">১৫ শাওয়াল থেকে ইনশাআল্লাহ</span></li>
+          </ul>
+        </section>
+
+        {/* ২. ভর্তি পরীক্ষা (Test) */}
+        <section id="test" className="scroll-mt-24 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-100 dark:border-slate-700/60 shadow-sm">
+          <h3 className="text-lg font-bold text-emerald-800 dark:text-emerald-400 mb-3 flex items-center gap-2">📝 ভর্তি পরীক্ষা সংক্রান্ত</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+            হিফজ ও কিতাব বিভাগের শিক্ষার্থীদের জন্য মৌখিক (তিলাওয়াত ও ইস্তেমাল) এবং সাধারণ লিখিত পরীক্ষা নেওয়া হবে। নূরানী ও নাজেরা বিভাগের জন্য শুধুমাত্র মৌখিক ও উচ্চারণ যোগ্যতা যাচাই করা হবে।
+          </p>
+        </section>
+
+        {/* ৩. ভর্তি প্রক্রিয়া (Process) */}
+        <section id="process" className="scroll-mt-24 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-100 dark:border-slate-700/60 shadow-sm">
+          <h3 className="text-lg font-bold text-emerald-800 dark:text-emerald-400 mb-3 flex items-center gap-2">⚡ ভর্তি প্রক্রিয়া</h3>
+          <ol className="list-decimal list-inside space-y-2 text-sm text-gray-600 dark:text-gray-300">
+            <li>অনলাইন বা অফিস থেকে ভর্তি ফরম সংগ্রহ করে সঠিক তথ্য দিয়ে পূরণ করুন।</li>
+            <li>প্রয়োজনীয় কাগজপত্রাদি সংযুক্ত করে অফিসে জমা দিন বা অনলাইনে সাবমিট করুন।</li>
+            <li>নির্দিষ্ট তারিখে ভর্তি পরীক্ষায় অংশগ্রহণ করে উত্তীর্ণ তালিকায় স্থান নিশ্চিত করুন।</li>
+          </ol>
+        </section>
+
+        {/* ৪. ভর্তি ফি (Fees) */}
+        <section id="fees" className="scroll-mt-24 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-100 dark:border-slate-700/60 shadow-sm">
+          <h3 className="text-lg font-bold text-emerald-800 dark:text-emerald-400 mb-3 flex items-center gap-2">💵 ভর্তি ও মাসিক ফি</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm text-gray-600 dark:text-gray-300">
+              <thead>
+                <tr className="border-b border-gray-200 dark:border-slate-700 font-bold text-emerald-900 dark:text-emerald-400">
+                  <th className="pb-2">বিভাগ</th>
+                  <th className="pb-2 text-center">ভর্তি ফি</th>
+                  <th className="pb-2 text-right">মাসিক প্রদেয়</th>
+                </tr>
+              </thead>
+              <tbody className="font-medium">
+                <tr className="border-b border-gray-100 dark:border-slate-700/40"><td className="py-2.5">নূরানী ও নাজেরা</td><td className="text-center">১,৫০০/-</td><td className="text-right">৫००/-</td></tr>
+                <tr className="border-b border-gray-100 dark:border-slate-700/40"><td className="py-2.5">হিফজ বিভাগ (আবাসিক)</td><td className="text-center">৩,০০০/-</td><td className="text-right">৩,৫০০/-</td></tr>
+                <tr><td className="py-2.5">কিতাব বিভাগ</td><td className="text-center">২,৫০০/-</td><td className="text-right">৮০০/-</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* ৫. ভর্তির শর্তাবলী (Terms) */}
+        <section id="terms" className="scroll-mt-24 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-100 dark:border-slate-700/60 shadow-sm">
+          <h3 className="text-lg font-bold text-emerald-800 dark:text-emerald-400 mb-3 flex items-center gap-2">📜 ভর্তির শর্তাবলী</h3>
+          <ul className="list-disc list-inside space-y-2 text-sm text-gray-600 dark:text-gray-300">
+            <li>শিক্ষার্থীকে অবশ্যই সদাচারী এবং মাদরাসার নিয়ম-কানুন মানতে বাধ্য থাকতে হবে।</li>
+            <li>আবাসিক ছাত্রদের ক্ষেত্রে নির্দিষ্ট সময়ে বোর্ডিংয়ের নিয়ম অনুধাবন করতে হবে।</li>
+            <li>ভর্তির সময় জন্ম নিবন্ধন এবং অভিভাবকের জাতীয় পরিচয়পত্রের কপি জমা দেওয়া বাধ্যতামূলক।</li>
+          </ul>
+        </section>
+
+        {/* ফরম পূরণের অ্যাকশন বাটন */}
+        <div className="text-center pt-4">
+          <Link 
+            href="/admission/form"
+            className="inline-flex items-center gap-2 bg-gradient-to-r cursor-pointer from-emerald-700 to-emerald-800 hover:from-emerald-800 hover:to-emerald-900 text-white font-bold text-sm sm:text-base px-8 py-4 rounded-xl shadow-md transition-all active:scale-95 animate-pulse"
+          >
+            ✍️ অনলাইন ভর্তি ফরম পূরণ করুন
+          </Link>
+        </div>
+
+      </div>
     </div>
   );
 }
