@@ -94,6 +94,8 @@ export default function AdmissionFormPage() {
     }
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleChange = (e, section = null) => {
     const { name, value, type, checked } = e.target;
     if (section) {
@@ -125,16 +127,37 @@ export default function AdmissionFormPage() {
     }));
   };
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
     try {
-      console.log("মঙ্গোডিবি-তে সেভ হওয়ার জন্য প্রস্তুত ডেটা:", formData);
-      alert("কনসোলে ডেটা চেক করুন! ডাটাবেজ এপিআই যুক্ত থাকলে সফলভাবে সেভ হয়ে যেত।");
+      // এক্সপ্রেস সার্ভারের এপিআই এন্ডপয়েন্ট (আপনার পোর্ট ৮০০০ হলে)
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/admissions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert("✅ আলহামদুলিল্লাহ্‌! " + data.message);
+        
+        // ফরম সফলভাবে সেভ হলে ডাটা রিসেট করার ঐচ্ছিক ব্যবস্থা করতে পারেন
+        // window.location.href = "/admission/success"; 
+      } else {
+        alert("❌ দুঃখিত: " + data.message);
+      }
     } catch (error) {
-      console.error("ডেটা সাবমিট করার সময় ত্রুটি ঘটেছে:", error);
+      console.error("সার্ভারে ডাটা পাঠাতে সমস্যা হয়েছে:", error);
+      alert("❌ সার্ভারের সাথে যোগাযোগ করা যাচ্ছে না। অনুগ্রহ করে আপনার ইন্টারনেট কানেকশন বা সার্ভার চেক করুন।");
+    } finally {
+      setIsSubmitting(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-slate-100 py-4 sm:py-10 px-2 sm:px-4 flex flex-col items-center justify-center font-sans antialiased print:bg-white print:py-0 print:px-0">
       
@@ -175,9 +198,10 @@ export default function AdmissionFormPage() {
         <div className="p-4 sm:p-8 bg-gray-50 border-t border-gray-200 text-right print:hidden rounded-b-sm w-full">
           <button 
             type="submit" 
-            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base sm:text-lg px-8 sm:px-10 py-3 sm:py-3.5 rounded-lg shadow-md transition-all duration-150 active:scale-95 w-full sm:w-auto"
+            disabled={isSubmitting}
+            className={`bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base sm:text-lg px-8 sm:px-10 py-3 sm:py-3.5 rounded-lg shadow-md transition-all duration-150 active:scale-95 w-full sm:w-auto ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            ভর্তি ফরমটি ডাটাবেজে সংরক্ষণ করুন
+            {isSubmitting ? "সংরক্ষণ হচ্ছে, অপেক্ষা করুন..." : "ভর্তি ফরমটি ডাটাবেজে সংরক্ষণ করুন"}
           </button>
         </div>
       </form>
