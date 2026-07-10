@@ -45,7 +45,7 @@ const DashboardLayout = ({ children }) => {
                                 মারকাযি নিয়ন্ত্রণ বোর্ড
                             </h2>
                             <h2 className="font-black text-sm text-emerald-900 tracking-wide lg:hidden block">
-                                আস-সালাম মাদরাসা
+                                আস-সালাম আইডিয়াল মাদরাসা
                             </h2>
                         </div>
                     </div>
