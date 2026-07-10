@@ -1,0 +1,84 @@
+// app/about/page.js
+"use client";
+
+import { useEffect, useState } from "react";
+import Profile from "@/components/public/about/Profile";
+import Founder from "@/components/public/about/Founder";
+import Vision from "@/components/public/about/Vision";
+import Committee from "@/components/public/about/Committee";
+import Features from "@/components/public/about/Features";
+import Roadmap from "@/components/public/about/Roadmap";
+import Testimonials from "@/components/public/about/Testimonials";
+import Policies from "@/components/public/about/Policies";
+
+export default function AboutPage() {
+  const [aboutData, setAboutData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function getAboutData() {
+      try {
+        // এপিআই কানেকশন চালু হলে এখানে ডাটা সেট হবে
+        setAboutData({
+          profile: null,
+          founder: null,
+          vision: null,
+          committee: null,
+          features: null,
+          roadmap: null,
+          testimonials: null,
+          policies: null,
+        });
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    getAboutData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-emerald-800"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="scroll-smooth min-h-screen bg-gray-50 dark:bg-slate-900">
+      <section id="profile" className="py-16 border-b border-gray-100 dark:border-slate-800/60">
+        <Profile data={aboutData?.profile} />
+      </section>
+
+      <section id="founder" className="py-16 border-b border-gray-100 dark:border-slate-800/60 bg-emerald-50/10 dark:bg-slate-900/40">
+        <Founder data={aboutData?.founder} />
+      </section>
+
+      <section id="vision" className="py-16 border-b border-gray-100 dark:border-slate-800/60">
+        <Vision data={aboutData?.vision} />
+      </section>
+
+      <section id="committee" className="py-16 border-b border-gray-100 dark:border-slate-800/60 bg-emerald-50/10 dark:bg-slate-900/40">
+        <Committee data={aboutData?.committee} />
+      </section>
+
+      <section id="features" className="py-16 border-b border-gray-100 dark:border-slate-800/60">
+        <Features data={aboutData?.features} />
+      </section>
+
+      <section id="roadmap" className="py-16 border-b border-gray-100 dark:border-slate-800/60 bg-emerald-50/10 dark:bg-slate-900/40">
+        <Roadmap data={aboutData?.roadmap} />
+      </section>
+
+      <section id="testimonials" className="py-16 border-b border-gray-100 dark:border-slate-800/60">
+        <Testimonials data={aboutData?.testimonials} />
+      </section>
+
+      <section id="policies" className="py-16 bg-emerald-50/10 dark:bg-slate-900/40">
+        <Policies data={aboutData?.policies} />
+      </section>
+    </div>
+  );
+}
