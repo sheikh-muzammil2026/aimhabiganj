@@ -1,10 +1,17 @@
+// components/WhatsAppButton.jsx
 "use client";
 
 import React from 'react';
 
 export default function WhatsAppButton() {
-  const phoneNumber = "8801836376174"; 
-  const message = encodeURIComponent("আস-সালামু আলাইকুম, আমি আপনার পোর্টফোলিও দেখে নক করেছি।");
+
+  const phoneNumber = "8801992757431"; 
+  
+  
+  const message = encodeURIComponent(
+    "আস-সালামু আলাইকুম, আমি আস-সালাম আইডিয়াল মাদরাসার অনলাইন পোর্টাল থেকে যোগাযোগ করছি। কিছু তথ্য জানতে চাচ্ছিলাম।"
+  );
+  
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
 
   return (
@@ -12,10 +19,10 @@ export default function WhatsAppButton() {
       href={whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label="Contact me on WhatsApp"
+      aria-label="Contact As-Salam Ideal Madrasah on WhatsApp"
       className="fixed bottom-6 right-6 z-50 bg-[#25D366] p-3.5 rounded-full shadow-[0_4px_14px_rgba(37,211,102,0.4)] hover:bg-[#20ba59] hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center group"
     >
-      {/* Official WhatsApp SVG Icon */}
+      {/* অফিসিয়াল হোয়াটসঅ্যাপ SVG আইকন */}
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 448 512"
