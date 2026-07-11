@@ -2,8 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client"; // Better Auth ক্লায়েন্ট ইম্পোর্ট
 
 export default function RegisterPage() {
+    const router = useRouter();
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -12,18 +15,47 @@ export default function RegisterPage() {
         confirmPassword: "",
     });
 
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
     const handleChange = (e) => {
+        setError(""); // ইউজার আবার টাইপ করা শুরু করলে এরর মুছে যাবে
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setError("");
+
+        // ফ্রন্টএন্ড পাসওয়ার্ড ম্যাচ চেক
         if (formData.password !== formData.confirmPassword) {
-            alert("পাসওয়ার্ড দুটি মিলছে না!");
+            setError("পাসওয়ার্ড দুটি মিলছে না!");
             return;
         }
-        console.log("Registration Data:", formData);
-        // এখানে আপনার ব্যাকএন্ড সাইন-আপ API কল হবে
+
+        // Better Auth API কল
+        await authClient.signUp.email({
+            email: formData.email,
+            password: formData.password,
+            name: formData.name,
+            // এখানে আপনি চাইলে অতিরিক্ত ডেটা (যেমন role) পাঠাতে পারেন যদি আপনার ডাটাবেজ স্কিমাতে তা ডিফাইন করা থাকে
+            // metadata: { role: formData.role }, 
+            callbackURL: "/dashboard" 
+        }, {
+            onRequest: () => {
+                setLoading(true);
+            },
+            onSuccess: () => {
+                setLoading(false);
+                router.push("/dashboard"); // সফল হলে ড্যাশবোর্ডে রিডাইরেক্ট
+            },
+            onError: (ctx) => {
+                setLoading(false);
+                setError(ctx.error.message || "নিবন্ধন করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
+            },
+        });
     };
 
     return (
@@ -42,6 +74,13 @@ export default function RegisterPage() {
                         আস-সালাম আইডিয়াল মাদ্রাসার ডিজিটাল পোর্টালে যুক্ত হোন
                     </p>
                 </div>
+
+                {/* এরর মেসেজ ডিসপ্লে */}
+                {error && (
+                    <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 p-3 rounded-lg text-sm font-medium text-center">
+                        {error}
+                    </div>
+                )}
 
                 <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
                     <div className="rounded-md space-y-3">
@@ -95,49 +134,67 @@ export default function RegisterPage() {
                             </select>
                         </div>
 
-                        {/* পাসওয়ার্ড */}
+                        {/* পাসওয়ার্ড */}
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                                পাসওয়ার্ড তৈরি করুন
+                                পাসওয়ার্ড তৈরি করুন
                             </label>
-                            <input
-                                name="password"
-                                type="password"
-                                required
-                                value={formData.password}
-                                onChange={handleChange}
-                                placeholder="••••••••"
-                                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm"
-                            />
+                            <div className="relative">
+                                <input
+                                    name="password"
+                                    type={showPassword ? "text" : "password"}
+                                    required
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    placeholder="••••••••"
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm pr-10"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-emerald-600"
+                                >
+                                    {showPassword ? "লুকান" : "দেখুন"}
+                                </button>
+                            </div>
                         </div>
 
-                        {/* কনফার্ম পাসওয়ার্ড */}
+                        {/* কনফার্ম পাসওয়ার্ড */}
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                                পাসওয়ার্ডটি পুনরায় নিশ্চিত করুন
+                                পাসওয়ার্ডটি পুনরায় নিশ্চিত করুন
                             </label>
-                            <input
-                                name="confirmPassword"
-                                type="password"
-                                required
-                                value={formData.confirmPassword}
-                                onChange={handleChange}
-                                placeholder="••••••••"
-                                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm"
-                            />
+                            <div className="relative">
+                                <input
+                                    name="confirmPassword"
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    required
+                                    value={formData.confirmPassword}
+                                    onChange={handleChange}
+                                    placeholder="••••••••"
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm pr-10"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-emerald-600"
+                                >
+                                    {showConfirmPassword ? "লুকান" : "দেখুন"}
+                                </button>
+                            </div>
                         </div>
                     </div>
 
                     {/* শর্তাবলী সম্মতি */}
-                    <div className="flex items-start text-xs sm:text-sm">
+                    <div className="flex items-start text-xs sm:text-sm pt-1">
                         <input
                             id="terms"
                             name="terms"
                             type="checkbox"
                             required
-                            className="mt-1 h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+                            className="mt-1 h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded cursor-pointer"
                         />
-                        <label htmlFor="terms" className="ml-2 block text-gray-900 dark:text-gray-300 leading-tight">
+                        <label htmlFor="terms" className="ml-2 block text-gray-900 dark:text-gray-300 leading-tight cursor-pointer">
                             আমি মাদ্রাসার সমস্ত ডিজিটাল ব্যবহারের <Link href="/about#policies" className="text-emerald-700 dark:text-emerald-400 font-semibold hover:underline">নীতিমালা ও শর্তাবলী</Link> মেনে চলবো।
                         </label>
                     </div>
@@ -146,15 +203,18 @@ export default function RegisterPage() {
                     <div>
                         <button
                             type="submit"
-                            className="w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-bold rounded-md text-slate-950 bg-amber-500 hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 shadow-md transition duration-150"
+                            disabled={loading}
+                            className={`w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-bold rounded-md text-slate-950 bg-amber-500 hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 shadow-md transition duration-150 ${
+                                loading ? "opacity-70 cursor-not-allowed" : ""
+                            }`}
                         >
-                            নিবন্ধন সম্পন্ন করুন (Register)
+                            {loading ? "নিবন্ধন হচ্ছে..." : "নিবন্ধন সম্পন্ন করুন (Register)"}
                         </button>
                     </div>
                 </form>
 
                 {/* লগইন লিংক */}
-                <div className="text-center">
+                <div className="text-center pt-2">
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                         পূর্বেই অ্যাকাউন্ট তৈরি করা আছে?{" "}
                         <Link href="/login" className="font-bold text-emerald-700 dark:text-emerald-400 hover:underline">
