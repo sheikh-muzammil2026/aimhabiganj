@@ -3,16 +3,20 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { authClient } from "@/lib/auth-client"; // Better Auth ক্লায়েন্ট ইম্পোর্ট করা হলো
 
 export default function Sidebar({ isOpen, setIsOpen }) {
     const pathname = usePathname();
     const [openDropdown, setOpenDropdown] = useState(null);
 
-    const dummyUser = {
-        name: "মুফতি আব্দুল্লাহ",
-        role: "admin", 
-        avatarLetter: "আ"
-    };
+    // ১. Better Auth থেকে রিয়েল-টাইম সেশন এবং ইউজার ডেটা আনা
+    const { data: session, isPending } = authClient.useSession();
+    
+    // সেশন থেকে ইউজার ডেটা প্রসেস করা (লগইন না থাকলে বা লোড হতে থাকলে ব্যাকআপ রাখা)
+    const user = session?.user;
+    const userRole = user?.role?.toLowerCase() || "user"; // ডিফল্ট বা সেফ সাইড রোল
+    const userName = user?.name || "অতিথি ব্যবহারকারী";
+    const avatarLetter = userName ? userName[0] : "ইউ";
 
     const menuConfig = [
         { 
@@ -43,10 +47,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             roles: ["admin", "teacher"],
             dropdown: [
                 { title: "শিক্ষা স্তর", href: "/dashboard/admin/academics?section=levels" },
-                { title: "পাঠ্যक्रम (Syllabus)", href: "/dashboard/admin/academics?section=syllabus" },
+                { title: "পাঠ্যক্রম (Syllabus)", href: "/dashboard/admin/academics?section=syllabus" },
                 { title: "ক্লাস রুটিন", href: "/dashboard/admin/academics?section=class-routine" },
                 { title: "পরীক্ষা রুটিন", href: "/dashboard/admin/academics?section=exam-routine" },
-                { title: "সহ-পাঠ্যক্রম", href: "/dashboard/admin/academics?section=co-curricular" },
+                { title: "सह-পাঠ্যক্রম", href: "/dashboard/admin/academics?section=co-curricular" },
             ]
         },
         {
@@ -65,17 +69,17 @@ export default function Sidebar({ isOpen, setIsOpen }) {
              dropdown: [
                 { title: "ভর্তির সময়", href: "/dashboard/admin/admission?section=timeline" },
                 { title: "ভর্তি পরীক্ষা", href: "/dashboard/admin/admission?section=test" },
-                { title: "ভর্তি প্রক্রিয়া", href: "/dashboard/admin/admission?section=test" }, // গাইডলাইনের আওতাভুক্ত
+                { title: "ভর্তি প্রক্রিয়া", href: "/dashboard/admin/admission?section=test" }, 
                 { title: "ভর্তি ফি", href: "/dashboard/admin/admission?section=fees" },
                 { title: "সকল আবেদন", href: "/dashboard/admin/admission" },
             ]
         },
         {
-            title: "মিডিয়া গ্যালারি",
+            title: "মিডিয়া গ্যালারি",
             icon: "🖼️",
             roles: ["admin"],
             dropdown: [
-                { title: "গ্যালারি নিয়ন্ত্রণ", href: "/dashboard/admin/gallery" },
+                { title: "গ্যালারি নিয়ন্ত্রণ", href: "/dashboard/admin/gallery" },
                 { title: "ফটো এবং ভিডিও লিস্ট", href: "/dashboard/admin/gallery/list" },
             ]
         },
@@ -107,17 +111,24 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         {
             title: "হিসাব ও অর্থ বিভাগ",
             icon: "💰",
-            roles: ["admin", "accountant"],
+            // ২. রিকোয়েস্ট অনুযায়ী এখানে 'accountant' এর সাথে 'admin' রাখা হয়েছে (যেহেতু আলাদা একাউন্টেন্ট রোল নেই)
+            roles: ["admin", "accountant"], 
             dropdown: [
                 { title: "রশিদ ব্যবস্থাপনা", href: "/dashboard/finance/receipts" },
                 { title: "সদকা ও অনুদান", href: "/dashboard/finance/donations" },
                 { title: "ঋণ ও বকেয়া", href: "/dashboard/finance/dues" },
-                { title: "অ্যাকাউন্টিং রিপোর্টস", href: "/dashboard/finance/reports" },
+                { title: "অ্যাকাউন্टिंग রিপোর্টস", href: "/dashboard/finance/reports" },
             ]
         }
     ];
 
-    const allowedMenuItems = menuConfig.filter(item => item.roles.includes(dummyUser.role));
+    // ৩. রিয়েল ইউজার রোলের ওপর ভিত্তি করে ফিল্টারিং
+    const allowedMenuItems = menuConfig.filter(item => item.roles.includes(userRole));
+
+    // সেশন লোড হওয়ার সময়ে একটি মার্জিত কঙ্কাল (Skeleton) বা ব্ল্যাঙ্ক স্টেট রাখা ভালো
+    if (isPending) {
+        return <div className="w-66 bg-[#043e30] h-screen fixed top-0 left-0 z-50 animate-pulse" />;
+    }
 
     return (
         <>
@@ -212,19 +223,26 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                     })}
                 </div>
 
-                <div className="p-3 border-t border-emerald-800/40 bg-emerald-950/40">
-                    <div className="flex items-center gap-3 px-2 py-2 rounded-xl bg-emerald-900/30 border border-emerald-800/30 shadow-xs">
-                        <div className="w-8 h-8 rounded-full bg-amber-400 text-[#043e30] flex items-center justify-center font-black text-sm shadow-inner transform hover:rotate-12 transition-transform duration-300">
-                            {dummyUser.avatarLetter}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <h4 className="text-xs font-bold text-slate-100 truncate tracking-wide">{dummyUser.name}</h4>
-                            <span className="inline-block text-[9px] font-extrabold bg-amber-400/10 text-amber-400 px-2 py-0.5 rounded-md uppercase tracking-widest mt-0.5">
-                                {dummyUser.role} মুদীর
-                            </span>
+                {/* ৪. ইউজার প্রোফাইল কার্ড - ডাইনামিক সেশন ডেটা প্রদর্শন */}
+                {session && (
+                    <div className="p-3 border-t border-emerald-800/40 bg-emerald-950/40">
+                        <div className="flex items-center gap-3 px-2 py-2 rounded-xl bg-emerald-900/30 border border-emerald-800/30 shadow-xs">
+                            <div className="w-8 h-8 rounded-full bg-amber-400 text-[#043e30] flex items-center justify-center font-black text-sm shadow-inner transform hover:rotate-12 transition-transform duration-300 overflow-hidden">
+                                {user?.image ? (
+                                    <img src={user.image} alt="Profile" className="w-full h-full object-cover" />
+                                ) : (
+                                    avatarLetter
+                                )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <h4 className="text-xs font-bold text-slate-100 truncate tracking-wide">{userName}</h4>
+                                <span className="inline-block text-[9px] font-extrabold bg-amber-400/10 text-amber-400 px-2 py-0.5 rounded-md uppercase tracking-widest mt-0.5">
+                                    {userRole === "admin" ? "মুদীর (Admin)" : userRole}
+                                </span>
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
             </aside>
         </>
     );
