@@ -61,7 +61,7 @@ export default function RegisterPage() {
     return (
         <div 
             className="min-h-screen flex items-center justify-center bg-cover bg-center transition-colors duration-200 px-4 py-12 sm:px-6 lg:px-8" 
-            style={{backgroundImage: `url('/loginBackground.jpg')`}} // এখানে আপনার ছবির সঠিক পাথ দিন
+            style={{backgroundImage: `url('/loginBackground.png')`}} // এখানে আপনার ছবির সঠিক পাথ দিন
         >
             <div className="max-w-md w-full space-y-6 bg-white dark:bg-slate-900 p-8 rounded-xl shadow-xl border border-gray-100 dark:border-slate-800">
 
