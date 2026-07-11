@@ -49,7 +49,7 @@ export default function RegisterPage() {
             },
             onSuccess: () => {
                 setLoading(false);
-                router.push("/auth/login); 
+                router.push("/auth/login"); 
             },
             onError: (ctx) => {
                 setLoading(false);
