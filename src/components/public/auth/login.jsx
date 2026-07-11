@@ -9,7 +9,6 @@ import { toast } from "react-toastify";
 export default function LoginPage() {
     const router = useRouter();
     
-   
     const [formData, setFormData] = useState({
         email: "",
         password: "",
@@ -33,13 +32,11 @@ export default function LoginPage() {
             });
 
             if (data && !error) {
-                toast.success("স্বাগতম! লগইন সফল হয়েছে।");
+                toast.success("স্বাগতম! লগইন সফল হয়েছে।");
 
-                // ডেটাবেস/অথ ক্লায়েন্ট থেকে ইউজারের রোল নিয়ে আসা (যেমন: data.user.role)
-                // আপনার অথেন্টিকেশন লাইব্রেরি (যেমন: Better Auth, NextAuth, বা Supabase) অনুযায়ী এই 'data' অবজেক্টের স্ট্রাকচার আলাদা হতে পারে।
                 const userRole = data?.user?.role; 
 
-                // রোল অনুযায়ী আলাদা আলাদা ড্যাশবোর্ডে পাঠানো
+                // রোল অনুযায়ী আলাদা আলাদা ড্যাশবোর্ডে পাঠানো
                 if (userRole === "admin") {
                     router.push('dashboard/admin');
                 } else if (userRole === "teacher") {
@@ -54,18 +51,21 @@ export default function LoginPage() {
             }
             
             if (error) {
-                toast.error(error.message || "ভুল ইমেইল বা পাসওয়ার্ড। আবার চেষ্টা করুন।");
+                toast.error(error.message || "ভুল ইমেইল বা পাসওয়ার্ড। আবার চেষ্টা করুন।");
             }
         } catch (err) {
             console.error("Authentication lifecycle crash:", err);
-            toast.error("লগইন করার সময় একটি অপ্রত্যাশিত সমস্যা হয়েছে।");
+            toast.error("লগইন করার সময় একটি অপ্রত্যাশিত সমস্যা হয়েছে।");
         } finally {
             setIsSubmitting(false);
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-950 px-4 py-12 sm:px-6 lg:px-8 transition-colors duration-200">
+        <div 
+            className="min-h-screen flex items-center justify-center md:bg-cover lg:bg-[length:100%_100%] bg-no-repeat bg-center transition-colors duration-200 px-4 py-12 sm:px-6 lg:px-8" 
+            style={{backgroundImage: `url('/loginBackground.png')`}}
+        >
             <div className="max-w-md w-full space-y-8 bg-white dark:bg-slate-900 p-8 rounded-xl shadow-xl border border-gray-100 dark:border-slate-800">
 
                 {/* হেডার ও লোগো */}
@@ -83,7 +83,6 @@ export default function LoginPage() {
 
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                     <div className="rounded-md space-y-4">
-                        {/* রোল সিলেকশনের ড্রপডাউনটি এখান থেকে সম্পূর্ণ সরিয়ে দেওয়া হয়েছে */}
 
                         {/* ইমেইল ইনপুট */}
                         <div>
