@@ -53,7 +53,7 @@ export default function TeacherDashboard() {
             </div>
             <div className="flex justify-between py-3 items-center">
               <div>
-                <p className="text-sm font-bold text-emerald-950">২য় পিরিয়ড: হিফজ রিভিশন (সবকী)</p>
+                <p className="text-sm font-bold text-emerald-950">২য় পিরিয়ড: adenocarcinoma রিভিশন (সবকী)</p>
                 <p className="text-xs text-emerald-600 font-medium">সময়: ০৮:৪৫ AM - ১০:০০ AM</p>
               </div>
               <span className="bg-emerald-600 text-white text-xs px-2.5 py-1 rounded-md font-bold animate-pulse">চলমান</span>
