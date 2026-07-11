@@ -9,10 +9,8 @@ export default function Navbar() {
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [darkMode, setDarkMode] = useState(false);
 
-   
     const { data: session } = authClient.useSession();
     
-   
     const isLoggedIn = !!session?.user;
     const userRole = session?.user?.role;
     const userPhoto = session?.user?.image;
@@ -36,20 +34,16 @@ export default function Navbar() {
         setActiveDropdown(null);
     };
 
-    // লগআউট হ্যান্ডলার ফাংশন
     const handleLogout = async () => {
         await authClient.signOut();
-        // আলাদা করে স্টেট রিসেট করার দরকার নেই, signOut হলে session আপনাআপনি পরিবর্তন হবে
         closeMenu();
     };
 
-    // ডাইনামিক ড্যাশবোর্ড রাউট পাথ জেনারেটর
     const getDashboardPath = () => {
         if (!userRole) return "/";
         return `/dashboard/${userRole.toLowerCase()}`;
     };
 
-    // সম্পূর্ণ মেনু স্ট্রাকচার
     const menuItems = [
         { name: "হোম", href: "/" },
         {
@@ -61,7 +55,7 @@ export default function Navbar() {
                 { name: "পরিচালনা পর্ষদ", href: "/about#committee" },
                 { name: "আমাদের বৈশিষ্ট্য", href: "/about#features" },
                 { name: "ভবিষ্যৎ পরিকল্পনা", href: "/about#roadmap" },
-                { name: "مтамত (শিক্ষার্থী ও উলামা)", href: "/about#testimonials" },
+                { name: "মতামত (শিক্ষার্থী ও উলামা)", href: "/about#testimonials" },
                 { name: "নীতিমালা", href: "/about#policies" },
                 { name: "শিক্ষকমণ্ডলী", href: "/about#faculty" },
                 { name: "কর্মকর্তা ও কর্মচারী", href: "/about#staff" },
@@ -74,7 +68,7 @@ export default function Navbar() {
                 { name: "শ্রেণী শিক্ষকের তালিকা", href: "/academics#teachers" },
                 { name: "শিক্ষা স্তর", href: "/academics#levels" },
                 { name: "পাঠ্যক্রম (Syllabus)", href: "/academics#syllabus" },
-                { name: "सह-पाठ्यक्रम", href: "/academics#co-curricular" },
+                { name: "সহ-পাঠ্যক্রম", href: "/academics#co-curricular" },
                 { name: "ক্লাস রুটিন", href: "/academics#class-routine" },
                 { name: "পরীক্ষা রুটিন", href: "/academics#exam-routine" },
             ],
@@ -88,6 +82,7 @@ export default function Navbar() {
         },
         {
             name: "ভর্তি",
+            isAdmission: true, // পালস অ্যানিমেশনের জন্য ফ্ল্যাগ
             dropdown: [
                 { name: "ভর্তির সময়", href: "/admission#timeline" },
                 { name: "ভর্তি পরীক্ষা", href: "/admission#test" },
@@ -112,7 +107,7 @@ export default function Navbar() {
             dropdown: [
                 { name: "লাইভ ক্লাস", href: "/smart-classroom/live" },
                 { name: "রেকর্ডেড ক্লাস", href: "/smart-classroom/recorded" },
-                { name: "ই-বুক / লেকচার শিট", href: "/smart-classroom/ebooks" },
+                { name: "ই-বুক / লেکচার শিট", href: "/smart-classroom/ebooks" },
                 { name: "অনলাইন এক্সাম", href: "/smart-classroom/exam" },
                 { name: "কুইজ প্রতিযোগিতা", href: "/smart-classroom/quiz" },
             ],
@@ -151,10 +146,12 @@ export default function Navbar() {
                                     <>
                                         <button
                                             onClick={() => setActiveDropdown(activeDropdown === item.name ? null : item.name)}
-                                            className="px-2 py-2 rounded-md text-[13px] xl:text-sm font-medium hover:bg-emerald-800 dark:hover:bg-slate-800 transition flex items-center gap-0.5 focus:outline-none text-white"
+                                            className={`px-2 py-2 rounded-md text-[13px] xl:text-sm font-semibold hover:bg-emerald-800 dark:hover:bg-slate-800 transition flex items-center gap-0.5 focus:outline-none text-white ${
+                                                item.isAdmission ? "bg-amber-500 hover:bg-amber-600 text-slate-950 dark:text-slate-950 animate-pulse rounded-md px-3 font-bold" : ""
+                                            }`}
                                         >
                                             {item.name}
-                                            <svg className="w-3 h-3 text-emerald-200/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className={`w-3 h-3 ${item.isAdmission ? "text-slate-950" : "text-emerald-200/70"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                                             </svg>
                                         </button>
@@ -189,7 +186,7 @@ export default function Navbar() {
                             )}
                         </button>
 
-                        {/* ডেস্কটপ ইউজার প্যানেল */}
+                        {/* ডেস্কটপ ইউজার প্যানেল (কন্ডিশনাল বাটন) */}
                         {isLoggedIn ? (
                             <div className="flex items-center gap-2 ml-2 pl-2 border-l border-emerald-700 dark:border-slate-700 flex-shrink-0">
                                 <div className="w-7 h-7 rounded-full bg-amber-400 text-slate-900 font-bold flex items-center justify-center text-[11px] overflow-hidden border border-white shadow-inner">
@@ -209,12 +206,20 @@ export default function Navbar() {
                                 </button>
                             </div>
                         ) : (
-                            <Link
-                                href="/login"
-                                className="ml-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-md text-xs xl:text-sm shadow transition transform hover:-translate-y-0.5 flex-shrink-0"
-                            >
-                                লগইন
-                            </Link>
+                            <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-emerald-700 dark:border-slate-700 flex-shrink-0">
+                                <Link
+                                    href="/login"
+                                    className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-md text-xs xl:text-sm shadow transition transform hover:-translate-y-0.5"
+                                >
+                                    লগইন
+                                </Link>
+                                <Link
+                                    href="/register"
+                                    className="bg-transparent border border-amber-400 text-amber-400 hover:bg-amber-400 hover:text-slate-950 font-bold px-3 py-1.5 rounded-md text-xs xl:text-sm shadow transition transform hover:-translate-y-0.5"
+                                >
+                                    নিবন্ধন
+                                </Link>
+                            </div>
                         )}
                     </div>
 
@@ -243,7 +248,9 @@ export default function Navbar() {
                                     <>
                                         <button
                                             onClick={() => setActiveDropdown(activeDropdown === item.name ? null : item.name)}
-                                            className="w-full text-left px-3 py-2 rounded-md text-base font-medium hover:bg-emerald-800 dark:hover:bg-slate-800 transition flex items-center justify-between text-white"
+                                            className={`w-full text-left px-3 py-2 rounded-md text-base font-medium hover:bg-emerald-800 dark:hover:bg-slate-800 transition flex items-center justify-between text-white ${
+                                                item.isAdmission ? "bg-amber-500 text-slate-950 dark:text-slate-950 animate-pulse font-bold my-1" : ""
+                                            }`}
                                         >
                                             <span>{item.name}</span>
                                             <svg className={`w-4 h-4 transform transition-transform ${activeDropdown === item.name ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -264,32 +271,41 @@ export default function Navbar() {
                             </div>
                         ))}
                         
-                        {/* মোবাইল ইউজার অ্যাকশন প্যানেল */}
+                        {/* মোবাইল ইউজার অ্যাকশন প্যানেল (কন্ডিশনাল বাটন) */}
                         <div className="pt-4 border-t border-emerald-800 dark:border-slate-800 px-3 space-y-2">
                             {isLoggedIn ? (
                                 <>
                                     <Link 
                                         href={getDashboardPath()} 
                                         onClick={closeMenu} 
-                                        className="block text-center bg-amber-500 text-slate-950 font-bold py-2 rounded-md"
+                                        className="block text-center bg-amber-500 text-slate-950 font-bold py-2 rounded-md shadow"
                                     >
                                         ড্যাশবোর্ড প্যানেল ({userRole})
                                     </Link>
                                     <button 
                                         onClick={handleLogout} 
-                                        className="w-full text-center bg-red-600 text-white font-bold py-2 rounded-md"
+                                        className="w-full text-center bg-red-600 text-white font-bold py-2 rounded-md shadow"
                                     >
                                         লগআউট করুন
                                     </button>
                                 </>
                             ) : (
-                                <Link 
-                                    href="/login" 
-                                    onClick={closeMenu} 
-                                    className="block text-center bg-amber-500 text-slate-950 font-bold py-2 rounded-md"
-                                >
-                                    লগইন করুন
-                                </Link>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <Link 
+                                        href="/login" 
+                                        onClick={closeMenu} 
+                                        className="block text-center bg-amber-500 text-slate-950 font-bold py-2 rounded-md shadow"
+                                    >
+                                        লগইন
+                                    </Link>
+                                    <Link 
+                                        href="/register" 
+                                        onClick={closeMenu} 
+                                        className="block text-center bg-transparent border border-amber-400 text-amber-400 font-bold py-2 rounded-md shadow"
+                                    >
+                                        নিবন্ধন
+                                    </Link>
+                                </div>
                             )}
                         </div>
                     </div>
