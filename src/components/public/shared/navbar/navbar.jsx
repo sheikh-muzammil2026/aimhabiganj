@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation"; // ১. রিডাইরেকশনের জন্য useRouter ইম্পোর্ট করা হলো
 import { authClient } from "@/lib/auth-client";
 
 export default function Navbar() {
+    const router = useRouter(); // ২. রাউটার ইনিশিয়েলাইজ করা হলো
     const [isOpen, setIsOpen] = useState(false);
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [darkMode, setDarkMode] = useState(false);
@@ -34,9 +36,16 @@ export default function Navbar() {
         setActiveDropdown(null);
     };
 
+    // ৩. লগআউট ফাংশনটি Better Auth এর নিয়ম অনুযায়ী রিডাইরেক্ট সহ ফিক্স করা হলো
     const handleLogout = async () => {
-        await authClient.signOut();
-        closeMenu();
+        await authClient.signOut({
+            fetchOptions: {
+                onSuccess: () => {
+                    closeMenu();
+                    router.push("/login"); // স্পেলিং মিস্টেক ঠিক করা হয়েছে এবং আপনার রুট অনুযায়ী '/login' দেওয়া হলো
+                }
+            }
+        });
     };
 
     const getDashboardPath = () => {
@@ -82,7 +91,7 @@ export default function Navbar() {
         },
         {
             name: "ভর্তি",
-            isAdmission: true, // পালস অ্যানিমেশনের জন্য ফ্ল্যাগ
+            isAdmission: true, 
             dropdown: [
                 { name: "ভর্তির সময়", href: "/admission#timeline" },
                 { name: "ভর্তি পরীক্ষা", href: "/admission#test" },
@@ -107,7 +116,7 @@ export default function Navbar() {
             dropdown: [
                 { name: "লাইভ ক্লাস", href: "/smart-classroom/live" },
                 { name: "রেকর্ডেড ক্লাস", href: "/smart-classroom/recorded" },
-                { name: "ই-বুক / লেکচার শিট", href: "/smart-classroom/ebooks" },
+                { name: "ই-বুক / লেকচার শিট", href: "/smart-classroom/ebooks" },
                 { name: "অনলাইন এক্সাম", href: "/smart-classroom/exam" },
                 { name: "কুইজ প্রতিযোগিতা", href: "/smart-classroom/quiz" },
             ],
@@ -186,7 +195,7 @@ export default function Navbar() {
                             )}
                         </button>
 
-                        {/* ডেস্কটপ ইউজার প্যানেল (কন্ডিশনাল বাটন) */}
+                        {/* ডেস্কটপ ইউজার প্যানেল */}
                         {isLoggedIn ? (
                             <div className="flex items-center gap-2 ml-2 pl-2 border-l border-emerald-700 dark:border-slate-700 flex-shrink-0">
                                 <div className="w-7 h-7 rounded-full bg-amber-400 text-slate-900 font-bold flex items-center justify-center text-[11px] overflow-hidden border border-white shadow-inner">
@@ -271,7 +280,7 @@ export default function Navbar() {
                             </div>
                         ))}
                         
-                        {/* মোবাইল ইউজার অ্যাকশন প্যানেল (কন্ডিশনাল বাটন) */}
+                        {/* মোবাইল ইউজার অ্যাকশন প্যানেল */}
                         <div className="pt-4 border-t border-emerald-800 dark:border-slate-800 px-3 space-y-2">
                             {isLoggedIn ? (
                                 <>
