@@ -50,7 +50,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 { title: "পাঠ্যক্রম (Syllabus)", href: "/dashboard/admin/academics?section=syllabus" },
                 { title: "ক্লাস রুটিন", href: "/dashboard/admin/academics?section=class-routine" },
                 { title: "পরীক্ষা রুটিন", href: "/dashboard/admin/academics?section=exam-routine" },
-                { title: "सह-পাঠ্যক্রম", href: "/dashboard/admin/academics?section=co-curricular" },
+                { title: "সহ-পাঠ্যক্রম", href: "/dashboard/admin/academics?section=co-curricular" },
             ]
         },
         {
@@ -65,8 +65,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         {
             title: "ভর্তি ব্যবস্থাপনা",
             icon: "📝",
-            roles: ["admin"],
-             dropdown: [
+            roles: ["admin", "accountant"], // একাউন্ট্যান্টও ফি ও আবেদন দেখতে পারেন
+            dropdown: [
                 { title: "ভর্তির সময়", href: "/dashboard/admin/admission?section=timeline" },
                 { title: "ভর্তি পরীক্ষা", href: "/dashboard/admin/admission?section=test" },
                 { title: "ভর্তি প্রক্রিয়া", href: "/dashboard/admin/admission?section=test" }, 
@@ -86,7 +86,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         {
             title: "আবাসন (হোস্টেল)",
             icon: "🛏️",
-            roles: ["admin"],
+            roles: ["admin", "teacher"],
             dropdown: [
                 { title: "ছাত্রাবাস পরিচিতি", href: "/dashboard/admin/hostel?section=about" },
                 { title: "আবাসিক নিয়মাবলী", href: "/dashboard/admin/hostel?section=rules" },
@@ -108,16 +108,36 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         { title: "শিক্ষার্থী ব্যবস্থাপনা", icon: "👥", href: "/dashboard/students", roles: ["admin", "teacher"] },
         { title: "শিক্ষক ব্যবস্থাপনা", icon: "🕌", href: "/dashboard/teachers", roles: ["admin"] },
         { title: "প্রশাসনিক বিভাগ", icon: "🛡️", href: "/dashboard/administration", roles: ["admin"] },
+        
+        // --- ACCOUNTANT (হিসাব ও অর্থ বিভাগ) পেশাদার বর্ধিত সংস্করণ ---
         {
             title: "হিসাব ও অর্থ বিভাগ",
             icon: "💰",
-            // ২. রিকোয়েস্ট অনুযায়ী এখানে 'accountant' এর সাথে 'admin' রাখা হয়েছে (যেহেতু আলাদা একাউন্টেন্ট রোল নেই)
             roles: ["admin", "accountant"], 
             dropdown: [
                 { title: "রশিদ ব্যবস্থাপনা", href: "/dashboard/finance/receipts" },
+                { title: "ফি ও তহবিল কনফিগার", href: "/dashboard/finance/fees-setup" },
+                { title: "খরচ ও ভাউচার ট্র্যাকিং", href: "/dashboard/finance/expenses" },
+                { title: "বেতন ও ভাতা (Payroll)", href: "/dashboard/finance/payroll" },
                 { title: "সদকা ও অনুদান", href: "/dashboard/finance/donations" },
+                { title: "জাকাত ফান্ড", href: "/dashboard/finance/zakat" },
                 { title: "ঋণ ও বকেয়া", href: "/dashboard/finance/dues" },
-                { title: "অ্যাকাউন্टिंग রিপোর্টস", href: "/dashboard/finance/reports" },
+                { title: "অ্যাকাউন্টিং রিপোর্টস", href: "/dashboard/finance/reports" },
+            ]
+        },
+
+        // --- PARENT (অভিভাবক কর্নার) অপশনসমূহ ---
+        {
+            title: "অভিভাবক কর্নার",
+            icon: "👨‍👩-‍👦",
+            roles: ["admin", "parent"],
+            dropdown: [
+                { title: "সন্তানের প্রোফাইল", href: "/dashboard/parent/child-profile" },
+                { title: "একাডেমিক রেজাল্ট", href: "/dashboard/parent/results" },
+                { title: "হাজিরা রিপোর্ট", href: "/dashboard/parent/attendance" },
+                { title: "ফি ও অনলাইন পেমেন্ট", href: "/dashboard/parent/payments" },
+                { title: "ক্লাস ও পরীক্ষার রুটিন", href: "/dashboard/parent/routines" },
+                { title: "শিক্ষকদের নোটিশ", href: "/dashboard/parent/notices" },
             ]
         }
     ];
@@ -125,10 +145,21 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     // ৩. রিয়েল ইউজার রোলের ওপর ভিত্তি করে ফিল্টারিং
     const allowedMenuItems = menuConfig.filter(item => item.roles.includes(userRole));
 
-    // সেশন লোড হওয়ার সময়ে একটি মার্জিত কঙ্কাল (Skeleton) বা ব্ল্যাঙ্ক স্টেট রাখা ভালো
+    // সেশন লোড হওয়ার সময়ে একটি মার্জিত কঙ্কাল (Skeleton) বা ব্ল্যাঙ্ক স্টেট রাখা ভালো
     if (isPending) {
         return <div className="w-66 bg-[#043e30] h-screen fixed top-0 left-0 z-50 animate-pulse" />;
     }
+
+    // সুন্দর বাংলা রোল বা নাম দেখানোর সুবিধার্থে
+    const displayRoleName = (role) => {
+        switch(role) {
+            case "admin": return "মুদীর (Admin)";
+            case "teacher": return "উস্তাদ (Teacher)";
+            case "accountant": return "হিসাবরক্ষক (Accountant)";
+            case "parent": return "অভিভাবক (Parent)";
+            default: return role;
+        }
+    };
 
     return (
         <>
@@ -177,7 +208,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                     >
                                         <div className="flex items-center gap-3">
                                             <span className="text-base group-hover/btn:scale-110 transition-transform duration-300">{item.icon}</span>
-                                            <span className="font-semibold tracking-wide">{item.title}</span>
+                                            <span className="font-semibold tracking-wide text-left">{item.title}</span>
                                         </div>
                                         <span className={`text-[10px] text-emerald-400 transition-transform duration-300 ${isDropdownOpen ? "rotate-180 text-amber-400" : ""}`}>
                                             ▼
@@ -189,7 +220,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                         onClick={() => setIsOpen(false)}
                                         className={`flex items-center gap-3 px-3 py-2.5 text-xs sm:text-sm rounded-xl transition-all duration-300 group/link
                                             ${isActive
-                                                ? "bg-amber-400 text-[#043e30] font-black shadow-md border-r-4 border-emerald-900 scale-[1.02]"
+                                                ? "bg-amber-400 text-[#043e30] font-black shadow-md border-r-4 border-emerald-990 scale-[1.02]"
                                                 : "text-emerald-100/90 hover:bg-emerald-800/40 hover:text-white hover:translate-x-1"}`}
                                     >
                                         <span className="text-base transform group-hover/link:scale-110 transition-transform duration-300">{item.icon}</span>
@@ -199,7 +230,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
                                 {hasDropdown && (
                                     <div className={`pl-4 space-y-1 border-l-2 border-emerald-800/50 ml-5 overflow-hidden transition-all duration-300 ease-in-out
-                                        ${isDropdownOpen ? "max-h-[400px] opacity-100 py-1" : "max-h-0 opacity-0"}`}>
+                                        ${isDropdownOpen ? "max-h-[500px] opacity-100 py-1" : "max-h-0 opacity-0"}`}>
                                         {item.dropdown.map((sub, subIdx) => {
                                             const isSubActive = pathname === sub.href;
                                             return (
@@ -237,7 +268,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                             <div className="flex-1 min-w-0">
                                 <h4 className="text-xs font-bold text-slate-100 truncate tracking-wide">{userName}</h4>
                                 <span className="inline-block text-[9px] font-extrabold bg-amber-400/10 text-amber-400 px-2 py-0.5 rounded-md uppercase tracking-widest mt-0.5">
-                                    {userRole === "admin" ? "মুদীর (Admin)" : userRole}
+                                    {displayRoleName(userRole)}
                                 </span>
                             </div>
                         </div>
