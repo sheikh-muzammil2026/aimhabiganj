@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { authClient } from "@/lib/auth-client"; // Better Auth ক্লায়েন্ট ইম্পোর্ট
+import { authClient } from "@/lib/auth-client";
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -42,14 +42,14 @@ export default function RegisterPage() {
             name: formData.name,
             // এখানে আপনি চাইলে অতিরিক্ত ডেটা (যেমন role) পাঠাতে পারেন যদি আপনার ডাটাবেজ স্কিমাতে তা ডিফাইন করা থাকে
             // metadata: { role: formData.role }, 
-            callbackURL: "/dashboard" 
+            // callbackURL: "/auth/login" 
         }, {
             onRequest: () => {
                 setLoading(true);
             },
             onSuccess: () => {
                 setLoading(false);
-                router.push("/dashboard"); // সফল হলে ড্যাশবোর্ডে রিডাইরেক্ট
+                router.push("/auth/login); 
             },
             onError: (ctx) => {
                 setLoading(false);
