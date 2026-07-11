@@ -29,7 +29,7 @@ export default function RegisterPage() {
         e.preventDefault();
         setError("");
 
-        // ফ্রন্টএন্ড পাসওয়ার্ড ম্যাচ চেক
+        // ফ্রন্টএন্ড পাসওয়ার্ড ম্যাচ চেক
         if (formData.password !== formData.confirmPassword) {
             setError("পাসওয়ার্ড দুটি মিলছে না!");
             return;
@@ -53,13 +53,16 @@ export default function RegisterPage() {
             },
             onError: (ctx) => {
                 setLoading(false);
-                setError(ctx.error.message || "নিবন্ধন করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
+                setError(ctx.error.message || "নিবন্ধন করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
             },
         });
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-950 px-4 py-12 sm:px-6 lg:px-8 transition-colors duration-200">
+        <div 
+            className="min-h-screen flex items-center justify-center bg-cover bg-center transition-colors duration-200 px-4 py-12 sm:px-6 lg:px-8" 
+            style={{backgroundImage: `url('/loginBackground.jpg')`}} // এখানে আপনার ছবির সঠিক পাথ দিন
+        >
             <div className="max-w-md w-full space-y-6 bg-white dark:bg-slate-900 p-8 rounded-xl shadow-xl border border-gray-100 dark:border-slate-800">
 
                 {/* হেডার */}
@@ -154,7 +157,7 @@ export default function RegisterPage() {
                                     onClick={() => setShowPassword(!showPassword)}
                                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-emerald-600"
                                 >
-                                    {showPassword ? "লুকান" : "দেখুন"}
+                                    {showPassword ? "লুকান" : "देखুন"}
                                 </button>
                             </div>
                         </div>
@@ -179,7 +182,7 @@ export default function RegisterPage() {
                                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-emerald-600"
                                 >
-                                    {showConfirmPassword ? "লুকান" : "দেখুন"}
+                                    {showConfirmPassword ? "লুকান" : "देखুন"}
                                 </button>
                             </div>
                         </div>
