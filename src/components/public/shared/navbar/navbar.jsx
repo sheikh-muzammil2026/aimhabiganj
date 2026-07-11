@@ -2,18 +2,20 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { authClient } from "@/lib/auth-client";
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [darkMode, setDarkMode] = useState(false);
 
-    // ডাইনামিক রোল ও অথেনটিকেশন স্টেট (মাস্টার প্ল্যান অনুযায়ী)
-    const [user, setUser] = useState({
-        isLoggedIn: true,
-        role: "Admin",
-        photo: null
-    });
+   
+    const { data: session } = authClient.useSession();
+    
+   
+    const isLoggedIn = !!session?.user;
+    const userRole = session?.user?.role;
+    const userPhoto = session?.user?.image;
 
     useEffect(() => {
         const isDark = localStorage.getItem("theme") === "dark" ||
@@ -34,7 +36,20 @@ export default function Navbar() {
         setActiveDropdown(null);
     };
 
-    // আপনার রিকোয়ারমেন্ট অনুযায়ী সম্পূর্ণ মেনু স্ট্রাকচার
+    // লগআউট হ্যান্ডলার ফাংশন
+    const handleLogout = async () => {
+        await authClient.signOut();
+        // আলাদা করে স্টেট রিসেট করার দরকার নেই, signOut হলে session আপনাআপনি পরিবর্তন হবে
+        closeMenu();
+    };
+
+    // ডাইনামিক ড্যাশবোর্ড রাউট পাথ জেনারেটর
+    const getDashboardPath = () => {
+        if (!userRole) return "/";
+        return `/dashboard/${userRole.toLowerCase()}`;
+    };
+
+    // সম্পূর্ণ মেনু স্ট্রাকচার
     const menuItems = [
         { name: "হোম", href: "/" },
         {
@@ -46,7 +61,7 @@ export default function Navbar() {
                 { name: "পরিচালনা পর্ষদ", href: "/about#committee" },
                 { name: "আমাদের বৈশিষ্ট্য", href: "/about#features" },
                 { name: "ভবিষ্যৎ পরিকল্পনা", href: "/about#roadmap" },
-                { name: "مতামত (শিক্ষার্থী ও উলামা)", href: "/about#testimonials" },
+                { name: "مтамত (শিক্ষার্থী ও উলামা)", href: "/about#testimonials" },
                 { name: "নীতিমালা", href: "/about#policies" },
                 { name: "শিক্ষকমণ্ডলী", href: "/about#faculty" },
                 { name: "কর্মকর্তা ও কর্মচারী", href: "/about#staff" },
@@ -59,7 +74,7 @@ export default function Navbar() {
                 { name: "শ্রেণী শিক্ষকের তালিকা", href: "/academics#teachers" },
                 { name: "শিক্ষা স্তর", href: "/academics#levels" },
                 { name: "পাঠ্যক্রম (Syllabus)", href: "/academics#syllabus" },
-                { name: "সহ-পাঠ্যক্রম", href: "/academics#co-curricular" },
+                { name: "सह-पाठ्यक्रम", href: "/academics#co-curricular" },
                 { name: "ক্লাস রুটিন", href: "/academics#class-routine" },
                 { name: "পরীক্ষা রুটিন", href: "/academics#exam-routine" },
             ],
@@ -115,7 +130,6 @@ export default function Navbar() {
     ];
 
     return (
-        /* এখানে bg-emerald-850 বদলে bg-emerald-900 করা হয়েছে যাতে লাইট মোডেও সুন্দর গাঢ় ইসলামিক গ্রিন কালার থাকে */
         <nav className="bg-emerald-900 print:hidden text-white shadow-md sticky top-0 z-50 transition-colors duration-300 dark:bg-slate-900 border-b border-emerald-800 dark:border-slate-800">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-20">
@@ -145,7 +159,7 @@ export default function Navbar() {
                                             </svg>
                                         </button>
 
-                                        {/* ড্রপডাউন বক্স (টেক্সট কালার লাইট মোডের জন্য স্পষ্ট করা হয়েছে) */}
+                                        {/* ড্রপডাউন বক্স */}
                                         <div className="absolute left-0 mt-0 w-56 bg-white text-gray-800 rounded-md shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border-t-4 border-amber-500 dark:bg-slate-800 dark:text-gray-100 dark:border-emerald-600">
                                             <div className="py-1 max-h-[70vh] overflow-y-auto custom-scrollbar">
                                                 {item.dropdown.map((sub, i) => (
@@ -175,18 +189,24 @@ export default function Navbar() {
                             )}
                         </button>
 
-                        {/* রোল-বেসড ডাইনামিক অ্যাকশন বাটন প্যানেল */}
-                        {user.isLoggedIn ? (
+                        {/* ডেস্কটপ ইউজার প্যানেল */}
+                        {isLoggedIn ? (
                             <div className="flex items-center gap-2 ml-2 pl-2 border-l border-emerald-700 dark:border-slate-700 flex-shrink-0">
                                 <div className="w-7 h-7 rounded-full bg-amber-400 text-slate-900 font-bold flex items-center justify-center text-[11px] overflow-hidden border border-white shadow-inner">
-                                    {user.photo ? <img src={user.photo} alt="Profile" className="w-full h-full object-cover" /> : user.role[0]}
+                                    {userPhoto ? <img src={userPhoto} alt="Profile" className="w-full h-full object-cover" /> : userRole ? userRole[0].toUpperCase() : "U"}
                                 </div>
                                 <Link
-                                    href={`/dashboard/admin`}
+                                    href={getDashboardPath()}
                                     className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-md text-xs xl:text-sm shadow transition transform hover:-translate-y-0.5"
                                 >
                                     ড্যাশবোর্ড
                                 </Link>
+                                <button
+                                    onClick={handleLogout}
+                                    className="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-1.5 rounded-md text-xs xl:text-sm shadow transition transform hover:-translate-y-0.5"
+                                >
+                                    লগআউট
+                                </button>
                             </div>
                         ) : (
                             <Link
@@ -213,7 +233,7 @@ export default function Navbar() {
                 </div>
             </div>
 
-            {/* মোবাইল মেনু ড্রয়ার */}
+            {/* মোবাইল মেনু ড্রয়ার */}
             {isOpen && (
                 <div className="lg:hidden bg-emerald-900 border-t border-emerald-800 dark:bg-slate-950 dark:border-slate-800 max-h-[80vh] overflow-y-auto">
                     <div className="px-2 pt-2 pb-4 space-y-1">
@@ -243,11 +263,33 @@ export default function Navbar() {
                                 )}
                             </div>
                         ))}
-                        <div className="pt-4 border-t border-emerald-800 dark:border-slate-800 px-3">
-                            {user.isLoggedIn ? (
-                                <Link href={`/dashboard/admin`} onClick={closeMenu} className="block text-center bg-amber-500 text-slate-950 font-bold py-2 rounded-md">ড্যাশবোর্ড প্যানেল</Link>
+                        
+                        {/* মোবাইল ইউজার অ্যাকশন প্যানেল */}
+                        <div className="pt-4 border-t border-emerald-800 dark:border-slate-800 px-3 space-y-2">
+                            {isLoggedIn ? (
+                                <>
+                                    <Link 
+                                        href={getDashboardPath()} 
+                                        onClick={closeMenu} 
+                                        className="block text-center bg-amber-500 text-slate-950 font-bold py-2 rounded-md"
+                                    >
+                                        ড্যাশবোর্ড প্যানেল ({userRole})
+                                    </Link>
+                                    <button 
+                                        onClick={handleLogout} 
+                                        className="w-full text-center bg-red-600 text-white font-bold py-2 rounded-md"
+                                    >
+                                        লগআউট করুন
+                                    </button>
+                                </>
                             ) : (
-                                <Link href="/login" onClick={closeMenu} className="block text-center bg-amber-500 text-slate-950 font-bold py-2 rounded-md">লগইন করুন</Link>
+                                <Link 
+                                    href="/login" 
+                                    onClick={closeMenu} 
+                                    className="block text-center bg-amber-500 text-slate-950 font-bold py-2 rounded-md"
+                                >
+                                    লগইন করুন
+                                </Link>
                             )}
                         </div>
                     </div>
