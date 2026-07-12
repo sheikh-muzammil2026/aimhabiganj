@@ -14,12 +14,13 @@ export default function AdminAdmissionDashboard() {
     const [selectedRequest, setSelectedRequest] = useState(null); 
     const [actionMessage, setActionMessage] = useState('');
 
-    // পাবলিক পেজের সাথে মিল রেখে স্টেট সাজানো হয়েছে
+    // পাবলিক পেজের সাথে মিল রেখে এবং process_details সহ স্টেট সাজানো হয়েছে
     const [guideSettings, setGuideSettings] = useState({
         timeline_start: "", 
         timeline_exam: "", 
         timeline_class: "",
         test_details: "",
+        process_details: "", // নতুন সংযোজিত ফিল্ড
         fee_noorani_adm: "", 
         fee_noorani_monthly: "",
         fee_hifz_adm: "", 
@@ -32,6 +33,7 @@ export default function AdminAdmissionDashboard() {
     // স্ক্রলিং এর জন্য রেফ (Refs)
     const timelineRef = useRef(null);
     const testRef = useRef(null);
+    const processRef = useRef(null); // নতুন রেফ
     const feesRef = useRef(null);
     const termsRef = useRef(null);
 
@@ -39,16 +41,19 @@ export default function AdminAdmissionDashboard() {
     const loadDashboardData = async () => {
         try {
             setIsLoading(true);
-            // ১. ভর্তি আবেদনপত্র নিয়ে আসা
+            // ১. ভর্তি আবেদনপত্র নিয়ে আসা
             const resApps = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/admissions`);
             const dataApps = await resApps.json();
             if (dataApps.success) setAdmissionRequests(dataApps.data);
 
-            // ২. গাইডলাইন সেটিংস নিয়ে আসা
+            // ২. গাইডলাইন সেটিংস নিয়ে আসা
             const resSett = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/admission-settings`);
             const dataSett = await resSett.json();
             if (dataSett.success && dataSett.data) {
-                setGuideSettings(dataSett.data);
+                setGuideSettings(prev => ({
+                    ...prev,
+                    ...dataSett.data
+                }));
             }
         } catch (error) {
             console.error("ডাটা লোড করতে সমস্যা:", error);
@@ -70,6 +75,8 @@ export default function AdminAdmissionDashboard() {
                     timelineRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 } else if (sectionParam === 'test' && testRef.current) {
                     testRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else if (sectionParam === 'process' && processRef.current) {
+                    processRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 } else if (sectionParam === 'fees' && feesRef.current) {
                     feesRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 } else if (sectionParam === 'terms' && termsRef.current) {
@@ -100,7 +107,31 @@ export default function AdminAdmissionDashboard() {
                 setTimeout(() => setActionMessage(''), 4000);
             }
         } catch (error) {
-            alert("স্ট্যাটাস আপডেট করা যায়নি।");
+            alert("স্ট্যাটাস আপডেট করা যায়নি।");
+        }
+    };
+
+    // আবেদনপত্র চিরতরে মুছে ফেলার হ্যান্ডলার (DELETE API)
+    const deleteAdmissionRequest = async (id) => {
+        if (confirm("আপনি কি নিশ্চিত যে এই ভর্তি আবেদনপত্রটি চিরতরে মুছে ফেলতে চান?")) {
+            try {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/admissions/${id}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    // স্টেট থেকে ডাটা রিমুভ করা
+                    setAdmissionRequests(prev => prev.filter(req => req._id !== id));
+                    setActionMessage(data.message || "আবেদনটি সফলভাবে মুছে ফেলা হয়েছে।");
+                    setTimeout(() => setActionMessage(''), 4000);
+                } else {
+                    alert(data.message || "মুছে ফেলা সম্ভব হয়নি।");
+                }
+            } catch (error) {
+                console.error("ডিলিট করতে সমস্যা:", error);
+                alert("সার্ভারে সমস্যা হওয়ার কারণে আবেদনটি মুছা যায়নি।");
+            }
         }
     };
 
@@ -115,11 +146,11 @@ export default function AdminAdmissionDashboard() {
             });
             const data = await response.json();
             if (data.success) {
-                setActionMessage(data.message || "সেটিংস সফলভাবে আপডেট করা হয়েছে!");
+                setActionMessage(data.message || "সেটিংস সফলভাবে আপডেট করা হয়েছে!");
                 setTimeout(() => setActionMessage(''), 4000);
             }
         } catch (error) {
-            alert("সেটিংস সেভ করা যায়নি।");
+            alert("সেটিংস সেভ করা যায়নি।");
         }
     };
 
@@ -201,9 +232,12 @@ export default function AdminAdmissionDashboard() {
                                             </span>
                                         </td>
                                         <td className="p-4 text-right space-x-1 sm:space-x-2 whitespace-nowrap">
-                                            <button onClick={() => setSelectedRequest(req)} className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-[11px] font-bold px-3 py-1.5 rounded-lg">👁️ ভিউ</button>
-                                            <button disabled={req.status === 'Approved'} onClick={() => updateStatus(req._id, 'Approved')} className="bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg disabled:opacity-30">✓ অ্যাপ্রুভ</button>
-                                            <button disabled={req.status === 'Rejected'} onClick={() => updateStatus(req._id, 'Rejected')} className="bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold px-3 py-1.5 rounded-lg disabled:opacity-30">✕ রিজেক্ট</button>
+                                            <button onClick={() => setSelectedRequest(req)} className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg cursor-pointer">👁️ ভিউ</button>
+                                            <button disabled={req.status === 'Approved'} onClick={() => updateStatus(req._id, 'Approved')} className="bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-lg disabled:opacity-30 cursor-pointer">✓ অ্যাপ্রুভ</button>
+                                            <button disabled={req.status === 'Rejected'} onClick={() => updateStatus(req._id, 'Rejected')} className="bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg disabled:opacity-30 cursor-pointer">✕ রিজেক্ট</button>
+                                            
+                                            {/* 🗑️ নতুন সংযোজিত: ডিলিট বাটন */}
+                                            <button onClick={() => deleteAdmissionRequest(req._id)} className="bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-lg cursor-pointer">🗑️ ডিলিট</button>
                                         </td>
                                     </tr>
                                 ))}
@@ -240,13 +274,22 @@ export default function AdminAdmissionDashboard() {
                         <h3 className="text-sm font-black text-emerald-800 bg-emerald-50 p-2.5 rounded-xl mb-4">📝 ২. ভর্তি পরীক্ষা সংক্রান্ত গাইডলাইন</h3>
                         <div>
                             <label className="block text-xs font-bold text-gray-500 mb-1">পরীক্ষার সংক্ষিপ্ত নিয়ম</label>
-                            <textarea rows={3} value={guideSettings.test_details} onChange={(e) => setGuideSettings({...guideSettings, test_details: e.target.value})} className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-emerald-600" placeholder="পরীক্ষার সিলেবাস বা নিয়মাবলী এখানে লিখুন..." />
+                            <textarea rows={3} value={guideSettings.test_details} onChange={(e) => setGuideSettings({...guideSettings, test_details: e.target.value})} className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-emerald-600" placeholder="পরীক্ষার সিলেবাস বা নিয়মাবলী এখানে লিখুন..." />
                         </div>
                     </div>
 
-                    {/* ৩. ভর্তি ও মাসিক ফি স্ট্রাকচার */}
+                    {/* ⚡ নতুন সংযোজিত: ৩. ভর্তি প্রক্রিয়া (Admission Process) */}
+                    <div ref={processRef} className="scroll-mt-6">
+                        <h3 className="text-sm font-black text-emerald-800 bg-emerald-50 p-2.5 rounded-xl mb-4">⚡ ৩. ভর্তি প্রক্রিয়া </h3>
+                        <div>
+                            <label className="block text-xs font-bold text-gray-500 mb-1">ভর্তির ধাপসমূহ (নতুন লাইন তৈরি করতে Enter চাপুন)</label>
+                            <textarea rows={3} value={guideSettings.process_details} onChange={(e) => setGuideSettings({...guideSettings, process_details: e.target.value})} className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-emerald-600" placeholder="১. অনলাইন বা অফিস থেকে ফরম সংগ্রহ করুন...&#10;২. অফিসে জমা দিন..." />
+                        </div>
+                    </div>
+
+                    {/* ৪. ভর্তি ও মাসিক ফি স্ট্রাকচার */}
                     <div ref={feesRef} className="scroll-mt-6">
-                        <h3 className="text-sm font-black text-emerald-800 bg-emerald-50 p-2.5 rounded-xl mb-4">💵 ৩. ভর্তি ও মাসিক ফি স্ট্রাকচার</h3>
+                        <h3 className="text-sm font-black text-emerald-800 bg-emerald-50 p-2.5 rounded-xl mb-4">💵 ৪. ভর্তি ও মাসিক ফি স্ট্রাকচার</h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             {/* নূরানী ও নাজেরা */}
                             <div className="p-4 border border-gray-100 rounded-xl bg-gray-50/60 space-y-3">
@@ -289,9 +332,9 @@ export default function AdminAdmissionDashboard() {
                         </div>
                     </div>
 
-                    {/* ৪. ভর্তির শর্তাবলী */}
+                    {/* ৫. ভর্তির শর্তাবলী */}
                     <div ref={termsRef} className="scroll-mt-6">
-                        <h3 className="text-sm font-black text-emerald-800 bg-emerald-50 p-2.5 rounded-xl mb-4">📜 ৪. ভর্তির শর্তাবলী ও রুলস</h3>
+                        <h3 className="text-sm font-black text-emerald-800 bg-emerald-50 p-2.5 rounded-xl mb-4">📜 ৫. ভর্তির শর্তাবলী ও রুলস</h3>
                         <div>
                             <label className="block text-xs font-bold text-gray-500 mb-1">শর্তসমূহ (নতুন লাইন তৈরি করতে Enter চাপুন)</label>
                             <textarea rows={4} value={guideSettings.terms} onChange={(e) => setGuideSettings({...guideSettings, terms: e.target.value})} className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-emerald-600" placeholder="প্রতিটি শর্ত আলাদা লাইনে লিখুন..." />
@@ -306,7 +349,7 @@ export default function AdminAdmissionDashboard() {
                 </form>
             )}
 
-            {/* ৪. বিস্তারিত ভিউ প্রোফাইল মোডাল */}
+            {/* ৪. বিস্তারিত ভিউ প্রোфাইল মোডাল */}
             {selectedRequest && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 z-50">
                     <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto border border-gray-200 shadow-2xl flex flex-col animate-in fade-in zoom-in-95 duration-200">
