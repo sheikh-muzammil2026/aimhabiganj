@@ -1,3 +1,4 @@
+// app/admin/admission/page.js
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -13,12 +14,18 @@ export default function AdminAdmissionDashboard() {
     const [selectedRequest, setSelectedRequest] = useState(null); 
     const [actionMessage, setActionMessage] = useState('');
 
+    // পাবলিক পেজের সাথে মিল রেখে স্টেট সাজানো হয়েছে
     const [guideSettings, setGuideSettings] = useState({
-        timeline_start: "", timeline_exam: "", timeline_class: "",
+        timeline_start: "", 
+        timeline_exam: "", 
+        timeline_class: "",
         test_details: "",
-        fee_noorani_adm: "", fee_noorani_monthly: "",
-        fee_hifz_adm: "", fee_hifz_monthly: "",
-        fee_kitab_adm: "", fee_kitab_monthly: "",
+        fee_noorani_adm: "", 
+        fee_noorani_monthly: "",
+        fee_hifz_adm: "", 
+        fee_hifz_monthly: "",
+        fee_kitab_adm: "", 
+        fee_kitab_monthly: "",
         terms: ""
     });
 
@@ -26,6 +33,7 @@ export default function AdminAdmissionDashboard() {
     const timelineRef = useRef(null);
     const testRef = useRef(null);
     const feesRef = useRef(null);
+    const termsRef = useRef(null);
 
     // ডাটা লোড করার ফাংশন
     const loadDashboardData = async () => {
@@ -64,6 +72,8 @@ export default function AdminAdmissionDashboard() {
                     testRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 } else if (sectionParam === 'fees' && feesRef.current) {
                     feesRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else if (sectionParam === 'terms' && termsRef.current) {
+                    termsRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             }, 300);
         }
@@ -105,7 +115,7 @@ export default function AdminAdmissionDashboard() {
             });
             const data = await response.json();
             if (data.success) {
-                setActionMessage(data.message);
+                setActionMessage(data.message || "সেটিংস সফলভাবে আপডেট করা হয়েছে!");
                 setTimeout(() => setActionMessage(''), 4000);
             }
         } catch (error) {
@@ -150,7 +160,7 @@ export default function AdminAdmissionDashboard() {
             {activeTab === 'requests' && (
                 <div className="bg-white border border-emerald-900/10 rounded-2xl shadow-xs overflow-hidden">
                     <div className="p-4 border-b border-gray-100 bg-gray-50/50">
-                        <h3 className="text-sm font-bold text-gray-700">জমা হওয়া অনলাইন ভর্তি ফরমের তালিকা</h3>
+                        <h3 className="text-sm font-bold text-gray-700">জমা হওয়া অনলাইন ভর্তি ফরমের তালিকা</h3>
                     </div>
 
                     <div className="overflow-x-auto">
@@ -206,260 +216,192 @@ export default function AdminAdmissionDashboard() {
             {activeTab === 'settings' && (
                 <form onSubmit={handleGuideSubmit} className="bg-white border border-emerald-900/10 p-5 sm:p-6 rounded-2xl shadow-xs space-y-6">
                     
+                    {/* ১. ভর্তির সময়সূচী */}
                     <div ref={timelineRef} className="scroll-mt-6">
-                        <h3 className="text-sm font-black text-emerald-800 bg-emerald-50 p-2.5 rounded-xl mb-4">📅 ১. ভর্তির সময়সূচী মডিউল</h3>
+                        <h3 className="text-sm font-black text-emerald-800 bg-emerald-50 p-2.5 rounded-xl mb-4">📅 ১. ভর্তির সময়সূচী মডিউল</h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label className="block text-xs font-bold text-gray-500 mb-1">ভর্তি ফরম বিতরণ শুরু</label>
-                                <input type="text" value={guideSettings.timeline_start} onChange={(e) => setGuideSettings({...guideSettings, timeline_start: e.target.value})} className="w-full p-3 border border-gray-200 rounded-xl text-sm font-semibold" />
+                                <input type="text" value={guideSettings.timeline_start} onChange={(e) => setGuideSettings({...guideSettings, timeline_start: e.target.value})} className="w-full p-3 border border-gray-200 rounded-xl text-sm font-semibold focus:outline-emerald-600" placeholder="উদাঃ ০১ শাওয়াল থেকে" />
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-gray-500 mb-1">ভর্তি পরীক্ষার তারিখ</label>
-                                <input type="text" value={guideSettings.timeline_exam} onChange={(e) => setGuideSettings({...guideSettings, timeline_exam: e.target.value})} className="w-full p-3 border border-gray-200 rounded-xl text-sm font-semibold" />
+                                <input type="text" value={guideSettings.timeline_exam} onChange={(e) => setGuideSettings({...guideSettings, timeline_exam: e.target.value})} className="w-full p-3 border border-gray-200 rounded-xl text-sm font-semibold focus:outline-emerald-600" placeholder="উদাঃ ১০ শাওয়াল, সকাল ৯:০০ টা" />
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-gray-500 mb-1">ক্লাস শুরুর তারিখ</label>
-                                <input type="text" value={guideSettings.timeline_class} onChange={(e) => setGuideSettings({...guideSettings, timeline_class: e.target.value})} className="w-full p-3 border border-gray-200 rounded-xl text-sm font-semibold" />
+                                <input type="text" value={guideSettings.timeline_class} onChange={(e) => setGuideSettings({...guideSettings, timeline_class: e.target.value})} className="w-full p-3 border border-gray-200 rounded-xl text-sm font-semibold focus:outline-emerald-600" placeholder="উদাঃ ১৫ শাওয়াল থেকে ইনশাالله" />
                             </div>
                         </div>
                     </div>
 
+                    {/* ২. ভর্তি পরীক্ষা সংক্রান্ত */}
                     <div ref={testRef} className="scroll-mt-6">
                         <h3 className="text-sm font-black text-emerald-800 bg-emerald-50 p-2.5 rounded-xl mb-4">📝 ২. ভর্তি পরীক্ষা সংক্রান্ত গাইডলাইন</h3>
                         <div>
-                            <label className="block text-xs font-bold text-gray-500 mb-1">পরীক্ষার সংক্ষিপ্ত নিয়ম</label>
-                            <textarea rows={3} value={guideSettings.test_details} onChange={(e) => setGuideSettings({...guideSettings, test_details: e.target.value})} className="w-full p-3 border border-gray-200 rounded-xl text-sm" />
+                            <label className="block text-xs font-bold text-gray-500 mb-1">পরীক্ষার সংক্ষিপ্ত নিয়ম</label>
+                            <textarea rows={3} value={guideSettings.test_details} onChange={(e) => setGuideSettings({...guideSettings, test_details: e.target.value})} className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-emerald-600" placeholder="পরীক্ষার সিলেবাস বা নিয়মাবলী এখানে লিখুন..." />
                         </div>
                     </div>
 
+                    {/* ৩. ভর্তি ও মাসিক ফি স্ট্রাকচার */}
                     <div ref={feesRef} className="scroll-mt-6">
                         <h3 className="text-sm font-black text-emerald-800 bg-emerald-50 p-2.5 rounded-xl mb-4">💵 ৩. ভর্তি ও মাসিক ফি স্ট্রাকচার</h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="p-3 border border-gray-100 rounded-xl bg-gray-50/60">
-                                <p className="text-xs font-bold text-emerald-900 mb-2">নূরানী ও নাজেরা বিভাগ</p>
-                                <input type="text" value={guideSettings.fee_noorani_adm} onChange={(e) => setGuideSettings({...guideSettings, fee_noorani_adm: e.target.value})} className="w-full p-2 border border-gray-200 rounded-lg text-xs mb-2 font-bold" />
-                                <input type="text" value={guideSettings.fee_noorani_monthly} onChange={(e) => setGuideSettings({...guideSettings, fee_noorani_monthly: e.target.value})} className="w-full p-2 border border-gray-200 rounded-lg text-xs" />
+                            {/* নূরানী ও নাজেরা */}
+                            <div className="p-4 border border-gray-100 rounded-xl bg-gray-50/60 space-y-3">
+                                <p className="text-xs font-black text-emerald-900 border-b pb-1">নূরানী ও নাজেরা বিভাগ</p>
+                                <div>
+                                    <label className="block text-[10px] text-gray-400 font-bold">ভর্তি ফি</label>
+                                    <input type="text" value={guideSettings.fee_noorani_adm} onChange={(e) => setGuideSettings({...guideSettings, fee_noorani_adm: e.target.value})} className="w-full p-2 border border-gray-200 rounded-lg text-xs font-bold" placeholder="১,৫০০/-" />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] text-gray-400 font-bold">মাসিক ফি</label>
+                                    <input type="text" value={guideSettings.fee_noorani_monthly} onChange={(e) => setGuideSettings({...guideSettings, fee_noorani_monthly: e.target.value})} className="w-full p-2 border border-gray-200 rounded-lg text-xs" placeholder="৫০০/-" />
+                                </div>
                             </div>
-                            <div className="p-3 border border-gray-100 rounded-xl bg-gray-50/60">
-                                <p className="text-xs font-bold text-emerald-900 mb-2">হিফজ বিভাগ (আবাসিক)</p>
-                                <input type="text" value={guideSettings.fee_hifz_adm} onChange={(e) => setGuideSettings({...guideSettings, fee_hifz_adm: e.target.value})} className="w-full p-2 border border-gray-200 rounded-lg text-xs mb-2 font-bold" />
-                                <input type="text" value={guideSettings.fee_hifz_monthly} onChange={(e) => setGuideSettings({...guideSettings, fee_hifz_monthly: e.target.value})} className="w-full p-2 border border-gray-200 rounded-lg text-xs" />
+
+                            {/* হিফজ বিভাগ */}
+                            <div className="p-4 border border-gray-100 rounded-xl bg-gray-50/60 space-y-3">
+                                <p className="text-xs font-black text-emerald-900 border-b pb-1">হিফজ বিভাগ (আবাসিক)</p>
+                                <div>
+                                    <label className="block text-[10px] text-gray-400 font-bold">ভর্তি ফি</label>
+                                    <input type="text" value={guideSettings.fee_hifz_adm} onChange={(e) => setGuideSettings({...guideSettings, fee_hifz_adm: e.target.value})} className="w-full p-2 border border-gray-200 rounded-lg text-xs font-bold" placeholder="৩,০০০/-" />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] text-gray-400 font-bold">মাসিক ফি</label>
+                                    <input type="text" value={guideSettings.fee_hifz_monthly} onChange={(e) => setGuideSettings({...guideSettings, fee_hifz_monthly: e.target.value})} className="w-full p-2 border border-gray-200 rounded-lg text-xs" placeholder="৩,৫০০/-" />
+                                </div>
                             </div>
-                            <div className="p-3 border border-gray-100 rounded-xl bg-gray-50/60">
-                                <p className="text-xs font-bold text-emerald-900 mb-2">কিতাব বিভাগ</p>
-                                <input type="text" value={guideSettings.fee_kitab_adm} onChange={(e) => setGuideSettings({...guideSettings, fee_kitab_adm: e.target.value})} className="w-full p-2 border border-gray-200 rounded-lg text-xs mb-2 font-bold" />
-                                <input type="text" value={guideSettings.fee_kitab_monthly} onChange={(e) => setGuideSettings({...guideSettings, fee_kitab_monthly: e.target.value})} className="w-full p-2 border border-gray-200 rounded-lg text-xs" />
+
+                            {/* কিতাব বিভাগ */}
+                            <div className="p-4 border border-gray-100 rounded-xl bg-gray-50/60 space-y-3">
+                                <p className="text-xs font-black text-emerald-900 border-b pb-1">কিতাব বিভাগ</p>
+                                <div>
+                                    <label className="block text-[10px] text-gray-400 font-bold">ভর্তি ফি</label>
+                                    <input type="text" value={guideSettings.fee_kitab_adm} onChange={(e) => setGuideSettings({...guideSettings, fee_kitab_adm: e.target.value})} className="w-full p-2 border border-gray-200 rounded-lg text-xs font-bold" placeholder="২,৫০০/-" />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] text-gray-400 font-bold">মাসিক ফি</label>
+                                    <input type="text" value={guideSettings.fee_kitab_monthly} onChange={(e) => setGuideSettings({...guideSettings, fee_kitab_monthly: e.target.value})} className="w-full p-2 border border-gray-200 rounded-lg text-xs" placeholder="৮০০/-" />
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div>
+                    {/* ৪. ভর্তির শর্তাবলী */}
+                    <div ref={termsRef} className="scroll-mt-6">
                         <h3 className="text-sm font-black text-emerald-800 bg-emerald-50 p-2.5 rounded-xl mb-4">📜 ৪. ভর্তির শর্তাবলী ও রুলস</h3>
                         <div>
-                            <label className="block text-xs font-bold text-gray-500 mb-1">শর্তসমূহ</label>
-                            <textarea rows={4} value={guideSettings.terms} onChange={(e) => setGuideSettings({...guideSettings, terms: e.target.value})} className="w-full p-3 border border-gray-200 rounded-xl text-sm" />
+                            <label className="block text-xs font-bold text-gray-500 mb-1">শর্তসমূহ (নতুন লাইন তৈরি করতে Enter চাপুন)</label>
+                            <textarea rows={4} value={guideSettings.terms} onChange={(e) => setGuideSettings({...guideSettings, terms: e.target.value})} className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-emerald-600" placeholder="প্রতিটি শর্ত আলাদা লাইনে লিখুন..." />
                         </div>
                     </div>
 
                     <div className="flex justify-end pt-4 border-t border-gray-100">
-                        <button type="submit" className="bg-amber-500 hover:bg-amber-400 text-[#043e30] font-black text-xs sm:text-sm px-6 py-3 rounded-xl shadow-md">
+                        <button type="submit" className="bg-amber-500 hover:bg-amber-400 text-[#043e30] font-black text-xs sm:text-sm px-6 py-3 rounded-xl shadow-md transition-transform active:scale-95 cursor-pointer">
                             💾 গাইডলাইন ডাটা আপডেট করুন
                         </button>
                     </div>
                 </form>
             )}
 
-            {/* ৪. বিস্তারিত ভিউ প্রোফাইল মোডাল (ডাটাবেজ স্কিমা অনুযায়ী আপডেটকৃত) */}
-{selectedRequest && (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 z-50">
-        <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto border border-gray-200 shadow-2xl flex flex-col animate-in fade-in zoom-in-95 duration-200">
-            
-            {/* মোডাল হেডার */}
-            <div className="p-4 sm:p-5 border-b border-emerald-900/10 bg-gradient-to-r from-emerald-900 to-emerald-800 text-white flex justify-between items-center sticky top-0 z-10 shadow-sm">
-                <div>
-                    <h3 className="text-base sm:text-lg font-black tracking-wide">📝 অনলাইন ভর্তি আবেদনপত্রের বিস্তারিত বিবরণ</h3>
-                    <p className="text-[11px] text-emerald-200/90 font-mono mt-0.5">
-                        সেশন: {selectedRequest.sessionYear} | আইডি: {selectedRequest._id}
-                    </p>
-                </div>
-                <button 
-                    onClick={() => setSelectedRequest(null)} 
-                    className="bg-white/10 hover:bg-white/20 text-white rounded-xl p-2 px-3 text-xs font-bold transition-colors"
-                >
-                    ✕ বন্ধ করুন
-                </button>
-            </div>
-
-            {/* মোডাল বডি */}
-            <div className="p-5 sm:p-6 space-y-6 text-xs sm:text-sm text-gray-700 bg-gray-50/30">
-                
-                {/* বেসিক ও কভার ডাটা কার্ড */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-emerald-900/5 p-4 rounded-xl border border-emerald-900/10 shadow-2xs">
-                    <div>
-                        <span className="block text-[11px] font-bold text-emerald-800/80">কভার অভিভাবক</span> 
-                        <span className="font-bold text-gray-900">{selectedRequest.guardianNameCover || 'N/A'}</span>
-                    </div>
-                    <div>
-                        <span className="block text-[11px] font-bold text-emerald-800/80">কভার মোবাইল</span> 
-                        <span className="font-bold text-gray-900 font-mono">{selectedRequest.mobileNumberCover || 'N/A'}</span>
-                    </div>
-                    <div>
-                        <span className="block text-[11px] font-bold text-emerald-800/80">কভার আইডি নম্বর</span> 
-                        <span className="font-bold text-gray-900 font-mono">{selectedRequest.idNumberCover || 'N/A'}</span>
-                    </div>
-                </div>
-
-                {/* সেকশন ১: শিক্ষার্থীর ব্যক্তিগত তথ্য */}
-                <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-2xs space-y-3">
-                    <h4 className="text-xs font-black text-emerald-800 border-b border-emerald-900/10 pb-1.5 flex items-center gap-1">
-                        👤 শিক্ষার্থীর ব্যক্তিগত তথ্য
-                    </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                        <div><span className="text-gray-400 font-bold block text-[11px]">নাম (বাংলা):</span> <span className="font-bold text-gray-900">{selectedRequest.studentNameBangla}</span></div>
-                        <div><span className="text-gray-400 font-bold block text-[11px]">Name (English):</span> <span className="font-semibold text-gray-900 font-mono">{selectedRequest.studentNameEnglish}</span></div>
-                        <div><span className="text-gray-400 font-bold block text-[11px]">الاسم (العربية):</span> <span className="font-semibold text-gray-900">{selectedRequest.studentNameArabic || 'N/A'}</span></div>
+            {/* ৪. বিস্তারিত ভিউ প্রোফাইল মোডাল */}
+            {selectedRequest && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 z-50">
+                    <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto border border-gray-200 shadow-2xl flex flex-col animate-in fade-in zoom-in-95 duration-200">
                         
-                        <div><span className="text-gray-400 font-bold block text-[11px]">জন্ম তারিখ:</span> <span className="font-semibold font-mono">{selectedRequest.dateOfBirth}</span></div>
-                        <div><span className="text-gray-400 font-bold block text-[11px]">বয়স:</span> <span className="font-semibold font-mono">{selectedRequest.age} বছর</span></div>
-                        <div><span className="text-gray-400 font-bold block text-[11px]">লিঙ্গ:</span> <span className="font-semibold">{selectedRequest.gender}</span></div>
-                        
-                        <div><span className="text-gray-400 font-bold block text-[11px]">জন্ম নিবন্ধন নম্বর:</span> <span className="font-bold text-gray-900 font-mono">{selectedRequest.birthCertificateNo || 'N/A'}</span></div>
-                        <div><span className="text-gray-400 font-bold block text-[11px]">রক্তের গ্রুপ:</span> <span className="font-bold text-rose-600 font-mono">{selectedRequest.bloodGroup || 'N/A'}</span></div>
-                        <div><span className="text-gray-400 font-bold block text-[11px]">জাতীয়তা:</span> <span className="font-semibold">{selectedRequest.nationality}</span></div>
-                        
-                        <div><span className="text-gray-400 font-bold block text-[11px]">উচ্চতা:</span> <span className="font-semibold font-mono">{selectedRequest.height} ইঞ্চি</span></div>
-                        <div><span className="text-gray-400 font-bold block text-[11px]">ওজন:</span> <span className="font-semibold font-mono">{selectedRequest.weight} কেজি</span></div>
-                    </div>
-                </div>
+                        {/* মোডাল হেডার */}
+                        <div className="p-4 sm:p-5 border-b border-emerald-900/10 bg-gradient-to-r from-emerald-900 to-emerald-800 text-white flex justify-between items-center sticky top-0 z-10 shadow-sm">
+                            <div>
+                                <h3 className="text-base sm:text-lg font-black tracking-wide">📝 অনলাইন ভর্তি আবেদনপত্রের বিস্তারিত বিবরণ</h3>
+                                <p className="text-[11px] text-emerald-200/90 font-mono mt-0.5">
+                                    সেশন: {selectedRequest.sessionYear} | আইডি: {selectedRequest._id}
+                                </p>
+                            </div>
+                            <button 
+                                onClick={() => setSelectedRequest(null)} 
+                                className="bg-white/10 hover:bg-white/20 text-white rounded-xl p-2 px-3 text-xs font-bold transition-colors cursor-pointer"
+                            >
+                                ✕ বন্ধ করুন
+                            </button>
+                        </div>
 
-                {/* সেকশন ২: অভিভাবকের তথ্য (মাতা ও পিতা) */}
-                <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-2xs space-y-4">
-                    <h4 className="text-xs font-black text-emerald-800 border-b border-emerald-900/10 pb-1.5">
-                        👨‍👩‍👦 পিতা ও মাতার বিবরণ
-                    </h4>
-                    
-                    {/* পিতার তথ্য */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 border-b border-gray-100 pb-3">
-                        <div className="col-span-full font-bold text-xs text-gray-500">পিতার ডাটা:</div>
-                        <div><span className="text-gray-400 block text-[11px]">পিতার নাম (বাংলা):</span> <span className="font-semibold text-gray-900">{selectedRequest.fatherNameBangla || 'N/A'}</span></div>
-                        <div><span className="text-gray-400 block text-[11px]">Father Name (English):</span> <span className="font-medium text-gray-900 font-mono">{selectedRequest.fatherNameEnglish || 'N/A'}</span></div>
-                        <div><span className="text-gray-400 block text-[11px]">পিতার মোবাইল:</span> <span className="font-bold text-gray-900 font-mono">{selectedRequest.fatherMobile || 'N/A'}</span></div>
-                        <div><span className="text-gray-400 block text-[11px]">পিতার এনআইডি (NID):</span> <span className="font-medium text-gray-900 font-mono">{selectedRequest.fatherNid || 'N/A'}</span></div>
-                        <div><span className="text-gray-400 block text-[11px]">পিতার পেশা:</span> <span className="font-medium text-gray-900">{selectedRequest.fatherProfession || 'N/A'}</span></div>
-                        <div><span className="text-gray-400 block text-[11px]">অবস্থা:</span> <span className="font-semibold text-gray-900">{selectedRequest.fatherStatus}</span></div>
-                    </div>
+                        {/* মোডাল বডি */}
+                        <div className="p-5 sm:p-6 space-y-6 text-xs sm:text-sm text-gray-700 bg-gray-50/30">
+                            
+                            {/* বেসিক ও কভার ডাটা কার্ড */}
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-emerald-900/5 p-4 rounded-xl border border-emerald-900/10 shadow-2xs">
+                                <div>
+                                    <span className="block text-[11px] font-bold text-emerald-800/80">কভার অভিভাবক</span> 
+                                    <span className="font-bold text-gray-900">{selectedRequest.guardianNameCover || 'N/A'}</span>
+                                </div>
+                                <div>
+                                    <span className="block text-[11px] font-bold text-emerald-800/80">কভার মোবাইল</span> 
+                                    <span className="font-bold text-gray-900 font-mono">{selectedRequest.mobileNumberCover || 'N/A'}</span>
+                                </div>
+                                <div>
+                                    <span className="block text-[11px] font-bold text-emerald-800/80">কভার আইডি নম্বর</span> 
+                                    <span className="font-bold text-gray-900 font-mono">{selectedRequest.idNumberCover || 'N/A'}</span>
+                                </div>
+                            </div>
 
-                    {/* মাতার তথ্য */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                        <div className="col-span-full font-bold text-xs text-gray-500">মাতার ডাটা:</div>
-                        <div><span className="text-gray-400 block text-[11px]">মাতার নাম (বাংলা):</span> <span className="font-semibold text-gray-900">{selectedRequest.motherNameBangla || 'N/A'}</span></div>
-                        <div><span className="text-gray-400 block text-[11px]">Mother Name (English):</span> <span className="font-medium text-gray-900 font-mono">{selectedRequest.motherNameEnglish || 'N/A'}</span></div>
-                        <div><span className="text-gray-400 block text-[11px]">মাতার মোবাইল:</span> <span className="font-bold text-gray-900 font-mono">{selectedRequest.motherMobile || 'N/A'}</span></div>
-                        <div><span className="text-gray-400 block text-[11px]">মাতার এনআইডি (NID):</span> <span className="font-medium text-gray-900 font-mono">{selectedRequest.motherNid || 'N/A'}</span></div>
-                        <div><span className="text-gray-400 block text-[11px]">মাতার পেশা:</span> <span className="font-medium text-gray-900">{selectedRequest.motherProfession || 'N/A'}</span></div>
-                        <div><span className="text-gray-400 block text-[11px]">অবস্থা:</span> <span className="font-semibold text-gray-900">{selectedRequest.motherStatus}</span></div>
-                    </div>
-                </div>
+                            {/* সেকশন ১: শিক্ষার্থীর ব্যক্তিগত তথ্য */}
+                            <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-2xs space-y-3">
+                                <h4 className="text-xs font-black text-emerald-800 border-b border-emerald-900/10 pb-1.5 flex items-center gap-1">
+                                    👤 শিক্ষার্থীর ব্যক্তিগত তথ্য
+                                </h4>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                    <div><span className="text-gray-400 font-bold block text-[11px]">নাম (বাংলা):</span> <span className="font-bold text-gray-900">{selectedRequest.studentNameBangla}</span></div>
+                                    <div><span className="text-gray-400 font-bold block text-[11px]">Name (English):</span> <span className="font-semibold text-gray-900 font-mono">{selectedRequest.studentNameEnglish}</span></div>
+                                    <div><span className="text-gray-400 font-bold block text-[11px]">الاسم (العربية):</span> <span className="font-semibold text-gray-900">{selectedRequest.studentNameArabic || 'N/A'}</span></div>
+                                    
+                                    <div><span className="text-gray-400 font-bold block text-[11px]">জন্ম তারিখ:</span> <span className="font-semibold font-mono">{selectedRequest.dateOfBirth}</span></div>
+                                    <div><span className="text-gray-400 font-bold block text-[11px]">বয়স:</span> <span className="font-semibold font-mono">{selectedRequest.age} বছর</span></div>
+                                    <div><span className="text-gray-400 font-bold block text-[11px]">লিঙ্গ:</span> <span className="font-semibold">{selectedRequest.gender}</span></div>
+                                    
+                                    <div><span className="text-gray-400 font-bold block text-[11px]">জন্ম নিবন্ধন নম্বর:</span> <span className="font-bold text-gray-900 font-mono">{selectedRequest.birthCertificateNo || 'N/A'}</span></div>
+                                    <div><span className="text-gray-400 font-bold block text-[11px]">রক্তের গ্রুপ:</span> <span className="font-bold text-rose-600 font-mono">{selectedRequest.bloodGroup || 'N/A'}</span></div>
+                                    <div><span className="text-gray-400 font-bold block text-[11px]">জাতীয়তা:</span> <span className="font-semibold">{selectedRequest.nationality}</span></div>
+                                    
+                                    <div><span className="text-gray-400 font-bold block text-[11px]">উচ্চতা:</span> <span className="font-semibold font-mono">{selectedRequest.height} ইঞ্চি</span></div>
+                                    <div><span className="text-gray-400 font-bold block text-[11px]">ওজন:</span> <span className="font-semibold font-mono">{selectedRequest.weight} কেজি</span></div>
+                                </div>
+                            </div>
 
-                {/* সেকশন ৩: অভিভাবক (পিতা-মাতার অনুপস্থিতিতে) এবং আর্থিক বিবরণ */}
-                <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-2xs space-y-3">
-                    <h4 className="text-xs font-black text-emerald-800 border-b border-emerald-900/10 pb-1.5">
-                        💼 আইনগত অভিভাবক ও বার্ষিক আয়ের বিবরণী
-                    </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                        <div><span className="text-gray-400 font-bold block text-[11px]">অনুপস্থিতিতে অভিভাবকের নাম:</span> <span className="font-semibold">{selectedRequest.guardianNameAbsentParents || 'পিতা/মাতা নিজেই'}</span></div>
-                        <div><span className="text-gray-400 font-bold block text-[11px]">সম্পর্ক:</span> <span className="font-semibold">{selectedRequest.guardianRelation || 'N/A'}</span></div>
-                        <div><span className="text-gray-400 font-bold block text-[11px]">অভিভাবকের মোবাইল:</span> <span className="font-bold text-gray-900 font-mono">{selectedRequest.guardianMobile || 'N/A'}</span></div>
-                        
-                        <div><span className="text-gray-400 font-bold block text-[11px]">অভিভাবকের পেশা:</span> <span className="font-semibold">{selectedRequest.guardianProfession || 'N/A'}</span></div>
-                        <div><span className="text-gray-400 font-bold block text-[11px]">বার্ষিক আয় (টাকা):</span> <span className="font-bold text-emerald-700 font-mono">{selectedRequest.guardianAnnualIncome || 'N/A'} /-</span></div>
-                        <div><span className="text-gray-400 font-bold block text-[11px]">বার্ষিক আয় (কথায়):</span> <span className="font-semibold text-gray-600 text-[11px]">{selectedRequest.guardianAnnualIncomeWords || 'N/A'}</span></div>
+                            {/* সেকশন ২: অভিভাবকের তথ্য (মাতা ও পিতা) */}
+                            <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-2xs space-y-4">
+                                <h4 className="text-xs font-black text-emerald-800 border-b border-emerald-900/10 pb-1.5">
+                                    👨‍👩‍👦 পিতা ও মাতার বিবরণ
+                                </h4>
+                                
+                                {/* পিতার তথ্য */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 border-b border-gray-100 pb-3">
+                                    <div className="col-span-full font-bold text-xs text-gray-500">পিতার ডাটা:</div>
+                                    <div><span className="text-gray-400 block text-[11px]">পিতার নাম (বাংলা):</span> <span className="font-semibold text-gray-900">{selectedRequest.fatherNameBangla || 'N/A'}</span></div>
+                                    <div><span className="text-gray-400 block text-[11px]">Father Name (English):</span> <span className="font-medium text-gray-900 font-mono">{selectedRequest.fatherNameEnglish || 'N/A'}</span></div>
+                                    <div><span className="text-gray-400 block text-[11px]">পিতার মোবাইল:</span> <span className="font-bold text-gray-900 font-mono">{selectedRequest.fatherMobile || 'N/A'}</span></div>
+                                    <div><span className="text-gray-400 block text-[11px]">পিতার এনআইডি (NID):</span> <span className="font-medium text-gray-900 font-mono">{selectedRequest.fatherNid || 'N/A'}</span></div>
+                                    <div><span className="text-gray-400 block text-[11px]">পিতার পেশা:</span> <span className="font-medium text-gray-900">{selectedRequest.fatherProfession || 'N/A'}</span></div>
+                                    <div><span className="text-gray-400 block text-[11px]">অবস্থা:</span> <span className="font-semibold text-gray-900">{selectedRequest.fatherStatus || 'N/A'}</span></div>
+                                </div>
+
+                                {/* মাতার তথ্য */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                                    <div className="col-span-full font-bold text-xs text-gray-500">মাতার ডাটা:</div>
+                                    <div><span className="text-gray-400 block text-[11px]">মাতার নাম (বাংলা):</span> <span className="font-semibold text-gray-900">{selectedRequest.motherNameBangla || 'N/A'}</span></div>
+                                    <div><span className="text-gray-400 block text-[11px]">Mother Name (English):</span> <span className="font-medium text-gray-900 font-mono">{selectedRequest.motherNameEnglish || 'N/A'}</span></div>
+                                    <div><span className="text-gray-400 block text-[11px]">মাতার মোবাইল:</span> <span className="font-bold text-gray-900 font-mono">{selectedRequest.motherMobile || 'N/A'}</span></div>
+                                    <div><span className="text-gray-400 block text-[11px]">মাতার এনআইডি (NID):</span> <span className="font-medium text-gray-900 font-mono">{selectedRequest.motherNid || 'N/A'}</span></div>
+                                    <div><span className="text-gray-400 block text-[11px]">মাতার পেশা:</span> <span className="font-medium text-gray-900">{selectedRequest.motherProfession || 'N/A'}</span></div>
+                                    <div><span className="text-gray-400 block text-[11px]">অবস্থা:</span> <span className="font-semibold text-gray-900">{selectedRequest.motherStatus || 'N/A'}</span></div>
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
                 </div>
-
-                {/* সেকশন ৪: শিক্ষার্থীর অভ্যাস, স্বাস্থ্য ও মনস্তাত্ত্বিক তথ্য */}
-                <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-2xs space-y-3">
-                    <h4 className="text-xs font-black text-emerald-800 border-b border-emerald-900/10 pb-1.5">
-                        🧠 অভ্যাস, স্বাস্থ্য ও মনস্তাত্ত্বিক বিবরণী
-                    </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                        <div><span className="text-gray-400 font-bold block text-[11px]">শারীরিক কোনো সমস্যা আছে?:</span> <span className={`font-bold ${selectedRequest.physicalProblem === 'হ্যাঁ' ? 'text-rose-600' : 'text-gray-800'}`}>{selectedRequest.physicalProblem}</span></div>
-                        <div className="sm:col-span-2"><span className="text-gray-400 font-bold block text-[11px]">শারীরিক সমস্যার বিবরণ:</span> <span className="font-medium">{selectedRequest.physicalProblemDetails || 'কোনো বিবরণ নেই'}</span></div>
-                        
-                        <div><span className="text-gray-400 font-bold block text-[11px]">পরিষ্কার-পরিচ্ছন্নতা পছন্দ করে?:</span> <span className="font-semibold">{selectedRequest.cleanlinessLover}</span></div>
-                        <div><span className="text-gray-400 font-bold block text-[11px]">খাবারে অরুচি বা অনিহা আছে?:</span> <span className="font-semibold">{selectedRequest.foodReluctance}</span></div>
-                        <div><span className="text-gray-400 font-bold block text-[11px]">পছন্দের খাবার:</span> <span className="font-semibold">{selectedRequest.favFoodType}</span></div>
-                        
-                        <div><span className="text-gray-400 font-bold block text-[11px]">নামাজে অভ্যস্ত বা অনুরাগী?:</span> <span className="font-semibold text-emerald-700">{selectedRequest.prayerAddicted}</span></div>
-                        <div><span className="text-gray-400 font-bold block text-[11px]">ঘুম থেকে ওঠার সময়:</span> <span className="font-semibold font-mono">{selectedRequest.wakeUpTime} টায়</span></div>
-                        <div><span className="text-gray-400 font-bold block text-[11px]">প্রিয় জিনিস/শখ:</span> <span className="font-semibold">{selectedRequest.favThing || 'N/A'}</span></div>
-                        
-                        <div className="sm:col-span-3"><span className="text-gray-400 font-bold block text-[11px]">হতাশা বা চিন্তিত হওয়ার বিশেষ কারণ:</span> <span className="font-medium text-gray-700 bg-amber-50 p-2 rounded-lg border border-amber-100 block mt-1">{selectedRequest.anxietyReason || 'N/A'}</span></div>
-                    </div>
-                </div>
-
-                {/* সেকশন ৫: পূর্ববর্তী মাদরাসা / স্কুলের রেকর্ড */}
-                <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-2xs space-y-3">
-                    <h4 className="text-xs font-black text-emerald-800 border-b border-emerald-900/10 pb-1.5">
-                        🏫 পূর্ববর্তী শিক্ষা প্রতিষ্ঠানের তথ্য রেকর্ড
-                    </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                        <div className="sm:col-span-2"><span className="text-gray-400 font-bold block text-[11px]">প্রতিষ্ঠানের নাম ও ঠিকানা:</span> <span className="font-bold text-gray-800">{selectedRequest.prevInstituteName || 'প্রথম ভর্তি'}</span></div>
-                        <div><span className="text-gray-400 font-bold block text-[11px]">প্রধান শিক্ষকের মোবাইল নম্বর:</span> <span className="font-semibold font-mono">{selectedRequest.prevPrincipalMobile || 'N/A'}</span></div>
-                        
-                        <div><span className="text-gray-400 font-bold block text-[11px]">পূর্ববর্তী ক্লাস/শ্রেণী:</span> <span className="font-semibold">{selectedRequest.prevClass || 'N/A'}</span></div>
-                        <div><span className="text-gray-400 font-bold block text-[11px]">টিসি (TC) নম্বর এবং তারিখ:</span> <span className="font-semibold font-mono">{selectedRequest.prevTransferCertificateNo || 'N/A'} {selectedRequest.prevTcDate ? `(${selectedRequest.prevTcDate})` : ''}</span></div>
-                        <div><span className="text-gray-400 font-bold block text-[11px]">প্রতিষ্ঠান ছাড়ার মূল কারণ:</span> <span className="font-semibold">{selectedRequest.prevInstituteLeaveReason || 'N/A'}</span></div>
-                    </div>
-                </div>
-
-                {/* সেকশন ৬: ভর্তির উদ্দেশ্য এবং আবেদনের তারিখ */}
-                <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-2xs grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <span className="text-gray-400 font-bold block text-[11px]">এই মাদরাসায় ভর্তির মূল কারণ/উদ্দেশ্য:</span> 
-                        <span className="font-medium text-gray-800 block mt-1">{selectedRequest.admissionReason || 'উল্লেখ করা হয়নি'}</span>
-                    </div>
-                    <div className="flex flex-col justify-end items-start sm:items-end text-left sm:text-right">
-                        <span className="text-gray-400 font-bold block text-[11px]">আবেদন জমাদানের তারিখ ও সময়:</span> 
-                        <span className="font-bold text-emerald-900 font-mono mt-1">
-                            {new Date(selectedRequest.createdAt).toLocaleDateString('bn-BD')} 
-                            <span className="text-xs font-normal text-gray-400 ml-1">
-                                ({new Date(selectedRequest.createdAt).toLocaleTimeString()})
-                            </span>
-                        </span>
-                    </div>
-                </div>
-
-            </div>
-
-            {/* মোডাল ফুটার একশন বার */}
-            <div className="p-4 bg-gray-100 border-t border-gray-200/60 flex justify-end gap-2 sticky bottom-0 rounded-b-2xl shadow-inner">
-                <button 
-                    disabled={selectedRequest.status === 'Rejected'} 
-                    onClick={() => {
-                        updateStatus(selectedRequest._id, 'Rejected');
-                        setSelectedRequest(null);
-                    }} 
-                    className="bg-rose-50 hover:bg-rose-100 text-rose-700 font-black text-xs px-5 py-2.5 rounded-xl border border-rose-200 active:scale-95 transition-all disabled:opacity-40"
-                >
-                    ✕ আবেদন বাতিল করুন
-                </button>
-                <button 
-                    disabled={selectedRequest.status === 'Approved'} 
-                    onClick={() => {
-                        updateStatus(selectedRequest._id, 'Approved');
-                        setSelectedRequest(null);
-                    }} 
-                    className="bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs px-6 py-2.5 rounded-xl shadow-xs active:scale-95 transition-all disabled:opacity-40"
-                >
-                    ✓ আবেদন অনুমোদন (Approve) করুন
-                </button>
-            </div>
-        </div>
-    </div>
-)}
-
-            
+            )}
         </div>
     );
 }
