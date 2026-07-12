@@ -20,7 +20,7 @@ export default function AdmissionInfoPage() {
       })
       .catch((err) => {
         console.error("Error loading admission settings:", err);
-        setLoading(false);
+        loading=false;
       });
   }, []);
 
@@ -46,13 +46,13 @@ export default function AdmissionInfoPage() {
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">নতুন শিক্ষাবর্ষে ভর্তির যাবতীয় নিয়ম ও সময়সূচী</p>
         </div>
 
-        {/* ১. ভর্তির সময় (Timeline) - Dynamically Rendered */}
+        {/* ১. ভর্তির সময় (Timeline) - Dashboard Keys অনুযায়ী আপডেটেড */}
         <section id="timeline" className="scroll-mt-24 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-100 dark:border-slate-700/60 shadow-sm">
           <h3 className="text-lg font-bold text-emerald-800 dark:text-emerald-400 mb-3 flex items-center gap-2">📅 ভর্তির সময়সূচী</h3>
           <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300 font-medium">
             <li className="flex justify-between border-b border-gray-100 dark:border-slate-700/50 pb-2">
               <span>ভর্তি ফরম বিতরণ শুরু:</span> 
-              <span className="text-amber-600">{settings?.formStart || "০১ শাওয়াল থেকে"}</span>
+              <span className="text-amber-600">{settings?.admission_start || "০১ শাওয়াল থেকে"}</span>
             </li>
             <li className="flex justify-between border-b border-gray-100 dark:border-slate-700/50 pb-2">
               <span>ভর্তি পরীক্ষার তারিখ:</span> 
@@ -65,20 +65,20 @@ export default function AdmissionInfoPage() {
           </ul>
         </section>
 
-        {/* ২. ভর্তি পরীক্ষা (Test) - Dynamically Rendered */}
+        {/* ২. ভর্তি পরীক্ষা (Test) - Dashboard Keys অনুযায়ী আপডেটেড */}
         <section id="test" className="scroll-mt-24 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-100 dark:border-slate-700/60 shadow-sm">
           <h3 className="text-lg font-bold text-emerald-800 dark:text-emerald-400 mb-3 flex items-center gap-2">📝 ভর্তি পরীক্ষা সংক্রান্ত</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed white-space-pre-line">
-            {settings?.examDetails || "হিফজ ও কিতাব বিভাগের শিক্ষার্থীদের জন্য মৌখিক (তিলাওয়াত ও ইস্তেমাল) এবং সাধারণ লিখিত পরীক্ষা নেওয়া হবে। নূরানী ও নাজেরা বিভাগের জন্য শুধুমাত্র মৌখিক ও উচ্চারণ যোগ্যতা যাচাই করা হবে।"}
+          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+            {settings?.exam_details || "হিফজ ও কিতাব বিভাগের শিক্ষার্থীদের জন্য মৌখিক (তিলাওয়াত ও ইস্তেমাল) এবং সাধারণ লিখিত পরীক্ষা নেওয়া হবে। নূরানী ও নাজেরা বিভাগের জন্য শুধুমাত্র মৌখিক ও উচ্চারণ যোগ্যতা যাচাই করা হবে।"}
           </p>
         </section>
 
-        {/* ৩. ভর্তি প্রক্রিয়া (Process) - Dynamically Rendered */}
+        {/* ৩. ভর্তি প্রক্রিয়া (Process) - Dashboard Keys অনুযায়ী আপডেটেড */}
         <section id="process" className="scroll-mt-24 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-100 dark:border-slate-700/60 shadow-sm">
           <h3 className="text-lg font-bold text-emerald-800 dark:text-emerald-400 mb-3 flex items-center gap-2">⚡ ভর্তি প্রক্রিয়া</h3>
           <div className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-line">
-            {settings?.processDetails ? (
-              <p>{settings.processDetails}</p>
+            {settings?.admission_process ? (
+              <p>{settings.admission_process}</p>
             ) : (
               <ol className="list-decimal list-inside space-y-2">
                 <li>অনলাইন বা অফিস থেকে ভর্তি ফরম সংগ্রহ করে সঠিক তথ্য দিয়ে পূরণ করুন।</li>
@@ -89,7 +89,7 @@ export default function AdmissionInfoPage() {
           </div>
         </section>
 
-        {/* ৪. ভর্তি ফি (Fees) - Admin Dashboard data mapping with fallback value */}
+        {/* ৪. ভর্তি ফি (Fees) - ইতিমধ্যে ঠিক আছে */}
         <section id="fees" className="scroll-mt-24 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-100 dark:border-slate-700/60 shadow-sm">
           <h3 className="text-lg font-bold text-emerald-800 dark:text-emerald-400 mb-3 flex items-center gap-2">💵 ভর্তি ও মাসিক ফি</h3>
           <div className="overflow-x-auto">
@@ -122,12 +122,12 @@ export default function AdmissionInfoPage() {
           </div>
         </section>
 
-        {/* ৫. ভর্তির শর্তাবলী (Terms) - Dynamically Rendered */}
+        {/* ৫. ভর্তির শর্তাবলী (Terms) - Dashboard Keys অনুযায়ী আপডেটেড */}
         <section id="terms" className="scroll-mt-24 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-100 dark:border-slate-700/60 shadow-sm">
           <h3 className="text-lg font-bold text-emerald-800 dark:text-emerald-400 mb-3 flex items-center gap-2">📜 ভর্তির শর্তাবলী</h3>
           <div className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-line">
-            {settings?.termsDetails ? (
-              <p>{settings.termsDetails}</p>
+            {settings?.rules_regulations ? (
+              <p>{settings.rules_regulations}</p>
             ) : (
               <ul className="list-disc list-inside space-y-2">
                 <li>শিক্ষার্থীকে অবশ্যই সদাচারী এবং মাদরাসার নিয়ম-কানুন মানতে বাধ্য থাকতে হবে।</li>
