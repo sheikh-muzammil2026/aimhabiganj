@@ -1,31 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { authClient } from "@/lib/auth-client"; // Better Auth ক্লায়েন্ট ইম্পোর্ট করা হলো
+import { authClient } from "@/lib/auth-client"; // Better Auth ক্লায়েন্ট
 
 export default function Sidebar({ isOpen, setIsOpen }) {
     const pathname = usePathname();
     const [openDropdown, setOpenDropdown] = useState(null);
 
-    // ১. Better Auth থেকে রিয়েল-টাইম সেশন এবং ইউজার ডেটা আনা
+    // Better Auth থেকে রিয়েল-টাইম সেশন এবং ইউজার ডেটা আনা
     const { data: session, isPending } = authClient.useSession();
     
-    // সেশন থেকে ইউজার ডেটা প্রসেস করা (লগইন না থাকলে বা লোড হতে থাকলে ব্যাকআপ রাখা)
+    // সেশন থেকে ইউজার ডেটা প্রসেস করা
     const user = session?.user;
-    const userRole = user?.role?.toLowerCase() || "user"; // ডিফল্ট বা সেফ সাইড রোল
+    const userRole = user?.role?.toLowerCase() || "user"; // ডিফল্ট 'user' রোল
     const userName = user?.name || "অতিথি ব্যবহারকারী";
-    const avatarLetter = userName ? userName[0] : "ইউ";
+    const avatarLetter = user?.name ? user.name.charAt(0) : "ই";
 
     const menuConfig = [
         { 
+            id: "admin-dashboard",
             title: "মারকাযি ড্যাশবোর্ড", 
             icon: "🕌", 
             href: "/dashboard/admin", 
             roles: ["admin"] 
         },
         {
+            id: "madrasa-info",
             title: "মাদরাসা পরিচিতি",
             icon: "📜",
             roles: ["admin"],
@@ -42,6 +44,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             ]
         },
         {
+            id: "academics",
             title: "শিক্ষা কার্যক্রম",
             icon: "📚",
             roles: ["admin", "teacher"],
@@ -54,6 +57,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             ]
         },
         {
+            id: "departments",
             title: "বিভাগসমূহ",
             icon: "🏫",
             roles: ["admin"],
@@ -63,18 +67,20 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             ]
         },
         {
+            id: "admission",
             title: "ভর্তি ব্যবস্থাপনা",
             icon: "📝",
-            roles: ["admin", "accountant"], // একাউন্ট্যান্টও ফি ও আবেদন দেখতে পারেন
+            roles: ["admin", "accountant"], 
             dropdown: [
                 { title: "ভর্তির সময়", href: "/dashboard/admin/admission?section=timeline" },
                 { title: "ভর্তি পরীক্ষা", href: "/dashboard/admin/admission?section=test" },
-                { title: "ভর্তি প্রক্রিয়া", href: "/dashboard/admin/admission?section=test" }, 
+                { title: "ভর্তি প্রক্রিয়া", href: "/dashboard/admin/admission?section=process" }, // ?section=process এ ফিক্স করা হয়েছে
                 { title: "ভর্তি ফি", href: "/dashboard/admin/admission?section=fees" },
                 { title: "সকল আবেদন", href: "/dashboard/admin/admission" },
             ]
         },
         {
+            id: "gallery",
             title: "মিডিয়া গ্যালারি",
             icon: "🖼️",
             roles: ["admin"],
@@ -84,6 +90,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             ]
         },
         {
+            id: "hostel",
             title: "আবাসন (হোস্টেল)",
             icon: "🛏️",
             roles: ["admin", "teacher"],
@@ -94,6 +101,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             ]
         },
         {
+            id: "smart-classroom",
             title: "স্মার্ট ক্লাসরুম",
             icon: "💻",
             roles: ["admin", "teacher"],
@@ -101,16 +109,15 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 { title: "লাইভ ক্লাস লিংক", href: "/dashboard/admin/smart-classroom/live" },
                 { title: "রেকর্ডেড ক্লাস আপলোড", href: "/dashboard/admin/smart-classroom/recorded" },
                 { title: "ই-বুক / লেকচার শিট", href: "/dashboard/admin/smart-classroom/ebooks" },
-                { title: "অনলাইন এক্সাম... কন্ট্রোল", href: "/dashboard/admin/smart-classroom/exam" },
+                { title: "অনলাইন এক্সাম কন্ট্রোল", href: "/dashboard/admin/smart-classroom/exam" },
             ]
         },
-        { title: "ডিজিটাল হাজিরা", icon: "📅", href: "/dashboard/attendance", roles: ["admin", "teacher"] },
-        { title: "শিক্ষার্থী ব্যবস্থাপনা", icon: "👥", href: "/dashboard/students", roles: ["admin", "teacher"] },
-        { title: "শিক্ষক ব্যবস্থাপনা", icon: "🕌", href: "/dashboard/teachers", roles: ["admin"] },
-        { title: "প্রশাসনিক বিভাগ", icon: "🛡️", href: "/dashboard/administration", roles: ["admin"] },
-        
-        // --- ACCOUNTANT (হিসাব ও অর্থ বিভাগ) পেশাদার বর্ধিত সংস্করণ ---
+        { id: "attendance", title: "ডিজিটাল হাজিরা", icon: "📅", href: "/dashboard/attendance", roles: ["admin", "teacher"] },
+        { id: "students", title: "শিক্ষার্থী ব্যবস্থাপনা", icon: "👥", href: "/dashboard/students", roles: ["admin", "teacher"] },
+        { id: "teachers", title: "শিক্ষক ব্যবস্থাপনা", icon: "🕌", href: "/dashboard/teachers", roles: ["admin"] },
+        { id: "administration", title: "প্রশাসনিক বিভাগ", icon: "🛡️", href: "/dashboard/administration", roles: ["admin"] },
         {
+            id: "finance",
             title: "হিসাব ও অর্থ বিভাগ",
             icon: "💰",
             roles: ["admin", "accountant"], 
@@ -125,11 +132,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 { title: "অ্যাকাউন্টিং রিপোর্টস", href: "/dashboard/finance/reports" },
             ]
         },
-
-        // --- PARENT (অভিভাবক কর্নার) অপশনসমূহ ---
         {
+            id: "parent-corner",
             title: "অভিভাবক কর্নার",
-            icon: "👨‍👩-‍👦",
+            icon: "👨‍👩‍👦",
             roles: ["admin", "parent"],
             dropdown: [
                 { title: "সন্তানের প্রোফাইল", href: "/dashboard/parent/child-profile" },
@@ -142,15 +148,23 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         }
     ];
 
-    // ৩. রিয়েল ইউজার রোলের ওপর ভিত্তি করে ফিল্টারিং
-    const allowedMenuItems = menuConfig.filter(item => item.roles.includes(userRole));
+    // রিয়েল ইউজার রোলের ওপর ভিত্তি করে ফিল্টারিং (isPending অবস্থায় খালি অ্যারে থাকবে, সাইডবার বন্ধ হবে না)
+    const allowedMenuItems = isPending ? [] : menuConfig.filter(item => item.roles.includes(userRole));
 
-    // সেশন লোড হওয়ার সময়ে একটি মার্জিত কঙ্কাল (Skeleton) বা ব্ল্যাঙ্ক স্টেট রাখা ভালো
-    if (isPending) {
-        return <div className="w-66 bg-[#043e30] h-screen fixed top-0 left-0 z-50 animate-pulse" />;
-    }
+    // অ্যাক্টিভ সাব-মেনু থাকলে ড্রপডাউনটি অটোমেটিক ওপেন রাখার মেকানিজম
+    useEffect(() => {
+        if (!isPending) {
+            allowedMenuItems.forEach((item) => {
+                if (item.dropdown) {
+                    const hasActiveChild = item.dropdown.some(sub => pathname.startsWith(sub.href.split('?')[0]));
+                    if (hasActiveChild) {
+                        setOpenDropdown(item.id);
+                    }
+                }
+            });
+        }
+    }, [pathname, isPending, userRole]);
 
-    // সুন্দর বাংলা রোল বা নাম দেখানোর সুবিধার্থে
     const displayRoleName = (role) => {
         switch(role) {
             case "admin": return "মুদীর (Admin)";
@@ -177,92 +191,103 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
             `}>
 
+                {/* ব্র্যান্ড লোগো সেকশন */}
                 <div className="p-4 border-b border-emerald-800/40 flex items-center justify-between bg-emerald-950/30">
                     <Link href="/" className="group flex items-center gap-2.5 focus:outline-hidden">
                         <span className="text-xl p-2 bg-emerald-900/50 rounded-xl group-hover:bg-amber-500 group-hover:text-[#043e30] transition-all duration-300 group-hover:scale-105 shadow-sm">
                             🕌
                         </span>
                         <div>
-                            <h2 className="font-black text-sm sm:text-base text-amber-400 tracking-wide transition-colors duration-200">আস-সালাম মাদরাসা</h2>
+                            <h2 className="font-black text-sm sm:text-base text-amber-400 tracking-wide">আস-সালাম মাদরাসা</h2>
                             <p className="text-[10px] text-emerald-300/80 font-medium tracking-wider">হবিগঞ্জ, বাংলাদেশ</p>
                         </div>
                     </Link>
                     <button onClick={() => setIsOpen(false)} className="lg:hidden text-emerald-300 hover:text-white text-base p-1">✕</button>
                 </div>
 
+                {/* মেইন মেনু আইটেমসমূহ */}
                 <div className="flex-1 overflow-y-auto p-3 space-y-1.5 scroll-smooth scrollbar-thin scrollbar-thumb-emerald-900/60 scrollbar-track-transparent">
-                    {allowedMenuItems.map((item, idx) => {
-                        const isDropdownOpen = openDropdown === idx;
-                        const hasDropdown = !!item.dropdown;
-                        const isActive = pathname === item.href;
+                    {isPending ? (
+                        // সাইডবার গায়েব না করে শুধু মেনুর জায়গায় একটি সুন্দর কঙ্কাল লোডার দেখাবে
+                        <div className="space-y-3 p-2 animate-pulse">
+                            {[...Array(6)].map((_, i) => (
+                                <div key={i} className="h-9 bg-emerald-900/40 rounded-xl w-full"></div>
+                            ))}
+                        </div>
+                    ) : (
+                        allowedMenuItems.map((item) => {
+                            const isDropdownOpen = openDropdown === item.id;
+                            const hasDropdown = !!item.dropdown;
+                            const isActive = pathname === item.href;
 
-                        return (
-                            <div key={idx} className="space-y-1 transition-all duration-300">
-                                {hasDropdown ? (
-                                    <button
-                                        onClick={() => setOpenDropdown(isDropdownOpen ? null : idx)}
-                                        className={`w-full flex items-center justify-between px-3 py-2.5 text-xs sm:text-sm rounded-xl transition-all duration-300 group/btn
-                                            ${isDropdownOpen 
-                                                ? "bg-emerald-900/80 text-amber-300 shadow-inner border-l-4 border-amber-400 pl-2" 
-                                                : "text-emerald-100/90 hover:bg-emerald-800/40 hover:text-white hover:translate-x-1"}`}
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-base group-hover/btn:scale-110 transition-transform duration-300">{item.icon}</span>
-                                            <span className="font-semibold tracking-wide text-left">{item.title}</span>
+                            return (
+                                <div key={item.id} className="space-y-1 transition-all duration-300">
+                                    {hasDropdown ? (
+                                        <button
+                                            onClick={() => setOpenDropdown(isDropdownOpen ? null : item.id)}
+                                            className={`w-full flex items-center justify-between px-3 py-2.5 text-xs sm:text-sm rounded-xl transition-all duration-300 group/btn
+                                                ${isDropdownOpen 
+                                                    ? "bg-emerald-900/80 text-amber-300 shadow-inner border-l-4 border-amber-400 pl-2" 
+                                                    : "text-emerald-100/90 hover:bg-emerald-800/40 hover:text-white hover:translate-x-1"}`}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-base group-hover/btn:scale-110 transition-transform duration-300">{item.icon}</span>
+                                                <span className="font-semibold tracking-wide text-left">{item.title}</span>
+                                            </div>
+                                            <span className={`text-[10px] text-emerald-400 transition-transform duration-300 ${isDropdownOpen ? "rotate-180 text-amber-400" : ""}`}>
+                                                ▼
+                                            </span>
+                                        </button>
+                                    ) : (
+                                        <Link
+                                            href={item.href || "#"}
+                                            onClick={() => setIsOpen(false)}
+                                            className={`flex items-center gap-3 px-3 py-2.5 text-xs sm:text-sm rounded-xl transition-all duration-300 group/link
+                                                ${isActive
+                                                    ? "bg-amber-400 text-[#043e30] font-black shadow-md border-r-4 border-emerald-900 scale-[1.02]"
+                                                    : "text-emerald-100/90 hover:bg-emerald-800/40 hover:text-white hover:translate-x-1"}`}
+                                        >
+                                            <span className="text-base transform group-hover/link:scale-110 transition-transform duration-300">{item.icon}</span>
+                                            <span className="font-semibold tracking-wide">{item.title}</span>
+                                        </Link>
+                                    )}
+
+                                    {hasDropdown && (
+                                        <div className={`pl-4 space-y-1 border-l-2 border-emerald-800/50 ml-5 overflow-hidden transition-all duration-300 ease-in-out
+                                            ${isDropdownOpen ? "max-h-[500px] opacity-100 py-1" : "max-h-0 opacity-0"}`}>
+                                            {item.dropdown.map((sub, subIdx) => {
+                                                const isSubActive = pathname === sub.href;
+                                                return (
+                                                    <Link
+                                                        key={subIdx}
+                                                        href={sub.href}
+                                                        onClick={() => setIsOpen(false)}
+                                                        className={`block py-2 px-3 text-[11px] sm:text-xs rounded-lg transition-all duration-200 font-medium
+                                                            ${isSubActive
+                                                                ? "text-amber-400 font-bold bg-emerald-900/60 shadow-xs border-l-2 border-amber-400 pl-2"
+                                                                : "text-emerald-200/80 hover:text-white hover:bg-emerald-800/30 hover:pl-4"}`}
+                                                    >
+                                                        ✨ {sub.title}
+                                                    </Link>
+                                                );
+                                            })}
                                         </div>
-                                        <span className={`text-[10px] text-emerald-400 transition-transform duration-300 ${isDropdownOpen ? "rotate-180 text-amber-400" : ""}`}>
-                                            ▼
-                                        </span>
-                                    </button>
-                                ) : (
-                                    <Link
-                                        href={item.href || "#"}
-                                        onClick={() => setIsOpen(false)}
-                                        className={`flex items-center gap-3 px-3 py-2.5 text-xs sm:text-sm rounded-xl transition-all duration-300 group/link
-                                            ${isActive
-                                                ? "bg-amber-400 text-[#043e30] font-black shadow-md border-r-4 border-emerald-990 scale-[1.02]"
-                                                : "text-emerald-100/90 hover:bg-emerald-800/40 hover:text-white hover:translate-x-1"}`}
-                                    >
-                                        <span className="text-base transform group-hover/link:scale-110 transition-transform duration-300">{item.icon}</span>
-                                        <span className="font-semibold tracking-wide">{item.title}</span>
-                                    </Link>
-                                )}
-
-                                {hasDropdown && (
-                                    <div className={`pl-4 space-y-1 border-l-2 border-emerald-800/50 ml-5 overflow-hidden transition-all duration-300 ease-in-out
-                                        ${isDropdownOpen ? "max-h-[500px] opacity-100 py-1" : "max-h-0 opacity-0"}`}>
-                                        {item.dropdown.map((sub, subIdx) => {
-                                            const isSubActive = pathname === sub.href;
-                                            return (
-                                                <Link
-                                                    key={subIdx}
-                                                    href={sub.href}
-                                                    onClick={() => setIsOpen(false)}
-                                                    className={`block py-2 px-3 text-[11px] sm:text-xs rounded-lg transition-all duration-200 font-medium
-                                                        ${isSubActive
-                                                            ? "text-amber-400 font-bold bg-emerald-900/60 shadow-xs border-l-2 border-amber-400 pl-2"
-                                                            : "text-emerald-200/80 hover:text-white hover:bg-emerald-800/30 hover:pl-4"}`}
-                                                >
-                                                    ✨ {sub.title}
-                                                </Link>
-                                            );
-                                        })}
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })}
+                                    )}
+                                </div>
+                            );
+                        })
+                    )}
                 </div>
 
-                {/* ৪. ইউজার প্রোফাইল কার্ড - ডাইনামিক সেশন ডেটা প্রদর্শন */}
-                {session && (
+                {/* ইউজার প্রোফাইল কার্ড - সেশন লোড হওয়ার পর দেখাবে */}
+                {!isPending && session && (
                     <div className="p-3 border-t border-emerald-800/40 bg-emerald-950/40">
                         <div className="flex items-center gap-3 px-2 py-2 rounded-xl bg-emerald-900/30 border border-emerald-800/30 shadow-xs">
                             <div className="w-8 h-8 rounded-full bg-amber-400 text-[#043e30] flex items-center justify-center font-black text-sm shadow-inner transform hover:rotate-12 transition-transform duration-300 overflow-hidden">
                                 {user?.image ? (
                                     <img src={user.image} alt="Profile" className="w-full h-full object-cover" />
                                 ) : (
-                                    avatarLetter
+                                    <span className="uppercase">{avatarLetter}</span>
                                 )}
                             </div>
                             <div className="flex-1 min-w-0">
