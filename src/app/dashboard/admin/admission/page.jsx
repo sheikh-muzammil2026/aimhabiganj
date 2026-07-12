@@ -194,9 +194,9 @@ export default function AdminAdmissionDashboard() {
                         <h3 className="text-sm font-bold text-gray-700">জমা হওয়া অনলাইন ভর্তি ফরমের তালিকা</h3>
                     </div>
 
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs sm:text-sm text-gray-600">
-                            <thead>
+                    <div className="w-full">
+                        <table className="w-full text-left text-xs sm:text-sm text-gray-600 block md:table">
+                            <thead className="hidden md:table-header-group">
                                 <tr className="border-b border-gray-200 bg-emerald-900/5 text-emerald-900 font-bold">
                                     <th className="p-4">আবেদন আইডি</th>
                                     <th className="p-4">ছাত্রের নাম</th>
@@ -206,24 +206,35 @@ export default function AdminAdmissionDashboard() {
                                     <th className="p-4 text-right">অ্যাকশন</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100 font-medium">
+                            <tbody className="divide-y divide-gray-100 font-medium block md:table-row-group">
                                 {admissionRequests.map((req) => (
-                                    <tr key={req._id} className="hover:bg-gray-50/70 transition-colors">
-                                        <td className="p-4 font-mono font-bold text-gray-900">...{req._id?.slice(-6)}</td>
-                                        <td className="p-4">
-                                            <div className="font-bold text-gray-800">{req.studentNameBangla}</div>
-                                            <div className="text-[11px] text-gray-400 font-normal">{req.studentNameEnglish}</div>
+                                    <tr 
+                                        key={req._id} 
+                                        className="hover:bg-gray-50/70 transition-colors block md:table-row p-4 md:p-0 space-y-3 md:space-y-0 border-b border-gray-100 md:border-b-0"
+                                    >
+                                        <td className="p-0 md:p-4 font-mono font-bold text-gray-900 flex justify-between md:table-cell items-center before:content-['আবেদন_আইডি:'] before:md:hidden before:font-sans before:text-gray-400 before:text-[11px]">
+                                            <span className="bg-gray-100 md:bg-transparent px-2 py-0.5 md:p-0 rounded-sm">
+                                                ...{req._id?.slice(-6)}
+                                            </span>
                                         </td>
-                                        <td className="p-4">
-                                            <div>{req.fatherNameBangla}</div>
-                                            <div className="text-gray-400 font-mono text-[11px]">{req.mobile}</div>
+                                        <td className="p-0 md:p-4 flex justify-between md:table-cell items-start before:content-['ছাত্রের_নাম:'] before:md:hidden before:text-gray-400 before:text-[11px] before:pt-1">
+                                            <div className="text-right md:text-left">
+                                                <div className="font-bold text-gray-800">{req.studentNameBangla}</div>
+                                                <div className="text-[11px] text-gray-400 font-normal">{req.studentNameEnglish}</div>
+                                            </div>
                                         </td>
-                                        <td className="p-4">
+                                        <td className="p-0 md:p-4 flex justify-between md:table-cell items-start before:content-['পিতা_&_মোবাইল:'] before:md:hidden before:text-gray-400 before:text-[11px]">
+                                            <div className="text-right md:text-left">
+                                                <div>{req.fatherNameBangla}</div>
+                                                <div className="text-gray-400 font-mono text-[11px]">{req.mobile}</div>
+                                            </div>
+                                        </td>
+                                        <td className="p-0 md:p-4 flex justify-between md:table-cell items-center before:content-['বিভাগ:'] before:md:hidden before:text-gray-400 before:text-[11px]">
                                             <span className="bg-emerald-50 text-emerald-900 px-2.5 py-1 rounded-md text-[11px] font-bold border border-emerald-200/50">
                                                 {req.appliedDivision}
                                             </span>
                                         </td>
-                                        <td className="p-4 text-center">
+                                        <td className="p-0 md:p-4 flex justify-between md:table-cell items-center md:text-center before:content-['স্ট্যাটাস:'] before:md:hidden before:text-gray-400 before:text-[11px]">
                                             <span className={`px-2.5 py-1 rounded-full text-[10px] font-black border uppercase tracking-wider
                                                 ${req.status === 'Approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 
                                                   req.status === 'Rejected' ? 'bg-rose-50 text-rose-700 border-rose-200' : 
@@ -231,13 +242,11 @@ export default function AdminAdmissionDashboard() {
                                                 {req.status === 'Approved' ? 'অনুমোদিত' : req.status === 'Rejected' ? 'বাতিল' : 'অপেক্ষমাণ'}
                                             </span>
                                         </td>
-                                        <td className="p-4 text-right space-x-1 sm:space-x-2 whitespace-nowrap">
-                                            <button onClick={() => setSelectedRequest(req)} className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg cursor-pointer">👁️ ভিউ</button>
-                                            <button disabled={req.status === 'Approved'} onClick={() => updateStatus(req._id, 'Approved')} className="bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-lg disabled:opacity-30 cursor-pointer">✓ অ্যাপ্রুভ</button>
-                                            <button disabled={req.status === 'Rejected'} onClick={() => updateStatus(req._id, 'Rejected')} className="bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg disabled:opacity-30 cursor-pointer">✕ রিজেক্ট</button>
-                                            
-                                            {/* 🗑️ নতুন সংযোজিত: ডিলিট বাটন */}
-                                            <button onClick={() => deleteAdmissionRequest(req._id)} className="bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-lg cursor-pointer">🗑️ ডিলিট</button>
+                                        <td className="p-0 md:p-4 pt-2 md:pt-4 flex flex-wrap gap-2 md:table-cell md:text-right md:space-x-1 sm:space-x-2 whitespace-nowrap justify-end border-t border-dashed border-gray-100 md:border-t-0">
+                                            <button onClick={() => setSelectedRequest(req)} className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg cursor-pointer flex-1 md:flex-none text-center">👁️ ভিউ</button>
+                                            <button disabled={req.status === 'Approved'} onClick={() => updateStatus(req._id, 'Approved')} className="bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-lg disabled:opacity-30 cursor-pointer flex-1 md:flex-none text-center">✓ অ্যাপ্রুভ</button>
+                                            <button disabled={req.status === 'Rejected'} onClick={() => updateStatus(req._id, 'Rejected')} className="bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg disabled:opacity-30 cursor-pointer flex-1 md:flex-none text-center">✕ রিজেক্ট</button>
+                                            <button onClick={() => deleteAdmissionRequest(req._id)} className="bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-lg cursor-pointer flex-1 md:flex-none text-center">🗑️ ডিলিট</button>
                                         </td>
                                     </tr>
                                 ))}
@@ -349,7 +358,7 @@ export default function AdminAdmissionDashboard() {
                 </form>
             )}
 
-            {/* ৪. বিস্তারিত ভিউ প্রোфাইল মোডাল */}
+            {/* ৪. বিস্তারিত ভিউ প্রোফাইল মোডাল */}
             {selectedRequest && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 z-50">
                     <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto border border-gray-200 shadow-2xl flex flex-col animate-in fade-in zoom-in-95 duration-200">
@@ -376,7 +385,7 @@ export default function AdminAdmissionDashboard() {
                             {/* বেসিক ও কভার ডাটা কার্ড */}
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-emerald-900/5 p-4 rounded-xl border border-emerald-900/10 shadow-2xs">
                                 <div>
-                                    <span className="block text-[11px] font-bold text-emerald-800/80">কভার অভিভাবক</span> 
+                                    <span className="block text-[11px] font-bold text-emerald-800/80">कवर अभिभावक</span> 
                                     <span className="font-bold text-gray-900">{selectedRequest.guardianNameCover || 'N/A'}</span>
                                 </div>
                                 <div>
