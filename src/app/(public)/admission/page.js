@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 
 export default function AdmissionInfoPage() {
-  // Back-end settings/guidelines dhore rakhar jonno state
+  
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -20,7 +20,7 @@ export default function AdmissionInfoPage() {
       })
       .catch((err) => {
         console.error("Error loading admission settings:", err);
-        loading=false;
+       setLoading(false);
       });
   }, []);
 
