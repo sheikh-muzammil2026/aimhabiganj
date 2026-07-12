@@ -3,29 +3,30 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { toast } from 'react-toastify';
 
 export default function AdminAdmissionDashboard() {
     const searchParams = useSearchParams();
     const sectionParam = searchParams.get('section');
 
-    const [activeTab, setActiveTab] = useState('requests'); 
+    const [activeTab, setActiveTab] = useState('requests');
     const [admissionRequests, setAdmissionRequests] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [selectedRequest, setSelectedRequest] = useState(null); 
+    const [selectedRequest, setSelectedRequest] = useState(null);
     const [actionMessage, setActionMessage] = useState('');
 
     // পাবলিক পেজের সাথে মিল রেখে এবং process_details সহ স্টেট সাজানো হয়েছে
     const [guideSettings, setGuideSettings] = useState({
-        timeline_start: "", 
-        timeline_exam: "", 
+        timeline_start: "",
+        timeline_exam: "",
         timeline_class: "",
         test_details: "",
         process_details: "", // নতুন সংযোজিত ফিল্ড
-        fee_noorani_adm: "", 
+        fee_noorani_adm: "",
         fee_noorani_monthly: "",
-        fee_hifz_adm: "", 
+        fee_hifz_adm: "",
         fee_hifz_monthly: "",
-        fee_kitab_adm: "", 
+        fee_kitab_adm: "",
         fee_kitab_monthly: "",
         terms: ""
     });
@@ -97,17 +98,18 @@ export default function AdminAdmissionDashboard() {
             const data = await response.json();
 
             if (data.success) {
-                setAdmissionRequests(prev => 
+                taost.succes("data updated.")
+                setAdmissionRequests(prev =>
                     prev.map(req => req._id === id ? { ...req, status: newStatus } : req)
                 );
-                if(selectedRequest && selectedRequest._id === id) {
+                if (selectedRequest && selectedRequest._id === id) {
                     setSelectedRequest(prev => ({ ...prev, status: newStatus }));
                 }
                 setActionMessage(data.message);
                 setTimeout(() => setActionMessage(''), 4000);
             }
         } catch (error) {
-            alert("স্ট্যাটাস আপডেট করা যায়নি।");
+            toast.error("স্ট্যাটাস আপডেট করা যায়নি।");
         }
     };
 
@@ -167,13 +169,13 @@ export default function AdminAdmissionDashboard() {
                 </div>
 
                 <div className="flex bg-emerald-900/5 p-1 rounded-xl w-fit border border-emerald-900/10">
-                    <button 
+                    <button
                         onClick={() => setActiveTab('requests')}
                         className={`px-4 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all ${activeTab === 'requests' ? 'bg-emerald-800 text-white shadow-sm' : 'text-emerald-900 hover:bg-emerald-800/5'}`}
                     >
                         📥 আবেদন রিকোয়েস্ট ({admissionRequests.length})
                     </button>
-                    <button 
+                    <button
                         onClick={() => setActiveTab('settings')}
                         className={`px-4 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all ${activeTab === 'settings' ? 'bg-emerald-800 text-white shadow-sm' : 'text-emerald-900 hover:bg-emerald-800/5'}`}
                     >
@@ -208,8 +210,8 @@ export default function AdminAdmissionDashboard() {
                             </thead>
                             <tbody className="divide-y divide-gray-100 font-medium block md:table-row-group">
                                 {admissionRequests.map((req) => (
-                                    <tr 
-                                        key={req._id} 
+                                    <tr
+                                        key={req._id}
                                         className="hover:bg-gray-50/70 transition-colors block md:table-row p-4 md:p-0 space-y-3 md:space-y-0 border-b border-gray-100 md:border-b-0"
                                     >
                                         <td className="p-0 md:p-4 font-mono font-bold text-gray-900 flex justify-between md:table-cell items-center before:content-['আবেদন_আইডি:'] before:md:hidden before:font-sans before:text-gray-400 before:text-[11px]">
@@ -236,9 +238,9 @@ export default function AdminAdmissionDashboard() {
                                         </td>
                                         <td className="p-0 md:p-4 flex justify-between md:table-cell items-center md:text-center before:content-['স্ট্যাটাস:'] before:md:hidden before:text-gray-400 before:text-[11px]">
                                             <span className={`px-2.5 py-1 rounded-full text-[10px] font-black border uppercase tracking-wider
-                                                ${req.status === 'Approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 
-                                                  req.status === 'Rejected' ? 'bg-rose-50 text-rose-700 border-rose-200' : 
-                                                  'bg-amber-50 text-amber-700 border-amber-200'}`}>
+                                                ${req.status === 'Approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                                                    req.status === 'Rejected' ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                                                        'bg-amber-50 text-amber-700 border-amber-200'}`}>
                                                 {req.status === 'Approved' ? 'অনুমোদিত' : req.status === 'Rejected' ? 'বাতিল' : 'অপেক্ষমাণ'}
                                             </span>
                                         </td>
@@ -258,22 +260,22 @@ export default function AdminAdmissionDashboard() {
 
             {activeTab === 'settings' && (
                 <form onSubmit={handleGuideSubmit} className="bg-white border border-emerald-900/10 p-5 sm:p-6 rounded-2xl shadow-xs space-y-6">
-                    
+
                     {/* ১. ভর্তির সময়সূচী */}
                     <div ref={timelineRef} className="scroll-mt-6">
                         <h3 className="text-sm font-black text-emerald-800 bg-emerald-50 p-2.5 rounded-xl mb-4">📅 ১. ভর্তির সময়সূচী মডিউল</h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label className="block text-xs font-bold text-gray-500 mb-1">ভর্তি ফরম বিতরণ শুরু</label>
-                                <input type="text" value={guideSettings.timeline_start} onChange={(e) => setGuideSettings({...guideSettings, timeline_start: e.target.value})} className="w-full p-3 border border-gray-200 rounded-xl text-sm font-semibold focus:outline-emerald-600" placeholder="উদাঃ ০১ শাওয়াল থেকে" />
+                                <input type="text" value={guideSettings.timeline_start} onChange={(e) => setGuideSettings({ ...guideSettings, timeline_start: e.target.value })} className="w-full p-3 border border-gray-200 rounded-xl text-sm font-semibold focus:outline-emerald-600" placeholder="উদাঃ ০১ শাওয়াল থেকে" />
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-gray-500 mb-1">ভর্তি পরীক্ষার তারিখ</label>
-                                <input type="text" value={guideSettings.timeline_exam} onChange={(e) => setGuideSettings({...guideSettings, timeline_exam: e.target.value})} className="w-full p-3 border border-gray-200 rounded-xl text-sm font-semibold focus:outline-emerald-600" placeholder="উদাঃ ১০ শাওয়াল, সকাল ৯:০০ টা" />
+                                <input type="text" value={guideSettings.timeline_exam} onChange={(e) => setGuideSettings({ ...guideSettings, timeline_exam: e.target.value })} className="w-full p-3 border border-gray-200 rounded-xl text-sm font-semibold focus:outline-emerald-600" placeholder="উদাঃ ১০ শাওয়াল, সকাল ৯:০০ টা" />
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-gray-500 mb-1">ক্লাস শুরুর তারিখ</label>
-                                <input type="text" value={guideSettings.timeline_class} onChange={(e) => setGuideSettings({...guideSettings, timeline_class: e.target.value})} className="w-full p-3 border border-gray-200 rounded-xl text-sm font-semibold focus:outline-emerald-600" placeholder="উদাঃ ১৫ শাওয়াল থেকে ইনশাالله" />
+                                <input type="text" value={guideSettings.timeline_class} onChange={(e) => setGuideSettings({ ...guideSettings, timeline_class: e.target.value })} className="w-full p-3 border border-gray-200 rounded-xl text-sm font-semibold focus:outline-emerald-600" placeholder="উদাঃ ১৫ শাওয়াল থেকে ইনশাالله" />
                             </div>
                         </div>
                     </div>
@@ -283,7 +285,7 @@ export default function AdminAdmissionDashboard() {
                         <h3 className="text-sm font-black text-emerald-800 bg-emerald-50 p-2.5 rounded-xl mb-4">📝 ২. ভর্তি পরীক্ষা সংক্রান্ত গাইডলাইন</h3>
                         <div>
                             <label className="block text-xs font-bold text-gray-500 mb-1">পরীক্ষার সংক্ষিপ্ত নিয়ম</label>
-                            <textarea rows={3} value={guideSettings.test_details} onChange={(e) => setGuideSettings({...guideSettings, test_details: e.target.value})} className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-emerald-600" placeholder="পরীক্ষার সিলেবাস বা নিয়মাবলী এখানে লিখুন..." />
+                            <textarea rows={3} value={guideSettings.test_details} onChange={(e) => setGuideSettings({ ...guideSettings, test_details: e.target.value })} className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-emerald-600" placeholder="পরীক্ষার সিলেবাস বা নিয়মাবলী এখানে লিখুন..." />
                         </div>
                     </div>
 
@@ -292,7 +294,7 @@ export default function AdminAdmissionDashboard() {
                         <h3 className="text-sm font-black text-emerald-800 bg-emerald-50 p-2.5 rounded-xl mb-4">⚡ ৩. ভর্তি প্রক্রিয়া </h3>
                         <div>
                             <label className="block text-xs font-bold text-gray-500 mb-1">ভর্তির ধাপসমূহ (নতুন লাইন তৈরি করতে Enter চাপুন)</label>
-                            <textarea rows={3} value={guideSettings.process_details} onChange={(e) => setGuideSettings({...guideSettings, process_details: e.target.value})} className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-emerald-600" placeholder="১. অনলাইন বা অফিস থেকে ফরম সংগ্রহ করুন...&#10;২. অফিসে জমা দিন..." />
+                            <textarea rows={3} value={guideSettings.process_details} onChange={(e) => setGuideSettings({ ...guideSettings, process_details: e.target.value })} className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-emerald-600" placeholder="১. অনলাইন বা অফিস থেকে ফরম সংগ্রহ করুন...&#10;২. অফিসে জমা দিন..." />
                         </div>
                     </div>
 
@@ -305,11 +307,11 @@ export default function AdminAdmissionDashboard() {
                                 <p className="text-xs font-black text-emerald-900 border-b pb-1">নূরানী ও নাজেরা বিভাগ</p>
                                 <div>
                                     <label className="block text-[10px] text-gray-400 font-bold">ভর্তি ফি</label>
-                                    <input type="text" value={guideSettings.fee_noorani_adm} onChange={(e) => setGuideSettings({...guideSettings, fee_noorani_adm: e.target.value})} className="w-full p-2 border border-gray-200 rounded-lg text-xs font-bold" placeholder="১,৫০০/-" />
+                                    <input type="text" value={guideSettings.fee_noorani_adm} onChange={(e) => setGuideSettings({ ...guideSettings, fee_noorani_adm: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg text-xs font-bold" placeholder="১,৫০০/-" />
                                 </div>
                                 <div>
                                     <label className="block text-[10px] text-gray-400 font-bold">মাসিক ফি</label>
-                                    <input type="text" value={guideSettings.fee_noorani_monthly} onChange={(e) => setGuideSettings({...guideSettings, fee_noorani_monthly: e.target.value})} className="w-full p-2 border border-gray-200 rounded-lg text-xs" placeholder="৫০০/-" />
+                                    <input type="text" value={guideSettings.fee_noorani_monthly} onChange={(e) => setGuideSettings({ ...guideSettings, fee_noorani_monthly: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg text-xs" placeholder="৫০০/-" />
                                 </div>
                             </div>
 
@@ -318,11 +320,11 @@ export default function AdminAdmissionDashboard() {
                                 <p className="text-xs font-black text-emerald-900 border-b pb-1">হিফজ বিভাগ (আবাসিক)</p>
                                 <div>
                                     <label className="block text-[10px] text-gray-400 font-bold">ভর্তি ফি</label>
-                                    <input type="text" value={guideSettings.fee_hifz_adm} onChange={(e) => setGuideSettings({...guideSettings, fee_hifz_adm: e.target.value})} className="w-full p-2 border border-gray-200 rounded-lg text-xs font-bold" placeholder="৩,০০০/-" />
+                                    <input type="text" value={guideSettings.fee_hifz_adm} onChange={(e) => setGuideSettings({ ...guideSettings, fee_hifz_adm: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg text-xs font-bold" placeholder="৩,০০০/-" />
                                 </div>
                                 <div>
                                     <label className="block text-[10px] text-gray-400 font-bold">মাসিক ফি</label>
-                                    <input type="text" value={guideSettings.fee_hifz_monthly} onChange={(e) => setGuideSettings({...guideSettings, fee_hifz_monthly: e.target.value})} className="w-full p-2 border border-gray-200 rounded-lg text-xs" placeholder="৩,৫০০/-" />
+                                    <input type="text" value={guideSettings.fee_hifz_monthly} onChange={(e) => setGuideSettings({ ...guideSettings, fee_hifz_monthly: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg text-xs" placeholder="৩,৫০০/-" />
                                 </div>
                             </div>
 
@@ -331,11 +333,11 @@ export default function AdminAdmissionDashboard() {
                                 <p className="text-xs font-black text-emerald-900 border-b pb-1">কিতাব বিভাগ</p>
                                 <div>
                                     <label className="block text-[10px] text-gray-400 font-bold">ভর্তি ফি</label>
-                                    <input type="text" value={guideSettings.fee_kitab_adm} onChange={(e) => setGuideSettings({...guideSettings, fee_kitab_adm: e.target.value})} className="w-full p-2 border border-gray-200 rounded-lg text-xs font-bold" placeholder="২,৫০০/-" />
+                                    <input type="text" value={guideSettings.fee_kitab_adm} onChange={(e) => setGuideSettings({ ...guideSettings, fee_kitab_adm: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg text-xs font-bold" placeholder="২,৫০০/-" />
                                 </div>
                                 <div>
                                     <label className="block text-[10px] text-gray-400 font-bold">মাসিক ফি</label>
-                                    <input type="text" value={guideSettings.fee_kitab_monthly} onChange={(e) => setGuideSettings({...guideSettings, fee_kitab_monthly: e.target.value})} className="w-full p-2 border border-gray-200 rounded-lg text-xs" placeholder="৮০০/-" />
+                                    <input type="text" value={guideSettings.fee_kitab_monthly} onChange={(e) => setGuideSettings({ ...guideSettings, fee_kitab_monthly: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg text-xs" placeholder="৮০০/-" />
                                 </div>
                             </div>
                         </div>
@@ -346,7 +348,7 @@ export default function AdminAdmissionDashboard() {
                         <h3 className="text-sm font-black text-emerald-800 bg-emerald-50 p-2.5 rounded-xl mb-4">📜 ৫. ভর্তির শর্তাবলী ও রুলস</h3>
                         <div>
                             <label className="block text-xs font-bold text-gray-500 mb-1">শর্তসমূহ (নতুন লাইন তৈরি করতে Enter চাপুন)</label>
-                            <textarea rows={4} value={guideSettings.terms} onChange={(e) => setGuideSettings({...guideSettings, terms: e.target.value})} className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-emerald-600" placeholder="প্রতিটি শর্ত আলাদা লাইনে লিখুন..." />
+                            <textarea rows={4} value={guideSettings.terms} onChange={(e) => setGuideSettings({ ...guideSettings, terms: e.target.value })} className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-emerald-600" placeholder="প্রতিটি শর্ত আলাদা লাইনে লিখুন..." />
                         </div>
                     </div>
 
@@ -362,7 +364,7 @@ export default function AdminAdmissionDashboard() {
             {selectedRequest && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 z-50">
                     <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto border border-gray-200 shadow-2xl flex flex-col animate-in fade-in zoom-in-95 duration-200">
-                        
+
                         {/* মোডাল হেডার */}
                         <div className="p-4 sm:p-5 border-b border-emerald-900/10 bg-gradient-to-r from-emerald-900 to-emerald-800 text-white flex justify-between items-center sticky top-0 z-10 shadow-sm">
                             <div>
@@ -371,8 +373,8 @@ export default function AdminAdmissionDashboard() {
                                     সেশন: {selectedRequest.sessionYear} | আইডি: {selectedRequest._id}
                                 </p>
                             </div>
-                            <button 
-                                onClick={() => setSelectedRequest(null)} 
+                            <button
+                                onClick={() => setSelectedRequest(null)}
                                 className="bg-white/10 hover:bg-white/20 text-white rounded-xl p-2 px-3 text-xs font-bold transition-colors cursor-pointer"
                             >
                                 ✕ বন্ধ করুন
@@ -381,19 +383,19 @@ export default function AdminAdmissionDashboard() {
 
                         {/* মোডাল বডি */}
                         <div className="p-5 sm:p-6 space-y-6 text-xs sm:text-sm text-gray-700 bg-gray-50/30">
-                            
+
                             {/* বেসিক ও কভার ডাটা কার্ড */}
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-emerald-900/5 p-4 rounded-xl border border-emerald-900/10 shadow-2xs">
                                 <div>
-                                    <span className="block text-[11px] font-bold text-emerald-800/80">कवर अभिभावक</span> 
+                                    <span className="block text-[11px] font-bold text-emerald-800/80">कवर अभिभावक</span>
                                     <span className="font-bold text-gray-900">{selectedRequest.guardianNameCover || 'N/A'}</span>
                                 </div>
                                 <div>
-                                    <span className="block text-[11px] font-bold text-emerald-800/80">কভার মোবাইল</span> 
+                                    <span className="block text-[11px] font-bold text-emerald-800/80">কভার মোবাইল</span>
                                     <span className="font-bold text-gray-900 font-mono">{selectedRequest.mobileNumberCover || 'N/A'}</span>
                                 </div>
                                 <div>
-                                    <span className="block text-[11px] font-bold text-emerald-800/80">কভার আইডি নম্বর</span> 
+                                    <span className="block text-[11px] font-bold text-emerald-800/80">কভার আইডি নম্বর</span>
                                     <span className="font-bold text-gray-900 font-mono">{selectedRequest.idNumberCover || 'N/A'}</span>
                                 </div>
                             </div>
@@ -407,15 +409,15 @@ export default function AdminAdmissionDashboard() {
                                     <div><span className="text-gray-400 font-bold block text-[11px]">নাম (বাংলা):</span> <span className="font-bold text-gray-900">{selectedRequest.studentNameBangla}</span></div>
                                     <div><span className="text-gray-400 font-bold block text-[11px]">Name (English):</span> <span className="font-semibold text-gray-900 font-mono">{selectedRequest.studentNameEnglish}</span></div>
                                     <div><span className="text-gray-400 font-bold block text-[11px]">الاسم (العربية):</span> <span className="font-semibold text-gray-900">{selectedRequest.studentNameArabic || 'N/A'}</span></div>
-                                    
+
                                     <div><span className="text-gray-400 font-bold block text-[11px]">জন্ম তারিখ:</span> <span className="font-semibold font-mono">{selectedRequest.dateOfBirth}</span></div>
                                     <div><span className="text-gray-400 font-bold block text-[11px]">বয়স:</span> <span className="font-semibold font-mono">{selectedRequest.age} বছর</span></div>
                                     <div><span className="text-gray-400 font-bold block text-[11px]">লিঙ্গ:</span> <span className="font-semibold">{selectedRequest.gender}</span></div>
-                                    
+
                                     <div><span className="text-gray-400 font-bold block text-[11px]">জন্ম নিবন্ধন নম্বর:</span> <span className="font-bold text-gray-900 font-mono">{selectedRequest.birthCertificateNo || 'N/A'}</span></div>
                                     <div><span className="text-gray-400 font-bold block text-[11px]">রক্তের গ্রুপ:</span> <span className="font-bold text-rose-600 font-mono">{selectedRequest.bloodGroup || 'N/A'}</span></div>
                                     <div><span className="text-gray-400 font-bold block text-[11px]">জাতীয়তা:</span> <span className="font-semibold">{selectedRequest.nationality}</span></div>
-                                    
+
                                     <div><span className="text-gray-400 font-bold block text-[11px]">উচ্চতা:</span> <span className="font-semibold font-mono">{selectedRequest.height} ইঞ্চি</span></div>
                                     <div><span className="text-gray-400 font-bold block text-[11px]">ওজন:</span> <span className="font-semibold font-mono">{selectedRequest.weight} কেজি</span></div>
                                 </div>
@@ -426,7 +428,7 @@ export default function AdminAdmissionDashboard() {
                                 <h4 className="text-xs font-black text-emerald-800 border-b border-emerald-900/10 pb-1.5">
                                     👨‍👩‍👦 পিতা ও মাতার বিবরণ
                                 </h4>
-                                
+
                                 {/* পিতার তথ্য */}
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 border-b border-gray-100 pb-3">
                                     <div className="col-span-full font-bold text-xs text-gray-500">পিতার ডাটা:</div>
