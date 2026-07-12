@@ -145,7 +145,7 @@ export default function AdmissionFormPage() {
       const data = await response.json();
 
       if (data.success) {
-        toast.success("✅ আলহামদুলিল্লাহ্‌! " + data.message);
+        toast.success(data.message + " আলহামদুলিল্লাহ্‌!");
 
         // ফরম সফলভাবে সেভ হলে ডাটা রিসেট করার ঐচ্ছিক ব্যবস্থা করতে পারেন
         // window.location.href = "/admission/success"; 
