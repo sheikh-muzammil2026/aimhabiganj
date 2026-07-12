@@ -125,7 +125,7 @@ export default function AdmissionInfoPage() {
             <li>অনলাইন বা অফিস থেকে ভর্তি ফরম সংগ্রহ করে সঠিক তথ্য দিয়ে পূরণ করুন।</li>
             <li>প্রয়োজনীয় কাগজপত্রাদি সংযুক্ত করে অফিসে জমা দিন বা অনলাইনে সাবমিট করুন।</li>
             <li>নির্দিষ্ট তারিখে ভর্তি পরীক্ষায় অংশগ্রহণ করে উত্তীর্ণ তালিকায় স্থান নিশ্চিত করুন।</li>
-          </</ol>
+          </ol>
         </section>
 
         {/* ৪. ভর্তি ফি (Fees) */}
@@ -153,7 +153,7 @@ export default function AdmissionInfoPage() {
         <section id="terms" className="scroll-mt-24 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-100 dark:border-slate-700/60 shadow-sm">
           <h3 className="text-lg font-bold text-emerald-800 dark:text-emerald-400 mb-3 flex items-center gap-2">📜 ভর্তির শর্তাবলী</h3>
           <ul className="list-disc list-inside space-y-2 text-sm text-gray-600 dark:text-gray-300">
-            <li>विद्याর্থীকে অবশ্যই সদাচারী এবং মাদরাসার নিয়ম-কানুন মানতে বাধ্য থাকতে হবে।</li>
+            <li>শিক্ষার্থীকে অবশ্যই সদাচারী এবং মাদরাসার নিয়ম-কানুন মানতে বাধ্য থাকতে হবে।</li>
             <li>আবাসিক ছাত্রদের ক্ষেত্রে নির্দিষ্ট সময়ে বোর্ডিংয়ের নিয়ম অনুধাবন করতে হবে।</li>
             <li>ভর্তির সময় জন্ম নিবন্ধন এবং অভিভাবকের জাতীয় পরিচয়পত্রের কপি জমা দেওয়া বাধ্যতামূলক।</li>
           </ul>
