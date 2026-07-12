@@ -85,7 +85,7 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
 
     try {
       // আপনার ImgBB API Key এখানে বসাবেন (ফ্রি কি)
-      const apiKey = "YOUR_IMGBB_API_KEY_HERE"; 
+      const apiKey = "5a4f8c279ddcedf0d73f50444bad88b0"; 
       const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
         method: "POST",
         body: data,
