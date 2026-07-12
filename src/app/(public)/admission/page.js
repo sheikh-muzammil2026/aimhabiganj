@@ -68,7 +68,7 @@ export default function AdmissionGuidelinePage() {
                 <span className="bg-emerald-100 text-emerald-900 text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider border border-emerald-200">
                     ভর্তির নির্দেশিকা
                 </span>
-                <h1 className="text-2xl sm:text-4xl font-black text-emerald-950 tracking-tight">
+                <h1 className="text-2xl sm:text-4xl font-black text-emerald-950 tracking-tight mt-4">
                     নতুন শিক্ষাবর্ষে ভর্তি গাইডলাইন
                 </h1>
                 <p className="text-xs sm:text-sm text-gray-500 font-medium">

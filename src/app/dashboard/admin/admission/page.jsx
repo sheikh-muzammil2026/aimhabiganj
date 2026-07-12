@@ -98,7 +98,7 @@ export default function AdminAdmissionDashboard() {
             const data = await response.json();
 
             if (data.success) {
-                taost.succes("data updated.")
+                toast.success("📢 ভর্তি নির্দেশিকা সফলভাবে আপডেট হয়েছে!")
                 setAdmissionRequests(prev =>
                     prev.map(req => req._id === id ? { ...req, status: newStatus } : req)
                 );
@@ -128,11 +128,11 @@ export default function AdminAdmissionDashboard() {
                     setActionMessage(data.message || "আবেদনটি সফলভাবে মুছে ফেলা হয়েছে।");
                     setTimeout(() => setActionMessage(''), 4000);
                 } else {
-                    alert(data.message || "মুছে ফেলা সম্ভব হয়নি।");
+                    toast.error(data.message || "মুছে ফেলা সম্ভব হয়নি।");
                 }
             } catch (error) {
                 console.error("ডিলিট করতে সমস্যা:", error);
-                alert("সার্ভারে সমস্যা হওয়ার কারণে আবেদনটি মুছা যায়নি।");
+                toast.error("সার্ভারে সমস্যা হওয়ার কারণে আবেদনটি মুছা যায়নি।");
             }
         }
     };
@@ -152,7 +152,7 @@ export default function AdminAdmissionDashboard() {
                 setTimeout(() => setActionMessage(''), 4000);
             }
         } catch (error) {
-            alert("সেটিংস সেভ করা যায়নি।");
+            toast.error("সেটিংস সেভ করা যায়নি।");
         }
     };
 
@@ -228,7 +228,7 @@ export default function AdminAdmissionDashboard() {
                                         <td className="p-0 md:p-4 flex justify-between md:table-cell items-start before:content-['পিতা_&_মোবাইল:'] before:md:hidden before:text-gray-400 before:text-[11px]">
                                             <div className="text-right md:text-left">
                                                 <div>{req.fatherNameBangla}</div>
-                                                <div className="text-gray-400 font-mono text-[11px]">{req.mobile}</div>
+                                                <div className="text-gray-400 font-mono text-[11px]">{req?.fatherMobile}</div>
                                             </div>
                                         </td>
                                         <td className="p-0 md:p-4 flex justify-between md:table-cell items-center before:content-['বিভাগ:'] before:md:hidden before:text-gray-400 before:text-[11px]">
