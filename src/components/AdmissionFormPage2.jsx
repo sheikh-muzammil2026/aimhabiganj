@@ -17,13 +17,13 @@ export default function AdmissionFormPage2({ formData, handleChange }) {
 
     try {
       // আপনার ImgBB API Key এখানে বসাবেন
-      const apiKey = "5a4f8c279ddcedf0d73f50444bad88b0"; 
+      const apiKey = "5a4f8c279ddcedf0d73f50444bad88b0";
       const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
         method: "POST",
         body: data,
       });
       const result = await response.json();
-      
+
       if (result.success) {
         handleChange({
           target: { name: "guardianImage", value: result.data.url },
@@ -40,7 +40,7 @@ export default function AdmissionFormPage2({ formData, handleChange }) {
 
   return (
     <div className="w-full min-h-[11.69in] bg-white p-4 md:p-10 flex flex-col justify-between box-border text-gray-800 relative font-bengali print:min-h-screen overflow-x-hidden">
-      
+
       {/* টপ সেকশন: শিক্ষার্থী বিষয়ক তথ্য ও অভিভাবকের ছবি */}
       <div className="flex flex-col-reverse sm:flex-row justify-between items-start w-full gap-4 mb-6">
         <div className="flex-1 w-full sm:mr-4">
@@ -57,7 +57,7 @@ export default function AdmissionFormPage2({ formData, handleChange }) {
                 <label className="flex items-center gap-1 cursor-pointer"><input type="radio" name="physicalProblem" value="না" checked={formData.physicalProblem === "না"} onChange={handleChange} className="accent-orange-600" /> না</label>
               </div>
             </div>
-            
+
             <div className="flex flex-col sm:flex-row sm:items-end gap-2">
               <span className="text-xs text-gray-600 whitespace-nowrap">● অ্যাজমা/অ্যালার্জি/অটিজম/প্রতিবন্ধী/চোখে কম দেখা ইত্যাদি কোনটি আছে কি?</span>
               <input type="text" name="physicalProblemDetails" value={formData.physicalProblemDetails} onChange={handleChange} className="flex-1 border-b border-gray-400 focus:outline-none px-1" />
@@ -290,10 +290,10 @@ export default function AdmissionFormPage2({ formData, handleChange }) {
 
         <div className="text-sm leading-relaxed text-gray-700 text-justify space-y-3">
           <p className="flex flex-wrap items-end gap-x-2 gap-y-1">
-            আমি উপরে উল্লেখিত শিক্ষার্থীর 
-            <input type="text" name="guardianRelationToStudent" value={formData.guardianRelationToStudent || ""} onChange={handleChange} placeholder="(সম্পর্ক)" className="w-24 text-center font-bold border-b border-gray-400 focus:outline-none bg-transparent px-1 text-xs md:text-sm" /> 
-            এবং বৈধ অভিভাবক হিসেবে অঙ্গীকার করছি যে, এই প্রতিষ্ঠানের যাবতীয় বিষয় সম্পর্কে সম্যক অবগত হয়ে আমার অভিভাবকত্বে 
-            <input type="text" name="studentNameConfirmation" value={formData.studentNameConfirmation || ""} onChange={handleChange} placeholder="(শিক্ষার্থীর নাম)" className="w-48 text-center font-bold border-b border-gray-400 focus:outline-none bg-transparent px-1 text-xs md:text-sm" /> 
+            আমি উপরে উল্লেখিত শিক্ষার্থীর
+            <input type="text" name="guardianRelationToStudent" value={formData.guardianRelationToStudent || ""} onChange={handleChange} placeholder="(সম্পর্ক)" className="w-24 text-center font-bold border-b border-gray-400 focus:outline-none bg-transparent px-1 text-xs md:text-sm" />
+            এবং বৈধ অভিভাবক হিসেবে অঙ্গীকার করছি যে, এই প্রতিষ্ঠানের যাবতীয় বিষয় সম্পর্কে সম্যক অবগত হয়ে আমার অভিভাবকত্বে
+            <input type="text" name="studentNameConfirmation" value={formData.studentNameConfirmation || ""} onChange={handleChange} placeholder="(শিক্ষার্থীর নাম)" className="w-48 text-center font-bold border-b border-gray-400 focus:outline-none bg-transparent px-1 text-xs md:text-sm" />
             কে আবাসিক/অনাবাসিক/ডে-কেয়ার শিক্ষার্থী হিসেবে ভর্তি করার ইচ্ছা পোষণ করলাম।
           </p>
           <p>

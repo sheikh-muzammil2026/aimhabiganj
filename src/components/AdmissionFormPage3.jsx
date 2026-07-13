@@ -6,7 +6,7 @@ import React from "react";
 export default function AdmissionFormPage3({ formData, handleChange, handleCheckboxChange }) {
   return (
     <div className="w-full min-h-[11.69in] bg-white p-4 md:p-10 flex flex-col justify-between box-border text-gray-800 relative font-bengali print:min-h-screen overflow-x-hidden">
-      
+
       {/* ১. শিক্ষার্থীর অঙ্গীকারনামা */}
       <div className="w-full mb-6">
         <div className="text-center mb-4">
@@ -41,7 +41,7 @@ export default function AdmissionFormPage3({ formData, handleChange, handleCheck
         <span className="font-bold text-gray-800 text-sm block mb-3 border-b pb-1">
           ভর্তির আবেদনের সাথে নিচে উল্লিখিত কাগজপত্রাদি অবশ্যই সংযুক্ত করতে হবে:
         </span>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <label className="flex items-start gap-2 cursor-pointer select-none">
             <input type="checkbox" name="attachStudentPhoto" checked={formData.attachments?.attachStudentPhoto || false} onChange={(e) => handleCheckboxChange("attachments", "attachStudentPhoto", e.target.checked)} className="mt-1 w-4 h-4 accent-orange-600 rounded flex-shrink-0" />
