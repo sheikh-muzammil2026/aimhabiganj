@@ -204,8 +204,8 @@ export default function EditAdmissionPage() {
 
       {/* অ্যাকশন ও ব্যাক বাটন এরিয়া */}
       <div className="w-full max-w-[8.27in] flex justify-between items-center mb-4 print:hidden px-2">
-        <Link href="/admission" className="text-xs sm:text-sm font-bold text-emerald-800 hover:underline flex items-center gap-1">
-          ⬅ নির্দেশিকাতে ফিরে যান
+        <Link href="/dashboard/admin/admission" className="text-xs sm:text-sm font-bold text-emerald-800 hover:underline flex items-center gap-1">
+          ⬅ ফিরে যান
         </Link>
         <button
           type="button"
