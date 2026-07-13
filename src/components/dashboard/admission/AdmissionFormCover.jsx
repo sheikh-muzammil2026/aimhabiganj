@@ -82,9 +82,9 @@ export default function AdmissionFormCover({ formData, handleChange }) {
         <div className="w-full max-w-xl px-4 sm:px-10 space-y-3 sm:space-y-4 text-left my-2 print:space-y-3 print:my-1">
           {[
             { label: "শিক্ষার্থীর নাম", name: "studentNameBangla", type: "text" },
-            { label: "অভিভাবকের নাম", name: "guardianNameCover", type: "text" },
-            { label: "আইডি নম্বর", name: "idNumberCover", type: "text", isMono: true },
-            { label: "মোবাইল নম্বর", name: "mobileNumberCover", type: "text", isMono: true, spacer: true },
+            { label: "অভিভাবকের নাম", name: "fatherNameBangla", type: "text" },
+            { label: "আইডি নম্বর", name: "studentIdOffice", type: "text", isMono: true },
+            { label: "মোবাইল নম্বর", name: "fatherMobile", type: "text", isMono: true, spacer: true },
           ].map((field) => (
             <div key={field.name} className="flex flex-col sm:flex-row sm:items-end gap-1 sm:gap-2 text-sm sm:text-base print:flex-row print:items-end">
               <span className="font-extrabold text-[#231f20] whitespace-nowrap tracking-wide">{field.label} :</span>
