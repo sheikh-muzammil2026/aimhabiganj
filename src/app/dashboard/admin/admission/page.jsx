@@ -298,7 +298,7 @@ export default function AdminAdmissionDashboard() {
 
                                             <td className="p-0 md:p-4 pt-2 md:pt-4 flex flex-wrap gap-2 md:table-cell md:text-right md:space-x-1 sm:space-x-2 whitespace-nowrap justify-end border-t border-dashed border-gray-100 md:border-t-0">
                                                 {/* view button-টিকে Link tag এর ভেতরে দেওয়া হয়েছে */}
-                                                <Link href={`/dashboard/admin/admission/edit/${reqId}`} className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg cursor-pointer inline-block text-center flex-1 md:flex-none">
+                                                <Link href={`/admission/edit/${reqId}`} className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg cursor-pointer inline-block text-center flex-1 md:flex-none">
                                                     👁️ ভিউ & এডিট
                                                 </Link>
                                                 <button disabled={req.status === 'Approved'} onClick={() => updateStatus(reqId, 'Approved')} className="bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-lg disabled:opacity-30 cursor-pointer flex-1 md:flex-none text-center">✓ অ্যাপ্রুভ</button>
