@@ -1,9 +1,9 @@
-// app/admin/admission/page.js
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'react-toastify';
+import Link from 'next/link'; // Link tag ইমপোর্ট করা হয়েছে
 
 export default function AdminAdmissionDashboard() {
     const searchParams = useSearchParams();
@@ -238,6 +238,7 @@ export default function AdminAdmissionDashboard() {
                             </thead>
                             <tbody className="divide-y divide-gray-100 font-medium block md:table-row-group">
                                 {admissionRequests.map((req) => {
+                                    const reqId = req._id?.$oid || req._id;
                                     // ডেটাবেজ ফরম্যাট অনুযায়ী কোন কোন বিভাগগুলো active তা বের করার লজিক
                                     const activeDivisions = [];
                                     if (req.divisionPreHifz?.active) activeDivisions.push("Pre-Hifz");
@@ -247,7 +248,7 @@ export default function AdminAdmissionDashboard() {
 
                                     return (
                                         <tr
-                                            key={req._id?.$oid || req._id}
+                                            key={reqId}
                                             className="hover:bg-gray-50/70 transition-colors block md:table-row p-4 md:p-0 space-y-3 md:space-y-0 border-b border-gray-100 md:border-b-0"
                                         >
                                             {/* মঙ্গোডিবি আইডির পরিবর্তে ডেটাবেজের শর্ট আইডি (যেমন: 02420) প্রদর্শন */}
@@ -296,10 +297,13 @@ export default function AdminAdmissionDashboard() {
                                             </td>
 
                                             <td className="p-0 md:p-4 pt-2 md:pt-4 flex flex-wrap gap-2 md:table-cell md:text-right md:space-x-1 sm:space-x-2 whitespace-nowrap justify-end border-t border-dashed border-gray-100 md:border-t-0">
-                                                <button onClick={() => setSelectedRequest(req)} className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg cursor-pointer flex-1 md:flex-none text-center">👁️ ভিউ & এডিট</button>
-                                                <button disabled={req.status === 'Approved'} onClick={() => updateStatus(req._id?.$oid || req._id, 'Approved')} className="bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-lg disabled:opacity-30 cursor-pointer flex-1 md:flex-none text-center">✓ অ্যাপ্রুভ</button>
-                                                <button disabled={req.status === 'Rejected'} onClick={() => updateStatus(req._id?.$oid || req._id, 'Rejected')} className="bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg disabled:opacity-30 cursor-pointer flex-1 md:flex-none text-center">✕ রিজেক্ট</button>
-                                                <button onClick={() => deleteAdmissionRequest(req._id?.$oid || req._id)} className="bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-lg cursor-pointer flex-1 md:flex-none text-center">🗑️ ডিলিট</button>
+                                                {/* view button-টিকে Link tag এর ভেতরে দেওয়া হয়েছে */}
+                                                <Link href={`/dashboard/admin/admission/edit/${reqId}`} className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg cursor-pointer inline-block text-center flex-1 md:flex-none">
+                                                    👁️ ভিউ & এডিট
+                                                </Link>
+                                                <button disabled={req.status === 'Approved'} onClick={() => updateStatus(reqId, 'Approved')} className="bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-lg disabled:opacity-30 cursor-pointer flex-1 md:flex-none text-center">✓ অ্যাপ্রুভ</button>
+                                                <button disabled={req.status === 'Rejected'} onClick={() => updateStatus(reqId, 'Rejected')} className="bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg disabled:opacity-30 cursor-pointer flex-1 md:flex-none text-center">✕ রিজেক্ট</button>
+                                                <button onClick={() => deleteAdmissionRequest(reqId)} className="bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-lg cursor-pointer flex-1 md:flex-none text-center">🗑️ ডিলিট</button>
                                             </td>
                                         </tr>
                                     );
@@ -326,7 +330,7 @@ export default function AdminAdmissionDashboard() {
                                 <input type="text" value={guideSettings.timeline_exam} onChange={(e) => setGuideSettings({ ...guideSettings, timeline_exam: e.target.value })} className="w-full p-3 border border-gray-200 rounded-xl text-sm font-semibold focus:outline-emerald-600" placeholder="উদাঃ ১০ শাওয়াল, সকাল ৯:০০ টা" />
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 mb-1">клаস শুরুর তারিখ</label>
+                                <label className="block text-xs font-bold text-gray-500 mb-1">клас শুরুর তারিখ</label>
                                 <input type="text" value={guideSettings.timeline_class} onChange={(e) => setGuideSettings({ ...guideSettings, timeline_class: e.target.value })} className="w-full p-3 border border-gray-200 rounded-xl text-sm font-semibold focus:outline-emerald-600" placeholder="উদাঃ ১৫ শাওয়াল থেকে ইনশাالله" />
                             </div>
                         </div>
@@ -411,417 +415,6 @@ export default function AdminAdmissionDashboard() {
                     </div>
                 </form>
             )}
-            {/* ৪. বিস্তারিত ভিউ প্রোফাইল ও এডিট মোডাল */}
-            {selectedRequest && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 z-50 print:p-0 print:bg-white print:static print:block">
-
-                    {/* প্রিন্ট করার জন্য পারফেক্ট A4 সাইজ ও লেআউট সিএসএস স্টাইল */}
-                    <style>{`
-            @media print {
-                body * {
-                    visibility: hidden;
-                }
-                .print-modal-content, .print-modal-content * {
-                    visibility: visible;
-                }
-                .print-modal-content {
-                    position: absolute;
-                    left: 0;
-                    top: 0;
-                    width: 100% !important;
-                    max-width: 100% !important;
-                    height: auto !important;
-                    max-height: none !important;
-                    overflow: visible !important;
-                    box-shadow: none !important;
-                    border: none !important;
-                    padding: 0 !important;
-                    margin: 0 !important;
-                    background: white !important;
-                }
-                input, select, textarea {
-                    border: none !important;
-                    background: transparent !important;
-                    padding: 0 !important;
-                    appearance: none !important;
-                    width: 100% !important;
-                    font-weight: bold !important;
-                }
-                .no-print {
-                    display: none !important;
-                }
-            }
-        `}</style>
-
-                    <form onSubmit={handleFullRequestUpdate} className="print-modal-content bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-gray-200 shadow-2xl flex flex-col animate-in fade-in zoom-in-95 duration-200">
-
-                        {/* মোডাল হেডার */}
-                        <div className="p-4 sm:p-5 border-b border-emerald-900/10 bg-gradient-to-r from-emerald-900 to-emerald-800 text-white flex justify-between items-center sticky top-0 z-10 shadow-sm print:bg-transparent print:text-black print:border-b-2 print:border-emerald-900">
-                            <div>
-                                <h3 className="text-base sm:text-lg font-black tracking-wide">📝 মাদ্রাসা ভর্তি আবেদনপত্র (বিস্তারিত ও এডিট)</h3>
-                                <p className="text-[11px] text-emerald-200/90 font-mono mt-0.5 print:text-gray-600">
-                                    সেশন: {selectedRequest.sessionYear} | ফরম নং: {selectedRequest.formNo} | সিরিয়াল: {selectedRequest.serialNo}
-                                </p>
-                            </div>
-                            <div className="flex items-center gap-2 no-print">
-                                <button
-                                    type="button"
-                                    onClick={() => window.print()}
-                                    className="bg-white/20 hover:bg-white/30 text-white rounded-xl p-2 px-3 text-xs font-bold transition-colors cursor-pointer flex items-center gap-1"
-                                >
-                                    🖨️ প্রিন্ট (A4)
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setSelectedRequest(null)}
-                                    className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl p-2 px-3 text-xs font-bold transition-colors cursor-pointer"
-                                >
-                                    ✕ বন্ধ করুন
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* মোডাল বডি */}
-                        <div className="p-4 sm:p-6 space-y-6 text-xs sm:text-sm text-gray-700 bg-gray-50/30 print:bg-white print:p-0">
-
-                            {/* শীর্ষ কার্ড: সিস্টেম ও স্ট্যাটাস */}
-                            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 bg-emerald-900/5 p-4 rounded-xl border border-emerald-900/10 shadow-2xs print:border-none print:bg-transparent print:p-0 items-center">
-                                <div>
-                                    <span className="block text-[11px] font-bold text-emerald-800/80">আইডি (ID)</span>
-                                    <span className="font-bold text-gray-900 font-mono">{selectedRequest.id || 'N/A'}</span>
-                                </div>
-                                <div>
-                                    <span className="block text-[11px] font-bold text-emerald-800/80">ডাটাবেজ আইডি</span>
-                                    <span className="font-bold text-gray-500 font-mono text-[10px] break-all">{selectedRequest._id?.$oid || selectedRequest._id || 'N/A'}</span>
-                                </div>
-                                <div>
-                                    <span className="block text-[11px] font-bold text-emerald-800/80">আবেদনের স্ট্যাটাস</span>
-                                    <select
-                                        value={selectedRequest.status || 'Pending'}
-                                        onChange={(e) => setSelectedRequest({ ...selectedRequest, status: e.target.value })}
-                                        className="mt-1 p-1.5 w-full border border-gray-300 rounded bg-white text-xs font-bold focus:outline-emerald-600"
-                                    >
-                                        <option value="Pending">Pending (অপেক্ষমাণ)</option>
-                                        <option value="Approved">Approved (অনুমোদিত)</option>
-                                        <option value="Rejected">Rejected (বাতিল)</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <span className="block text-[11px] font-bold text-emerald-800/80">আবেদনের তারিখ</span>
-                                    <span className="font-bold text-gray-900 font-mono">
-                                        {selectedRequest.createdAt?.$date ? new Date(selectedRequest.createdAt.$date).toLocaleDateString('bn-BD') : 'N/A'}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* সেকশন ১: কাঙ্ক্ষিত বিভাগ (মাদ্রাসা ডিভিশন) */}
-                            <div className="border border-gray-200/80 p-4 rounded-xl bg-white space-y-4 print:border-none print:p-0">
-                                <h4 className="font-bold text-emerald-900 border-b pb-1 text-sm">🕌 ভর্তির কাঙ্ক্ষিত বিভাগ (Division Details)</h4>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">হিফজ বিভাগ (Hifz Active?)</label>
-                                        <select
-                                            value={selectedRequest.divisionHifz?.active ? "true" : "false"}
-                                            onChange={(e) => setSelectedRequest({
-                                                ...selectedRequest,
-                                                divisionHifz: { ...selectedRequest.divisionHifz, active: e.target.value === "true" }
-                                            })}
-                                            className="w-full p-2 border border-gray-200 rounded-lg font-semibold bg-white"
-                                        >
-                                            <option value="true">হ্যাঁ (Active)</option>
-                                            <option value="false">না (Inactive)</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">ধরন (Hifz Type)</label>
-                                        <input type="text" value={selectedRequest.divisionHifz?.type || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, divisionHifz: { ...selectedRequest.divisionHifz, type: e.target.value } })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">শ্রেণী (Hifz Class)</label>
-                                        <input type="text" value={selectedRequest.divisionHifz?.class || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, divisionHifz: { ...selectedRequest.divisionHifz, class: e.target.value } })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* সেকশন ২: শিক্ষার্থীর ব্যক্তিগত তথ্য */}
-                            <div className="border border-gray-200/80 p-4 rounded-xl bg-white space-y-4 print:border-none print:p-0">
-                                <h4 className="font-bold text-emerald-900 border-b pb-1 text-sm">👤 শিক্ষার্থীর ব্যক্তিগত তথ্য</h4>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">নাম (বাংলা)</label>
-                                        <input type="text" value={selectedRequest.studentNameBangla || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, studentNameBangla: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">নাম (English)</label>
-                                        <input type="text" value={selectedRequest.studentNameEnglish || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, studentNameEnglish: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">নাম (আরবি)</label>
-                                        <input type="text" value={selectedRequest.studentNameArabic || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, studentNameArabic: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold text-right" dir="rtl" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">জন্ম তারিখ</label>
-                                        <input type="date" value={selectedRequest.dateOfBirth || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, dateOfBirth: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold font-mono" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">বয়স (Age)</label>
-                                        <input type="text" value={selectedRequest.age || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, age: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold font-mono" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">জেন্ডার</label>
-                                        <input type="text" value={selectedRequest.gender || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, gender: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">জন্ম নিবন্ধন নম্বর</label>
-                                        <input type="text" value={selectedRequest.birthCertificateNo || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, birthCertificateNo: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold font-mono" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">রক্তের গ্রুপ</label>
-                                        <input type="text" value={selectedRequest.bloodGroup || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, bloodGroup: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold font-mono" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">জাতীয়তা</label>
-                                        <input type="text" value={selectedRequest.nationality || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, nationality: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">ওজন (Weight)</label>
-                                        <input type="text" value={selectedRequest.weight || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, weight: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">উচ্চতা (Height)</label>
-                                        <input type="text" value={selectedRequest.height || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, height: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* সেকশন ৩: বর্তমান ও স্থায়ী ঠিকানা (Nested Object Map) */}
-                            <div className="border border-gray-200/80 p-4 rounded-xl bg-white space-y-4 print:border-none print:p-0">
-                                <h4 className="font-bold text-emerald-900 border-b pb-1 text-sm">📍 ঠিকানার বিবরণ</h4>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                    {/* বর্তমান ঠিকানা */}
-                                    <div className="space-y-2 bg-gray-50/50 p-3 rounded-lg border border-gray-100">
-                                        <h5 className="font-bold text-gray-600 text-xs mb-1">🏡 বর্তমান ঠিকানা:</h5>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            <input type="text" placeholder="বাসা" value={selectedRequest.currentAddress?.house || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, currentAddress: { ...selectedRequest.currentAddress, house: e.target.value } })} className="p-1.5 border border-gray-200 rounded bg-white text-xs" />
-                                            <input type="text" placeholder="রোড" value={selectedRequest.currentAddress?.road || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, currentAddress: { ...selectedRequest.currentAddress, road: e.target.value } })} className="p-1.5 border border-gray-200 rounded bg-white text-xs" />
-                                            <input type="text" placeholder="গ্রাম" value={selectedRequest.currentAddress?.village || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, currentAddress: { ...selectedRequest.currentAddress, village: e.target.value } })} className="p-1.5 border border-gray-200 rounded bg-white text-xs" />
-                                            <input type="text" placeholder="পোস্ট অফিস" value={selectedRequest.currentAddress?.postOffice || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, currentAddress: { ...selectedRequest.currentAddress, postOffice: e.target.value } })} className="p-1.5 border border-gray-200 rounded bg-white text-xs" />
-                                            <input type="text" placeholder="থানা" value={selectedRequest.currentAddress?.thana || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, currentAddress: { ...selectedRequest.currentAddress, thana: e.target.value } })} className="p-1.5 border border-gray-200 rounded bg-white text-xs" />
-                                            <input type="text" placeholder="জেলা" value={selectedRequest.currentAddress?.district || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, currentAddress: { ...selectedRequest.currentAddress, district: e.target.value } })} className="p-1.5 border border-gray-200 rounded bg-white text-xs" />
-                                        </div>
-                                    </div>
-                                    {/* স্থায়ী ঠিকানা */}
-                                    <div className="space-y-2 bg-gray-50/50 p-3 rounded-lg border border-gray-100">
-                                        <h5 className="font-bold text-gray-600 text-xs mb-1">🏢 স্থায়ী ঠিকানা:</h5>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            <input type="text" placeholder="বাসা" value={selectedRequest.permanentAddress?.house || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, permanentAddress: { ...selectedRequest.permanentAddress, house: e.target.value } })} className="p-1.5 border border-gray-200 rounded bg-white text-xs" />
-                                            <input type="text" placeholder="রোড" value={selectedRequest.permanentAddress?.road || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, permanentAddress: { ...selectedRequest.permanentAddress, road: e.target.value } })} className="p-1.5 border border-gray-200 rounded bg-white text-xs" />
-                                            <input type="text" placeholder="গ্রাম" value={selectedRequest.permanentAddress?.village || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, permanentAddress: { ...selectedRequest.permanentAddress, village: e.target.value } })} className="p-1.5 border border-gray-200 rounded bg-white text-xs" />
-                                            <input type="text" placeholder="পোস্ট অফিস" value={selectedRequest.permanentAddress?.postOffice || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, permanentAddress: { ...selectedRequest.permanentAddress, postOffice: e.target.value } })} className="p-1.5 border border-gray-200 rounded bg-white text-xs" />
-                                            <input type="text" placeholder="থানা" value={selectedRequest.permanentAddress?.thana || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, permanentAddress: { ...selectedRequest.permanentAddress, thana: e.target.value } })} className="p-1.5 border border-gray-200 rounded bg-white text-xs" />
-                                            <input type="text" placeholder="জেলা" value={selectedRequest.permanentAddress?.district || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, permanentAddress: { ...selectedRequest.permanentAddress, district: e.target.value } })} className="p-1.5 border border-gray-200 rounded bg-white text-xs" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* সেকশন ৪: পিতা ও মাতার তথ্য */}
-                            <div className="border border-gray-200/80 p-4 rounded-xl bg-white space-y-4 print:border-none print:p-0">
-                                <h4 className="font-bold text-emerald-900 border-b pb-1 text-sm">👨‍👩‍👦 পিতা ও মাতার তথ্য</h4>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">পিতার নাম (বাংলা)</label>
-                                        <input type="text" value={selectedRequest.fatherNameBangla || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, fatherNameBangla: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">পিতার নাম (English)</label>
-                                        <input type="text" value={selectedRequest.fatherNameEnglish || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, fatherNameEnglish: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">পিতার মোবাইল</label>
-                                        <input type="text" value={selectedRequest.fatherMobile || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, fatherMobile: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold font-mono" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">পিতার NID</label>
-                                        <input type="text" value={selectedRequest.fatherNid || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, fatherNid: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold font-mono" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">পিতার পেশা</label>
-                                        <input type="text" value={selectedRequest.fatherProfession || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, fatherProfession: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">পিতার অবস্থা (Alive/Dead)</label>
-                                        <input type="text" value={selectedRequest.fatherStatus || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, fatherStatus: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold" />
-                                    </div>
-
-                                    <div className="sm:col-span-3 border-t border-gray-100 my-1"></div>
-
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">মাতার নাম (বাংলা)</label>
-                                        <input type="text" value={selectedRequest.motherNameBangla || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, motherNameBangla: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">মাতার মোবাইল</label>
-                                        <input type="text" value={selectedRequest.motherMobile || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, motherMobile: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold font-mono" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">মাতার NID</label>
-                                        <input type="text" value={selectedRequest.motherNid || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, motherNid: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold font-mono" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* সেকশন ৫: অভিভাবকের আর্থিক অবস্থা ও রেফারেন্স */}
-                            <div className="border border-gray-200/80 p-4 rounded-xl bg-white space-y-4 print:border-none print:p-0">
-                                <h4 className="font-bold text-emerald-900 border-b pb-1 text-sm">💰 অভিভাবকের আয় ও রেফারেন্স</h4>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">বার্ষিক আয় (অংকে)</label>
-                                        <input type="text" value={selectedRequest.guardianAnnualIncome || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, guardianAnnualIncome: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">বার্ষিক আয় (কথায়)</label>
-                                        <input type="text" value={selectedRequest.guardianAnnualIncomeWords || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, guardianAnnualIncomeWords: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">সুপারিশকারী/রেফারেন্স ব্যক্তির নাম</label>
-                                        <input type="text" value={selectedRequest.referenceName || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, referenceName: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">রেফারেন্স মোবাইল নম্বর</label>
-                                        <input type="text" value={selectedRequest.referenceMobile || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, referenceMobile: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold font-mono" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* সেকশন ৬: পূর্ববর্তী প্রতিষ্ঠানের বিবরণ */}
-                            <div className="border border-gray-200/80 p-4 rounded-xl bg-white space-y-4 print:border-none print:p-0">
-                                <h4 className="font-bold text-emerald-900 border-b pb-1 text-sm">🎓 পূর্ববর্তী শিক্ষা প্রতিষ্ঠানের তথ্য</h4>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                    <div className="sm:col-span-2">
-                                        <label className="block text-[11px] font-bold text-gray-400">প্রতিষ্ঠানের নাম</label>
-                                        <input type="text" value={selectedRequest.prevInstituteName || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, prevInstituteName: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">পূর্ববর্তী শ্রেণী</label>
-                                        <input type="text" value={selectedRequest.prevClass || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, prevClass: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold" />
-                                    </div>
-                                    <div className="sm:col-span-2">
-                                        <label className="block text-[11px] font-bold text-gray-400">মাদ্রাসা ত্যাগের কারণ</label>
-                                        <input type="text" value={selectedRequest.prevInstituteLeaveReason || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, prevInstituteLeaveReason: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">প্রধান শিক্ষকের মোবাইল</label>
-                                        <input type="text" value={selectedRequest.prevPrincipalMobile || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, prevPrincipalMobile: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold font-mono" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">ছাড়পত্র/TC নং</label>
-                                        <input type="text" value={selectedRequest.prevTransferCertificateNo || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, prevTransferCertificateNo: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold font-mono" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">টিসি প্রদানের তারিখ</label>
-                                        <input type="text" value={selectedRequest.prevTcDate || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, prevTcDate: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold font-mono" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* সেকশন ৭: আচরণ, অভ্যাস ও মনস্তাত্ত্বিক তথ্য */}
-                            <div className="border border-gray-200/80 p-4 rounded-xl bg-white space-y-4 print:border-none print:p-0">
-                                <h4 className="font-bold text-emerald-900 border-b pb-1 text-sm">🧠 শিক্ষার্থীর অভ্যাস ও মনস্তাত্ত্বিক তথ্য</h4>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">নিয়মিত নামাজ পড়ে?</label>
-                                        <input type="text" value={selectedRequest.prayerAddicted || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, prayerAddicted: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">পরিষ্কার-পরিচ্ছন্নতা পছন্দ করে?</label>
-                                        <input type="text" value={selectedRequest.cleanlinessLover || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, cleanlinessLover: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">খাবারে অরুচি আছে?</label>
-                                        <input type="text" value={selectedRequest.foodReluctance || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, foodReluctance: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">পছন্দের খাবার</label>
-                                        <input type="text" value={selectedRequest.favFoodType || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, favFoodType: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">ঘুমানোর সময়</label>
-                                        <input type="text" value={selectedRequest.sleepTime || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, sleepTime: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold font-mono" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">ঘুম থেকে ওঠার সময়</label>
-                                        <input type="text" value={selectedRequest.wakeUpTime || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, wakeUpTime: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold font-mono" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-400">প্রিয় কাজ/শখ</label>
-                                        <input type="text" value={selectedRequest.favThing || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, favThing: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold" />
-                                    </div>
-                                    <div className="sm:col-span-2">
-                                        <label className="block text-[11px] font-bold text-gray-400">উদ্বেগ বা চিন্তার কারণ</label>
-                                        <input type="text" value={selectedRequest.anxietyReason || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, anxietyReason: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg font-semibold" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* সেকশন ৮: অফিসের ব্যবহারের জন্য (Office Use Only) */}
-                            <div className="border border-dashed border-emerald-600 p-4 rounded-xl bg-emerald-50/20 space-y-4 print:border-solid print:p-0">
-                                <h4 className="font-bold text-emerald-900 border-b pb-1 text-sm flex items-center gap-1">🏢 অফিসের ব্যবহারের জন্য (Office Use Only)</h4>
-                                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-emerald-800">অফিস আইডি (Student ID)</label>
-                                        <input type="text" value={selectedRequest.officeUse?.studentIdOffice || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, officeUse: { ...selectedRequest.officeUse, studentIdOffice: e.target.value } })} className="w-full p-2 border border-emerald-200 bg-white rounded-lg font-bold font-mono" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-emerald-800">পরীক্ষার প্রাপ্ত নম্বর</label>
-                                        <input type="text" value={selectedRequest.officeUse?.examMark || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, officeUse: { ...selectedRequest.officeUse, examMark: e.target.value } })} className="w-full p-2 border border-emerald-200 bg-white rounded-lg font-bold font-mono" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-emerald-800">মেধা তালিকা (Position)</label>
-                                        <input type="text" value={selectedRequest.officeUse?.meritPosition || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, officeUse: { ...selectedRequest.officeUse, meritPosition: e.target.value } })} className="w-full p-2 border border-emerald-200 bg-white rounded-lg font-bold font-mono" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-emerald-800">অফিস রোল নং</label>
-                                        <input type="text" value={selectedRequest.officeUse?.officeRollNo || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, officeUse: { ...selectedRequest.officeUse, officeRollNo: e.target.value } })} className="w-full p-2 border border-emerald-200 bg-white rounded-lg font-bold font-mono" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-emerald-800">ভর্তিকৃত শ্রেণী</label>
-                                        <input type="text" value={selectedRequest.officeUse?.admittedClass || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, officeUse: { ...selectedRequest.officeUse, admittedClass: e.target.value } })} className="w-full p-2 border border-emerald-200 bg-white rounded-lg font-bold" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-emerald-800">ভর্তিকৃত শাখা/সেকশন</label>
-                                        <input type="text" value={selectedRequest.officeUse?.admittedSection || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, officeUse: { ...selectedRequest.officeUse, admittedSection: e.target.value } })} className="w-full p-2 border border-emerald-200 bg-white rounded-lg font-bold" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-emerald-800">ভর্তির তারিখ</label>
-                                        <input type="date" value={selectedRequest.officeUse?.admissionDate || ''} onChange={(e) => setSelectedRequest({ ...selectedRequest, officeUse: { ...selectedRequest.officeUse, admissionDate: e.target.value } })} className="w-full p-2 border border-emerald-200 bg-white rounded-lg font-bold font-mono" />
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        {/* মোডাল ফুটার (অ্যাকশন বাটন) */}
-                        <div className="p-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-2 sticky bottom-0 z-10 no-print">
-                            <button
-                                type="button"
-                                onClick={() => setSelectedRequest(null)}
-                                className="px-4 py-2 border border-gray-300 text-gray-700 font-bold rounded-xl text-xs hover:bg-gray-100 cursor-pointer"
-                            >
-                                বন্ধ করুন
-                            </button>
-                            <button
-                                type="submit"
-                                className="px-5 py-2 bg-emerald-800 hover:bg-emerald-900 text-white font-bold rounded-xl text-xs shadow-md cursor-pointer transition-transform active:scale-95"
-                            >
-                                💾 তথ্য আপডেট করুন
-                            </button>
-                        </div>
-
-                    </form>
-                </div>
-            )}
-
         </div>
     );
 }
