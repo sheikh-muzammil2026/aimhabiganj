@@ -3,7 +3,7 @@ import HeroSection from '@/components/public/home/hero';
 import ReviewSection from '@/components/public/home/reviews';
 import StatsSection from '@/components/public/home/statsSection';
 import WhyChooseUs from '@/components/public/home/whyChooseUs';
-import WhatsAppButton from "@/components/WhatsAppButton";
+import WhatsAppButton from "@/components/dashboard/admission/WhatsAppButton";
 import React from 'react';
 
 const page = () => {
@@ -14,7 +14,7 @@ const page = () => {
       <FeaturedSections />
       <StatsSection />
       <ReviewSection />
-    <WhatsAppButton />
+      <WhatsAppButton />
     </div>
   );
 };

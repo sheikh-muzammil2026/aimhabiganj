@@ -3,10 +3,10 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import AdmissionFormCover from "@/components/AdmissionFormCover";
-import AdmissionFormPage1 from "@/components/AdmissionFormPage1";
-import AdmissionFormPage2 from "@/components/AdmissionFormPage2";
-import AdmissionFormPage3 from "@/components/AdmissionFormPage3";
+import AdmissionFormCover from "@/components/dashboard/admission/AdmissionFormCover";
+import AdmissionFormPage1 from "@/components/dashboard/admission/AdmissionFormPage1";
+import AdmissionFormPage2 from "@/components/dashboard/admission/AdmissionFormPage2";
+import AdmissionFormPage3 from "@/components/dashboard/admission/AdmissionFormPage3";
 import { toast } from "react-toastify";
 
 export default function AdmissionFormPage() {
