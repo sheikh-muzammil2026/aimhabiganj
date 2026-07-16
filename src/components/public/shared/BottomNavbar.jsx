@@ -2,18 +2,33 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, FileText, GraduationCap, Phone, Menu, X, ChevronRight } from "lucide-react";
+import { 
+  Home, 
+  FileText, 
+  GraduationCap, 
+  BookOpen, 
+  Menu, 
+  X, 
+  ChevronRight, 
+  Info, 
+  School, 
+  Hotel, 
+  MonitorPlay, 
+  Image, 
+  PhoneCall 
+} from "lucide-react";
 
 export default function BottomNavbar() {
     const pathname = usePathname();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [activeDropdown, setActiveDropdown] = useState(null);
 
-    // আপনার দেওয়া সম্পূর্ণ menuItems অ্যারে
+    // প্রতিটি ক্যাটাগরির জন্য অর্থপূর্ণ ইসলামিক/মডার্ন আইকন সেটআপ
     const menuItems = [
-        { name: "হোম", href: "/", icon: <Home className="w-5 h-5" /> },
+        { name: "হোম", href: "/", icon: <Home className="w-4 h-4" /> },
         {
             name: "আমাদের সম্পর্কে",
+            icon: <Info className="w-4 h-4" />,
             dropdown: [
                 { name: "প্রতিষ্ঠান পরিচিতি", href: "/about#profile" },
                 { name: "প্রতিষ্ঠাতা পরিচিতি", href: "/about#founder" },
@@ -30,6 +45,7 @@ export default function BottomNavbar() {
         },
         {
             name: "শিক্ষা কার্যক্রম",
+            icon: <BookOpen className="w-4 h-4" />,
             dropdown: [
                 { name: "শ্রেণী শিক্ষকের তালিকা", href: "/academics#teachers" },
                 { name: "শিক্ষা স্তর", href: "/academics#levels" },
@@ -41,6 +57,7 @@ export default function BottomNavbar() {
         },
         {
             name: "বিভাগসমূহ",
+            icon: <School className="w-4 h-4" />,
             dropdown: [
                 { name: "হিফজ বিভাগ", href: "/#hifz" },
                 { name: "একাডেমিক বিভাগ", href: "/#academic" },
@@ -49,7 +66,7 @@ export default function BottomNavbar() {
         {
             name: "ভর্তি",
             isAdmission: true, 
-            icon: <GraduationCap className="w-5 h-5" />,
+            icon: <GraduationCap className="w-4 h-4" />,
             dropdown: [
                 { name: "ভর্তির সময়", href: "/admission#timeline" },
                 { name: "ভর্তি পরীক্ষা", href: "/admission#test" },
@@ -61,6 +78,7 @@ export default function BottomNavbar() {
         },
         {
             name: "আবাসন",
+            icon: <Hotel className="w-4 h-4" />,
             dropdown: [
                 { name: "ছাত্রাবাস পরিচিতি", href: "/hostel#about" },
                 { name: "আবাসিক হলের পরিচালকবৃন্দ", href: "/hostel#directors" },
@@ -71,6 +89,7 @@ export default function BottomNavbar() {
         },
         {
             name: "স্মার্ট ক্লাসরুম",
+            icon: <MonitorPlay className="w-4 h-4" />,
             dropdown: [
                 { name: "লাইভ ক্লাস", href: "/smart-classroom/live" },
                 { name: "রেকর্ডেড ক্লাস", href: "/smart-classroom/recorded" },
@@ -79,11 +98,12 @@ export default function BottomNavbar() {
                 { name: "কুইজ প্রতিযোগিতা", href: "/smart-classroom/quiz" },
             ],
         },
-        { name: "নোটিশ বোর্ড", href: "/notices", icon: <FileText className="w-5 h-5" /> },
-        { name: "গ্যালারি", href: "/gallery" },
-        { name: "ফলাফল", href: "/results" },
+        { name: "নোটিশ বোর্ড", href: "/notices", icon: <FileText className="w-4 h-4" /> },
+        { name: "গ্যালারি", href: "/gallery", icon: <Image className="w-4 h-4" /> },
+        { name: "ফলাফল", href: "/results", icon: <GraduationCap className="w-4 h-4" /> },
         {
             name: "যোগাযোগ",
+            icon: <PhoneCall className="w-4 h-4" />,
             dropdown: [
                 { name: "যোগাযোগের তথ্য", href: "/contact" },
                 { name: "অভিযোগ ও পরামর্শ", href: "/contact#feedback" },
@@ -91,12 +111,12 @@ export default function BottomNavbar() {
         },
     ];
 
-    // মূল বারের জন্য গুরুত্বপূর্ণ ৪টি আইটেম (বাকিগুলো 'অন্যান্য' তে যাবে)
+    // ডুপ্লিকেশন এড়িয়ে ৪টি সেরা গুরুত্বপূর্ণ মেনু
     const primaryItems = [
-        { name: "হোম", href: "/", icon: <Home className="w-5.5 h-5.5" /> },
-        { name: "ভর্তি ফরম", href: "/admission/form", icon: <GraduationCap className="w-5.5 h-5.5" /> },
-        { name: "নোটিশ", href: "/notices", icon: <FileText className="w-5.5 h-5.5" /> },
-        { name: "যোগাযোগ", href: "/contact", icon: <Phone className="w-5.5 h-5.5" /> },
+        { name: "হোম", href: "/", icon: <Home className="w-[22px] h-[22px]" /> },
+        { name: "শিক্ষা কার্যক্রম", href: "/academics", icon: <BookOpen className="w-[22px] h-[22px]" /> },
+        { name: "ফলাফল", href: "/results", icon: <GraduationCap className="w-[22px] h-[22px]" /> },
+        { name: "নোটিশ", href: "/notices", icon: <FileText className="w-[22px] h-[22px]" /> },
     ];
 
     const toggleDropdown = (index) => {
@@ -105,75 +125,101 @@ export default function BottomNavbar() {
 
     return (
         <>
-            {/* ১. মূল বটম নেভিগেশন বার (শুধু মোবাইল ও ট্যাবলেটের জন্য - md:hidden) */}
-            <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg md:hidden pb-safe">
-                <div className="flex justify-around items-center h-16">
+            {/* ১. মূল বটম নেভিগেশন বার (শুধু মোবাইল ভিউ: md:hidden) */}
+            <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-b from-[#ffffff] to-[#f4fbf7] border-t-2 border-emerald-600/30 shadow-[0_-8px_30px_rgb(6,95,70,0.08)] rounded-t-2xl md:hidden pb-safe">
+                <div className="flex justify-around items-center h-16 px-2">
                     {primaryItems.map((item, idx) => {
                         const isActive = pathname === item.href;
                         return (
                             <Link 
                                 key={idx} 
                                 href={item.href} 
-                                className={`flex flex-col items-center justify-center flex-1 h-full transition-all ${
-                                    isActive ? "text-emerald-600 font-semibold" : "text-gray-500"
+                                className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative group ${
+                                    isActive ? "text-emerald-700 font-bold" : "text-gray-500 hover:text-emerald-600"
                                 }`}
                             >
-                                {item.icon}
-                                <span className="text-[11px] mt-1 break-keep text-center">{item.name}</span>
+                                {/* অ্যাক্টিভ বারের উপরের প্রিটি ডট/লাইন ইন্ডিকেটর */}
+                                {isActive && (
+                                    <span className="absolute top-0 w-8 h-1 bg-amber-500 rounded-full shadow-[0_2px_10px_rgba(245,158,11,0.5)]" />
+                                )}
+                                <div className={`transition-transform duration-300 ${isActive ? "scale-110 drop-shadow-[0_2px_4px_rgba(4,120,87,0.2)]" : "group-hover:scale-105"}`}>
+                                    {item.icon}
+                                </div>
+                                <span className="text-[10.5px] mt-1 break-keep text-center tracking-tight font-medium">
+                                    {item.name}
+                                </span>
                             </Link>
                         );
                     })}
 
-                    {/* ৫ নম্বর বাটন: অন্যান্য (More Options) */}
+                    {/* ৫ নম্বর আকর্ষণীয় "অন্যান্য" বাটন */}
                     <button
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        className={`flex flex-col items-center justify-center flex-1 h-full transition-all ${
-                            isMenuOpen ? "text-emerald-600 font-semibold" : "text-gray-500"
+                        className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative group ${
+                            isMenuOpen ? "text-amber-600 font-bold" : "text-gray-500 hover:text-emerald-600"
                         }`}
                     >
-                        {isMenuOpen ? <X className="w-5.5 h-5.5" /> : <Menu className="w-5.5 h-5.5" />}
-                        <span className="text-[11px] mt-1">অন্যান্য</span>
+                        {isMenuOpen && (
+                            <span className="absolute top-0 w-8 h-1 bg-amber-500 rounded-full" />
+                        )}
+                        <div className={`p-1.5 rounded-xl transition-all duration-300 ${isMenuOpen ? "bg-amber-50 text-amber-600 rotate-90" : "bg-emerald-50 text-emerald-700 group-hover:bg-emerald-100"}`}>
+                            {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                        </div>
+                        <span className="text-[10.5px] mt-0.5 font-medium">অন্যান্য</span>
                     </button>
                 </div>
             </div>
 
-            {/* ২. "অন্যান্য" বাটনের ড্রয়ার/বটম শিট মেনু */}
+            {/* ২. "অন্যান্য" বটম শিট ড্রয়ার (ইসলামিক এস্থেটিক লুক) */}
             {isMenuOpen && (
-                <div className="fixed inset-0 z-40 bg-black/50 md:hidden transition-opacity" onClick={() => setIsMenuOpen(false)}>
+                <div className="fixed inset-0 z-40 bg-emerald-950/40 backdrop-blur-xs md:hidden transition-all duration-300 animate-fadeIn" onClick={() => setIsMenuOpen(false)}>
                     <div 
-                        className="fixed bottom-16 left-0 right-0 max-h-[70vh] bg-gray-50 rounded-t-2xl overflow-y-auto p-4 shadow-2xl transition-transform"
-                        onClick={(e) => e.stopPropagation()} // ড্রয়ারের ভেতর ক্লিক করলে যেন বন্ধ না হয়
+                        className="fixed bottom-16 left-0 right-0 max-h-[75vh] bg-[#fafdfb] rounded-t-3xl overflow-y-auto p-4 shadow-[0_-15px_40px_rgba(6,95,70,0.15)] border-t border-emerald-600/10 transition-transform duration-300 animate-slideUp"
+                        onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-4" />
-                        <h3 className="text-center font-bold text-gray-700 mb-4 border-b pb-2 text-base">সব মেনু অপশন</h3>
+                        {/* ড্রয়ার নচ */}
+                        <div className="w-16 h-1.5 bg-emerald-200/60 rounded-full mx-auto mb-5" />
                         
-                        <div className="space-y-2">
+                        <div className="flex items-center justify-center gap-2 mb-4 border-b border-emerald-100 pb-3">
+                            <School className="w-5 h-5 text-emerald-700" />
+                            <h3 className="text-center font-bold text-emerald-950 text-base font-serif">আস-সালাম মাদরাসা মেনু</h3>
+                        </div>
+                        
+                        <div className="space-y-2.5 pb-6">
                             {menuItems.map((item, idx) => {
-                                // যে লিঙ্কগুলো অলরেডি মূল বারে আছে, সেগুলো ড্রপডাউন থেকে বাদ দিতে পারেন অথবা রাখতেও পারেন।
                                 const hasDropdown = !!item.dropdown;
+                                const isDropdownOpen = activeDropdown === idx;
 
                                 return (
-                                    <div key={idx} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                                    <div key={idx} className="bg-white rounded-xl border border-emerald-600/5 shadow-[0_2px_8px_rgba(6,95,70,0.03)] overflow-hidden transition-all">
                                         {hasDropdown ? (
                                             <div>
                                                 <button
                                                     onClick={() => toggleDropdown(idx)}
-                                                    className="w-full flex justify-between items-center p-3.5 text-left font-medium text-gray-700 hover:bg-gray-50"
+                                                    className={`w-full flex justify-between items-center p-3.5 text-left font-medium transition-colors ${
+                                                        isDropdownOpen ? "bg-emerald-50 text-emerald-800" : "text-gray-700 hover:bg-emerald-50/40"
+                                                    }`}
                                                 >
-                                                    <span className="text-sm">{item.name}</span>
-                                                    <ChevronRight className={`w-4 h-4 text-gray-400 transition-transform ${activeDropdown === idx ? "rotate-90 text-emerald-600" : ""}`} />
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`p-1.5 rounded-lg ${isDropdownOpen ? "bg-emerald-600 text-white" : "bg-emerald-50 text-emerald-700"}`}>
+                                                            {item.icon}
+                                                        </div>
+                                                        <span className="text-sm font-semibold">{item.name}</span>
+                                                    </div>
+                                                    <ChevronRight className={`w-4 h-4 text-emerald-600/60 transition-transform duration-300 ${isDropdownOpen ? "rotate-90 text-amber-500" : ""}`} />
                                                 </button>
                                                 
-                                                {/* সাব-মেনু আইটেমসমূহ */}
-                                                {activeDropdown === idx && (
-                                                    <div className="bg-gray-50 border-t border-gray-100 divide-y divide-gray-200/50">
+                                                {/* সাব-মেনু আইটেমসমূহ (সুন্দর বর্ডার ও ব্যাকগ্রাউন্ড সহ) */}
+                                                {isDropdownOpen && (
+                                                    <div className="bg-[#f7fdfa] border-t border-emerald-100 divide-y divide-emerald-100/40">
                                                         {item.dropdown.map((subItem, subIdx) => (
                                                             <Link
                                                                 key={subIdx}
                                                                 href={subItem.href}
                                                                 onClick={() => setIsMenuOpen(false)}
-                                                                className="block p-3 pl-6 text-xs text-gray-600 hover:text-emerald-600 hover:bg-emerald-50/50"
+                                                                className="flex items-center gap-2 p-3.5 pl-12 text-xs font-medium text-gray-600 hover:text-emerald-700 hover:bg-emerald-50/50 transition-colors"
                                                             >
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                                                                 {subItem.name}
                                                             </Link>
                                                         ))}
@@ -184,8 +230,11 @@ export default function BottomNavbar() {
                                             <Link
                                                 href={item.href || "#"}
                                                 onClick={() => setIsMenuOpen(false)}
-                                                className="block p-3.5 text-sm font-medium text-gray-700 hover:bg-emerald-50 hover:text-emerald-600"
+                                                className="flex items-center gap-3 p-3.5 text-sm font-semibold text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
                                             >
+                                                <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700">
+                                                    {item.icon}
+                                                </div>
                                                 {item.name}
                                             </Link>
                                         )}
