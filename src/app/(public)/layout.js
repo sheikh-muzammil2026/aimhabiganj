@@ -2,6 +2,7 @@ import Footer from '@/components/public/shared/footer';
 import Navbar from '@/components/public/shared/navbar/navbar';
 import TopHeader from '@/components/public/shared/topHeader';
 import BottomNavbar from '@/components/public/shared/BottomNavbar';
+import AIChatbot from "@/components/AIChatbot";
 import React from 'react';
 
 
@@ -33,6 +34,7 @@ const layout = ({ children }) => {
       </main>
       
       <BottomNavbar />
+    <AIChatbot/>
       <Footer />
     </div>
   );
