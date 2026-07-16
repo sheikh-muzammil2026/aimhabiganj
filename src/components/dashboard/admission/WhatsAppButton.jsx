@@ -7,7 +7,6 @@ export default function WhatsAppButton() {
 
   const phoneNumber = "8801992757431"; 
   
-  
   const message = encodeURIComponent(
     "আস-সালামু আলাইকুম, আমি আস-সালাম আইডিয়াল মাদরাসার অনলাইন পোর্টাল থেকে যোগাযোগ করছি। কিছু তথ্য জানতে চাচ্ছিলাম।"
   );
@@ -20,7 +19,7 @@ export default function WhatsAppButton() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Contact As-Salam Ideal Madrasah on WhatsApp"
-      className="fixed bottom-8 md:bottom-20 right-6 z-50 bg-[#25D366] p-3.5 rounded-full shadow-[0_4px_14px_rgba(37,211,102,0.4)] hover:bg-[#20ba59] hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center group"
+      className="fixed bottom-20 md:bottom-6 right-6 z-50 bg-[#25D366] p-3.5 rounded-full shadow-[0_4px_14px_rgba(37,211,102,0.4)] hover:bg-[#20ba59] hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center group"
     >
       {/* অফিসিয়াল হোয়াটসঅ্যাপ SVG আইকন */}
       <svg
