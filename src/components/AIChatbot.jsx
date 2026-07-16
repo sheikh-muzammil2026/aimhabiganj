@@ -46,15 +46,15 @@ export default function AIChatbot() {
 
   return (
     <>
-      {/* ১. ফ্লোটিং চ্যাট বাটন (মোবাইলে বটম বারের উপরে ডান কোণায় থাকবে) */}
+      {/* ১. ফ্লোটিং চ্যাট বাটন (ডান দিকের হোয়াটসঅ্যাপের ব্যালেন্স করতে এটিকে বাম কোণায় bottom-20 left-6 পজিশনে সেট করা হয়েছে) */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Open AI Chatbot"
-        className="fixed bottom-20 right-6 z-50 bg-emerald-700 hover:bg-emerald-800 text-white p-3.5 rounded-full shadow-[0_4px_20px_rgba(4,120,87,0.3)] hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center group"
+        className="fixed bottom-20 left-6 z-50 bg-emerald-700 hover:bg-emerald-800 text-white p-3.5 rounded-full shadow-[0_4px_20px_rgba(4,120,87,0.3)] hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center group"
       >
         {isOpen ? <X className="w-6 h-6 animate-spin-slow" /> : <MessageSquare className="w-6 h-6 group-hover:rotate-12 transition-transform" />}
         {!isOpen && (
-          <span className="absolute -top-2 -right-1 bg-amber-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold animate-bounce">
+          <span className="absolute -top-2 -left-1 bg-amber-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold animate-bounce">
             AI
           </span>
         )}
@@ -62,7 +62,8 @@ export default function AIChatbot() {
 
       {/* ২. চ্যাট উইন্ডো ইন্টারফেস */}
       {isOpen && (
-        <div className="fixed bottom-36 right-4 left-4 sm:left-auto sm:w-96 z-50 bg-gradient-to-b from-white to-[#f7fdfa] rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.12)] border border-emerald-600/10 overflow-hidden flex flex-col h-[450px] sm:h-[500px] animate-slideUp">
+        /* চ্যাট উইন্ডোটিও এখন বাম পাশে (left-4 sm:left-6) পপ-আপ হবে */
+        <div className="fixed bottom-36 left-4 right-4 sm:right-auto sm:w-96 z-50 bg-gradient-to-b from-white to-[#f7fdfa] rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.12)] border border-emerald-600/10 overflow-hidden flex flex-col h-[450px] sm:h-[500px] animate-slideUp">
           
           {/* চ্যাট হেডার (ইসলামিক থিম) */}
           <div className="bg-gradient-to-r from-emerald-800 to-emerald-700 text-white p-4 flex justify-between items-center shadow-md">
@@ -89,8 +90,8 @@ export default function AIChatbot() {
                 <div
                   className={`max-w-[85%] rounded-2xl p-3 text-xs leading-relaxed shadow-xs ${
                     msg.role === "user"
-                      ? "bg-emerald-700 text-white rounded-br-none"
-                      : "bg-white text-gray-800 border border-emerald-600/5 rounded-bl-none"
+                      ? "bg-emerald-700 text-white rounded-bl-none" // বাম পাশে চ্যাট উইন্ডো থাকায় ইউজারের মেসেজ ডানে চ্যাপ্টা হবে
+                      : "bg-white text-gray-800 border border-emerald-600/5 rounded-br-none" // এআইয়ের মেসেজ বামে চ্যাপ্টা হবে
                   }`}
                 >
                   {msg.content}
@@ -99,7 +100,7 @@ export default function AIChatbot() {
             ))}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-white border border-emerald-600/5 rounded-2xl rounded-bl-none p-3 text-xs text-gray-400 flex items-center gap-1.5">
+                <div className="bg-white border border-emerald-600/5 rounded-2xl rounded-br-none p-3 text-xs text-gray-400 flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 bg-emerald-600 rounded-full animate-bounce [animation-delay:-0.3s]" />
                   <span className="w-1.5 h-1.5 bg-emerald-600 rounded-full animate-bounce [animation-delay:-0.15s]" />
                   <span className="w-1.5 h-1.5 bg-emerald-600 rounded-full animate-bounce" />
