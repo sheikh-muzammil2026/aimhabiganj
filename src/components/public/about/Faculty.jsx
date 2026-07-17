@@ -15,10 +15,10 @@ export default function Faculty({ data }) {
   const facultyData = data || fallbackData;
 
   return (
-    {/* এখানে id="faculty" এবং scroll-mt-24 যোগ করা হয়েছে */}
     <div id="faculty" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-24">
+      {/* এখানে id="faculty" এবং scroll-mt-24 যোগ করা হয়েছে */}
       <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-bold text-emerald-900 dark:text-emerald-400 flex items-center justify-center gap-3">
+        <h2 className="text-3xl md:text-4xl font-bold text-emerald-900 dark:text-emerald-4 flex items-center justify-center gap-3">
           <span className="hidden sm:inline text-amber-500">❖</span>
           {facultyData.title}
           <span className="hidden sm:inline text-amber-500">❖</span>
@@ -32,7 +32,6 @@ export default function Faculty({ data }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {facultyData.list?.map((teacher, index) => (
           <div key={teacher.id || index} className="bg-white dark:bg-slate-800 border border-emerald-100/70 dark:border-slate-700 rounded-2xl p-6 text-center shadow-md relative overflow-hidden group">
-            {/* ডেকোরেティブ ব্যাকগ্রাউন্ড */}
             <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-emerald-900/10 to-transparent dark:from-emerald-950/40"></div>
             
             <div className="w-28 h-28 rounded-full mx-auto p-1.5 border-4 border-emerald-800 dark:border-emerald-600 bg-white dark:bg-slate-700 flex items-center justify-center overflow-hidden shadow-md relative z-10 mb-4">
