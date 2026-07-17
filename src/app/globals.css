@@ -22,3 +22,8 @@ html {
 .animate-marquee:hover {
   animation-play-state: paused;
 }
+
+
+@utility font-arabic {
+  font-family: var(--font-reem-kufi), sans-serif;
+}
