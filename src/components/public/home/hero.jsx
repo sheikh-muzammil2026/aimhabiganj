@@ -14,7 +14,7 @@ export default function HeroSection() {
             subtitle: "জ্ঞানের আলোয় আলোকিত হোক আগামী প্রজন্ম",
         },
         {
-            url: "/mosque.png",
+            url: "/hero2.png",
             title: "আধুনিক ও সুশৃঙ্খল আবাসন ব্যবস্থা",
             subtitle: "ছাত্রদের মননশীল ও নৈতিক বিকাশে আমরা অঙ্গীকারাবদ্ধ",
         },
