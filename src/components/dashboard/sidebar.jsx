@@ -93,7 +93,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         { title: "ঋণ ও বকেয়া", href: "/dashboard/finance/dues" },
         { title: "অ্যাকাউন্টিং রিপোর্টস", href: "/dashboard/finance/reports" },
     ]
-}
+},
 
         {
             id: "parent-corner",
