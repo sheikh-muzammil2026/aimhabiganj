@@ -38,6 +38,35 @@ export default function AdmissionFormPage2({ formData, handleChange }) {
     }
   };
 
+  // অভিভাবকের অঙ্গীকারনামার জন্য ডায়নামিক রিলেশন এবং নামের লজিক
+  const getDynamicRelation = () => {
+    if (formData.fatherStatus === "জীবিত") return "পিতা";
+    if (formData.motherStatus === "জীবিত") return "মাতা";
+    return formData.guardianRelation || "অভিভাবক";
+  };
+
+  const getDynamicSignatureName = () => {
+    if (formData.fatherStatus === "জীবিত") return formData.fatherNameBangla || "পিতার নাম";
+    if (formData.motherStatus === "জীবित") return formData.motherNameBangla || "মাতার নাম";
+    return formData.guardianNameAbsentParents || "অভিভাবকের নাম";
+  };
+
+  // চেকবক্স হ্যান্ডলার (AIM এয়ার তত্ত্ব এর জন্য)
+  const handleCheckboxChange = (e) => {
+    const { value, checked } = e.target;
+    let currentSources = formData.infoSource ? formData.infoSource.split(", ") : [];
+    
+    if (checked) {
+      currentSources.push(value);
+    } else {
+      currentSources = currentSources.filter(src => src !== value);
+    }
+
+    handleChange({
+      target: { name: "infoSource", value: currentSources.join(", ") }
+    });
+  };
+
   return (
     <div className="w-full min-h-[11.69in] bg-white p-4 md:p-10 flex flex-col justify-between box-border text-gray-800 relative font-bengali print:min-h-screen overflow-x-hidden">
 
@@ -51,17 +80,20 @@ export default function AdmissionFormPage2({ formData, handleChange }) {
           {/* প্রশ্ন ও উত্তর সেকশন */}
           <div className="space-y-4 text-sm">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-semibold text-gray-700">১. আপনার সন্তানের শারীরিক কোনো সমস্যা আছে কি?</span>
+              <span className="font-semibold text-gray-700">১. আপনার সন্তানের শারীরিক কোনো সমস্যা আছে কি? (যেমন: অ্যাজমা, অ্যালার্জি, অটিজম, প্রতিবন্ধী, চোখে কম দেখা ইত্যাদি)</span>
               <div className="flex gap-2">
                 <label className="flex items-center gap-1 cursor-pointer"><input type="radio" name="physicalProblem" value="হ্যাঁ" checked={formData.physicalProblem === "হ্যাঁ"} onChange={handleChange} className="accent-orange-600" /> হ্যাঁ</label>
                 <label className="flex items-center gap-1 cursor-pointer"><input type="radio" name="physicalProblem" value="না" checked={formData.physicalProblem === "না"} onChange={handleChange} className="accent-orange-600" /> না</label>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-end gap-2">
-              <span className="text-xs text-gray-600 whitespace-nowrap">● অ্যাজমা/অ্যালার্জি/অটিজম/প্রতিবন্ধী/চোখে কম দেখা ইত্যাদি কোনটি আছে কি?</span>
-              <input type="text" name="physicalProblemDetails" value={formData.physicalProblemDetails} onChange={handleChange} className="flex-1 border-b border-gray-400 focus:outline-none px-1" />
-            </div>
+            {/* হ্যাঁ হলে এই ইনপুট ফিল্ডটি বের হবে */}
+            {formData.physicalProblem === "হ্যাঁ" && (
+              <div className="flex flex-col sm:flex-row sm:items-end gap-2 animate-fade-in">
+                <span className="text-xs text-gray-600 whitespace-nowrap">● রোগটি বা রোগের নাম লিখুন:</span>
+                <input type="text" name="physicalProblemDetails" value={formData.physicalProblemDetails} onChange={handleChange} className="flex-1 border-b border-gray-400 focus:outline-none px-1" />
+              </div>
+            )}
 
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-semibold text-gray-700">২. পরিষ্কার-পরিচ্ছন্ন থাকতে পছন্দ করে কি?</span>
@@ -84,6 +116,7 @@ export default function AdmissionFormPage2({ formData, handleChange }) {
               <div className="flex flex-wrap gap-2">
                 <label className="flex items-center gap-1 cursor-pointer"><input type="radio" name="favFoodType" value="বাসায় তৈরি খাবার" checked={formData.favFoodType === "বাসায় তৈরি খাবার"} onChange={handleChange} className="accent-orange-600" /> বাসায় তৈরি খাবার</label>
                 <label className="flex items-center gap-1 cursor-pointer"><input type="radio" name="favFoodType" value="ফাস্টফুড" checked={formData.favFoodType === "ফাস্টফুড"} onChange={handleChange} className="accent-orange-600" /> ফাস্টফুড</label>
+                <label className="flex items-center gap-1 cursor-pointer"><input type="radio" name="favFoodType" value="অন্যান্য" checked={formData.favFoodType === "অন্যান্য"} onChange={handleChange} className="accent-orange-600" /> অন্যান্য</label>
               </div>
             </div>
 
@@ -98,7 +131,8 @@ export default function AdmissionFormPage2({ formData, handleChange }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col sm:flex-row sm:items-end gap-1">
                 <span className="text-gray-700 font-semibold whitespace-nowrap">৬. সাধারণত রাতে কখন ঘুমায়?</span>
-                <input type="text" name="sleepTime" value={formData.sleepTime} onChange={handleChange} className="flex-1 border-b border-gray-400 text-center focus:outline-none pb-0.5" />
+                {/* টাইম পিকার ঘড়ি যুক্ত করা হলো */}
+                <input type="time" name="sleepTime" value={formData.sleepTime} onChange={handleChange} className="flex-1 border-b border-gray-400 text-center focus:outline-none pb-0.5 cursor-pointer bg-transparent" />
               </div>
               <div className="flex flex-col sm:flex-row sm:items-end gap-1">
                 <span className="text-gray-700 font-semibold whitespace-nowrap">৭. সকালে কখন ঘুম থেকে উঠে?</span>
@@ -107,7 +141,7 @@ export default function AdmissionFormPage2({ formData, handleChange }) {
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-end gap-2">
-              <span className="font-semibold text-gray-700 whitespace-nowrap">৮. তার প্রিয় জিনিস কী?</span>
+              <span className="font-semibold text-gray-700 whitespace-nowrap">⑧. তার প্রিয় জিনিস কী?</span>
               <input type="text" name="favThing" value={formData.favThing} onChange={handleChange} className="flex-1 border-b border-gray-400 focus:outline-none pb-0.5" />
             </div>
 
@@ -118,7 +152,7 @@ export default function AdmissionFormPage2({ formData, handleChange }) {
           </div>
         </div>
 
-        {/* অভিভাবকের ছবি বক্স (ImgBB ইন্টিগ্রেশন) */}
+        {/* অভিভাবকের ছবি বক্স */}
         <div className="w-32 h-40 border-2 border-dashed border-gray-400 bg-gray-50 flex flex-col items-center justify-center p-2 text-center rounded relative group cursor-pointer overflow-hidden mx-auto sm:mx-0 sm:mt-2">
           {formData.guardianImage ? (
             <img src={formData.guardianImage} alt="Guardian" className="w-full h-full object-cover" />
@@ -154,32 +188,39 @@ export default function AdmissionFormPage2({ formData, handleChange }) {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex flex-col sm:flex-row sm:items-end gap-2">
-                <span className="font-bold text-gray-700 whitespace-nowrap">এন আইডি নং:</span>
-                <input type="text" name="fatherNid" value={formData.fatherNid} onChange={handleChange} className="flex-1 border-b border-dotted border-gray-400 focus:outline-none bg-transparent font-mono" />
-              </div>
-              <div className="flex flex-col sm:flex-row sm:items-end gap-2">
-                <span className="font-bold text-gray-700 whitespace-nowrap">মোবাইল (হোয়াটসঅ্যাপ):</span>
-                <input type="text" name="fatherMobile" value={formData.fatherMobile} onChange={handleChange} className="flex-1 border-b border-dotted border-gray-400 focus:outline-none bg-transparent font-mono" />
-              </div>
+            {/* জীবিত নাকি মৃত প্রশ্ন */}
+            <div className="flex gap-4 pb-1">
+              <span className="font-bold text-gray-700">পিতা জীবিত নাকি মৃত?:</span>
+              <label className="flex items-center gap-1 cursor-pointer"><input type="radio" name="fatherStatus" value="জীবিত" checked={formData.fatherStatus === "জীবিত"} onChange={handleChange} /> জীবিত</label>
+              <label className="flex items-center gap-1 cursor-pointer"><input type="radio" name="fatherStatus" value="মৃত" checked={formData.fatherStatus === "মৃত"} onChange={handleChange} /> মৃত</label>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-end">
-              <div className="flex gap-4 pb-1">
-                <span className="font-bold text-gray-700">জীবিত/মৃত:</span>
-                <label className="flex items-center gap-1 cursor-pointer"><input type="radio" name="fatherStatus" value="জীবিত" checked={formData.fatherStatus === "জীবিত"} onChange={handleChange} /> জীবিত</label>
-                <label className="flex items-center gap-1 cursor-pointer"><input type="radio" name="fatherStatus" value="মৃত" checked={formData.fatherStatus === "মৃত"} onChange={handleChange} /> মৃত</label>
+            {/* জীবিত থাকলে এই ফিল্ডগুলো শো হবে */}
+            {formData.fatherStatus === "জীবিত" && (
+              <div className="space-y-3 animate-fade-in">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex flex-col sm:flex-row sm:items-end gap-2">
+                    <span className="font-bold text-gray-700 whitespace-nowrap">এন আইডি নং:</span>
+                    <input type="text" name="fatherNid" value={formData.fatherNid} onChange={handleChange} className="flex-1 border-b border-dotted border-gray-400 focus:outline-none bg-transparent font-mono" />
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:items-end gap-2">
+                    <span className="font-bold text-gray-700 whitespace-nowrap">মোবাইল (হোয়াটসঅ্যাপ):</span>
+                    <input type="text" name="fatherMobile" value={formData.fatherMobile} onChange={handleChange} className="flex-1 border-b border-dotted border-gray-400 focus:outline-none bg-transparent font-mono" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                  <div className="flex items-end gap-2">
+                    <span className="font-bold text-gray-700 whitespace-nowrap">পেশা:</span>
+                    <input type="text" name="fatherProfession" value={formData.fatherProfession} onChange={handleChange} className="flex-1 border-b border-dotted border-gray-400 focus:outline-none bg-transparent" />
+                  </div>
+                  <div className="flex items-end gap-2">
+                    <span className="font-bold text-gray-700 whitespace-nowrap">ইমেইল:</span>
+                    <input type="email" name="fatherEmail" value={formData.fatherEmail} onChange={handleChange} className="flex-1 border-b border-dotted border-gray-400 focus:outline-none bg-transparent font-mono" />
+                  </div>
+                </div>
               </div>
-              <div className="flex items-end gap-2">
-                <span className="font-bold text-gray-700 whitespace-nowrap">পেশা:</span>
-                <input type="text" name="fatherProfession" value={formData.fatherProfession} onChange={handleChange} className="flex-1 border-b border-dotted border-gray-400 focus:outline-none bg-transparent" />
-              </div>
-              <div className="flex items-end gap-2">
-                <span className="font-bold text-gray-700 whitespace-nowrap">ইমেইল:</span>
-                <input type="email" name="fatherEmail" value={formData.fatherEmail} onChange={handleChange} className="flex-1 border-b border-dotted border-gray-400 focus:outline-none bg-transparent font-mono" />
-              </div>
-            </div>
+            )}
           </div>
 
           {/* মাতার তথ্য */}
@@ -195,32 +236,39 @@ export default function AdmissionFormPage2({ formData, handleChange }) {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex flex-col sm:flex-row sm:items-end gap-2">
-                <span className="font-bold text-gray-700 whitespace-nowrap">এন আইডি নং:</span>
-                <input type="text" name="motherNid" value={formData.motherNid} onChange={handleChange} className="flex-1 border-b border-dotted border-gray-400 focus:outline-none bg-transparent font-mono" />
-              </div>
-              <div className="flex flex-col sm:flex-row sm:items-end gap-2">
-                <span className="font-bold text-gray-700 whitespace-nowrap">মোবাইল (হোয়াটসঅ্যাপ):</span>
-                <input type="text" name="motherMobile" value={formData.motherMobile} onChange={handleChange} className="flex-1 border-b border-dotted border-gray-400 focus:outline-none bg-transparent font-mono" />
-              </div>
+            {/* জীবিত নাকি মৃত প্রশ্ন */}
+            <div className="flex gap-4 pb-1">
+              <span className="font-bold text-gray-700">মাতা জীবিত নাকি মৃত?:</span>
+              <label className="flex items-center gap-1 cursor-pointer"><input type="radio" name="motherStatus" value="জীবিত" checked={formData.motherStatus === "জীবিত"} onChange={handleChange} /> জীবিত</label>
+              <label className="flex items-center gap-1 cursor-pointer"><input type="radio" name="motherStatus" value="মৃত" checked={formData.motherStatus === "মৃত"} onChange={handleChange} /> মৃত</label>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-end">
-              <div className="flex gap-4 pb-1">
-                <span className="font-bold text-gray-700">জীবিত/মৃত:</span>
-                <label className="flex items-center gap-1 cursor-pointer"><input type="radio" name="motherStatus" value="জীবিত" checked={formData.motherStatus === "জীবিত"} onChange={handleChange} /> জীবিত</label>
-                <label className="flex items-center gap-1 cursor-pointer"><input type="radio" name="motherStatus" value="মৃত" checked={formData.motherStatus === "মৃত"} onChange={handleChange} /> মৃত</label>
+            {/* জীবিত থাকলে এই ফিল্ডগুলো শো হবে */}
+            {formData.motherStatus === "জীবিত" && (
+              <div className="space-y-3 animate-fade-in">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex flex-col sm:flex-row sm:items-end gap-2">
+                    <span className="font-bold text-gray-700 whitespace-nowrap">এন আইডি নং:</span>
+                    <input type="text" name="motherNid" value={formData.motherNid} onChange={handleChange} className="flex-1 border-b border-dotted border-gray-400 focus:outline-none bg-transparent font-mono" />
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:items-end gap-2">
+                    <span className="font-bold text-gray-700 whitespace-nowrap">মোবাইল (হোয়াটসঅ্যাপ):</span>
+                    <input type="text" name="motherMobile" value={formData.motherMobile} onChange={handleChange} className="flex-1 border-b border-dotted border-gray-400 focus:outline-none bg-transparent font-mono" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                  <div className="flex items-end gap-2">
+                    <span className="font-bold text-gray-700 whitespace-nowrap">পেশা:</span>
+                    <input type="text" name="motherProfession" value={formData.motherProfession} onChange={handleChange} className="flex-1 border-b border-dotted border-gray-400 focus:outline-none bg-transparent" />
+                  </div>
+                  <div className="flex items-end gap-2">
+                    <span className="font-bold text-gray-700 whitespace-nowrap">ইমেইল:</span>
+                    <input type="email" name="motherEmail" value={formData.motherEmail} onChange={handleChange} className="flex-1 border-b border-dotted border-gray-400 focus:outline-none bg-transparent font-mono" />
+                  </div>
+                </div>
               </div>
-              <div className="flex items-end gap-2">
-                <span className="font-bold text-gray-700 whitespace-nowrap">পেশা:</span>
-                <input type="text" name="motherProfession" value={formData.motherProfession} onChange={handleChange} className="flex-1 border-b border-dotted border-gray-400 focus:outline-none bg-transparent" />
-              </div>
-              <div className="flex items-end gap-2">
-                <span className="font-bold text-gray-700 whitespace-nowrap">ইমেইল:</span>
-                <input type="email" name="motherEmail" value={formData.motherEmail} onChange={handleChange} className="flex-1 border-b border-dotted border-gray-400 focus:outline-none bg-transparent font-mono" />
-              </div>
-            </div>
+            )}
           </div>
 
           {/* পিতা/মাতার অবর্তমানে অন্য অভিভাবক */}
@@ -265,10 +313,67 @@ export default function AdmissionFormPage2({ formData, handleChange }) {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-end gap-2 pt-2">
-            <span className="font-bold text-gray-700 whitespace-nowrap">কেন আপনার সন্তানকে অত্র প্রতিষ্ঠানে ভর্তি করার সিদ্ধান্ত নিয়েছেন?</span>
-            <input type="text" name="admissionReason" value={formData.admissionReason} onChange={handleChange} className="flex-1 border-b border-dotted border-gray-400 focus:outline-none" />
+          {/* প্রাথমিক যোগাযোগ মাধ্যম ফিল্ড (মৃত হলে ডিজেবল থাকবে) */}
+          <div className="border border-gray-300 p-3 rounded-md bg-amber-50/20 flex flex-wrap items-center gap-4">
+            <span className="font-bold text-gray-700">প্রাথমিক যোগাযোগ মাধ্যম:</span>
+            <div className="flex gap-4">
+              <label className={`flex items-center gap-1 cursor-pointer ${formData.fatherStatus === "মৃত" ? "opacity-50 cursor-not-allowed text-gray-400" : ""}`}>
+                <input 
+                  type="radio" 
+                  name="primaryContactMethod" 
+                  value="পিতা" 
+                  checked={formData.primaryContactMethod === "পিতা"} 
+                  onChange={handleChange} 
+                  disabled={formData.fatherStatus === "মৃত"} 
+                /> পিতা
+              </label>
+              <label className={`flex items-center gap-1 cursor-pointer ${formData.motherStatus === "মৃত" ? "opacity-50 cursor-not-allowed text-gray-400" : ""}`}>
+                <input 
+                  type="radio" 
+                  name="primaryContactMethod" 
+                  value="মাতা" 
+                  checked={formData.primaryContactMethod === "মাতা"} 
+                  onChange={handleChange} 
+                  disabled={formData.motherStatus === "মৃত"} 
+                /> মাতা
+              </label>
+              <label className="flex items-center gap-1 cursor-pointer">
+                <input 
+                  type="radio" 
+                  name="primaryContactMethod" 
+                  value="পিতামাতার অবর্তমানে অভিভাবক" 
+                  checked={formData.primaryContactMethod === "পিতামাতার অবর্তমানে অভিভাবক"} 
+                  onChange={handleChange} 
+                /> পিতামাতার অবর্তমানে অভিভাবক
+              </label>
+            </div>
           </div>
+
+          {/* হাইলাইটেড ভর্তির সিদ্ধান্তের প্রশ্ন */}
+          <div className="flex flex-col sm:flex-row sm:items-end gap-2 pt-2 bg-amber-50 border-l-4 border-amber-500 p-3 rounded-r-md shadow-sm">
+            <span className="font-bold text-slate-950 whitespace-nowrap">কেন আপনার সন্তানকে অত্র প্রতিষ্ঠানে ভর্তি করার সিদ্ধান্ত নিয়েছেন?</span>
+            <input type="text" name="admissionReason" value={formData.admissionReason} onChange={handleChange} className="flex-1 border-b border-dotted border-slate-700 focus:outline-none bg-transparent font-medium" />
+          </div>
+
+          {/* AIM এয়ার তত্ত্ব জানার মাধ্যমের প্রফেশনাল মাল্টিপল অপশন ফিল্ড */}
+          <div className="border border-gray-200 p-3 rounded-md bg-gray-50/30 space-y-2">
+            <span className="font-bold text-gray-700 block">AIM এয়ার তত্ত্ব আপনি কিভাবে জানতে পেরেছেন? (একাধিক টিক চিহ্ন দিতে পারবেন)</span>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pt-1">
+              {["ফেসবুক / সোশ্যাল মিডিয়া", "মাদরাসার ওয়েবসাইট", "ব্যানার / লিফলেট", "পরিচিত অভিভাবক", "শিক্ষক / উলামাদের মাধ্যমে", "মসজিদের খুতবা / এলান", "ইউটিউব ভিডিও", "অন্যান্য মাধ্যম"].map((source) => (
+                <label key={source} className="flex items-center gap-1.5 cursor-pointer text-xs md:text-sm">
+                  <input 
+                    type="checkbox" 
+                    value={source} 
+                    checked={formData.infoSource ? formData.infoSource.split(", ").includes(source) : false} 
+                    onChange={handleCheckboxChange} 
+                    className="accent-orange-600 rounded"
+                  />
+                  {source}
+                </label>
+              ))}
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -291,8 +396,9 @@ export default function AdmissionFormPage2({ formData, handleChange }) {
         <div className="text-sm leading-relaxed text-gray-700 text-justify space-y-3">
           <p className="flex flex-wrap items-end gap-x-2 gap-y-1">
             আমি উপরে উল্লেখিত শিক্ষার্থীর
-            <input type="text" name="guardianRelationToStudent" value={formData.guardianRelationToStudent || ""} onChange={handleChange} placeholder="(সম্পর্ক)" className="w-24 text-center font-bold border-b border-gray-400 focus:outline-none bg-transparent px-1 text-xs md:text-sm" />
-            এবং বৈধ অভিভাবক হিসেবে অঙ্গীকার করছি যে, এই প্রতিষ্ঠানের যাবতীয় বিষয় সম্পর্কে সম্যক অবগত হয়ে আমার অভিভাবকত্বে
+            {/* অটোমেটিকলি সম্পর্ক চলে আসার জন্য ইনপুট রিড-ওনলি ও ডাইনামিক করা হলো */}
+            <span className="font-bold text-emerald-800 px-2 border-b border-gray-400 min-w-[60px] text-center">{getDynamicRelation()}</span>
+            এবং वैध অভিভাবক হিসেবে অঙ্গীকার করছি যে, এই প্রতিষ্ঠানের যাবতীয় বিষয় সম্পর্কে সম্যক অবগত হয়ে আমার অভিভাবকত্বে
             <input type="text" name="studentNameConfirmation" value={formData.studentNameConfirmation || ""} onChange={handleChange} placeholder="(শিক্ষার্থীর নাম)" className="w-48 text-center font-bold border-b border-gray-400 focus:outline-none bg-transparent px-1 text-xs md:text-sm" />
             কে আবাসিক/অনাবাসিক/ডে-কেয়ার শিক্ষার্থী হিসেবে ভর্তি করার ইচ্ছা পোষণ করলাম।
           </p>
@@ -307,8 +413,10 @@ export default function AdmissionFormPage2({ formData, handleChange }) {
             <span className="font-bold text-gray-700">তারিখ:</span>
             <input type="date" name="applicantSignatureDate" value={formData.applicantSignatureDate} onChange={handleChange} className="border border-gray-400 rounded px-1.5 py-0.5 text-xs focus:outline-none bg-transparent cursor-pointer" />
           </div>
-          <div className="text-center w-32 sm:w-48 border-t border-gray-500 pt-1 text-xs sm:text-sm font-bold text-gray-700">
-            অভিভাবকের স্বাক্ষর
+          <div className="text-center w-40 sm:w-60 border-t border-gray-500 pt-1 text-xs sm:text-sm font-bold text-gray-700 flex flex-col items-center">
+            {/* অটোমেটিকলি নাম চলে আসার ডায়নামিক টেক্সট */}
+            <span className="text-xs text-emerald-800 font-medium truncate max-w-[180px] mb-0.5">({getDynamicSignatureName()})</span>
+            <span>অভিভাবকের স্বাক্ষর</span>
           </div>
         </div>
       </div>
