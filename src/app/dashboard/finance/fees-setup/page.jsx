@@ -33,7 +33,7 @@ export default function FeesSetupPage() {
   // ডাটাবেজ থেকে বর্তমান সেটিংস লোড করা
   const fetchSettings = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/finance/settings");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/finance/settings`);
       const data = await res.json();
       if (data.success) {
         setSavedSettings({ funds: data.funds, feeStructures: data.feeStructures });
@@ -58,7 +58,7 @@ export default function FeesSetupPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/api/finance/funds", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/finance/funds`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(fundData),
@@ -83,7 +83,7 @@ export default function FeesSetupPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/api/finance/fee-setup", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/finance/fee-setup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(feeData),
@@ -230,7 +230,7 @@ export default function FeesSetupPage() {
                     onChange={(e) => setFeeData({ ...feeData, fundCode: e.target.value })}
                     required
                   >
-                    <option value="">তহবিল বাছুন...</option>
+                    <option value="">তহবিল ...</option>
                     {savedSettings.funds.map((fund) => (
                       <option key={fund._id} value={fund.code}>{fund.name} ({fund.code})</option>
                     ))}
@@ -319,4 +319,4 @@ export default function FeesSetupPage() {
       </div>
     </div>
   );
-     }
+}
