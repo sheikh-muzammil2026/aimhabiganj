@@ -1,60 +1,330 @@
 "use client";
 
-import Image from "next/image";
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation"; // ১. রিডাইরেকশনের জন্য useRouter ইম্পোর্ট করা হলো
+import { authClient } from "@/lib/auth-client";
 
-export default function TopHeader() {
-  return (
-    <div className="w-full print:hidden bg-gradient-to-r from-emerald-900 via-emerald-850 to-emerald-900 text-white py-3 px-4 md:px-6 border-b border-amber-500/30 relative overflow-hidden transition-colors duration-300 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 dark:border-emerald-800">
+export default function Navbar() {
+    const router = useRouter(); // ২. রাউটার ইনিশিয়েলাইজ করা হলো
+    const [isOpen, setIsOpen] = useState(false);
+    const [activeDropdown, setActiveDropdown] = useState(null);
+    const [darkMode, setDarkMode] = useState(false);
 
-      {/* ব্যাকগ্রাউন্ড জলছাপ/মেহরাব ইফেক্ট */}
-      <div className="absolute inset-0 opacity-10 pointer-events-none mix-blend-overlay">
-        <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
-          <path d="M50 0 L100 50 L50 100 L0 50 Z" fill="none" stroke="currentColor" strokeWidth="1" />
-          <circle cx="50" cy="50" r="20" fill="none" stroke="currentColor" strokeWidth="1" />
-        </svg>
-      </div>
+    const { data: session } = authClient.useSession();
+    
+    const isLoggedIn = !!session?.user;
+    const userRole = session?.user?.role;
+    const userPhoto = session?.user?.image;
 
-      {/* মেইন কন্টেইনার: লোগো বামে এবং টেক্সট ব্লক বাকি পুরোটা জুড়ে থাকবে */}
-      <div className="max-w-7xl mx-auto flex flex-row items-center relative z-10 gap-3 md:gap-5">
-        
-        {/* লোগো সেকশন: বাড়তি সব ব্যাকগ্রাউন্ড ও বর্ডার রিমুভ করে একদম ক্লিন করা হয়েছে */}
-        <div className="flex-shrink-0 w-[60px] h-[60px] md:w-[80px] md:h-[80px] relative rounded-full overflow-hidden">
-          <Image 
-            src="/aimlogo1.png" 
-            alt="As-Salam Ideal Madrasah Logo" 
-            fill
-            sizes="(max-width: 768px) 60px, 80px"
-            className="object-cover scale-[1.12]" // scale ব্যবহার করে বিশ্রী চারকোনা মার্জিনটা কেটে ফেলে শুধু ভেতরের গোল লোগোটা জুম করা হয়েছে
-            priority
-          />
-        </div>
+    useEffect(() => {
+        const isDark = localStorage.getItem("theme") === "dark" ||
+            (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches);
+        setDarkMode(isDark);
+        document.documentElement.classList.toggle("dark", isDark);
+    }, []);
 
-        {/* নাম ও স্লোগান সেকশন: w-full এবং flex-1 দিয়ে এটি লোগোর পর বাকি পুরো হেডার জুড়ে থাকবে */}
-        <div className="flex-1 flex flex-col space-y-0.5 text-left">
-          
-          {/* ১. আরবি নাম */}
-          <p className="text-xs md:text-base font-arabic text-emerald-200/90 tracking-wider dark:text-slate-400" dir="rtl" lang="ar">
-            مدرسة السلام النموذجية، حبيغنج
-          </p>
-          
-          {/* ২. বাংলা নাম */}
-          <p className="text-sm md:text-xl font-bold text-emerald-50 tracking-normal dark:text-slate-200 leading-tight">
-            আস-সালাম আইডিয়াল মাদ্রাসা, হবিগঞ্জ
-          </p>
-          
-          {/* ৩. ইংরেজি নাম */}
-          <h1 className="text-base md:text-2xl font-black tracking-wide text-amber-400 dark:text-emerald-400 capitalize drop-shadow-sm font-sans leading-none">
-            As-Salam Ideal Madrasah
-          </h1>
+    const toggleDarkMode = () => {
+        const newMode = !darkMode;
+        setDarkMode(newMode);
+        localStorage.setItem("theme", newMode ? "dark" : "light");
+        document.documentElement.classList.toggle("dark", newMode);
+    };
 
-          {/* ৪. স্লোগান: ইংরেজি নামের ঠিক নিচে নতুন লাইনে */}
-          <p className="text-[10px] md:text-xs font-medium tracking-widest text-amber-300/85 italic uppercase dark:text-emerald-300/70 pt-1">
-            AIM For Ultimate Success
-          </p>
-          
-        </div>
+    const closeMenu = () => {
+        setIsOpen(false);
+        setActiveDropdown(null);
+    };
 
-      </div>
-    </div>
-  );
+    // ৩. লগআউট ফাংশনটি Better Auth এর নিয়ম অনুযায়ী রিডাইরেক্ট সহ ফিক্স করা হলো
+    const handleLogout = async () => {
+        await authClient.signOut({
+            fetchOptions: {
+                onSuccess: () => {
+                    closeMenu();
+                    router.push("/login"); // স্পেলিং মিস্টেক ঠিক করা হয়েছে এবং আপনার রুট অনুযায়ী '/login' দেওয়া হলো
+                }
+            }
+        });
+    };
+
+    const getDashboardPath = () => {
+        if (!userRole) return "/";
+        return `/dashboard/${userRole.toLowerCase()}`;
+    };
+
+    const menuItems = [
+        { name: "হোম", href: "/" },
+        {
+            name: "আমাদের সম্পর্কে",
+            dropdown: [
+                { name: "প্রতিষ্ঠান পরিচিতি", href: "/about#profile" },
+                { name: "প্রতিষ্ঠাতা পরিচিতি", href: "/about#founder" },
+                { name: "লক্ষ্য ও উদ্দেশ্য", href: "/about#vision" },
+                { name: "পরিচালনা পর্ষদ", href: "/about#committee" },
+                { name: "আমাদের বৈশিষ্ট্য", href: "/about#features" },
+                { name: "ভবিষ্যৎ পরিকল্পনা", href: "/about#roadmap" },
+                { name: "মতামত (শিক্ষার্থী ও উলামা)", href: "/about#testimonials" },
+                { name: "নীতিমালা", href: "/about#policies" },
+                { name: "শিক্ষকমণ্ডলী", href: "/about#faculty" },
+                { name: "কর্মকর্তা ও কর্মচারী", href: "/about#staff" },
+                { name: "কর্মক্ষেত্র ও দায়িত্ব", href: "/about#roster" },
+            ],
+        },
+        {
+            name: "শিক্ষা কার্যক্রম",
+            dropdown: [
+                { name: "শ্রেণী শিক্ষকের তালিকা", href: "/academics#teachers" },
+                { name: "শিক্ষা স্তর", href: "/academics#levels" },
+                { name: "পাঠ্যক্রম (Syllabus)", href: "/academics#syllabus" },
+                { name: "সহ-পাঠ্যক্রম", href: "/academics#co-curricular" },
+                { name: "ক্লাস রুটিন", href: "/academics#class-routine" },
+                { name: "পরীক্ষা রুটিন", href: "/academics#exam-routine" },
+            ],
+        },
+        {
+            name: "বিভাগসমূহ",
+            dropdown: [
+                { name: "হিফজ বিভাগ", href: "/#hifz" },
+                { name: "একাডেমিক বিভাগ", href: "/#academic" },
+            ],
+        },
+        {
+            name: "ভর্তি",
+            isAdmission: true, 
+            dropdown: [
+                { name: "ভর্তির সময়", href: "/admission#timeline" },
+                { name: "ভর্তি পরীক্ষা", href: "/admission#test" },
+                { name: "ভর্তি প্রক্রিয়া", href: "/admission#process" },
+                { name: "ভর্তি ফি", href: "/admission#fees" },
+                { name: "ভর্তির শর্তাবলী", href: "/admission#terms" },
+                { name: "অনলাইন ভর্তি ফরম", href: "/admission/form" },
+            ],
+        },
+        {
+            name: "আবাসন",
+            dropdown: [
+                { name: "ছাত্রাবাস পরিচিতি", href: "/hostel#about" },
+                { name: "আবাসিক হলের পরিচালকবৃন্দ", href: "/hostel#directors" },
+                { name: "আবাসন প্রাপ্তির নিয়মাবলী", href: "/hostel#rules" },
+                { name: "আবাসন চার্ট", href: "/hostel#chart" },
+                { name: "দৈনিক আবাসিক কার্যসূচি", href: "/hostel#routine" },
+            ],
+        },
+        {
+            name: "স্মার্ট ক্লাসরুম",
+            dropdown: [
+                { name: "লাইভ ক্লাস", href: "/smart-classroom/live" },
+                { name: "রেকর্ডেড ক্লাস", href: "/smart-classroom/recorded" },
+                { name: "ই-বুক / লেকচার শিট", href: "/smart-classroom/ebooks" },
+                { name: "অনলাইন এক্সাম", href: "/smart-classroom/exam" },
+                { name: "কুইজ প্রতিযোগিতা", href: "/smart-classroom/quiz" },
+            ],
+        },
+        { name: "নোটিশ বোর্ড", href: "/notices" },
+        { name: "গ্যালারি", href: "/gallery" },
+        { name: "ফলাফল", href: "/results" },
+        {
+            name: "যোগাযোগ",
+            dropdown: [
+                { name: "যোগাযোগের তথ্য", href: "/contact" },
+                { name: "অভিযোগ ও পরামর্শ", href: "/contact#feedback" },
+            ],
+        },
+    ];
+
+    return (
+        <nav className="bg-emerald-900 print:hidden text-white shadow-md sticky top-0 z-50 transition-colors duration-300 dark:bg-slate-900 border-b border-emerald-800 dark:border-slate-800">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex items-center justify-between h-20">
+
+                    {/* লোগো সেকশন */}
+                    <div className="flex-shrink-0 flex items-center pr-4">
+                        <Link href="/" className="flex items-center" onClick={closeMenu}>
+                            {/* লোগো ধারক div */}
+                            <div className="w-16 h-16 flex items-center justify-center overflow-hidden rounded-full">
+                                <img 
+                                    src="/aimlogo1.png" 
+                                    alt="As-Salam Ideal Madrasah Logo" 
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                        </Link>
+                    </div>
+
+                    {/* ডেস্কটপ মেনু */}
+                    <div className="hidden lg:flex items-center space-x-0.5 ml-auto">
+                        {menuItems.map((item, index) => (
+                            <div key={index} className="relative group">
+                                {item.dropdown ? (
+                                    <>
+                                        <button
+                                            onClick={() => setActiveDropdown(activeDropdown === item.name ? null : item.name)}
+                                            className={`px-2 py-2 rounded-md text-[13px] xl:text-sm font-semibold hover:bg-emerald-800 dark:hover:bg-slate-800 transition flex items-center gap-0.5 focus:outline-none text-white ${
+                                                item.isAdmission ? "bg-amber-500 hover:bg-amber-600 text-slate-950 dark:text-slate-950 animate-pulse rounded-md px-3 font-bold" : ""
+                                            }`}
+                                        >
+                                            {item.name}
+                                            <svg className={`w-3 h-3 ${item.isAdmission ? "text-slate-950" : "text-emerald-200/70"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+
+                                        {/* ড্রপডাউন বক্স */}
+                                        <div className="absolute left-0 mt-0 w-56 bg-white text-gray-800 rounded-md shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border-t-4 border-amber-500 dark:bg-slate-800 dark:text-gray-100 dark:border-emerald-600">
+                                            <div className="py-1 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                                                {item.dropdown.map((sub, i) => (
+                                                    <Link
+                                                        key={i}
+                                                        href={sub.href}
+                                                        className="block px-4 py-2 text-xs xl:text-sm text-gray-700 dark:text-gray-200 hover:bg-emerald-50 dark:hover:bg-slate-700/50 hover:text-emerald-900 dark:hover:text-emerald-400 transition-colors border-b border-gray-100 dark:border-slate-700 last:border-0"
+                                                    >
+                                                        {sub.name}
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <Link href={item.href} className="px-2 py-2 rounded-md text-[13px] xl:text-sm font-medium hover:bg-emerald-800 dark:hover:bg-slate-800 transition block text-white">{item.name}</Link>
+                                )}
+                            </div>
+                        ))}
+
+                        {/* থিম টগল বাটন */}
+                        <button onClick={toggleDarkMode} className="p-1.5 ml-1 rounded-full hover:bg-emerald-800 dark:hover:bg-slate-800 transition-colors text-amber-300 focus:outline-none flex-shrink-0">
+                            {darkMode ? (
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M16.243 17.657l.707.707M6.343 6.343l.707-.707M12 12a9 9 0 110 18v-1z" /></svg>
+                            ) : (
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                            )}
+                        </button>
+
+                        {/* ডেস্কটপ ইউজার প্যানেল */}
+                        {isLoggedIn ? (
+                            <div className="flex items-center gap-2 ml-2 pl-2 border-l border-emerald-700 dark:border-slate-700 flex-shrink-0">
+                                <div className="w-7 h-7 rounded-full bg-amber-400 text-slate-900 font-bold flex items-center justify-center text-[11px] overflow-hidden border border-white shadow-inner">
+                                    {userPhoto ? <img src={userPhoto} alt="Profile" className="w-full h-full object-cover" /> : userRole ? userRole[0].toUpperCase() : "U"}
+                                </div>
+                                <Link
+                                    href={getDashboardPath()}
+                                    className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-md text-xs xl:text-sm shadow transition transform hover:-translate-y-0.5"
+                                >
+                                    ড্যাশবোর্ড
+                                </Link>
+                                <button
+                                    onClick={handleLogout}
+                                    className="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-1.5 rounded-md text-xs xl:text-sm shadow transition transform hover:-translate-y-0.5"
+                                >
+                                    লগআউট
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-emerald-700 dark:border-slate-700 flex-shrink-0">
+                                <Link
+                                    href="/login"
+                                    className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-md text-xs xl:text-sm shadow transition transform hover:-translate-y-0.5"
+                                >
+                                    লগইন
+                                </Link>
+                                <Link
+                                    href="/register"
+                                    className="bg-transparent border border-amber-400 text-amber-400 hover:bg-amber-400 hover:text-slate-950 font-bold px-3 py-1.5 rounded-md text-xs xl:text-sm shadow transition transform hover:-translate-y-0.5"
+                                >
+                                    নিবন্ধন
+                                </Link>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* মোবাইল রেসপনসিভ হ্যামবার্গার ও থিম বাটন */}
+                    <div className="flex items-center lg:hidden gap-2">
+                        <button onClick={toggleDarkMode} className="p-2 text-amber-300"><span className="text-lg">{darkMode ? "☀️" : "🌙"}</span></button>
+                        <button onClick={() => setIsOpen(!isOpen)} className="p-2 rounded-md text-emerald-100 hover:bg-emerald-800 focus:outline-none">
+                            {isOpen ? (
+                                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                            ) : (
+                                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                            )}
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            {/* মোবাইল মেনু ড্রয়ার */}
+            {isOpen && (
+                <div className="lg:hidden bg-emerald-900 border-t border-emerald-800 dark:bg-slate-950 dark:border-slate-800 max-h-[80vh] overflow-y-auto">
+                    <div className="px-2 pt-2 pb-4 space-y-1">
+                        {menuItems.map((item, index) => (
+                            <div key={index} className="block">
+                                {item.dropdown ? (
+                                    <>
+                                        <button
+                                            onClick={() => setActiveDropdown(activeDropdown === item.name ? null : item.name)}
+                                            className={`w-full text-left px-3 py-2 rounded-md text-base font-medium hover:bg-emerald-800 dark:hover:bg-slate-800 transition flex items-center justify-between text-white ${
+                                                item.isAdmission ? "bg-amber-500 text-slate-950 dark:text-slate-950 animate-pulse font-bold my-1" : ""
+                                            }`}
+                                        >
+                                            <span>{item.name}</span>
+                                            <svg className={`w-4 h-4 transform transition-transform ${activeDropdown === item.name ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+                                        {activeDropdown === item.name && (
+                                            <div className="pl-4 bg-emerald-950/50 dark:bg-slate-900 rounded-md mt-1 mb-2">
+                                                {item.dropdown.map((sub, i) => (
+                                                    <Link key={i} href={sub.href} onClick={closeMenu} className="block px-3 py-2 text-sm text-emerald-100 dark:text-gray-300 hover:bg-emerald-800 dark:hover:bg-slate-800 hover:text-white rounded-md transition">{sub.name}</Link>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </>
+                                ) : (
+                                    <Link href={item.href} onClick={closeMenu} className="block px-3 py-2 rounded-md text-base font-medium hover:bg-emerald-800 dark:hover:bg-slate-800 transition text-white">{item.name}</Link>
+                                )}
+                            </div>
+                        ))}
+                        
+                        {/* মোবাইল ইউজার অ্যাকশন প্যানেল */}
+                        <div className="pt-4 border-t border-emerald-800 dark:border-slate-800 px-3 space-y-2">
+                            {isLoggedIn ? (
+                                <>
+                                    <Link 
+                                        href={getDashboardPath()} 
+                                        onClick={closeMenu} 
+                                        className="block text-center bg-amber-500 text-slate-950 font-bold py-2 rounded-md shadow"
+                                    >
+                                        ড্যাশবোর্ড প্যানেল ({userRole})
+                                    </Link>
+                                    <button 
+                                        onClick={handleLogout} 
+                                        className="w-full text-center bg-red-600 text-white font-bold py-2 rounded-md shadow"
+                                    >
+                                        লগআউট করুন
+                                    </button>
+                                </>
+                            ) : (
+                                <div className="grid grid-cols-2 gap-2">
+                                    <Link 
+                                        href="/login" 
+                                        onClick={closeMenu} 
+                                        className="block text-center bg-amber-500 text-slate-950 font-bold py-2 rounded-md shadow"
+                                    >
+                                        লগইন
+                                    </Link>
+                                    <Link 
+                                        href="/register" 
+                                        onClick={closeMenu} 
+                                        className="block text-center bg-transparent border border-amber-400 text-amber-400 font-bold py-2 rounded-md shadow"
+                                    >
+                                        নিবন্ধন
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+        </nav>
+    );
 }
