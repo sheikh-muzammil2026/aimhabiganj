@@ -5,6 +5,18 @@ import Link from "next/link";
 
 export default function HeroSection() {
     const [currentSlide, setCurrentSlide] = useState(0);
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [isDark, setIsDark] = useState(false);
+
+    // গ্লোবাল স্টেট সিঙ্ক করার জন্য লিসেনার
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (typeof window !== "undefined") {
+                setIsDark(!!window.__isDarkModeActive);
+            }
+        }, 500);
+        return () => clearInterval(interval);
+    }, []);
 
     const carouselImages = [
         {
@@ -31,12 +43,27 @@ export default function HeroSection() {
         return () => clearInterval(timer);
     }, [carouselImages.length]);
 
+    // মোবাইল বাটনের কাস্টম ক্লিক হ্যান্ডলার
+    const handleMobileMenuClick = () => {
+        if (typeof window !== "undefined" && window.__toggleMobileMenu) {
+            window.__toggleMobileMenu();
+            setMenuOpen(!menuOpen);
+        }
+    };
+
+    const handleMobileThemeClick = () => {
+        if (typeof window !== "undefined" && window.__toggleMobileDarkMode) {
+            window.__toggleMobileDarkMode();
+            setIsDark(!isDark);
+        }
+    };
+
     return (
         <div className="w-full select-none">
 
             {/* ১. নোটিশবোর্ড স্ক্রোলার (Notice Ticker) */}
-            {/* নেভবার ফিক্সড হওয়ার কারণে নোটিশের উপরে mt-20 যোগ করা হয়েছে যাতে মেনু নোটিশকে ঢেকে না ফেলে */}
-            <div className="mt-20 bg-amber-500 dark:bg-amber-400 text-slate-900 font-medium py-2 px-4 shadow-sm flex items-center overflow-hidden border-b border-amber-600 dark:border-amber-500 transition-colors duration-300 relative z-30">
+            {/* সাদা অংশ রিমুভ করার জন্য mt-20 বাদ দিয়ে mt-0 বা রিলেটিভ রাখা হয়েছে */}
+            <div className="bg-amber-500 dark:bg-amber-400 text-slate-900 font-medium py-2 px-4 shadow-sm flex items-center overflow-hidden border-b border-amber-600 dark:border-amber-500 transition-colors duration-300 relative z-30">
                 <div className="bg-red-600 text-white px-3 py-1 text-xs font-bold rounded uppercase tracking-wider z-10 whitespace-nowrap mr-3 animate-pulse">
                     জরুরী নোটিশ:
                 </div>
@@ -49,6 +76,29 @@ export default function HeroSection() {
 
             {/* ২. ব্যানার ক্যারোসল (Hero Banner Carousel) */}
             <div className="relative h-[450px] md:h-[600px] w-full overflow-hidden bg-slate-900">
+                
+                {/* মোবাইল কন্ট্রোল বাটনসমূহ: নোটিসের নিচে এবং ইমেজের টপ রাইট অংশে প্লেস করা হয়েছে */}
+                <div className="absolute top-4 right-4 z-40 flex lg:hidden items-center gap-2 bg-slate-950/30 backdrop-blur-md p-1.5 rounded-full border border-white/10">
+                    {/* থিম টগল বাটন */}
+                    <button 
+                        onClick={handleMobileThemeClick} 
+                        className="p-2 text-amber-300 hover:bg-white/10 rounded-full transition-colors focus:outline-none"
+                    >
+                        <span className="text-base">{isDark ? "☀️" : "🌙"}</span>
+                    </button>
+                    
+                    {/* প্রফেশনাল অ্যাকাউন্ট/ইউজার আইকন (হ্যামবার্গারের পরিবর্তে) */}
+                    <button 
+                        onClick={handleMobileMenuClick} 
+                        className="p-2 rounded-full text-emerald-300 hover:bg-white/10 hover:text-white transition-colors focus:outline-none"
+                        aria-label="User Account Menu"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </button>
+                </div>
+
                 {carouselImages.map((slide, index) => (
                     <div
                         key={index}
@@ -65,7 +115,7 @@ export default function HeroSection() {
                         />
 
                         {/* স্লাইড টেক্সট */}
-                        <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-12 md:px-24 z-20 max-w-3xl text-white pt-10">
+                        <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-12 md:px-24 z-20 max-w-3xl text-white pt-6">
                             <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold leading-tight mb-4 text-emerald-400 dark:text-amber-400 drop-shadow-md transition-colors duration-300">
                                 {slide.title}
                             </h1>
