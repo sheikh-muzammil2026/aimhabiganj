@@ -2,14 +2,15 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation"; // ১. রিডাইরেকশনের জন্য useRouter ইম্পোর্ট করা হলো
+import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 
 export default function Navbar() {
-    const router = useRouter(); // ২. রাউটার ইনিশিয়েলাইজ করা হলো
+    const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [darkMode, setDarkMode] = useState(false);
+    const [isScrolled, setIsScrolled] = useState(false); // স্ক্রল ট্র্যাক করার স্টেট
 
     const { data: session } = authClient.useSession();
     
@@ -17,11 +18,23 @@ export default function Navbar() {
     const userRole = session?.user?.role;
     const userPhoto = session?.user?.image;
 
+    // থিম ও স্ক্রল লিসেনার ডিটেকশন
     useEffect(() => {
         const isDark = localStorage.getItem("theme") === "dark" ||
             (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches);
         setDarkMode(isDark);
         document.documentElement.classList.toggle("dark", isDark);
+
+        const handleScroll = () => {
+            if (window.scrollY > 20) {
+                setIsScrolled(true);
+            } else {
+                setIsScrolled(false);
+            }
+        };
+
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
     const toggleDarkMode = () => {
@@ -36,13 +49,12 @@ export default function Navbar() {
         setActiveDropdown(null);
     };
 
-    // ৩. লগআউট ফাংশনটি Better Auth এর নিয়ম অনুযায়ী রিডাইরেক্ট সহ ফিক্স করা হলো
     const handleLogout = async () => {
         await authClient.signOut({
             fetchOptions: {
                 onSuccess: () => {
                     closeMenu();
-                    router.push("/login"); // স্পেলিং মিস্টেক ঠিক করা হয়েছে এবং আপনার রুট অনুযায়ী '/login' দেওয়া হলো
+                    router.push("/login");
                 }
             }
         });
@@ -53,6 +65,7 @@ export default function Navbar() {
         return `/dashboard/${userRole.toLowerCase()}`;
     };
 
+    // ডেস্কটপের জন্য সম্পূর্ণ মেনু আইটেম
     const menuItems = [
         { name: "হোম", href: "/" },
         {
@@ -77,7 +90,7 @@ export default function Navbar() {
                 { name: "শ্রেণী শিক্ষকের তালিকা", href: "/academics#teachers" },
                 { name: "শিক্ষা স্তর", href: "/academics#levels" },
                 { name: "পাঠ্যক্রম (Syllabus)", href: "/academics#syllabus" },
-                { name: "সহ-পাঠ্যক্রম", href: "/academics#co-curricular" },
+                { name: "सह-पाठ्यक्रम", href: "/academics#co-curricular" },
                 { name: "ক্লাস রুটিন", href: "/academics#class-routine" },
                 { name: "পরীক্ষা রুটিন", href: "/academics#exam-routine" },
             ],
@@ -134,25 +147,20 @@ export default function Navbar() {
     ];
 
     return (
-        <nav className="bg-emerald-900 print:hidden text-white shadow-md sticky top-0 z-50 transition-colors duration-300 dark:bg-slate-900 border-b border-emerald-800 dark:border-slate-800">
+        <nav className={`fixed top-0 left-0 w-full print:hidden text-white z-50 transition-all duration-300 ${
+            isScrolled 
+                ? "bg-emerald-900 shadow-md border-b border-emerald-800 dark:bg-slate-900 dark:border-slate-800" 
+                : "bg-transparent border-b border-white/10"
+        }`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-20">
 
-                    {/* লোগো সেকশন */}
-                    <div className="flex-shrink-0 flex items-center pr-4">
-                        <Link href="/" className="flex items-center" onClick={closeMenu}>
-                            {/* লোগো ধারক div */}
-                            <div className="w-16 h-16 flex items-center justify-center overflow-hidden rounded-full">
-                                <img 
-                                    src="/aimlogo1.png" 
-                                    alt="As-Salam Ideal Madrasah Logo" 
-                                    className="w-full h-full object-cover"
-                                />
-                            </div>
-                        </Link>
+                    {/* লোগো সেকশন সম্পূর্ণ রিমুভড, স্পেস অ্যাডজাস্টমেন্ট এর জন্য খালি ডিভ রাখা হয়নি */}
+                    <div className="flex-shrink-0">
+                        {/* লোগো টোটালি বাদ */}
                     </div>
 
-                    {/* ডেস্কটপ মেনু */}
+                    {/* ডেস্কটপ মেনু (স্বাভাবিক অবস্থায় ব্যাকগ্রাউন্ড ছাড়া ভাসবে) */}
                     <div className="hidden lg:flex items-center space-x-0.5 ml-auto">
                         {menuItems.map((item, index) => (
                             <div key={index} className="relative group">
@@ -160,7 +168,7 @@ export default function Navbar() {
                                     <>
                                         <button
                                             onClick={() => setActiveDropdown(activeDropdown === item.name ? null : item.name)}
-                                            className={`px-2 py-2 rounded-md text-[13px] xl:text-sm font-semibold hover:bg-emerald-800 dark:hover:bg-slate-800 transition flex items-center gap-0.5 focus:outline-none text-white ${
+                                            className={`px-2 py-2 rounded-md text-[13px] xl:text-sm font-semibold hover:bg-emerald-800/80 dark:hover:bg-slate-800/80 transition flex items-center gap-0.5 focus:outline-none text-white ${
                                                 item.isAdmission ? "bg-amber-500 hover:bg-amber-600 text-slate-950 dark:text-slate-950 animate-pulse rounded-md px-3 font-bold" : ""
                                             }`}
                                         >
@@ -186,13 +194,13 @@ export default function Navbar() {
                                         </div>
                                     </>
                                 ) : (
-                                    <Link href={item.href} className="px-2 py-2 rounded-md text-[13px] xl:text-sm font-medium hover:bg-emerald-800 dark:hover:bg-slate-800 transition block text-white">{item.name}</Link>
+                                    <Link href={item.href} className="px-2 py-2 rounded-md text-[13px] xl:text-sm font-medium hover:bg-emerald-800/80 dark:hover:bg-slate-800/80 transition block text-white">{item.name}</Link>
                                 )}
                             </div>
                         ))}
 
                         {/* থিম টগল বাটন */}
-                        <button onClick={toggleDarkMode} className="p-1.5 ml-1 rounded-full hover:bg-emerald-800 dark:hover:bg-slate-800 transition-colors text-amber-300 focus:outline-none flex-shrink-0">
+                        <button onClick={toggleDarkMode} className="p-1.5 ml-1 rounded-full hover:bg-emerald-800/80 dark:hover:bg-slate-800/80 transition-colors text-amber-300 focus:outline-none flex-shrink-0">
                             {darkMode ? (
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M16.243 17.657l.707.707M6.343 6.343l.707-.707M12 12a9 9 0 110 18v-1z" /></svg>
                             ) : (
@@ -202,7 +210,7 @@ export default function Navbar() {
 
                         {/* ডেস্কটপ ইউজার প্যানেল */}
                         {isLoggedIn ? (
-                            <div className="flex items-center gap-2 ml-2 pl-2 border-l border-emerald-700 dark:border-slate-700 flex-shrink-0">
+                            <div className="flex items-center gap-2 ml-2 pl-2 border-l border-white/20 flex-shrink-0">
                                 <div className="w-7 h-7 rounded-full bg-amber-400 text-slate-900 font-bold flex items-center justify-center text-[11px] overflow-hidden border border-white shadow-inner">
                                     {userPhoto ? <img src={userPhoto} alt="Profile" className="w-full h-full object-cover" /> : userRole ? userRole[0].toUpperCase() : "U"}
                                 </div>
@@ -220,7 +228,7 @@ export default function Navbar() {
                                 </button>
                             </div>
                         ) : (
-                            <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-emerald-700 dark:border-slate-700 flex-shrink-0">
+                            <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-white/20 flex-shrink-0">
                                 <Link
                                     href="/login"
                                     className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-md text-xs xl:text-sm shadow transition transform hover:-translate-y-0.5"
@@ -237,10 +245,10 @@ export default function Navbar() {
                         )}
                     </div>
 
-                    {/* মোবাইল রেসপনসিভ হ্যামবার্গার ও থিম বাটন */}
-                    <div className="flex items-center lg:hidden gap-2">
+                    {/* মোবাইল রেসপনসিভ অ্যাকশন বাটন এবং ড্রয়ার টগল */}
+                    <div className="flex items-center lg:hidden gap-2 ml-auto">
                         <button onClick={toggleDarkMode} className="p-2 text-amber-300"><span className="text-lg">{darkMode ? "☀️" : "🌙"}</span></button>
-                        <button onClick={() => setIsOpen(!isOpen)} className="p-2 rounded-md text-emerald-100 hover:bg-emerald-800 focus:outline-none">
+                        <button onClick={() => setIsOpen(!isOpen)} className="p-2 rounded-md text-emerald-100 hover:bg-emerald-800/50 focus:outline-none">
                             {isOpen ? (
                                 <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
                             ) : (
@@ -252,76 +260,44 @@ export default function Navbar() {
                 </div>
             </div>
 
-            {/* মোবাইল মেনু ড্রয়ার */}
+            {/* মোবাইল মেনু ড্রয়ার: শুধুমাত্র অথেনটিকেশন আইটেম থাকবে */}
             {isOpen && (
-                <div className="lg:hidden bg-emerald-900 border-t border-emerald-800 dark:bg-slate-950 dark:border-slate-800 max-h-[80vh] overflow-y-auto">
-                    <div className="px-2 pt-2 pb-4 space-y-1">
-                        {menuItems.map((item, index) => (
-                            <div key={index} className="block">
-                                {item.dropdown ? (
-                                    <>
-                                        <button
-                                            onClick={() => setActiveDropdown(activeDropdown === item.name ? null : item.name)}
-                                            className={`w-full text-left px-3 py-2 rounded-md text-base font-medium hover:bg-emerald-800 dark:hover:bg-slate-800 transition flex items-center justify-between text-white ${
-                                                item.isAdmission ? "bg-amber-500 text-slate-950 dark:text-slate-950 animate-pulse font-bold my-1" : ""
-                                            }`}
-                                        >
-                                            <span>{item.name}</span>
-                                            <svg className={`w-4 h-4 transform transition-transform ${activeDropdown === item.name ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                                            </svg>
-                                        </button>
-                                        {activeDropdown === item.name && (
-                                            <div className="pl-4 bg-emerald-950/50 dark:bg-slate-900 rounded-md mt-1 mb-2">
-                                                {item.dropdown.map((sub, i) => (
-                                                    <Link key={i} href={sub.href} onClick={closeMenu} className="block px-3 py-2 text-sm text-emerald-100 dark:text-gray-300 hover:bg-emerald-800 dark:hover:bg-slate-800 hover:text-white rounded-md transition">{sub.name}</Link>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </>
-                                ) : (
-                                    <Link href={item.href} onClick={closeMenu} className="block px-3 py-2 rounded-md text-base font-medium hover:bg-emerald-800 dark:hover:bg-slate-800 transition text-white">{item.name}</Link>
-                                )}
+                <div className="lg:hidden bg-emerald-950/95 border-t border-emerald-800 dark:bg-slate-950/95 dark:border-slate-800 max-h-[40vh] overflow-y-auto backdrop-blur-md">
+                    <div className="px-4 py-4 space-y-3">
+                        {isLoggedIn ? (
+                            <div className="space-y-2">
+                                <Link 
+                                    href={getDashboardPath()} 
+                                    onClick={closeMenu} 
+                                    className="block text-center bg-amber-500 text-slate-950 font-bold py-2.5 rounded-md shadow"
+                                >
+                                    ড্যাশবোর্ড প্যানেল ({userRole})
+                                </Link>
+                                <button 
+                                    onClick={handleLogout} 
+                                    className="w-full text-center bg-red-600 text-white font-bold py-2.5 rounded-md shadow"
+                                >
+                                    লগআউট করুন
+                                </button>
                             </div>
-                        ))}
-                        
-                        {/* মোবাইল ইউজার অ্যাকশন প্যানেল */}
-                        <div className="pt-4 border-t border-emerald-800 dark:border-slate-800 px-3 space-y-2">
-                            {isLoggedIn ? (
-                                <>
-                                    <Link 
-                                        href={getDashboardPath()} 
-                                        onClick={closeMenu} 
-                                        className="block text-center bg-amber-500 text-slate-950 font-bold py-2 rounded-md shadow"
-                                    >
-                                        ড্যাশবোর্ড প্যানেল ({userRole})
-                                    </Link>
-                                    <button 
-                                        onClick={handleLogout} 
-                                        className="w-full text-center bg-red-600 text-white font-bold py-2 rounded-md shadow"
-                                    >
-                                        লগআউট করুন
-                                    </button>
-                                </>
-                            ) : (
-                                <div className="grid grid-cols-2 gap-2">
-                                    <Link 
-                                        href="/login" 
-                                        onClick={closeMenu} 
-                                        className="block text-center bg-amber-500 text-slate-950 font-bold py-2 rounded-md shadow"
-                                    >
-                                        লগইন
-                                    </Link>
-                                    <Link 
-                                        href="/register" 
-                                        onClick={closeMenu} 
-                                        className="block text-center bg-transparent border border-amber-400 text-amber-400 font-bold py-2 rounded-md shadow"
-                                    >
-                                        নিবন্ধন
-                                    </Link>
-                                </div>
-                            )}
-                        </div>
+                        ) : (
+                            <div className="grid grid-cols-2 gap-3">
+                                <Link 
+                                    href="/login" 
+                                    onClick={closeMenu} 
+                                    className="block text-center bg-amber-500 text-slate-950 font-bold py-2.5 rounded-md shadow"
+                                >
+                                    লগইন
+                                </Link>
+                                <Link 
+                                    href="/register" 
+                                    onClick={closeMenu} 
+                                    className="block text-center bg-transparent border border-amber-400 text-amber-400 font-bold py-2.5 rounded-md shadow"
+                                >
+                                    নিবন্ধন
+                                </Link>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
