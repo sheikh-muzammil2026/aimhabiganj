@@ -23,7 +23,7 @@ export default function TopHeader() {
           {/* লোগো সেকশন */}
           <div className="flex-shrink-0 bg-white/10 p-1.5 rounded-full border border-white/20 backdrop-blur-sm">
             <Image 
-              src="/aimlogo.png" 
+              src="/aimlogo1.png" 
               alt="As-Salam Ideal Madrasah Logo" 
               width={75} 
               height={75} 
