@@ -17,43 +17,39 @@ export default function TopHeader() {
       {/* মেইন কন্টেইনার */}
       <div className="max-w-7xl mx-auto flex flex-row items-center relative z-10 gap-4 md:gap-6">
         
-        {/* লোগো সেকশন: বিশ্রি মার্জিন কাটতে scale কমানো হয়েছে এবং ভেতরের দিকে ১ পিক্সেলের মতো ক্লিন মার্জিন দেওয়া হয়েছে */}
-        <div className="flex-shrink-0 w-[60px] h-[60px] md:w-[85px] md:h-[85px] relative rounded-full overflow-hidden p-[1px] bg-transparent">
+        {/* লোগো সেকশন: মার্জিন ১ পিক্সেল বাড়ানো হয়েছে এবং scale কমিয়ে গোল অংশ নিখুঁত করা হয়েছে */}
+        <div className="flex-shrink-0 w-[60px] h-[60px] md:w-[85px] md:h-[85px] relative rounded-full overflow-hidden p-[2px] bg-transparent">
           <Image 
             src="/aimlogo1.png" 
             alt="As-Salam Ideal Madrasah Logo" 
             fill
             sizes="(max-width: 768px) 60px, 85px"
-            className="object-cover scale-[1.08] rounded-full" 
+            className="object-cover scale-[1.06] rounded-full" 
             priority
           />
         </div>
 
-        {/* নাম ও স্লোগান কন্টেইনার: flex-1 এবং w-full দিয়ে লোগোর ডান পাশের পুরো হেডার দখল করবে */}
-        <div className="flex-1 flex flex-col space-y-1.5 w-full">
+        {/* নাম ও স্লোগান কন্টেইনার: ফুল উইডথ দখল করবে */}
+        <div className="flex-1 flex flex-col space-y-1 w-full text-left">
           
-          {/* ১. আরবি নাম: text-justify ও w-full দিয়ে পুরো চওড়া জায়গায় সমানভাবে জাস্টিফাইড হবে */}
-          <div className="w-full text-justify after:inline-block after:w-full">
-            <p className="inline text-xs md:text-base font-arabic text-emerald-200/90 tracking-wider dark:text-slate-400" dir="rtl" lang="ar">
-              مدرسة السلام النموذجية، حبيغنج
-            </p>
-          </div>
+          {/* ১. আরবি নাম: ফন্ট সাইজ বাড়িয়ে স্বাভাবিক ফ্লুইড অবস্থায় আনা হয়েছে */}
+          <p className="text-sm md:text-xl font-arabic text-emerald-200/90 tracking-wide dark:text-slate-400" dir="rtl" lang="ar">
+            مدرسة السلام النموذجية، حبيغنج
+          </p>
           
-          {/* ২. বাংলা নাম: text-justify দিয়ে বাকি নামগুলোর সাথে সমান উইডথ নেবে */}
-          <div className="w-full text-justify after:inline-block after:w-full">
-            <p className="inline text-sm md:text-xl font-bold text-emerald-50 tracking-normal dark:text-slate-200 leading-tight">
-              আস-সালাম আইডিয়াল মাদ্রাসা, হবিগঞ্জ
-            </p>
-          </div>
+          {/* ২. বাংলা নাম: ফন্ট সাইজ বড় করে রেগুলার এলাইনমেন্ট */}
+          <p className="text-base md:text-2xl font-bold text-emerald-50 tracking-normal dark:text-slate-200 leading-tight">
+            আস-সালাম আইডিয়াল মাদ্রাসা, হবিগঞ্জ
+          </p>
           
-          {/* ৩. ইংরেজি নাম এবং ৪. স্লোগান: একই লাইনে রেখে justify-between করা হয়েছে যাতে ইংরেজি নাম বামে থাকে এবং স্লোগান একদম ডান পাশে চলে যায় */}
-          <div className="w-full flex flex-row items-baseline justify-between gap-2 border-t border-white/5 pt-1">
-            <h1 className="text-sm md:text-2xl font-black tracking-wide text-amber-400 dark:text-emerald-400 capitalize drop-shadow-sm font-sans leading-none">
-              As-Salam Ideal Madrasah
-            </h1>
-            
-            {/* স্লোগান: ইংরেজি নামের সমান্তরালে একদম ডান সাইডে থাকবে */}
-            <p className="text-[9px] md:text-xs font-medium tracking-widest text-amber-300/85 italic uppercase dark:text-emerald-300/70 whitespace-nowrap">
+          {/* ৩. ইংরেজি নাম */}
+          <h1 className="text-lg md:text-3xl font-black tracking-wide text-amber-400 dark:text-emerald-400 capitalize drop-shadow-sm font-sans leading-none">
+            As-Salam Ideal Madrasah
+          </h1>
+
+          {/* ৪. স্লোগান: সম্পূর্ণ নতুন লাইনে এবং রাইট সাইডে পুশ করা হয়েছে */}
+          <div className="w-full flex justify-end pt-1 md:pt-1.5 border-t border-white/5">
+            <p className="text-[10px] md:text-sm font-medium tracking-widest text-amber-300/85 italic uppercase dark:text-emerald-300/70">
               AIM For Ultimate Success
             </p>
           </div>
