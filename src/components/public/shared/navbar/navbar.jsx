@@ -25,7 +25,6 @@ export default function Navbar() {
         document.documentElement.classList.toggle("dark", isDark);
 
         const handleScroll = () => {
-            // স্ক্রল ২০ পিক্সেলের বেশি হলে ব্যাকগ্রাউন্ড আসবে
             if (window.scrollY > 20) {
                 setIsScrolled(true);
             } else {
@@ -89,7 +88,7 @@ export default function Navbar() {
                 { name: "শ্রেণী শিক্ষকের তালিকা", href: "/academics#teachers" },
                 { name: "শিক্ষা স্তর", href: "/academics#levels" },
                 { name: "পাঠ্যক্রম (Syllabus)", href: "/academics#syllabus" },
-                { name: "সহ-পাঠ্যক্রম", href: "/academics#co-curricular" },
+                { name: "सह-পাঠ্যক্রম", href: "/academics#co-curricular" },
                 { name: "ক্লাস রুটিন", href: "/academics#class-routine" },
                 { name: "পরীক্ষা রুটিন", href: "/academics#exam-routine" },
             ],
@@ -147,20 +146,18 @@ export default function Navbar() {
 
     return (
         <>
-            {/* ডেস্কটপ নেভবার: যা স্ক্রল করলে ভেসে উঠবে এবং স্বাভাবিক অবস্থায় হাইড বা অন্য এলিমেন্টের সাথে থাকবে */}
+            {/* ডেস্কটপ নেভবার */}
             <nav className={`fixed top-0 left-0 w-full print:hidden text-white z-50 transition-all duration-300 ${
                 isScrolled 
-                    ? "bg-emerald-900/95 shadow-md border-b border-emerald-800 dark:bg-slate-900/95 dark:border-slate-800 backdrop-blur-sm transform translate-y-0 opacity-100" 
-                    : "bg-transparent pointer-events-none lg:pointer-events-auto transform lg:translate-y-0 opacity-0 lg:opacity-100"
+                    ? "bg-emerald-900/95 shadow-md border-b border-emerald-800 dark:bg-slate-900/95 dark:border-slate-800 backdrop-blur-sm opacity-100 pointer-events-auto transform translate-y-0" 
+                    : "bg-transparent opacity-0 pointer-events-none lg:opacity-100 lg:pointer-events-auto transform lg:translate-y-0"
             }`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-20">
+                    {/* flex justify-end ব্যবহার করে সব আইটেম ডানে পুশ করা হয়েছে */}
+                    <div className="flex items-center justify-end h-20">
 
-                        {/* লোগো সেকশন সম্পূর্ণ রিমুভড */}
-                        <div className="flex-shrink-0"></div>
-
-                        {/* ডেস্কটপ মেনু আইটেমসমূহ */}
-                        <div className="hidden lg:flex items-center space-x-0.5 ml-auto">
+                        {/* লোগো ও নাম রিমোভড — এখন সরাসরি মেনু আইটেমসমূহ দেখা যাবে */}
+                        <div className="hidden lg:flex items-center space-x-0.5">
                             {menuItems.map((item, index) => (
                                 <div key={index} className="relative group">
                                     {item.dropdown ? (
@@ -206,7 +203,7 @@ export default function Navbar() {
                                 )}
                             </button>
 
-                            {/* ডেস্কটপ লগইন/লগআউট অ্যাকশন */}
+                            {/* লগইন/লগআউট অ্যাকশন */}
                             {isLoggedIn ? (
                                 <div className="flex items-center gap-2 ml-2 pl-2 border-l border-white/20 flex-shrink-0">
                                     <div className="w-7 h-7 rounded-full bg-amber-400 text-slate-900 font-bold flex items-center justify-center text-[11px] overflow-hidden border border-white shadow-inner">
@@ -226,7 +223,7 @@ export default function Navbar() {
                 </div>
             </nav>
 
-            {/* মোবাইল মোডাল/ড্রয়ার প্যানেল (যখন আলাদাভাবে মোবাইল বাটন ট্রিগার হবে) */}
+            {/* মোবাইল মোডাল/ড্রয়ার প্যানেল */}
             {isOpen && (
                 <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-50 lg:hidden" onClick={closeMenu}>
                     <div className="absolute top-24 right-4 w-64 bg-emerald-950/95 border border-emerald-800 rounded-2xl shadow-2xl p-4 space-y-3 dark:bg-slate-950/95 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-150" onClick={(e) => e.stopPropagation()}>
@@ -272,13 +269,11 @@ export default function Navbar() {
                 </div>
             )}
 
-            {/* মোবাইল ভিউর জন্য গ্লোবাল ইভেন্ট পাসার - যাতে হিরো সেকশন থেকে টগল হ্যান্ডেল করা যায় */}
             <GlobalMobileNavTrigger isOpen={isOpen} setIsOpen={setIsOpen} darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
         </>
     );
 }
 
-// একটি ছোট হেল্পার ফাংশন যা উইন্ডো অবজেক্টে মোবাইল অ্যাকশনগুলো পাস করে দেয়
 function GlobalMobileNavTrigger({ isOpen, setIsOpen, darkMode, toggleDarkMode }) {
     useEffect(() => {
         if (typeof window !== "undefined") {
