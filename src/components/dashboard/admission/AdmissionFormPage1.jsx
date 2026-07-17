@@ -220,38 +220,7 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
       {/* মূল কন্টেইনার ক্লাস */}
       <div className="w-full min-h-[11.69in] bg-white p-4 md:p-10 flex flex-col justify-between box-border text-gray-800 relative font-bengali overflow-x-hidden print:min-h-0 print:h-full print:p-0 print:overflow-hidden">
 
-        {/* হেডার সেকশন */}
-        <div className="flex flex-col-reverse sm:flex-row justify-between items-start w-full gap-4 mb-4 print:mb-2 print:flex-row">
-          <div className="space-y-4 w-full sm:w-auto print:space-y-2">
-             <div className="flex items-center gap-2">
-              <span className="font-bold text-gray-700 text-sm print:text-xs">ক্রমিক নং :</span>
-              <input
-                type="text"
-                name="serialNo"
-                value={formData.serialNo || ""}
-                onChange={handleChange}
-                className="w-28 border border-gray-400 px-2 py-1 rounded text-sm focus:outline-none focus:border-orange-500 print:border-b print:border-dotted print:border-gray-400 print:px-0 print:py-0 print:w-24"
-              />
-            </div>
-
-            {/* ক্যাটাগরি চেকবক্স */}
-             <div className="flex flex-wrap gap-4 pt-2 print:gap-3 print:pt-1">
-              {["নতুন", "আবাসিক", "অনাবাসিক", "ডে-কেয়ার"].map((type) => (
-                <label key={type} className="flex items-center gap-2 font-bold text-gray-700 cursor-pointer text-sm print:text-xs">
-                  <input
-                    type="radio"
-                    name="status"
-                    value={type}
-                    checked={formData.status === type}
-                    onChange={handleChange}
-                    className="w-4 h-4 accent-orange-600 print:w-3 print:h-3"
-                  />
-                  <span>{type}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
+        
           {/* ছবি আপলোড */}
           <div className="w-32 h-40 border-2 border-dashed border-gray-400 bg-gray-50 flex flex-col items-center justify-center p-2 text-center rounded relative group cursor-pointer overflow-hidden print:w-24 print:h-28 print:border print:border-solid">
             {formData.studentImage ? (
@@ -266,7 +235,7 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
               className="absolute inset-0 opacity-0 cursor-pointer print:hidden"
             />
           </div>
-        </div>
+     
 
         {/* সেকশন ১: শিক্ষার্থীর তথ্য বিবরণী */}
         <div className="w-full mb-4 print:mb-2">
