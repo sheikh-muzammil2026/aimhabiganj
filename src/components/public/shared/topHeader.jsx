@@ -33,17 +33,17 @@ export default function TopHeader() {
         <div className="flex-1 flex flex-col space-y-1 w-full text-left">
           
           {/* ১. আরবি নাম: ফন্ট সাইজ বাড়িয়ে স্বাভাবিক ফ্লুইড অবস্থায় আনা হয়েছে */}
-          <p className="text-sm md:text-xl font-arabic text-emerald-200/90 tracking-wide dark:text-slate-400" dir="rtl" lang="ar">
-            مدرسة السلام النموذجية، حبيغنج
+          <p className="text-xl md:text-5xl font-arabic text-emerald-200/90 tracking-wide dark:text-slate-400" dir="rtl" lang="ar">
+            مدرسة السلام النموذجية
           </p>
           
           {/* ২. বাংলা নাম: ফন্ট সাইজ বড় করে রেগুলার এলাইনমেন্ট */}
-          <p className="text-base md:text-2xl font-bold text-emerald-50 tracking-normal dark:text-slate-200 leading-tight">
-            আস-সালাম আইডিয়াল মাদ্রাসা, হবিগঞ্জ
+          <p className="text-xl md:text-5xl font-bold text-emerald-50 tracking-normal dark:text-slate-200 leading-tight">
+            আস-সালাম আইডিয়াল মাদ্রাসা
           </p>
           
           {/* ৩. ইংরেজি নাম */}
-          <h1 className="text-lg md:text-3xl font-black tracking-wide text-amber-400 dark:text-emerald-400 capitalize drop-shadow-sm font-sans leading-none">
+          <h1 className="text-xl md:text-5xl font-black tracking-wide text-amber-400 dark:text-emerald-400 capitalize drop-shadow-sm font-sans leading-none">
             As-Salam Ideal Madrasah
           </h1>
 
