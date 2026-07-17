@@ -139,13 +139,17 @@ export default function Navbar() {
                 <div className="flex items-center justify-between h-20">
 
                     {/* লোগো সেকশন */}
-                    <div className="flex-shrink-0 flex items-center pr-4">
-                        <Link href="/" className="flex items-center" onClick={closeMenu}>
-                            <div className="bg-white text-emerald-950 font-black p-2 rounded-full w-12 h-12 flex items-center justify-center shadow-lg border-2 border-amber-400 dark:bg-emerald-800 dark:text-white dark:border-emerald-600 text-lg tracking-wider">
-                                AS
-                            </div>
-                        </Link>
-                    </div>
+<div className="flex-shrink-0 flex items-center pr-4">
+    <Link href="/" className="flex items-center" onClick={closeMenu}>
+        <div className="bg-white p-1 rounded-full w-12 h-12 flex items-center justify-center shadow-lg border-2 border-amber-400 dark:bg-emerald-800 dark:border-emerald-600 overflow-hidden">
+            <img 
+                src="/aimlogo.png" 
+                alt="As-Salam Ideal Madrasah Logo" 
+                className="w-full h-full object-contain"
+            />
+        </div>
+    </Link>
+</div>
 
                     {/* ডেস্কটপ মেনু */}
                     <div className="hidden lg:flex items-center space-x-0.5 ml-auto">
