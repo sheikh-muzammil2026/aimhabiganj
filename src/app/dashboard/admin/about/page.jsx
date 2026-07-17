@@ -1,7 +1,7 @@
+// src/app/dashboard/admin/about/page.jsx
 "use client";
 
 import { useState, useEffect } from "react";
-import { aboutApi } from "@/lib/api-client";
 
 const sections = [
   { id: "profile", name: "প্রতিষ্ঠান পরিচিতি", hasList: false, label: "পরিচিতি বর্ণনা" },
@@ -21,50 +21,43 @@ export default function AboutDashboard() {
   const [activeTab, setActiveTab] = useState("profile");
   const [formData, setFormData] = useState({ title: "", subtitle: "", content: "", listItems: [] });
   const [newItem, setNewItem] = useState({});
-  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
   const currentSection = sections.find(s => s.id === activeTab);
 
-  // ট্যাব পরিবর্তন হলে ডাটাবেজ থেকে ডাটা লোড হবে
+  // ট্যাব পরিবর্তন হলে স্ট্যাটিক্যালি ফিল্ড ও স্টেট রিসেট হবে (API কল রিমুভড)
   useEffect(() => {
-    const fetchTabMutation = async () => {
-      setLoading(true);
-      try {
-        const data = await aboutApi.getSection(activeTab);
-        setFormData(data);
-        // নতুন আইটেম যোগ করার ফিল্ড রিসেট করা
-        const initialFields = {};
-        currentSection.fields?.forEach(f => initialFields[f] = "");
-        setNewItem(initialFields);
-      } catch (err) {
-        console.error("ডাটা লোড করতে ব্যর্থ:", err);
-      }
-      setLoading(false);
-    };
-    fetchTabMutation();
+    setFormData({
+      title: currentSection.name,
+      subtitle: "",
+      content: "",
+      listItems: []
+    });
+    
+    const initialFields = {};
+    currentSection.fields?.forEach(f => initialFields[f] = "");
+    setNewItem(initialFields);
   }, [activeTab]);
 
-  // মেইন ফর্ম হ্যান্ডলার
-  const handleSave = async (e) => {
+  // স্ট্যাটিক ফর্ম সাবমিট হ্যান্ডলার (API রিমুভড)
+  const handleSave = (e) => {
     e.preventDefault();
-    setMessage("সংরক্ষণ করা হচ্ছে...");
-    try {
-      await aboutApi.saveSection(activeTab, formData);
-      setMessage("সফলভাবে ডাটাবেজে সংরক্ষিত হয়েছে! ✓");
+    setMessage("সংরক্ষণ করা হচ্ছে (স্ট্যাটিক)...");
+    
+    // লোকাল স্টেটে ডাটা লক করার সাকসেস মেসেজ সিমুলেশন
+    setTimeout(() => {
+      setMessage("স্ট্যাটিক্যালি ফর্ম আপডেট হয়েছে! ✓");
       setTimeout(() => setMessage(""), 3000);
-    } catch (err) {
-      setMessage("ত্রুটি ঘটেছে! আবার চেষ্টা করুন।");
-    }
+    }, 500);
   };
 
-  // লিস্ট আইটেম (যেমন নতুন শিক্ষক বা নতুন নীতিমালা) অ্যাড করা
+  // স্ট্যাটিক লিস্ট আইটেম অ্যাড করা
   const addListItem = () => {
     if (Object.values(newItem).some(val => val === "")) {
       alert("অনুগ্রহ করে সব ফিল্ড পূরণ করুন!");
       return;
     }
-    const updatedList = [...formData.listItems, { ...newItem, id: Date.now() }];
+    const updatedList = [...(formData.listItems || []), { ...newItem, id: Date.now() }];
     setFormData({ ...formData, listItems: updatedList });
     
     // ফিল্ড খালি করা
@@ -73,7 +66,7 @@ export default function AboutDashboard() {
     setNewItem(clearedFields);
   };
 
-  // লিস্ট থেকে আইটেম ডিলিট করা
+  // স্ট্যাটিক লিস্ট থেকে আইটেম ডিলিট করা
   const deleteListItem = (id) => {
     const updatedList = formData.listItems.filter(item => item.id !== id);
     setFormData({ ...formData, listItems: updatedList });
@@ -107,21 +100,20 @@ export default function AboutDashboard() {
 
           {/* ডান পাশের ডাইনামিক এডিটর ফর্ম */}
           <div className="lg:col-span-3 bg-white dark:bg-slate-800 rounded-xl p-6 shadow-md relative">
-            {loading && (
-              <div className="absolute inset-0 bg-white/70 dark:bg-slate-800/70 z-10 flex items-center justify-center font-bold">
-                ⏳ ডাটা লোড হচ্ছে...
-              </div>
-            )}
-
+            
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <span>📝</span> {currentSection.name} এডিট করছেন
               </h2>
-              {message && <span className="text-sm bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-bold dark:bg-emerald-950 dark:text-emerald-300 animate-fade-in">{message}</span>}
+              {message && (
+                <span className="text-sm bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-bold dark:bg-emerald-950 dark:text-emerald-300 animate-fade-in">
+                  {message}
+                </span>
+              )}
             </div>
 
             <form onSubmit={handleSave} className="space-y-5">
-              {/* টাইটেল এবং সাবটাইটেল (সবার জন্য কমন) */}
+              {/* টাইটেল এবং সাবটাইটেল */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold uppercase mb-1.5 text-slate-500">সেকশন মেইন হেডিং (বাংলায়)</label>
@@ -129,7 +121,7 @@ export default function AboutDashboard() {
                     type="text"
                     value={formData.title || ""}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full px-4 py-2 border rounded-lg dark:bg-slate-700 dark:border-slate-600 focus:outline-emerald-600"
+                    className="w-full px-4 py-2 border rounded-lg dark:bg-slate-700 dark:border-slate-600 focus:outline-emerald-600 animate-none"
                     placeholder="উদা: আমাদের শিক্ষকমণ্ডলী"
                     required
                   />
@@ -140,13 +132,13 @@ export default function AboutDashboard() {
                     type="text"
                     value={formData.subtitle || ""}
                     onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
-                    className="w-full px-4 py-2 border rounded-lg dark:bg-slate-700 dark:border-slate-600 focus:outline-emerald-600"
+                    className="w-full px-4 py-2 border rounded-lg dark:bg-slate-700 dark:border-slate-600 focus:outline-emerald-600 animate-none"
                     placeholder="উদা: দ্বীন ও আধুনিক শিক্ষার সমন্বয়ে..."
                   />
                 </div>
               </div>
 
-              {/* যদি সেকশনটি শুধু টেক্সট বেসড হয় (যেমন প্রতিষ্ঠান পরিচিতি) */}
+              {/* যদি সেকশনটি শুধু টেক্সট বেসড হয় */}
               {!currentSection.hasList && (
                 <div>
                   <label className="block text-xs font-bold uppercase mb-1.5 text-slate-500">{currentSection.label}</label>
@@ -154,13 +146,13 @@ export default function AboutDashboard() {
                     rows="8"
                     value={formData.content || ""}
                     onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                    className="w-full px-4 py-2 border rounded-lg dark:bg-slate-700 dark:border-slate-600 focus:outline-emerald-600"
+                    className="w-full px-4 py-2 border rounded-lg dark:bg-slate-700 dark:border-slate-600 focus:outline-emerald-600 animate-none"
                     placeholder="এখানে বিস্তারিত বিবরণ লিখুন..."
                   ></textarea>
                 </div>
               )}
 
-              {/* যদি সেকশনটি লিস্ট বেসড হয় (যেমন শিক্ষক, কর্মচারী, ফিচার গ্রিড) */}
+              {/* যদি সেকশনটি লিস্ট বেসড হয় */}
               {currentSection.hasList && (
                 <div className="border-t pt-4 mt-4">
                   <h3 className="text-sm font-bold text-amber-600 mb-3 uppercase tracking-wider">📋 তালিকা আইটেম যুক্ত করুন</h3>
@@ -169,12 +161,14 @@ export default function AboutDashboard() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border dark:border-slate-700">
                     {currentSection.fields?.map((field) => (
                       <div key={field}>
-                        <label className="block text-xs font-semibold text-slate-400 mb-1 capitalize">{field === "name" ? "নাম" : field === "designation" ? "পদবি" : field === "image" ? "ছবির লিঙ্ক" : field === "education" ? "শিক্ষাগত যোগ্যতা" : field}</label>
+                        <label className="block text-xs font-semibold text-slate-400 mb-1 capitalize">
+                          {field === "name" ? "নাম" : field === "designation" ? "পদবি" : field === "image" ? "ছবির লিঙ্ক" : field === "education" ? "শিক্ষাগত যোগ্যতা" : field}
+                        </label>
                         <input
                           type="text"
                           value={newItem[field] || ""}
                           onChange={(e) => setNewItem({ ...newItem, [field]: e.target.value })}
-                          className="w-full px-3 py-1.5 text-sm border rounded bg-white dark:bg-slate-800 dark:border-slate-700"
+                          className="w-full px-3 py-1.5 text-sm border rounded bg-white dark:bg-slate-800 dark:border-slate-700 animate-none"
                           placeholder={`${field} লিখুন`}
                         />
                       </div>
@@ -201,12 +195,14 @@ export default function AboutDashboard() {
                         </tr>
                       </thead>
                       <tbody>
-                        {formData.listItems?.length === 0 ? (
+                        {!formData.listItems || formData.listItems.length === 0 ? (
                           <tr>
-                            <td colSpan={currentSection.fields ? currentSection.fields.length + 2 : 2} className="p-4 text-center text-gray-400">তালিকায় কোনো ডাটা নেই। ওপর থেকে যোগ করুন।</td>
+                            <td colSpan={currentSection.fields ? currentSection.fields.length + 2 : 2} className="p-4 text-center text-gray-400">
+                              তালিকায় কোনো ডাটা নেই। ওপর থেকে যোগ করুন।
+                            </td>
                           </tr>
                         ) : (
-                          formData.listItems?.map((item, index) => (
+                          formData.listItems.map((item, index) => (
                             <tr key={item.id || index} className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
                               <td className="p-2 border dark:border-slate-600 font-bold">{index + 1}</td>
                               {currentSection.fields?.map(f => (
@@ -236,7 +232,7 @@ export default function AboutDashboard() {
                   type="submit"
                   className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-6 py-2.5 rounded-lg shadow-md transition transform hover:-translate-y-0.5"
                 >
-                  💾 ডাটাবেজে সংরক্ষণ (Save Changes)
+                  💾 ফর্ম আপডেট করুন
                 </button>
               </div>
             </form>
