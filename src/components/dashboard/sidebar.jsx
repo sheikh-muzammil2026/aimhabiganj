@@ -78,21 +78,23 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         { id: "teachers", title: "শিক্ষক ব্যবস্থাপনা", icon: "🕌", href: "/dashboard/teachers", roles: ["admin"] },
         { id: "administration", title: "প্রশাসনিক বিভাগ", icon: "🛡️", href: "/dashboard/administration", roles: ["admin"] },
         {
-            id: "finance",
-            title: "হিসাব ও অর্থ বিভাগ",
-            icon: "💰",
-            roles: ["admin", "accountant"], 
-            dropdown: [
-                { title: "রশিদ ব্যবস্থাপনা", href: "/dashboard/finance/receipts" },
-                { title: "ফি ও তহবিল কনফিগার", href: "/dashboard/finance/fees-setup" },
-                { title: "খরচ ও ভাউচার ট্র্যাকিং", href: "/dashboard/finance/expenses" },
-                { title: "বেতন ও ভাতা (Payroll)", href: "/dashboard/finance/payroll" },
-                { title: "সদকা ও অনুদান", href: "/dashboard/finance/donations" },
-                { title: "জাকাত ফান্ড", href: "/dashboard/finance/zakat" },
-                { title: "ঋণ ও বকেয়া", href: "/dashboard/finance/dues" },
-                { title: "অ্যাকাউন্টিং রিপোর্টস", href: "/dashboard/finance/reports" },
-            ]
-        },
+    id: "finance",
+    title: "হিসাব ও অর্থ বিভাগ",
+    icon: "💰",
+    roles: ["admin", "accountant"], 
+    dropdown: [
+        { title: "ফি ও তহবিল কনফিগার", href: "/dashboard/finance/fees-setup" }, // ১. এটিকে সবার উপরে আনা হয়েছে (যেহেতু এটি সেটিংস)
+        { title: "ফি কালেকশন (রসিদ)", href: "/dashboard/finance/collect" },      // ২. আমরা যে পেজটি বানালাম (/collect) সেটির রাউট যুক্ত করা হলো
+        { title: "রশিদ ইতিহাস/তালিকা", href: "/dashboard/finance/receipts" },   // আগের রসিদ পেজটিকে হিস্ট্রি হিসেবে ব্যবহার করা যাবে
+        { title: "খরচ ও ভাউচার ট্র্যাকিং", href: "/dashboard/finance/expenses" },
+        { title: "বেতন ও ভাতা (Payroll)", href: "/dashboard/finance/payroll" },
+        { title: "সদকা ও অনুদান", href: "/dashboard/finance/donations" },
+        { title: "জাকাত ফান্ড", href: "/dashboard/finance/zakat" },
+        { title: "ঋণ ও বকেয়া", href: "/dashboard/finance/dues" },
+        { title: "অ্যাকাউন্টিং রিপোর্টস", href: "/dashboard/finance/reports" },
+    ]
+}
+
         {
             id: "parent-corner",
             title: "অভিভাবক কর্নার",
