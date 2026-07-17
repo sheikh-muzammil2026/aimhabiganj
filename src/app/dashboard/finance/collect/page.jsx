@@ -11,6 +11,8 @@ export default function CollectFeePage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
 
+  const serverApi = process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:8000";
+
   // আইডি দিয়ে স্টুডেন্ট সার্চ করা
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -21,7 +23,7 @@ export default function CollectFeePage() {
     setSelectedFee(null);
 
     try {
-      const res = await fetch(`http://localhost:8000/api/finance/student-fees/${searchId}`);
+      const res = await fetch(`${serverApi}/api/finance/student-fees/${searchId}`);
       const data = await res.json();
       if (data.success) {
         setStudentData(data.student);
@@ -48,7 +50,7 @@ export default function CollectFeePage() {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/api/finance/collect-fee", {
+      const res = await fetch(`${serverApi}/api/finance/collect-fee`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -64,7 +66,6 @@ export default function CollectFeePage() {
       const data = await res.json();
       if (data.success) {
         setMessage({ type: "success", text: `টাকা সফলভাবে জমা হয়েছে! রসিদ নম্বর: ${data.receiptNo}` });
-        // রিসেট স্টেট
         setStudentData(null);
         setAvailableFees([]);
         setSelectedFee(null);
@@ -82,7 +83,6 @@ export default function CollectFeePage() {
   return (
     <div className="p-6 bg-gray-50 min-h-screen text-gray-800">
       <div className="max-w-4xl mx-auto">
-        
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-blue-700">শিক্ষার্থী ফি কালেকশন</h1>
           <p className="text-sm text-gray-500 mt-1">শিক্ষার্থীর আইডি সার্চ করে মানি রসিদ জেনারেট করুন</p>
@@ -98,7 +98,7 @@ export default function CollectFeePage() {
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
           <form onSubmit={handleSearch} className="flex gap-4 items-end">
             <div className="flex-1">
-              <label className="block text-sm font-medium mb-1">শিক্ষার্থীর আইডি (MongoDB Object ID বা নির্দিষ্ট ID)</label>
+              <label className="block text-sm font-medium mb-1">শিক্ষার্থীর আইডি</label>
               <input
                 type="text"
                 placeholder="যেমন: 65f1234abc..."
@@ -108,21 +108,15 @@ export default function CollectFeePage() {
                 required
               />
             </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2.5 rounded-lg transition"
-            >
+            <button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2.5 rounded-lg transition">
               {loading ? "খোঁজা হচ্ছে..." : "সার্চ করুন"}
             </button>
           </form>
         </div>
 
-        {/* সার্চ রেজাল্ট এবং কালেকশন প্যানেল */}
+        {/* সার্চ রেজাল্ট */}
         {studentData && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fadeIn">
-            
-            {/* ছাত্রের প্রোফাইল কার্ড */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-fit">
               <h3 className="text-lg font-semibold border-b pb-2 mb-4 text-gray-700">ছাত্রের প্রোফাইল</h3>
               <div className="space-y-2 text-sm">
@@ -132,10 +126,8 @@ export default function CollectFeePage() {
               </div>
             </div>
 
-            {/* ফি গ্রহণের ফর্ম */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 md:col-span-2">
               <h3 className="text-lg font-semibold border-b pb-2 mb-4 text-gray-700">ফি ও পেমেন্ট বিবরণ</h3>
-              
               <form onSubmit={handlePaymentSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">ফি-এর খাত নির্বাচন করুন</label>
@@ -187,16 +179,11 @@ export default function CollectFeePage() {
                   </div>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={loading || !selectedFee}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white font-medium p-3 rounded-lg transition"
-                >
+                <button type="submit" disabled={loading || !selectedFee} className="w-full bg-green-600 hover:bg-green-700 text-white font-medium p-3 rounded-lg transition">
                   {loading ? "প্রসেস হচ্ছে..." : "ফি সফলভাবে গ্রহণ করুন"}
                 </button>
               </form>
             </div>
-
           </div>
         )}
 
