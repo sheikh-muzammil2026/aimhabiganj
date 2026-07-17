@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image"; // লোগো ইমেজের জন্য ইমপোর্ট করা হলো
 import { usePathname } from "next/navigation";
 import { authClient } from "@/lib/auth-client"; // Better Auth ক্লায়েন্ট
 
@@ -21,27 +22,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     const menuConfig = [
         { 
             id: "admin-dashboard",
-            title: "মারকাযি ড্যাশবোর্ড", 
+            title: "ওভারভিউ", 
             icon: "🕌", 
             href: "/dashboard/admin", 
             roles: ["admin"] 
-        },
-        {
-            id: "madrasa-info",
-            title: "মাদরাসা পরিচিতি",
-            icon: "📜",
-            roles: ["admin"],
-            dropdown: [
-                { title: "প্রতিষ্ঠান পরিচিতি", href: "/dashboard/admin/about?section=profile" },
-                { title: "প্রতিষ্ঠাতা পরিচিতি", href: "/dashboard/admin/about?section=founder" },
-                { title: "লক্ষ্য ও উদ্দেশ্য", href: "/dashboard/admin/about?section=vision" },
-                { title: "পরিচালনা পর্ষদ", href: "/dashboard/admin/about?section=committee" },
-                { title: "আমাদের বৈশিষ্ট্য", href: "/dashboard/admin/about?section=features" },
-                { title: "ভবিষ্যৎ পরিকল্পনা", href: "/dashboard/admin/about?section=roadmap" },
-                { title: "শিক্ষকমণ্ডলী", href: "/dashboard/admin/about?section=faculty" },
-                { title: "কর্মকর্তা ও কর্মচারী", href: "/dashboard/admin/about?section=staff" },
-                { title: "নীতিমালা", href: "/dashboard/admin/about?section=policies" },
-            ]
         },
         {
             id: "academics",
@@ -49,21 +33,9 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             icon: "📚",
             roles: ["admin", "teacher"],
             dropdown: [
-                { title: "শিক্ষা স্তর", href: "/dashboard/admin/academics?section=levels" },
-                { title: "পাঠ্যক্রম (Syllabus)", href: "/dashboard/admin/academics?section=syllabus" },
                 { title: "ক্লাস রুটিন", href: "/dashboard/admin/academics?section=class-routine" },
                 { title: "পরীক্ষা রুটিন", href: "/dashboard/admin/academics?section=exam-routine" },
-                { title: "সহ-পাঠ্যক্রম", href: "/dashboard/admin/academics?section=co-curricular" },
-            ]
-        },
-        {
-            id: "departments",
-            title: "বিভাগসমূহ",
-            icon: "🏫",
-            roles: ["admin"],
-            dropdown: [
-                { title: "হিফজ বিভাগ", href: "/dashboard/admin/departments/hifz" },
-                { title: "একাডেমিক বিভাগ", href: "/dashboard/admin/departments/academic" },
+                { title: "পরীক্ষার ফলাফল (Results)", href: "/dashboard/admin/academics/results" },
             ]
         },
         {
@@ -74,7 +46,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             dropdown: [
                 { title: "ভর্তির সময়", href: "/dashboard/admin/admission?section=timeline" },
                 { title: "ভর্তি পরীক্ষা", href: "/dashboard/admin/admission?section=test" },
-                { title: "ভর্তি প্রক্রিয়া", href: "/dashboard/admin/admission?section=process" }, // ?section=process এ ফিক্স করা হয়েছে
+                { title: "ভর্তি প্রক্রিয়া", href: "/dashboard/admin/admission?section=process" },
                 { title: "ভর্তি ফি", href: "/dashboard/admin/admission?section=fees" },
                 { title: "সকল আবেদন", href: "/dashboard/admin/admission" },
             ]
@@ -87,17 +59,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             dropdown: [
                 { title: "গ্যালারি নিয়ন্ত্রণ", href: "/dashboard/admin/gallery" },
                 { title: "ফটো এবং ভিডিও লিস্ট", href: "/dashboard/admin/gallery/list" },
-            ]
-        },
-        {
-            id: "hostel",
-            title: "আবাসন (হোস্টেল)",
-            icon: "🛏️",
-            roles: ["admin", "teacher"],
-            dropdown: [
-                { title: "ছাত্রাবাস পরিচিতি", href: "/dashboard/admin/hostel?section=about" },
-                { title: "আবাসিক নিয়মাবলী", href: "/dashboard/admin/hostel?section=rules" },
-                { title: "দৈনিক কার্যসূচি", href: "/dashboard/admin/hostel?section=routine" },
             ]
         },
         {
@@ -148,7 +109,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         }
     ];
 
-    // রিয়েল ইউজার রোলের ওপর ভিত্তি করে ফিল্টারিং (isPending অবস্থায় খালি অ্যারে থাকবে, সাইডবার বন্ধ হবে না)
+    // রিয়েল ইউজার রোলের ওপর ভিত্তি করে ফিল্টারিং
     const allowedMenuItems = isPending ? [] : menuConfig.filter(item => item.roles.includes(userRole));
 
     // অ্যাক্টিভ সাব-মেনু থাকলে ড্রপডাউনটি অটোমেটিক ওপেন রাখার মেকানিজম
@@ -167,10 +128,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
     const displayRoleName = (role) => {
         switch(role) {
-            case "admin": return "মুদীর (Admin)";
-            case "teacher": return "উস্তাদ (Teacher)";
-            case "accountant": return "হিসাবরক্ষক (Accountant)";
-            case "parent": return "অভিভাবক (Parent)";
+            case "admin": return "Admin";
+            case "teacher": return "Teacher";
+            case "accountant": return "Accountant";
+            case "parent": return "Parent";
             default: return role;
         }
     };
@@ -194,11 +155,18 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 {/* ব্র্যান্ড লোগো সেকশন */}
                 <div className="p-4 border-b border-emerald-800/40 flex items-center justify-between bg-emerald-950/30">
                     <Link href="/" className="group flex items-center gap-2.5 focus:outline-hidden">
-                        <span className="text-xl p-2 bg-emerald-900/50 rounded-xl group-hover:bg-amber-500 group-hover:text-[#043e30] transition-all duration-300 group-hover:scale-105 shadow-sm">
-                            🕌
-                        </span>
+                        <div className="w-10 h-10 p-1 bg-emerald-900/30 rounded-xl group-hover:bg-amber-500/10 border border-emerald-700/30 transition-all duration-300 group-hover:scale-105 shadow-sm flex items-center justify-center overflow-hidden">
+                            <Image 
+                                src="/aimlogo1.png" 
+                                alt="আস-সালাম আইডিয়াল মাদরাসা লোগো" 
+                                width={36} 
+                                height={36} 
+                                className="object-contain"
+                                priority
+                            />
+                        </div>
                         <div>
-                            <h2 className="font-black text-sm sm:text-base text-amber-400 tracking-wide">আস-সালাম মাদরাসা</h2>
+                            <h2 className="font-black text-sm sm:text-base text-amber-400 tracking-wide">আস-সালাম আইডিয়াল মাদরাসা</h2>
                             <p className="text-[10px] text-emerald-300/80 font-medium tracking-wider">হবিগঞ্জ, বাংলাদেশ</p>
                         </div>
                     </Link>
@@ -208,7 +176,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 {/* মেইন মেনু আইটেমসমূহ */}
                 <div className="flex-1 overflow-y-auto p-3 space-y-1.5 scroll-smooth scrollbar-thin scrollbar-thumb-emerald-900/60 scrollbar-track-transparent">
                     {isPending ? (
-                        // সাইডবার গায়েব না করে শুধু মেনুর জায়গায় একটি সুন্দর কঙ্কাল লোডার দেখাবে
                         <div className="space-y-3 p-2 animate-pulse">
                             {[...Array(6)].map((_, i) => (
                                 <div key={i} className="h-9 bg-emerald-900/40 rounded-xl w-full"></div>
@@ -279,7 +246,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                     )}
                 </div>
 
-                {/* ইউজার প্রোফাইল কার্ড - সেশন লোড হওয়ার পর দেখাবে */}
+                {/* ইউজার প্রোফাইল কার্ড */}
                 {!isPending && session && (
                     <div className="p-3 border-t border-emerald-800/40 bg-emerald-950/40">
                         <div className="flex items-center gap-3 px-2 py-2 rounded-xl bg-emerald-900/30 border border-emerald-800/30 shadow-xs">
