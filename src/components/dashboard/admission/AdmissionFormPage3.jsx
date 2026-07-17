@@ -1,136 +1,279 @@
 // components/AdmissionFormPage3.jsx
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 
-export default function AdmissionFormPage3({ formData, handleChange, handleCheckboxChange }) {
+
+export default function AdmissionFormPage3({ formData, handleChange }) {
+  const [uploadingField, setUploadingField] = useState(null);
+
+  // ImgBB API এর মাধ্যমে ছবি আপলোড হ্যান্ডলার
+  const handleFileUpload = async (e, fieldName) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadingField(fieldName);
+    const data = new FormData();
+    data.append("image", file);
+
+    try {
+      // ImgBB API Key
+      const apiKey = "5a4f8c279ddcedf0d73f50444bad88b0";
+      const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+        method: "POST",
+        body: data,
+      });
+      const result = await response.json();
+
+      if (result.success) {
+        // ফাইল আপলোড সফল হলে URL 'formData.attachments' এর ভেতরে সেভ হবে
+        handleChange({
+          target: {
+            name: "attachments",
+            value: {
+              ...(formData?.attachments || {}),
+              [fieldName]: result.data.url,
+            },
+          },
+        });
+      } else {
+        alert("ফাইল আপলোড ব্যর্থ হয়েছে। পুনরায় চেষ্টা করুন।");
+      }
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      alert("নেটওয়ার্ক ত্রুটি! আবার চেষ্টা করুন।");
+    } finally {
+      setUploadingField(null);
+    }
+  };
+
+  // আপলোড করা ফাইলের নাম বা সফলতার শর্টকাট মেসেজ রিডার
+  const getFileStatus = (fieldName) => {
+    if (uploadingField === fieldName) return "আপলোড হচ্ছে...";
+    if (formData?.attachments?.[fieldName]) {
+      return "✓ আপলোড সম্পন্ন";
+    }
+    return "ফাইল নির্বাচন করুন (ক্লিক করুন)";
+  };
+
   return (
     <div className="w-full min-h-[11.69in] bg-white p-4 md:p-10 flex flex-col justify-between box-border text-gray-800 relative font-bengali print:min-h-screen overflow-x-hidden">
-
-      {/* ১. শিক্ষার্থীর অঙ্গীকারনামা */}
+      
+      {/* ১. শিক্ষার্থীর অঙ্গীকারনামা (ইমেজের ১০টি পয়েন্ট হুবহু সংযোজন) */}
       <div className="w-full mb-6">
         <div className="text-center mb-4">
-          <span className="border border-gray-500 rounded-full px-6 py-1 bg-gray-50 font-bold text-gray-800 text-sm shadow-sm inline-block">
-            শিক্ষার্থীয় অঙ্গীকারনামা
+          <span className="border border-gray-500 rounded-full px-6 py-1.5 bg-gray-50 font-bold text-gray-800 text-sm shadow-sm inline-block">
+            শিক্ষার্থীর অঙ্গীকার (প্রযোজ্যক্ষেত্রে)
           </span>
         </div>
 
         <div className="text-sm leading-relaxed text-gray-700 text-justify space-y-3">
-          <p>
-            আমি এই মর্মে অঙ্গীকার করছি যে, অত্র মাদরাসায় ভর্তি হয়ে প্রতিষ্ঠানের যাবতীয় নিয়ম-কানুন ও শৃঙ্খলা মেনে চলব এবং কোনো অবস্থাতেই নিয়মের পরিপন্থী কোনো কাজে লিপ্ত হব না। মাদরাসা কর্তৃপক্ষ কর্তৃক নির্ধারিত পোশাক (ইউনিফর্ম) পরিধান করে নিয়মিত ক্লাসে উপস্থিত থাকব।
-          </p>
-          <p>
-            যদি আমি কোনো প্রকার শৃঙ্খলা ভঙ্গ বা প্রতিষ্ঠানের স্বার্থবিরোধী কাজে অংশ নিই, তবে কর্তৃপক্ষ আমাকে যেকোনো শাস্তি প্রদান কিংবা প্রতিষ্ঠান থেকে বহিষ্কার করতে পারবে এবং এতে আমার বা আমার অভিভাবকের কোনো আপত্তি থাকবে না।
-          </p>
+          <div className="flex flex-wrap items-end gap-x-2 gap-y-1">
+            আমি
+            <input
+              type="text"
+              name="studentCommitmentName"
+              value={formData.studentCommitmentName || ""}
+              onChange={handleChange}
+              placeholder="(শিক্ষার্থীর নাম লিখুন)"
+              className="w-full sm:w-60 text-center font-bold border-b border-gray-400 focus:outline-none bg-transparent px-1 text-sm mt-1 sm:mt-0 text-emerald-850"
+            />
+            <span>আস-সালাম আইডিয়াল মাদরাসা (AIM) এ ভর্তি হওয়ার আগ্রহ প্রকাশ করে অঙ্গীকার করছি যে—</span>
+          </div>
+
+          {/* ১০টি পয়েন্ট */}
+          <ul className="space-y-2.5 pl-2 mt-4 text-xs sm:text-sm">
+            <li className="flex items-start gap-2">
+              <span className="text-orange-500 mt-1">★</span>
+              <span>অত্র মাদরাসার যাবতীয় নিয়ম কানুন মেনে চলব।</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-orange-500 mt-1">★</span>
+              <span>পাঁচ ওয়াক্ত সালাত জামা'তের সাথে আদায় করব।</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-orange-500 mt-1">★</span>
+              <span>মাথার চুল ও হাত পায়ের নখ ছোট রাখব।</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-orange-500 mt-1">★</span>
+              <span>অনুমতি (গেট পাস) ছাড়া বা অভিভাবক ছাড়া কখনো মাদরাসা ক্যাম্পাসের বাহিরে যাব না।</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-orange-500 mt-1">★</span>
+              <span>কখনো বিদ্যুৎ, খাবার সহ অন্য যেকোনো কিছুর অপচয়/নষ্ট করব না।</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-orange-500 mt-1">★</span>
+              <span>মাদরাসা ক্যাম্পাসে নিজের কাছে কোন ধরনের মোবাইল, ইলেকট্রনিক্স ডিভাইস, চাকু-ছুরি বা এই জাতীয় কোন ক্ষতিকর জিনিস রাখব না।</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-orange-500 mt-1">★</span>
+              <span>উপরে ক্লাসের ভাইদের শ্রদ্ধা ও সম্মান করব। ছোটদের বা নিচের ক্লাসের শিক্ষার্থীদের আদর ও স্নেহ করব।</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-orange-500 mt-1">★</span>
+              <span>কোন অবস্থাতেই নিজেদের মধ্যে কোন প্রকার ফেৎনা-ফাসাদ, মারামারি, বকাবকি করব না।</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-orange-500 mt-1">★</span>
+              <span>কোন রাজনৈতিক দলের সাথে জড়িত হব না।</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-orange-500 mt-1">★</span>
+              <span>সমাজ ও রাষ্ট্রবিরোধী কোন কাজে জড়িত হব না, ইন-শা-আল্লাহ।</span>
+            </li>
+          </ul>
         </div>
 
         {/* শিক্ষার্থীর স্বাক্ষর ও তারিখ */}
-        <div className="flex justify-between items-end mt-12">
+        <div className="flex justify-between items-end mt-10">
           <div className="flex items-end gap-2 text-sm">
             <span className="font-bold text-gray-700">তারিখ:</span>
-            <input type="date" name="studentSignatureDate" value={formData.studentSignatureDate || ""} onChange={handleChange} className="border border-gray-400 rounded px-1.5 py-0.5 text-xs focus:outline-none bg-transparent cursor-pointer" />
+            <input
+              type="date"
+              name="studentSignatureDate"
+              value={formData.studentSignatureDate || ""}
+              onChange={handleChange}
+              className="border border-gray-400 rounded px-1.5 py-0.5 text-xs focus:outline-none bg-transparent cursor-pointer"
+            />
           </div>
-          <div className="text-center w-32 sm:w-48 border-t border-gray-500 pt-1 text-xs sm:text-sm font-bold text-gray-700">
+          <div className="text-center w-36 sm:w-52 border-t border-gray-500 pt-1 text-xs sm:text-sm font-bold text-gray-700">
             শিক্ষার্থীর স্বাক্ষর
           </div>
         </div>
       </div>
 
-      {/* ২. প্রয়োজনীয় সংযুক্তিসমূহ (চেকবক্স সেকশন) */}
+      {/* ২. প্রয়োজনীয় সংযুক্তিসমূহ ও আপলোড (চেকবক্স বাতিল করে কাস্টম ফাইল আপলোড) */}
       <div className="w-full mb-6 border border-gray-300 rounded-md p-4 bg-gray-50/30">
-        <span className="font-bold text-gray-800 text-sm block mb-3 border-b pb-1">
-          ভর্তির আবেদনের সাথে নিচে উল্লিখিত কাগজপত্রাদি অবশ্যই সংযুক্ত করতে হবে:
+        <span className="font-bold text-pink-700 text-xs sm:text-sm block mb-4 border-b pb-1.5">
+          সংযুক্তি: এই ফরমের সাথে নিম্নোক্ত প্রয়োজনীয় কাগজপত্র আপলোড করুন (ImgBB সিস্টেমে):
         </span>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-          <label className="flex items-start gap-2 cursor-pointer select-none">
-            <input type="checkbox" name="attachStudentPhoto" checked={formData.attachments?.attachStudentPhoto || false} onChange={(e) => handleCheckboxChange("attachments", "attachStudentPhoto", e.target.checked)} className="mt-1 w-4 h-4 accent-orange-600 rounded flex-shrink-0" />
-            <span>শিক্ষার্থীর পাসপোর্ট সাইজের ছবি (৩ কপি)</span>
-          </label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
+          
+          {/* ১. জন্ম সনদপত্র */}
+          <div className="flex flex-col gap-1.5 bg-white p-2.5 rounded border border-gray-200">
+            <span className="font-semibold text-gray-700">১. শিক্ষার্থীর অনলাইন জন্ম সনদপত্র:</span>
+            <div className="relative border border-dashed border-orange-400 rounded bg-orange-50/30 h-10 flex items-center justify-center cursor-pointer hover:bg-orange-50 transition-colors overflow-hidden">
+              <span className={`text-xs font-medium ${formData?.attachments?.birthCertificate ? 'text-emerald-700' : 'text-gray-500'}`}>
+                {getFileStatus("birthCertificate")}
+              </span>
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                onChange={(e) => handleFileUpload(e, "birthCertificate")}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+              />
+            </div>
+            {formData?.attachments?.birthCertificate && (
+              <a href={formData.attachments.birthCertificate} target="_blank" rel="noreferrer" className="text-[10px] text-blue-500 underline">আপলোডকৃত ফাইল দেখুন</a>
+            )}
+          </div>
 
-          <label className="flex items-start gap-2 cursor-pointer select-none">
-            <input type="checkbox" name="attachParentsPhoto" checked={formData.attachments?.attachParentsPhoto || false} onChange={(e) => handleCheckboxChange("attachments", "attachParentsPhoto", e.target.checked)} className="mt-1 w-4 h-4 accent-orange-600 rounded flex-shrink-0" />
-            <span>পিতা ও মাতার পাসপোর্ট সাইজের ছবি (১ কপি করে)</span>
-          </label>
+          {/* ২. নাগরিক সনদপত্র */}
+          <div className="flex flex-col gap-1.5 bg-white p-2.5 rounded border border-gray-200">
+            <span className="font-semibold text-gray-700">২. অভিভাবকের নাগরিক সনদপত্র:</span>
+            <div className="relative border border-dashed border-orange-400 rounded bg-orange-50/30 h-10 flex items-center justify-center cursor-pointer hover:bg-orange-50 transition-colors overflow-hidden">
+              <span className={`text-xs font-medium ${formData?.attachments?.citizenshipCertificate ? 'text-emerald-700' : 'text-gray-500'}`}>
+                {getFileStatus("citizenshipCertificate")}
+              </span>
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                onChange={(e) => handleFileUpload(e, "citizenshipCertificate")}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+              />
+            </div>
+            {formData?.attachments?.citizenshipCertificate && (
+              <a href={formData.attachments.citizenshipCertificate} target="_blank" rel="noreferrer" className="text-[10px] text-blue-500 underline">আপলোডকৃত ফাইল দেখুন</a>
+            )}
+          </div>
 
-          <label className="flex items-start gap-2 cursor-pointer select-none">
-            <input type="checkbox" name="attachBirthCertificate" checked={formData.attachments?.attachBirthCertificate || false} onChange={(e) => handleCheckboxChange("attachments", "attachBirthCertificate", e.target.checked)} className="mt-1 w-4 h-4 accent-orange-600 rounded flex-shrink-0" />
-            <span>শিক্ষার্থীর জন্ম নিবন্ধন সনদের ফটোকপি (অনлайн ভেরিফাইড)</span>
-          </label>
+          {/* ৩. অভিভাবকের এনআইডি কার্ড */}
+          <div className="flex flex-col gap-1.5 bg-white p-2.5 rounded border border-gray-200">
+            <span className="font-semibold text-gray-700">৩. অভিভাবকের এনআইডি (NID) কার্ডের স্পষ্ট কপি:</span>
+            <div className="relative border border-dashed border-orange-400 rounded bg-orange-50/30 h-10 flex items-center justify-center cursor-pointer hover:bg-orange-50 transition-colors overflow-hidden">
+              <span className={`text-xs font-medium ${formData?.attachments?.guardianNid ? 'text-emerald-700' : 'text-gray-500'}`}>
+                {getFileStatus("guardianNid")}
+              </span>
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                onChange={(e) => handleFileUpload(e, "guardianNid")}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+              />
+            </div>
+            {formData?.attachments?.guardianNid && (
+              <a href={formData.attachments.guardianNid} target="_blank" rel="noreferrer" className="text-[10px] text-blue-500 underline">আপলোডকৃত ফাইল দেখুন</a>
+            )}
+          </div>
 
-          <label className="flex items-start gap-2 cursor-pointer select-none">
-            <input type="checkbox" name="attachParentsNid" checked={formData.attachments?.attachParentsNid || false} onChange={(e) => handleCheckboxChange("attachments", "attachParentsNid", e.target.checked)} className="mt-1 w-4 h-4 accent-orange-600 rounded flex-shrink-0" />
-            <span>পিতা ও মাতার এনআইডি (NID) কার্ডের ফটোকপি</span>
-          </label>
+          {/* ৪. পূর্ববর্তী প্রতিষ্ঠানের প্রশংসাপত্র/নম্বরপত্র */}
+          <div className="flex flex-col gap-1.5 bg-white p-2.5 rounded border border-gray-200">
+            <span className="font-semibold text-gray-700">৪. পূর্ববর্তী প্রতিষ্ঠানের প্রশংসাপত্র এবং নম্বরপত্র (মার্কশিট):</span>
+            <div className="relative border border-dashed border-orange-400 rounded bg-orange-50/30 h-10 flex items-center justify-center cursor-pointer hover:bg-orange-50 transition-colors overflow-hidden">
+              <span className={`text-xs font-medium ${formData?.attachments?.academicTranscript ? 'text-emerald-700' : 'text-gray-500'}`}>
+                {getFileStatus("academicTranscript")}
+              </span>
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                onChange={(e) => handleFileUpload(e, "academicTranscript")}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+              />
+            </div>
+            {formData?.attachments?.academicTranscript && (
+              <a href={formData.attachments.academicTranscript} target="_blank" rel="noreferrer" className="text-[10px] text-blue-500 underline">আপলোডকৃত ফাইল দেখুন</a>
+            )}
+          </div>
 
-          <label className="flex items-start gap-2 cursor-pointer select-none md:col-span-2">
-            <input type="checkbox" name="attachReportCard" checked={formData.attachments?.attachReportCard || false} onChange={(e) => handleCheckboxChange("attachments", "attachReportCard", e.target.checked)} className="mt-1 w-4 h-4 accent-orange-600 rounded flex-shrink-0" />
-            <span>পূর্ববর্তী শিক্ষা প্রতিষ্ঠানের ছাড়পত্র/প্রশংসাপত্র এবং নম্বরপত্রের মূলকপি (প্রযোজ্য ক্ষেত্রে)</span>
-          </label>
+          {/* ৫. নতুন ডাইনামিক ফিল্ড ১: ৭ম বা ৮ম শ্রেণীতে ভর্তি হতে চাইলে রেজিস্ট্রেশন কার্ড আপলোড */}
+          {(formData.admissionClass === "সপ্তম" || formData.admissionClass === "অষ্টম" || formData.admissionClass === "7" || formData.admissionClass === "8") && (
+            <div className="flex flex-col gap-1.5 bg-amber-50/60 p-2.5 rounded border border-amber-300 md:col-span-2 animate-fade-in">
+              <span className="font-bold text-amber-900">৫. পূর্ববর্তী বোর্ডের প্রাথমিক/জেএসডি রেজিস্ট্রেশন কার্ডের স্পষ্ট কপি (৭ম/৮ম শ্রেণীতে ভর্তির জন্য):</span>
+              <div className="relative border border-dashed border-amber-500 rounded bg-white h-10 flex items-center justify-center cursor-pointer hover:bg-amber-100/50 transition-colors overflow-hidden">
+                <span className={`text-xs font-semibold ${formData?.attachments?.boardRegCard ? 'text-emerald-700' : 'text-amber-800'}`}>
+                  {getFileStatus("boardRegCard")}
+                </span>
+                <input
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={(e) => handleFileUpload(e, "boardRegCard")}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                />
+              </div>
+              {formData?.attachments?.boardRegCard && (
+                <a href={formData.attachments.boardRegCard} target="_blank" rel="noreferrer" className="text-[10px] text-blue-500 underline">আপলোডকৃত ফাইল দেখুন</a>
+              )}
+            </div>
+          )}
+
+          {/* ৬. নতুন ডাইনামিক ফিল্ড ২: পিতা মৃত হলে ইয়াতীম সনদপত্র আপলোড */}
+          {formData.fatherStatus === "মৃত" && (
+            <div className="flex flex-col gap-1.5 bg-rose-50/60 p-2.5 rounded border border-rose-300 md:col-span-2 animate-fade-in">
+              <span className="font-bold text-rose-900">৬. স্থানীয় চেয়ারম্যান/উপযুক্ত কর্তৃপক্ষ কর্তৃক প্রত্যয়িত অফিসিয়াল ইয়াতীম সনদপত্র:</span>
+              <div className="relative border border-dashed border-rose-500 rounded bg-white h-10 flex items-center justify-center cursor-pointer hover:bg-rose-100/50 transition-colors overflow-hidden">
+                <span className={`text-xs font-semibold ${formData?.attachments?.orphanCertificate ? 'text-emerald-700' : 'text-rose-800'}`}>
+                  {getFileStatus("orphanCertificate")}
+                </span>
+                <input
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={(e) => handleFileUpload(e, "orphanCertificate")}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                />
+              </div>
+              {formData?.attachments?.orphanCertificate && (
+                <a href={formData.attachments.orphanCertificate} target="_blank" rel="noreferrer" className="text-[10px] text-blue-500 underline">আপলোডকৃত ফাইল দেখুন</a>
+              )}
+            </div>
+          )}
+
         </div>
       </div>
 
-      {/* ৩. কেবল অফিসের ব্যবহারের জন্য (কার্যালয়ের পূরণীয় অংশ) */}
-      <div className="w-full border-2 border-gray-400 rounded-lg p-4 sm:p-5 bg-gray-50/60 relative mt-6">
-        <div className="absolute -top-3 left-4 sm:left-6 bg-white border border-gray-400 px-3 py-0.5 rounded-full font-bold text-[10px] sm:text-xs text-gray-700 tracking-wide uppercase">
-          কেবল অফিসের ব্যবহারের জন্য
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm mt-3">
-          <div className="flex flex-col sm:flex-row sm:items-end gap-1">
-            <span className="font-semibold text-gray-700 whitespace-nowrap">ভর্তি পরীক্ষার প্রাপ্ত নম্বর:</span>
-            <input type="text" name="examMark" value={formData.officeUse?.examMark || ""} onChange={(e) => handleChange(e, "officeUse")} className="flex-1 border-b border-gray-400 text-center font-mono focus:outline-none bg-transparent pb-0.5" />
-          </div>
-          <div className="flex flex-col sm:flex-row sm:items-end gap-1">
-            <span className="font-semibold text-gray-700 whitespace-nowrap">মেধা স্থান:</span>
-            <input type="text" name="meritPosition" value={formData.officeUse?.meritPosition || ""} onChange={(e) => handleChange(e, "officeUse")} className="flex-1 border-b border-gray-400 text-center font-mono focus:outline-none bg-transparent pb-0.5" />
-          </div>
-          <div className="flex flex-col sm:flex-row sm:items-end gap-1">
-            <span className="font-semibold text-gray-700 whitespace-nowrap">রোল নং:</span>
-            <input type="text" name="officeRollNo" value={formData.officeUse?.officeRollNo || ""} onChange={(e) => handleChange(e, "officeUse")} className="flex-1 border-b border-gray-400 text-center font-mono focus:outline-none bg-transparent pb-0.5" />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm mt-4">
-          <div className="flex flex-col sm:flex-row sm:items-end gap-2">
-            <span className="font-semibold text-gray-700 whitespace-nowrap">ভর্তিকৃত শ্রেণী:</span>
-            <input type="text" name="admittedClass" value={formData.officeUse?.admittedClass || ""} onChange={(e) => handleChange(e, "officeUse")} className="flex-1 border-b border-gray-400 focus:outline-none bg-transparent pb-0.5" />
-          </div>
-          <div className="flex flex-col sm:flex-row sm:items-end gap-2">
-            <span className="font-semibold text-gray-700 whitespace-nowrap">বিভাগ/শাখা:</span>
-            <input type="text" name="admittedSection" value={formData.officeUse?.admittedSection || ""} onChange={(e) => handleChange(e, "officeUse")} className="flex-1 border-b border-gray-400 focus:outline-none bg-transparent pb-0.5" />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm mt-4">
-          <div className="flex flex-col sm:flex-row sm:items-end gap-2">
-            <span className="font-semibold text-gray-700 whitespace-nowrap">সেশনের নাম:</span>
-            <input type="text" name="academicSession" value={formData.officeUse?.academicSession || ""} onChange={(e) => handleChange(e, "officeUse")} className="flex-1 border-b border-gray-400 text-center focus:outline-none bg-transparent pb-0.5" />
-          </div>
-          <div className="flex flex-col sm:flex-row sm:items-end gap-2">
-            <span className="font-semibold text-gray-700 whitespace-nowrap">ভর্তির তারিখ:</span>
-            <input type="date" name="admissionDate" value={formData.officeUse?.admissionDate || ""} onChange={(e) => handleChange(e, "officeUse")} className="flex-1 border-b border-gray-400 focus:outline-none bg-transparent pb-0.5 cursor-pointer" />
-          </div>
-        </div>
-
-        {/* অফিসিয়াল স্বাক্ষরসমূহ (মোবাইলে পারফেক্ট গ্রিড লেআউট) */}
-        <div className="grid grid-cols-3 gap-2 mt-16 text-[10px] sm:text-xs md:text-sm font-bold text-gray-600 text-center">
-          <div className="border-t border-gray-400 pt-1">
-            আবেদন যাচাইকারী
-          </div>
-          <div className="border-t border-gray-400 pt-1">
-            ভাইস প্রিন্সিপাল
-          </div>
-          <div className="border-t border-gray-400 pt-1 text-gray-800">
-            অধ্যক্ষ / প্রিন্সিপাল
-          </div>
-        </div>
-      </div>
-
-      {/* একদম নিচের ফুটনোট বা প্রিন্ট সহায়ক বার্তা */}
-      <div className="w-full text-center text-[10px] text-gray-400 border-t pt-2 mt-4 print:hidden">
-        নির্ধারিত A4 সাইজে প্রিন্ট করার জন্য পেজ ব্রেক এবং মার্জিন সেট করা আছে।
-      </div>
 
     </div>
   );
