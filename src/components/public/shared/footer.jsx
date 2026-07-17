@@ -23,7 +23,7 @@ export default function Footer() {
               </div>
             </div>
             <p className="text-sm text-gray-400 leading-relaxed font-normal dark:text-slate-400">
-              দ্বীনি ও আধুনিক শিক্ষার এক অপূর্ব সমন্বয়। অভিজ্ঞ উলামায়ে কেরাম ও দক্ষ শিক্ষকমণ্ডলী দ্বারা পরিচালিত হবিগঞ্জের একটি নির্ভরযোগ্য দ্বীনি শিক্ষা প্রতিষ্ঠান। আমাদের কোনো শাখা নেই।
+              দ্বীনি ও আধুনিক শিক্ষার এক অপূর্ব সমন্বয়। অভিজ্ঞ উলামায়ে কেরাম ও দক্ষ শিক্ষকমণ্ডলী দ্বারা পরিচালিত হবিগঞ্জের একটি নির্ভরযোগ্য দ্বীনি শিক্ষা প্রতিষ্ঠান।
             </p>
             
             {/* সোশ্যাল মিডিয়া ও ওয়েবসাইট আইকন লিংক */}
@@ -114,7 +114,7 @@ export default function Footer() {
             <ul className="space-y-3.5 text-sm font-normal text-gray-400 dark:text-slate-400">
               <li className="flex items-start gap-2.5">
                 <span className="text-amber-400 mt-0.5 flex-shrink-0">📍</span>
-                <span className="leading-relaxed">প্রধান শাখা, হবিগঞ্জ সদর,<br />হবিগঞ্জ, সিলেট, বাংলাদেশ।<br /><span className="text-xs text-amber-500 dark:text-amber-400 font-semibold">(আমাদের কোনো শাখা নেই)</span></span>
+                <span className="leading-relaxed">হবিগঞ্জ সদর,<br />হবিগঞ্জ, সিলেট, বাংলাদেশ।<br /></span>
               </li>
               <li className="flex items-center gap-2.5">
                 <span className="text-amber-400 flex-shrink-0">📞</span>
