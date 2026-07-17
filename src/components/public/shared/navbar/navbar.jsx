@@ -75,7 +75,7 @@ export default function Navbar() {
                 { name: "পরিচালনা পর্ষদ", href: "/about#committee" },
                 { name: "আমাদের বৈশিষ্ট্য", href: "/about#features" },
                 { name: "ভবিষ্যৎ পরিকল্পনা", href: "/about#roadmap" },
-                { name: "মতামত (শিক্ষার্থী ও উলামা)", href: "/about#testimonials" },
+                { name: "مতামত (শিক্ষার্থী ও উলামা)", href: "/about#testimonials" },
                 { name: "নীতিমালা", href: "/about#policies" },
                 { name: "শিক্ষকমণ্ডলী", href: "/about#faculty" },
                 { name: "কর্মকর্তা ও কর্মচারী", href: "/about#staff" },
@@ -88,7 +88,7 @@ export default function Navbar() {
                 { name: "শ্রেণী শিক্ষকের তালিকা", href: "/academics#teachers" },
                 { name: "শিক্ষা স্তর", href: "/academics#levels" },
                 { name: "পাঠ্যক্রম (Syllabus)", href: "/academics#syllabus" },
-                { name: "सह-পাঠ্যক্রম", href: "/academics#co-curricular" },
+                { name: "সহ-পাঠ্যক্রম", href: "/academics#co-curricular" },
                 { name: "ক্লাস রুটিন", href: "/academics#class-routine" },
                 { name: "পরীক্ষা রুটিন", href: "/academics#exam-routine" },
             ],
@@ -146,17 +146,16 @@ export default function Navbar() {
 
     return (
         <>
-            {/* ডেস্কটপ নেভবার */}
+            {/* ডেস্কটপ নেভবার (ফিক্সড ক্লাসেস) */}
             <nav className={`fixed top-0 left-0 w-full print:hidden text-white z-50 transition-all duration-300 ${
                 isScrolled 
-                    ? "bg-emerald-900/95 shadow-md border-b border-emerald-800 dark:bg-slate-900/95 dark:border-slate-800 backdrop-blur-sm opacity-100 pointer-events-auto transform translate-y-0" 
-                    : "bg-transparent opacity-0 pointer-events-none lg:opacity-100 lg:pointer-events-auto transform lg:translate-y-0"
+                    ? "bg-emerald-900/95 shadow-md border-b border-emerald-800 dark:bg-slate-900/95 dark:border-slate-800 backdrop-blur-sm bg-opacity-100 pointer-events-auto" 
+                    : "bg-transparent lg:bg-transparent"
             }`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    {/* flex justify-end ব্যবহার করে সব আইটেম ডানে পুশ করা হয়েছে */}
                     <div className="flex items-center justify-end h-20">
 
-                        {/* লোগো ও নাম রিমোভড — এখন সরাসরি মেনু আইটেমসমূহ দেখা যাবে */}
+                        {/* মেনু কন্টেইনার - নিশ্চিত করা হয়েছে যেন বড় স্ক্রিনে সবসময় দৃশ্যমান থাকে */}
                         <div className="hidden lg:flex items-center space-x-0.5">
                             {menuItems.map((item, index) => (
                                 <div key={index} className="relative group">
@@ -238,7 +237,7 @@ export default function Navbar() {
                                     onClick={closeMenu} 
                                     className="block text-center bg-amber-500 text-slate-950 font-bold py-2.5 rounded-xl shadow text-sm"
                                 >
-                                    ড্যাশবোর্ড প্যানেল ({userRole})
+                                    ড্যাশবোর্ড ({userRole})
                                 </Link>
                                 <button 
                                     onClick={handleLogout} 
@@ -261,7 +260,7 @@ export default function Navbar() {
                                     onClick={closeMenu} 
                                     className="block text-center bg-transparent border border-amber-400 text-amber-400 font-bold py-2.5 rounded-xl shadow text-sm"
                                 >
-                                    নিবন্ধন
+                                    রেজিস্ট্রার
                                 </Link>
                             </div>
                         )}
