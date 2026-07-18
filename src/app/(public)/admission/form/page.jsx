@@ -40,7 +40,7 @@ export default function AdmissionFormPage() {
   reasonForLeaving: "",                 // ৪. পূর্ব প্রতিষ্ঠান ছাড়ার কারণ
   previousClass: "",                    // ৫. অধ্যয়নকৃত শ্রেণি
   transferCertificateNo: "",            // ৬. ছাড়পত্র নং
-  leavingDate: ""         
+  leavingDate: "",        
 
     // 2nd page
     physicalProblem: "",
