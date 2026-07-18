@@ -5,33 +5,33 @@ import React, { useState, useEffect } from "react";
 // বাংলাদেশের জেলা এবং তাদের থানার লিস্ট ডেটা
 const bdDistrictsAndThanas = {
   "হবিগঞ্জ": ["হবিগঞ্জ সদর", "নবীগঞ্জ", "বাহুবল", "চুনারুঘাট", "মাধবপুর", "লাখাই", "বানিয়াচং", "আজমিরীগঞ্জ", "শায়েস্তাগঞ্জ"],
-  "সিলেট": ["সিলেট সদর", "দক্ষিণ সুরমা", "বিশ্বনাথ", "ওসমানীনগর", "বালাগঞ্জ", "ফেঞ্চুগঞ্জ", "গোলাপগঞ্জ", "বিয়ানীবাজার", "জکیগঞ্জ", "কানাইঘাট", "জৈنتাপুর", "গোয়াইনঘাট", "কোম্পানীগঞ্জ"],
+  "সিলেট": ["সিলেট সদর", "দক্ষিণ সুরমা", "বিশ্বনাথ", "ওসমানীনগর", "বাلاগঞ্জ", "ফেঞ্চুগঞ্জ", "গোলাপগঞ্জ", "বিয়ানীবাজার", "জকিগঞ্জ", "কানাইঘাট", "জৈنتাপুর", "গোয়াইনঘাট", "কোম্পানীগঞ্জ"],
   "সুনামগঞ্জ": ["সুনামগঞ্জ সদর", "দক্ষিণ সুনামগঞ্জ", "দোয়ারাবাজার", "ছাতক", "জগন্নাথপুর", "দিরাই", "শাল্লা", "জামালগঞ্জ", "তাহিরপুর", "বিশ্বম্ভরপুর", "ধর্মপাশা"],
-  "মৌলভীবাজার": ["মৌলভীবাজার সদর", "রাজনগর", "কুলাউড়া", "জুড়ী", "কমলগঞ্জ", "শ্রীমঙ্গল", "বড়লেখা"],
+  "مৌলভীবাজার": ["مৌলভীবাজার সদর", "রাজনগর", "কুলাউড়া", "জুড়ী", "কমলগঞ্জ", "শ্রীমঙ্গল", "বড়লেখা"],
   "ঢাকা": ["ধামরাই", "দোহার", "কেরানীগঞ্জ", "নবাবগঞ্জ", "সাভার", "মিরপুর", "মোহাম্মদপুর", "ধানমন্ডি", "গুলশান", "উত্তরা", "মতিঝিল", "পল্টন", "শাহবাগ", "রমনা", "তেজগাঁও"],
   "চট্টগ্রাম": ["চট্টগ্রাম সদর", "পটিয়া", "হাটহাজারী", "সীতাকুণ্ড", "মিরসরাই", "সন্দীপ", "রাউজান", "রাঙ্গুনিয়া", "বোয়ালখালী", "আনোয়ারা", "চন্দনাইশ", "লোহাগাড়া", "সাতকানিয়া", "বাঁশখালী"],
-  "বাগেরহাট": ["বাগেরহাট সদর", "ফকিরহাট", "مোল্লাহাট", "চিতলমারী", "কচুয়া", "রামপাল", "মোংলা", "মোরেলগঞ্জ", "শরণখোলা"],
+  "বাগেরহাট": ["বাগেরহাট সদর", "ফকিরহাট", "মোল্লাহাট", "চিতলমারী", "কচুয়া", "রামপাল", "মোংলা", "মোরেলগঞ্জ", "শরণখোলা"],
   "বান্দরবান": ["বান্দরবান সদর", "রুমা", "রোয়াংছড়ি", "থানচি", "লামা", "আলীকদম", "নাইক্ষ্যংছড়ি"],
   "বরগুনা": ["বরগুনা সদর", "আমতলী", "তালতলী", "বামনা", "বেতাগী", "পাথরঘাটা"],
   "বরিশাল": ["বরিশাল সদর", "বাকেরগঞ্জ", "বাবুগঞ্জ", "উজিরপুর", "বানারীপাড়া", "গৌরনদী", "আগৈলঝারা", "মুলাদী", "হিজলা", "মেহেন্দিগঞ্জ"],
   "ভোলা": ["ভোলা সদর", "বোরহানউদ্দিন", "দৌলতখান", "লালমোহন", "তজুমুদ্দিন", "মনপুরা", "চরফ্যাশন"],
   "বগুড়া": ["বগুড়া সদর", "শাজাহানপুর", "কাহালু", "নন্দীগ্রাম", "শেরপুর", "ধুনট", "গাবতলী", "সারিয়াকান্দি", "সোনাতলা", "শিবগঞ্জ", "আদমদিঘী", "দুপচাঁচিয়া"],
   "ব্রাহ্মণবাড়িয়া": ["ব্রাহ্মণবাড়িয়া সদর", "আশুগঞ্জ", "সরাইল", "নাসিরনগর", "নবীনগর", "বাঞ্ছারামপুর", "কসবা", "আখাউড়া", "বিজয়নগর"],
-  "চাঁদপুর": ["চাঁদপুর সদর", "হাজীগঞ্জ", "শাহরাস্তি", "কচুয়া", "ফরিদগঞ্জ", "হাইমচর", "মতলব উত্তর", "মতলব দক্ষিণ"],
+  "চাঁদপুর": ["চাঁদপুর সদর", "হাজীগঞ্জ", "শাহরাস্তি", "কচুয়া", "ফریدগঞ্জ", "হাইমচর", "মতলব উত্তর", "মতলব দক্ষিণ"],
   "চুয়াডাঙ্গা": ["চুয়াডাঙ্গা সদর", "আলমডাঙ্গা", "দামুড়হুদা", "জীবননগর"],
-  "কুমিল্লা": ["কুমিল্লা সদর", "কুমিল্লা সদর দক্ষিণ", "চৌদ্দগ্রাম", "লাকسام", "বরুড়া", "চান্দিনা", "বুড়িচং", "ব্রাহ্মণপাড়া", "দেবিদ্বার", "মুরাদনগর", "দাউদκαν্দি", "হোমনা", "মেঘনা", "তিতাস", "মনোহরগঞ্জ", "নাঙ্গলকোট"],
+  "কুমিল্লা": ["কুমিল্লা সদর", "কুমিল্লা সদর দক্ষিণ", "চৌদ্দগ্রাম", "লাকসাম", "বরুড়া", "চান্দিনা", "বুড়িচং", "ব্রাহ্মণপাড়া", "দেবিদ্বার", "মুরাদনগর", "দাউদকান্দি", "হোমনা", "মেঘনা", "তিতাস", "মনোহরগঞ্জ", "নাঙ্গলকোট"],
   "কক্সবাজার": ["কক্সবাজার সদর", "চাকোরিয়া", "মহেশখালী", "টেকনাফ", "উখিয়া", "পেকুয়া", "কুতুবদিয়া", "রামু"],
   "দিনাজপুর": ["দিনাজপুর সদর", "বিরল", "বোচাগঞ্জ", "কাহারোল", "বীরগঞ্জ", "খানসামা", "চিরিরবন্দর", "পার্বতীপুর", "ফুলবাড়ী", "নবাবগঞ্জ", "বিরামপুর", "হাকিমপুর", "ঘোড়াঘাট"],
-  "ফরিদপুর": ["ফরিদপুর সদর", "মধুখালী", "বোয়ালমারী", "আলফাডাঙ্গা", "সালথা", "নগরকান্দা", "ভাঙ্গা", "সদরপুর", "চরভদ্রাসন"],
+  "ফریدপুর": ["ফریدপুর সদর", "মধুখালী", "বোয়ালমারী", "আলফাডাঙ্গা", "সালথা", "নগরকান্দা", "ভাঙ্গা", "সদরপুর", "চরভদ্রাসন"],
   "ফেনী": ["ফেনী সদর", "দাগনভূঁইয়া", "ছাগলনাইয়া", "পরশুরাম", "ফুলগাজী", "সোনাগাজী"],
-  "গাইবান্ধা": ["গাইবান্ধা সদর", "সাদুল্লাপুর", "পলাশবাড়ী", "গোবিন্দগঞ্জ", "সুন্দরগঞ্জ", "সাঘাটা", "ফুলছড়ি"],
+  "গাইবান্ধা": ["গাইবান্ধা সদর", "সادুল্লাপুর", "পলাশবাড়ী", "গোবিন্দগঞ্জ", "সুন্দরগঞ্জ", "সাঘাটা", "ফুলছড়ি"],
   "গাজীপুর": ["গাজীপুর সদর", "কালীগঞ্জ", "কালিয়াকৈর", "শ্রীপুর", "কপাসিয়া"],
   "গোপালগঞ্জ": ["গোপালগঞ্জ সদর", "টুঙ্গিপাড়া", "কোটালীপাড়া", "কাশিয়ানী", "মুকসুদপুর"],
   "জয়পুরহাট": ["জয়পুরহাট সদর", "পাঁচবিবি", "আক্কেলপুর", "ক্ষেতলাল", "কালাই"],
   "জামালপুর": ["জামালপুর সদর", "মেলান্দহ", "ইসলামপুর", "দেওয়ানগঞ্জ", "বকশীগঞ্জ", "مাদারগঞ্জ", "সরিষাবাড়ী"],
   "যশোর": ["যশোর সদর", "ঝিকরগাছা", "চৌগাছা", "শার্শা", "মণিরামপুর", "কেশবপুর", "বাঘেরপাড়া", "অভয়নগর"],
   "ঝালকাঠি": ["ঝালকাঠি সদর", "নলছিটি", "রাজাপুর", "কাঠালিয়া"],
-  "ঝিনাইদহ": ["ঝিনাইদহ সদর", "কালীগঞ্জ", "কোটচাঁদপুর", "মহেশপুর", "শৈলকুপা", "হরিণাকুণ্ডু"],
+  "ঝিনাইদহ": ["ঝিনাইদহ সদর", "কালীগঞ্জ", "কোটচাঁদপুর", "মহেশপুর", "شৈলকুপা", "হরিণাকুণ্ডু"],
   "খাগড়াছড়ি": ["খাগড়াছড়ি সদর", "দীঘিনালা", "পানছড়ি", "মহালছড়ি", "মাটিরাঙ্গা", "মানিকছড়ি", "রামগড়", "লক্ষ্মীছড়ি"],
   "খুলনা": ["খুলনা সদর", "দিঘলিয়া", "রূপসা", "তেরখাদা", "ডুমুরিয়া", "বটিয়াঘাটা", "পাইকগাছা", "কয়রা", "ফুলতলা"],
   "কিশোরগঞ্জ": ["কিশোরগঞ্জ সদর", "হোসেনপুর", "কটিয়াদী", "পাকুন্দিয়া", "তাড়াইল", "করিমগঞ্জ", "ইটনা", "মিঠামইন", "অষ্টগ্রাম", "নিকলী", "বাজিতপুর", "কুলিয়ারচর", "ভৈরব"],
@@ -39,27 +39,27 @@ const bdDistrictsAndThanas = {
   "কুষ্টিয়া": ["কুষ্টিয়া সদর", "কুমারখালী", "খোকসা", "মিরপুর", "ভেড়ামারা", "দৌলতপুর"],
   "লক্ষ্মীপুর": ["লক্ষ্মীপুর সদর", "রায়পুর", "রামগঞ্জ", "রামগতি", "কমলনগর"],
   "লালমনিরহাট": ["লালমনিরহাট সদর", "কালীগঞ্জ", "আদিতমারী", "হাতিবান্ধা", "পাটগ্রাম"],
-  "মাদারীপুর": ["মাদারীপুর সদর", "শিবচর", "কালকিনি", "রাজৈর"],
+  "مাদারীপুর": ["مাদারীপুর সদর", "শিবচর", "কালকিনি", "রাজৈর"],
   "মাগুরা": ["মাগুরা সদর", "শ্রীপুর", "মোহাম্মদপুর", "শালিখা"],
   "মানিকগঞ্জ": ["মানিকগঞ্জ সদর", "সিংগাইর", "সাটুরিয়া", "ঘিওর", "দৌলতপুর", "হরিরামপুর", "শিবালয়"],
   "মেহেরপুর": ["মেহেরপুর সদর", "মুজিবনগর", "গাংনী"],
   "মুন্সিগঞ্জ": ["মুন্সিগঞ্জ সদর", "টংগিবাড়ী", "শ্রীনগর", "লৌহজং", "গজারিয়া", "সিরাজদিখান"],
-  "ময়মনসিংহ": ["ময়মনসিংহ সদর", "মুক্তাগাছা", "ফুলবাড়িয়া", "ত্রিশাল", "ভালuকা", "গফরগাঁও", "নন্দাইল", "ঈশ্বরগঞ্জ", "গৌরীপুর", "তারাকান্দা", "ফুলপুর", "ধোবাউড়া", "হালুয়াঘাট"],
-  "নওগাঁ": ["নওগাঁ সদর", "রানীনগর", "আত্রাই", "বدلগাছী", "মহাদেবপুর", "ধামইরহাট", "পত্নীতলা", "পোরশা", "সাপাহার", "নিয়ামতপুর", "মান্দা"],
-  "নড়াইল": ["নড়াইল সদর", "লোহাগড়া", "কালিয়া"],
+  "ময়মনসিংহ": ["ময়মনসিংহ সদর", "মুক্তাগাছা", "ফুলবাড়িয়া", "ত্রিশাল", "ভালুকা", "গফরগাঁও", "নন্দাইল", "ঈশ্বরগঞ্জ", "গৌরীপুর", "তারাকান্দা", "ফুলপুর", "ধোবাউড়া", "হালুয়াঘাট"],
+  "নওগাঁ": ["নওগাঁ সদর", "রানীনগর", "আত্রাই", "বদলাগাজী", "মহাদেবপুর", "ধামইরহাট", "পত্নীতলা", "পোরশা", "সাপাহার", "নিয়ামতপুর", "মান্দা"],
+  "নড়াইল": ["নড়াইল সদর", "لوহাগড়া", "কালিয়া"],
   "নারায়ণগঞ্জ": ["নারায়ণগঞ্জ সদর", "বন্দর", "সোনারগাঁও", "আড়াইহাজার", "রূপগঞ্জ"],
   "নরসিংদী": ["নরসিংদী সদর", "পলাশ", "শিবপুর", "মনোহরদী", "বেলাবো", "রায়পুরা"],
   "নাটোর": ["নাটোর সদর", "বাগাতিপাড়া", "বড়াইগ্রাম", "লালপুর", "গুরুদাসপুর", "সিংড়া", "নলডাঙ্গা"],
-  "নেত্রকোনা": ["নেত্রকোনা সদর", "বারহাট্টা", "কলমাকান্দা", "দুর্গাপুর", "পূর্বধলা", "কেন্দুয়া", "مদন", "খালিয়াজুরী", "মোহনগঞ্জ", "আটপাড়া"],
+  "নেত্রকোনা": ["নেত্রকোনা সদর", "বারহাট্টা", "কলমাকান্দা", "দুর্গাপুর", "পূর্বধলা", "কেন্দুয়া", "মদন", "খালিয়াজুরী", "মোহনগঞ্জ", "আটপাড়া"],
   "নীলফামারী": ["নীলফামারী সদর", "সৈয়দপুর", "জলঢাকা", "কিশোরগঞ্জ", "ডোম্যার", "ডিমলা"],
   "নোয়াখালী": ["নোয়াখালী সদর", "কোম্পানীগঞ্জ", "বেগমগঞ্জ", "চাটখিল", "সেনবাগ", "হাতিয়া", "সোনাইমুড়ি", "সুবর্ণচর", "কবিরহাট"],
   "পাবনা": ["পাবনা সদর", "ঈশ্বরদী", "আটঘরিয়া", "চাটমোহর", "ভাঙ্গুড়া", "ফریدপুর", "বেড়া", "সুজানগর", "সাঁথিয়া"],
   "পঞ্চগড়": ["পঞ্চগড় সদর", "বোদা", "দেবীগঞ্জ", "আটোয়ারী", "তেঁতুলিয়া"],
-  "পটুয়াখালী": ["পটুয়াখালী সদর", "বাউফল", "গলাচিপা", "দশমিনা", "কলাপাড়া", "মির্জাগঞ্জ", "দুমকি", "রাঙ্গাবালী"],
+  "পটুয়াখালী": ["পটুয়াখালী সদর", "বাউফল", "গলাচিপা", "দশমিনা", "কলাপাড়া", "মির্জাগঞ্জ", "دুমকি", "রাঙ্গাবালী"],
   "রাজবাড়ী": ["রাজবাড়ী সদর", "গোয়ালন্দ", "পাংশা", "বালিয়াকান্দি", "কালুখালী"],
-  "রাজশাহী": ["বোয়ালিয়া", "মতিহার", "রাজপাড়া", "শাহ মখদুম", "পবা", "গোদাগাড়ী", "তানোর", "মোহনপুর", "বাগমারা", "দুর্গাপুর", "পুঠিয়া", "চারঘাট", "বাঘা"],
-  "রাঙ্গামাটি": ["রাঙ্গামাটি সদর", "কাপ্তাই", "কাউখালী", "বাঘাইছড়ি", "লংগদু", "নানিয়ারচর", "রাজস্থলী", "জুরাছড়ি", "বিলাইছড়ি", "বরকল"],
-  "রংপুর": ["রংপুর সদর", "মিঠাপুকুর", "পীরগঞ্জ", "পীরগাছা", "কাউনিয়া", "গঙ্গাচড়া", "বদরগঞ্জ", "তপোধন"],
+  "রাজশাহী": ["বোয়ালিয়া", "মতিহার", "রাজপাড়া", "শাহ মখদুম", "পবা", "গোদাগাড়ী", "তানোর", "مোহনপুর", "বাগমারা", "দুর্গাপুর", "পুঠিয়া", "চারঘাট", "বাঘা"],
+  "রাঙ্গামাটি": ["রাঙ্গামাটি সদর", "কাপ্তাই", "কাউখালী", "বাঘাইছড়ি", "লংগদু", "نانিয়ারচর", "রাজস্থলী", "জুরাছড়ি", "বিলাইছড়ি", "বরকল"],
+  "رংপুর": ["رংপুর সদর", "মিঠাপুকুর", "পীরগঞ্জ", "পীরগাছা", "কাউনিয়া", "গঙ্গাচড়া", "بদরগঞ্জ", "তপোধন"],
   "সাতক্ষীরা": ["সাতক্ষীরা সদর", "কলারোয়া", "তালা", "দেবহাটা", "কালীগঞ্জ", "শ্যামনগর", "আশাশুনি"],
   "শরীয়তপুর": ["শরীয়তপুর সদর", "দামুড্যা", "নড়িয়া", "জাজিরা", "ভেদরগঞ্জ", "গোসাইরহাট"],
   "শেরপুর": ["শেরপুর সদর", "নালিতাবাড়ী", "ঝিনাইগাতী", "শ্রীবরদী", "নকলা"],
@@ -74,7 +74,7 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
   const [permanentThanas, setPermanentThanas] = useState([]);
   const [isSameAddress, setIsSameAddress] = useState(false);
 
-  // একাডেমি সেকশনের জন্য ডাইনামিক বিভাগ স্টেট
+  // একাডেমিক সেকশনের জন্য ডাইনামিক বিভাগ স্টেট
   const [selectedAcademyType, setSelectedAcademyType] = useState(formData.divisionAcademy?.academyType || "");
 
   const handleImageUpload = async (e) => {
@@ -123,7 +123,7 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
     }
   }, [formData.permanentAddress?.district]);
 
-  // বর্তমান ঠিকানা পরিবর্তনের সাথে সাথে যদি চেকবক্স টিক দেওয়া থাকে, তবে স্থায়ী ঠিকানাও স্বয়ংক্রিয় সিঙ্ক হবে
+  // বর্তমান ঠিকানা পরিবর্তনের সাথে সাথে যদি চেকবক্স টিক দেওয়া থাকে, তবে স্থায়ী ঠিকানাও স্বয়ংক্রিয় সিঙ্ক হবে
   useEffect(() => {
     if (isSameAddress && formData.currentAddress) {
       const fields = ["district", "thana", "postOffice", "village", "house", "road"];
@@ -137,7 +137,7 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
     }
   }, [formData.currentAddress, isSameAddress]);
 
-  // চেকবক্স হ্যান্ডলার যা টিক দেওয়া মাত্রই ইনস্ট্যান্ট সিঙ্ক করে দেয়
+  // চেকবক্স হ্যান্ডলার যা টিক দেওয়া মাত্রই ইনস্ট্যান্ট সিঙ্ক করে দেয়
   const handleSameAddressChange = (e) => {
     const checked = e.target.checked;
     setIsSameAddress(checked);
@@ -164,7 +164,6 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
     const checked = e.target.checked;
     handleChange(e); // প্যারেন্ট স্টেট আপডেট
     if (!checked) {
-      // চেকবক্স আনটিক করলে ডাটা ক্লিয়ার করা
       setSelectedAcademyType("");
       handleChange({ target: { name: "divisionAcademy.academyType", value: "" } });
       handleChange({ target: { name: "divisionAcademy.class", value: "" } });
@@ -180,7 +179,7 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
     handleChange({ target: { name: "divisionAcademy.class", value: "" } });
   };
 
-  // একাডেমি টাইপ অনুযায়ী ক্লাস লিস্ট জেনারেট করা
+  // একাডেমি টাইপ অনুযায়ী ক্লাস লিস্ট জেনারেট করা
   const getAcademyClasses = () => {
     if (selectedAcademyType === "প্রাক-প্রাথমিক") return ["প্লে", "নার্সারি"];
     if (selectedAcademyType === "প্রাথমিক") return ["১ম শ্রেণি", "২য় শ্রেণি", "৩য় শ্রেণি", "৪র্থ শ্রেণি", "৫ম শ্রেণি"];
@@ -195,7 +194,7 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
         @media print {
           @page {
             size: A4 portrait;
-            margin: 0.4in 0.4in 0.4in 0.4in;
+            margin: 0.4in;
           }
           body {
             background: white !important;
@@ -220,27 +219,31 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
       {/* মূল কন্টেইনার ক্লাস */}
       <div className="w-full min-h-[11.69in] bg-white p-4 md:p-10 flex flex-col justify-between box-border text-gray-800 relative font-bengali overflow-x-hidden print:min-h-0 print:h-full print:p-0 print:overflow-hidden">
 
-
-        {/* ছবি আপলোড */}
-        <div className="w-32 h-40 border-2 border-dashed border-gray-400 bg-gray-50 flex flex-col items-center justify-center p-2 text-center rounded relative group cursor-pointer overflow-hidden print:w-24 print:h-28 print:border print:border-solid">
-          {formData.studentImage ? (
-            <img src={formData.studentImage} alt="Student" className="w-full h-full object-cover" />
-          ) : (
-            <span className="text-xs font-bold text-gray-500 print:text-[10px]">{uploading ? "আপলোড হচ্ছে..." : "শিক্ষার্থীর ছবি"}</span>
-          )}
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            className="absolute inset-0 opacity-0 cursor-pointer print:hidden"
-          />
+        {/* ছবি আপলোড ও হেড অংশ */}
+        <div className="flex justify-between items-start w-full mb-4 print:mb-2">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 print:text-lg">ভর্তি ফরম</h2>
+            <p className="text-xs text-gray-500 print:hidden">অনুগ্রহ করে নিচের তথ্যগুলো সঠিকভাবে পূরণ করুন।</p>
+          </div>
+          <div className="w-32 h-40 border-2 border-dashed border-gray-400 bg-gray-50 flex flex-col items-center justify-center p-2 text-center rounded relative group cursor-pointer overflow-hidden print:w-24 print:h-28 print:border print:border-solid">
+            {formData.studentImage ? (
+              <img src={formData.studentImage} alt="Student" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-xs font-bold text-gray-500 print:text-[10px]">{uploading ? "আপলোড হচ্ছে..." : "শিক্ষার্থীর ছবি"}</span>
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="absolute inset-0 opacity-0 cursor-pointer print:hidden"
+            />
+          </div>
         </div>
-
 
         {/* সেকশন ১: শিক্ষার্থীর তথ্য বিবরণী */}
         <div className="w-full mb-4 print:mb-2">
           <div className="bg-[#231f20] text-white font-bold px-4 py-1 text-sm inline-block rounded-r-md mb-4 transform -skew-x-12 print:mb-2 print:py-0.5 print:text-xs">
-            <span className="inline-block skew-x-12">শিক্ষার্থার তথ্য বিবরণী:</span>
+            <span className="inline-block skew-x-12">শিক্ষার্থীর তথ্য বিবরণী:</span>
           </div>
 
           <div className="space-y-4 print:space-y-2.5">
@@ -332,8 +335,8 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
               />
             </div>
 
-            {/* রক্তের গ্রুপ, ওজন, উচ্চতা, জাতীয়তা (Fully Responsive) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end print:grid-cols-4 print:gap-2">
+            {/* রক্তের গ্রুপ, ওজন, উচ্চতা, জাতীয়তা */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end print:grid-cols-4 print:gap-2">
               <div className="flex items-center gap-2 w-full">
                 <span className="font-bold text-gray-700 whitespace-nowrap text-sm print:text-xs">রক্তের গ্রুপ :</span>
                 <select
@@ -475,233 +478,176 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
           </div>
         </div>
 
-        {/* সেকশন ২: ভর্তিচ্ছু বিভাগ (ছক ও মোবাইল রেস্পন্সিভ কার্ড ভিউ) */}
+        {/* সেকশন ২: ভর্তিচ্ছু বিভাগ */}
         <div className="w-full mb-4 print:mb-2">
           <div className="bg-[#231f20] text-white font-bold px-4 py-1 text-sm inline-block rounded-r-md mb-3 transform -skew-x-12 print:mb-1.5 print:py-0.5 print:text-xs">
             <span className="inline-block skew-x-12">ভর্তিচ্ছু বিভাগ:</span>
           </div>
 
-          {/* টেবিল কন্টেইনার - রেস্পন্সিভ সিএসএস সহ */}
-          <div className="border border-gray-400 rounded overflow-hidden">
-
-            {/* বড় স্ক্রিনের জন্য ট্র্যাডিশনাল টেবিল (স্মার্টফোনে হাইড থাকবে) */}
-            <table className="hidden sm:table w-full text-left border-collapse text-sm print:table print:w-full print:text-xs">
+          <div className="border border-gray-400 rounded overflow-hidden mb-6 print:mb-4">
+            <table className="w-full text-left border-collapse text-sm print:text-xs">
               <thead>
                 <tr className="bg-gray-100 border-b border-gray-400 font-bold text-gray-700">
-                  <th className="p-1.5 border-r border-gray-400 text-center w-12 print:p-1 print:w-10">টিক</th>
-                  <th className="p-1.5 border-r border-gray-400 print:p-1 w-1/3">বিভাগ</th>
-                  <th className="p-1.5 border-r border-gray-400 print:p-1 w-1/3">শ্রেণি</th>
-                  <th className="p-1.5 print:p-1 w-1/3">ধরণ</th>
+                  <th className="p-2 border-r border-gray-400 text-center w-12 print:p-1">টিক</th>
+                  <th className="p-2 border-r border-gray-400 print:p-1 w-1/3">বিভাগ</th>
+                  <th className="p-2 border-r border-gray-400 print:p-1 w-1/3">শ্রেণি</th>
+                  <th className="p-2 print:p-1 w-1/3">ধরণ</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-400">
                 {/* রো ১: প্রি-হিফজ */}
                 <tr>
-                  <td className="p-1.5 border-r border-gray-400 text-center print:p-1">
+                  <td className="p-2 border-r border-gray-400 text-center print:p-1">
                     <input type="checkbox" name="divisionPreHifz.active" checked={formData.divisionPreHifz?.active || false} onChange={handleChange} className="w-4 h-4 accent-orange-600 print:w-3 print:h-3 cursor-pointer" />
                   </td>
-                  <td className="p-1.5 border-r border-gray-400 font-bold text-gray-700 print:p-1">প্রি-হিফজ</td>
-                  <td className="p-1.5 border-r border-gray-400 print:p-1">
-                    <select name="divisionPreHifz.class" value={formData.divisionPreHifz?.class || ""} onChange={handleChange} className="border border-gray-300 rounded p-0.5 text-xs bg-white w-full print:border-none">
+                  <td className="p-2 border-r border-gray-400 font-bold text-gray-700 print:p-1">প্রি-হিফজ</td>
+                  <td className="p-2 border-r border-gray-400 print:p-1">
+                    <select name="divisionPreHifz.class" value={formData.divisionPreHifz?.class || ""} onChange={handleChange} className="w-full bg-transparent focus:outline-none" disabled={!formData.divisionPreHifz?.active}>
                       <option value="">বাছাই করুন</option>
-                      <option value="কায়দা/আমপারা">কায়দা/আমপারা</option>
-                      <option value="নাজেরা">নাজেরা</option>
+                      <option value="নার্সারি">নার্সারি</option>
+                      <option value="কেজি">কেজি</option>
                     </select>
                   </td>
-                  <td className="p-1.5 print:p-1">
-                    <select name="divisionPreHifz.type" value={formData.divisionPreHifz?.type || ""} onChange={handleChange} className="border border-gray-300 rounded p-0.5 text-xs bg-white w-full print:border-none">
-                      <option value="">বাছাই করুন</option>
-                      <option value="আবাসিক">আবাসিক</option>
-                      <option value="অনাবাসিক">অনাবাসিক</option>
-                      <option value="ডে-কেয়ার">ডে-কেয়ার</option>
-                    </select>
+                  <td className="p-2 print:p-1">
+                    <input type="text" name="divisionPreHifz.type" value={formData.divisionPreHifz?.type || ""} onChange={handleChange} className="w-full bg-transparent focus:outline-none" placeholder="যেমন: আবাসিক/অনাবাসিক" disabled={!formData.divisionPreHifz?.active} />
                   </td>
                 </tr>
 
-                {/* রো ২: হিফজ */}
+                {/* রো ২: হিফজ বিভাগ */}
                 <tr>
-                  <td className="p-1.5 border-r border-gray-400 text-center print:p-1">
+                  <td className="p-2 border-r border-gray-400 text-center print:p-1">
                     <input type="checkbox" name="divisionHifz.active" checked={formData.divisionHifz?.active || false} onChange={handleChange} className="w-4 h-4 accent-orange-600 print:w-3 print:h-3 cursor-pointer" />
                   </td>
-                  <td className="p-1.5 border-r border-gray-400 font-bold text-gray-700 print:p-1">হিফজ</td>
-                  <td className="p-1.5 border-r border-gray-400 print:p-1">
-                    <select name="divisionHifz.class" value={formData.divisionHifz?.class || ""} onChange={handleChange} className="border border-gray-300 rounded p-0.5 text-xs bg-white w-full print:border-none">
-                      <option value="">বাছাই করুন</option>
-                      <option value="সবক">সবক</option>
-                      <option value="শুনানি">শুনানি</option>
-                    </select>
+                  <td className="p-2 border-r border-gray-400 font-bold text-gray-700 print:p-1">হিফজ বিভাগ</td>
+                  <td className="p-2 border-r border-gray-400 print:p-1">
+                    <input type="text" name="divisionHifz.class" value={formData.divisionHifz?.class || ""} onChange={handleChange} className="w-full bg-transparent focus:outline-none" placeholder="যেমন: ১-৫ পারা" disabled={!formData.divisionHifz?.active} />
                   </td>
-                  <td className="p-1.5 print:p-1">
-                    <select name="divisionHifz.type" value={formData.divisionHifz?.type || ""} onChange={handleChange} className="border border-gray-300 rounded p-0.5 text-xs bg-white w-full print:border-none">
-                      <option value="">বাছাই করুন</option>
-                      <option value="আবাসিক">আবাসিক</option>
-                      <option value="অনাবাসিক">অনাবাসিক</option>
-                      <option value="ডে-কেয়ার">ডে-কেয়ার</option>
-                    </select>
+                  <td className="p-2 print:p-1">
+                    <input type="text" name="divisionHifz.type" value={formData.divisionHifz?.type || ""} onChange={handleChange} className="w-full bg-transparent focus:outline-none" placeholder="যেমন: নূরানী/নাজেরা" disabled={!formData.divisionHifz?.active} />
                   </td>
                 </tr>
 
-                {/* রো ৩: একাডেমি (আপনার নির্দেশিত কন্ডিশনাল ড্রপডাউন সহ) */}
+                {/* রো ৩: একাডেমিক জেনারেল বিভাগ */}
                 <tr>
-                  <td className="p-1.5 border-r border-gray-400 text-center print:p-1">
-                    <input
-                      type="checkbox"
-                      name="divisionAcademy.active"
-                      checked={formData.divisionAcademy?.active || false}
-                      onChange={handleAcademyActiveToggle}
-                      className="w-4 h-4 accent-orange-600 print:w-3 print:h-3 cursor-pointer"
-                    />
+                  <td className="p-2 border-r border-gray-400 text-center print:p-1">
+                    <input type="checkbox" name="divisionAcademic.active" checked={formData.divisionAcademy?.active || false} onChange={handleAcademyActiveToggle} className="w-4 h-4 accent-orange-600 print:w-3 print:h-3 cursor-pointer" />
                   </td>
-                  <td className="p-1.5 border-r border-gray-400 font-bold text-gray-700 print:p-1 h-12 flex items-center">
-                    {formData.divisionAcademy?.active ? (
-                      <select
-                        value={selectedAcademyType}
-                        onChange={handleAcademyTypeChange}
-                        className="border border-gray-300 rounded p-0.5 text-xs bg-white w-full font-normal"
-                      >
+                  <td className="p-2 border-r border-gray-400 font-bold text-gray-700 print:p-1">একাডেমিক বিভাগ</td>
+                  <td className="p-2 border-r border-gray-400 print:p-1">
+                    <div className="flex flex-col gap-1">
+                      <select value={selectedAcademyType} onChange={handleAcademyTypeChange} className="w-full bg-transparent focus:outline-none text-xs text-gray-500 font-semibold" disabled={!formData.divisionAcademic?.active}>
                         <option value="">বিভাগ বাছাই করুন</option>
                         <option value="প্রাক-প্রাথমিক">প্রাক-প্রাথমিক</option>
                         <option value="প্রাথমিক">প্রাথমিক</option>
                         <option value="মাধ্যমিক">মাধ্যমিক</option>
                         <option value="উচ্চমাধ্যমিক">উচ্চমাধ্যমিক</option>
                       </select>
-                    ) : (
-                      <span>একাডেমি</span>
-                    )}
+                      {selectedAcademyType && (
+                        <select name="divisionAcademy.class" value={formData.divisionAcademy?.class || ""} onChange={handleChange} className="w-full bg-transparent focus:outline-none mt-1 font-bold" disabled={!formData.divisionAcademic?.active}>
+                          <option value="">শ্রেণি বাছাই করুন</option>
+                          {getAcademyClasses().map((cls) => (
+                            <option key={cls} value={cls}>{cls}</option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
                   </td>
-                  <td className="p-1.5 border-r border-gray-400 print:p-1">
-                    {formData.divisionAcademy?.active && (
-                      <select
-                        name="divisionAcademy.class"
-                        value={formData.divisionAcademy?.class || ""}
-                        onChange={handleChange}
-                        className="border border-gray-300 rounded p-0.5 text-xs bg-white w-full print:border-none"
-                        disabled={!selectedAcademyType}
-                      >
-                        <option value="">শ্রেণি বাছাই করুন</option>
-                        {getAcademyClasses().map((cls) => (
-                          <option key={cls} value={cls}>{cls}</option>
-                        ))}
-                      </select>
-                    )}
-                  </td>
-                  <td className="p-1.5 print:p-1">
-                    {formData.divisionAcademy?.active && (
-                      <select name="divisionAcademy.type" value={formData.divisionAcademy?.type || ""} onChange={handleChange} className="border border-gray-300 rounded p-0.5 text-xs bg-white w-full print:border-none">
-                        <option value="">বাছাই করুন</option>
-                        <option value="আবাসিক">আবাসিক</option>
-                        <option value="অনাবাসিক">অনাবাসিক</option>
-                        <option value="ডে-কেয়ার">ডে-কেয়ার</option>
-                      </select>
-                    )}
+                  <td className="p-2 print:p-1">
+                    <input type="text" name="divisionAcademic.type" value={formData.divisionAcademy?.type || ""} onChange={handleChange} className="w-full bg-transparent focus:outline-none" placeholder="যেমন: বিজ্ঞান/মানবিক" disabled={!formData.divisionAcademic?.active} />
                   </td>
                 </tr>
               </tbody>
             </table>
+          </div>
 
-            {/* মোবাইলের জন্য রেস্পন্সিভ ভিউ (ডেস্কটপ ও প্রিন্টে হাইড থাকবে) */}
-            <div className="block sm:hidden divide-y divide-gray-300 text-sm print:hidden p-2 bg-gray-50 space-y-4">
+          {/* নতুন ফিল্ডসমূহ: ছবি অনুযায়ী পূর্বে অধ্যয়নরত প্রতিষ্ঠানের তথ্যাদি */}
+          <div className="space-y-4 print:space-y-2.5 pt-2 border-t border-gray-300">
+            {/* ১. পূর্বে অধ্যয়নরত প্রতিষ্ঠানের নাম */}
+            <div className="flex flex-col md:flex-row md:items-end gap-2 md:gap-3 print:flex-row print:items-end print:gap-2">
+              <span className="font-bold text-gray-700 whitespace-nowrap text-sm print:text-xs">পূর্বে অধ্যয়নরত প্রতিষ্ঠানের নাম :</span>
+              <input
+                type="text"
+                name="previousInstitutionName"
+                value={formData.previousInstitutionName || ""}
+                onChange={handleChange}
+                className="flex-1 border-b border-dotted border-gray-400 pb-0.5 focus:outline-none focus:border-orange-500 bg-transparent text-sm print:text-xs"
+              />
+            </div>
 
-              {/* প্রি-হিফজ কার্ড */}
-              <div className="p-2 border border-gray-300 rounded bg-white">
-                <div className="flex items-center gap-2 mb-2">
-                  <input type="checkbox" id="m-prehifz" name="divisionPreHifz.active" checked={formData.divisionPreHifz?.active || false} onChange={handleChange} className="w-4 h-4 accent-orange-600" />
-                  <label htmlFor="m-prehifz" className="font-bold text-gray-700">প্রি-হিফজ</label>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <select name="divisionPreHifz.class" value={formData.divisionPreHifz?.class || ""} onChange={handleChange} className="border border-gray-300 rounded p-1 text-xs bg-white w-full">
-                    <option value="">শ্রেণি বাছাই</option>
-                    <option value="কায়দা/আমপারা">কায়দা/আমপারা</option>
-                    <option value="নাজেরা">নাজেরা</option>
-                  </select>
-                  <select name="divisionPreHifz.type" value={formData.divisionPreHifz?.type || ""} onChange={handleChange} className="border border-gray-300 rounded p-1 text-xs bg-white w-full">
-                    <option value="">ধরণ বাছাই</option>
-                    <option value="আবাসিক">আবাসিক</option>
-                    <option value="অনাবাসিক">অনাবাসিক</option>
-                    <option value="ডে-কেয়ার">ডে-কেয়ার</option>
-                  </select>
-                </div>
+            {/* ২. ঠিকানা এবং ৩. প্রিন্সিপালের মোবাইল */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end print:grid-cols-3 print:gap-2">
+              <div className="flex items-end gap-2 md:col-span-2 w-full">
+                <span className="font-bold text-gray-700 whitespace-nowrap text-sm print:text-xs">ঠিকানা :</span>
+                <input
+                  type="text"
+                  name="previousInstitutionAddress"
+                  value={formData.previousInstitutionAddress || ""}
+                  onChange={handleChange}
+                  className="flex-1 border-b border-dotted border-gray-400 pb-0.5 focus:outline-none focus:border-orange-500 bg-transparent text-sm print:text-xs"
+                />
               </div>
-
-              {/* হিফজ কার্ড */}
-              <div className="p-2 border border-gray-300 rounded bg-white">
-                <div className="flex items-center gap-2 mb-2">
-                  <input type="checkbox" id="m-hifz" name="divisionHifz.active" checked={formData.divisionHifz?.active || false} onChange={handleChange} className="w-4 h-4 accent-orange-600" />
-                  <label htmlFor="m-hifz" className="font-bold text-gray-700">হিফজ</label>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <select name="divisionHifz.class" value={formData.divisionHifz?.class || ""} onChange={handleChange} className="border border-gray-300 rounded p-1 text-xs bg-white w-full">
-                    <option value="">শ্রেণি বাছাই</option>
-                    <option value="সবক">সবক</option>
-                    <option value="শুনানি">শুনানি</option>
-                  </select>
-                  <select name="divisionHifz.type" value={formData.divisionHifz?.type || ""} onChange={handleChange} className="border border-gray-300 rounded p-1 text-xs bg-white w-full">
-                    <option value="">ধরণ বাছাই</option>
-                    <option value="আবাসিক">আবাসিক</option>
-                    <option value="অনাবাসিক">অনাবাসিক</option>
-                    <option value="ডে-কেয়ার">ডে-কেয়ার</option>
-                  </select>
-                </div>
+              <div className="flex items-end gap-2 w-full">
+                <span className="font-bold text-gray-700 whitespace-nowrap text-sm print:text-xs">প্রিন্সিপালের মোবাইল :</span>
+                <input
+                  type="text"
+                  name="previousInstitutionPrincipalMobile"
+                  value={formData.previousInstitutionPrincipalMobile || ""}
+                  onChange={handleChange}
+                  placeholder="০১৭XXXXXXXX"
+                  className="flex-1 border-b border-dotted border-gray-400 pb-0.5 focus:outline-none focus:border-orange-500 bg-transparent font-mono text-sm print:text-xs print:placeholder-transparent"
+                />
               </div>
+            </div>
 
-              {/* একাডেমি কার্ড (মোবাইল কন্ডিশনাল ড্রপডাউন) */}
-              <div className="p-2 border border-gray-300 rounded bg-white">
-                <div className="flex items-center gap-2 mb-2">
-                  <input
-                    type="checkbox"
-                    id="m-academy"
-                    name="divisionAcademy.active"
-                    checked={formData.divisionAcademy?.active || false}
-                    onChange={handleAcademyActiveToggle}
-                    className="w-4 h-4 accent-orange-600"
-                  />
-                  <label htmlFor="m-academy" className="font-bold text-gray-700">
-                    {formData.divisionAcademy?.active ? "একাডেমি (সক্রিয়)" : "একাডেমি"}
-                  </label>
-                </div>
+            {/* ৪. পূর্ব প্রতিষ্ঠান ছাড়ার কারণ */}
+            <div className="flex flex-col md:flex-row md:items-end gap-2 md:gap-3 print:flex-row print:items-end print:gap-2">
+              <span className="font-bold text-gray-700 whitespace-nowrap text-sm print:text-xs">পূর্ব প্রতিষ্ঠান ছাড়ার কারণ :</span>
+              <input
+                type="text"
+                name="reasonForLeaving"
+                value={formData.reasonForLeaving || ""}
+                onChange={handleChange}
+                className="flex-1 border-b border-dotted border-gray-400 pb-0.5 focus:outline-none focus:border-orange-500 bg-transparent text-sm print:text-xs"
+              />
+            </div>
 
-                {formData.divisionAcademy?.active && (
-                  <div className="space-y-2 mt-2">
-                    <select
-                      value={selectedAcademyType}
-                      onChange={handleAcademyTypeChange}
-                      className="border border-gray-300 rounded p-1 text-xs bg-white w-full"
-                    >
-                      <option value="">বিভাগ বাছাই করুন</option>
-                      <option value="প্রাক-প্রাথমিক">প্রাক-প্রাথমিক</option>
-                      <option value="প্রাথমিক">প্রাথমিক</option>
-                      <option value="মাধ্যমিক">মাধ্যমিক</option>
-                      <option value="উচ্চমাধ্যমিক">উচ্চমাধ্যমিক</option>
-                    </select>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <select
-                        name="divisionAcademy.class"
-                        value={formData.divisionAcademy?.class || ""}
-                        onChange={handleChange}
-                        className="border border-gray-300 rounded p-1 text-xs bg-white w-full"
-                        disabled={!selectedAcademyType}
-                      >
-                        <option value="">শ্রেণি বাছাই</option>
-                        {getAcademyClasses().map((cls) => (
-                          <option key={cls} value={cls}>{cls}</option>
-                        ))}
-                      </select>
-
-                      <select name="divisionAcademy.type" value={formData.divisionAcademy?.type || ""} onChange={handleChange} className="border border-gray-300 rounded p-1 text-xs bg-white w-full">
-                        <option value="">ধরণ বাছাই</option>
-                        <option value="আবাসিক">আবাসিক</option>
-                        <option value="অনাবাসিক">অনাবাসিক</option>
-                        <option value="ডে-কেয়ার">ডে-কেয়ার</option>
-                      </select>
-                    </div>
-                  </div>
-                )}
+            {/* ৫. অধ্যয়নকৃত শ্রেণি ও ছাড়পত্র নং এবং ৬. তারিখ */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end print:grid-cols-3 print:gap-2">
+              <div className="flex items-end gap-2 w-full">
+                <span className="font-bold text-gray-700 whitespace-nowrap text-sm print:text-xs">অধ্যয়নকৃত শ্রেণি :</span>
+                <input
+                  type="text"
+                  name="previousClass"
+                  value={formData.previousClass || ""}
+                  onChange={handleChange}
+                  className="flex-1 border-b border-dotted border-gray-400 pb-0.5 focus:outline-none focus:border-orange-500 bg-transparent text-sm print:text-xs"
+                />
               </div>
-
+              <div className="flex items-end gap-2 w-full">
+                <span className="font-bold text-gray-700 whitespace-nowrap text-sm print:text-xs">ছাড়পত্র নং :</span>
+                <input
+                  type="text"
+                  name="transferCertificateNo"
+                  value={formData.transferCertificateNo || ""}
+                  onChange={handleChange}
+                  className="flex-1 border-b border-dotted border-gray-400 pb-0.5 focus:outline-none focus:border-orange-500 bg-transparent text-sm print:text-xs"
+                />
+              </div>
+              <div className="flex items-center gap-2 w-full">
+                <span className="font-bold text-gray-700 whitespace-nowrap text-sm print:text-xs">তারিখ :</span>
+                <input
+                  type="date"
+                  name="leavingDate"
+                  value={formData.leavingDate || ""}
+                  onChange={handleChange}
+                  className="border border-gray-400 rounded px-2 py-0.5 text-sm focus:outline-none focus:border-orange-500 text-gray-700 cursor-pointer w-full print:border-none print:border-b print:border-dotted print:px-0 print:text-xs"
+                />
+              </div>
             </div>
           </div>
+
         </div>
+
       </div>
     </>
   );
