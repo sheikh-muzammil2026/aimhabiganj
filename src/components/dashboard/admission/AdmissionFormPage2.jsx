@@ -433,7 +433,7 @@ export default function AdmissionFormPage2({ formData, handleChange }) {
             {/* "শিক্ষক / উলামাদের মাধ্যমে" সিলেক্ট করলে এই অতিরিক্ত শিক্ষক আইডি ফিল্ডটি বের হবে */}
             {formData.infoSource && formData.infoSource.split(", ").includes("AIM এর শিক্ষকের মাধ্যমে") && (
               <div className="flex flex-col sm:flex-row sm:items-end gap-2 p-3 bg-orange-50/50 border-l-4 border-orange-500 rounded-r-md animate-fade-in w-full">
-                <span className="font-bold text-gray-700 text-xs md:text-sm whitespace-nowrap">● শিক্ষকের আইডি নাম্বার লিখুন (পুরস্কারের জন্য):</span>
+                <span className="font-bold text-gray-700 text-xs md:text-sm whitespace-nowrap">● শিক্ষকের আইডি নাম্বার লিখুন:</span>
                 <input
                   type="text"
                   name="teacherId"

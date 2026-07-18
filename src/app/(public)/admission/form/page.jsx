@@ -13,6 +13,8 @@ export default function AdmissionFormPage() {
   const [formData, setFormData] = useState({
     sessionYear: "২০২৬-২০২৭",
     status: "",
+    // 1st page
+    studentImage: "",
     studentNameBangla: "",
     studentNameEnglish: "",
     studentNameArabic: "",
@@ -30,7 +32,7 @@ export default function AdmissionFormPage() {
     referenceMobile: "",
     divisionPreHifz: { active: false, type: "", class: "" },
     divisionHifz: { active: false, type: "", class: "" },
-    divisionAcademic: { active: false, type: "", class: "" },
+    divisionAcademy: { active: false, type: "", class: "" },
     // divisionArabicCourse: { active: false, type: "", class: "" },
     prevInstituteName: "",
     prevInstituteAddress: "",
@@ -39,6 +41,8 @@ export default function AdmissionFormPage() {
     prevClass: "",
     prevTransferCertificateNo: "",
     prevTcDate: "",
+
+    // 2nd page
     physicalProblem: "",
     physicalProblemDetails: "",
     cleanlinessLover: "",
@@ -49,6 +53,8 @@ export default function AdmissionFormPage() {
     wakeUpTime: "",
     favThing: "",
     anxietyReason: "",
+
+    guardianImage: "",
     fatherNameBangla: "",
     fatherNameEnglish: "",
     fatherNid: "",
@@ -56,6 +62,7 @@ export default function AdmissionFormPage() {
     fatherStatus: "",
     fatherProfession: "",
     fatherEmail: "",
+
     motherNameBangla: "",
     motherNameEnglish: "",
     motherNid: "",
@@ -63,7 +70,8 @@ export default function AdmissionFormPage() {
     motherStatus: "",
     motherProfession: "",
     motherEmail: "",
-    guardianImage: "",
+
+
     guardianNameAbsentParents: "",
     guardianRelation: "",
     guardianNid: "",
@@ -72,23 +80,30 @@ export default function AdmissionFormPage() {
     guardianMobile: "",
     guardianAnnualIncome: "",
     guardianAnnualIncomeWords: "",
+
     admissionReason: "",
+
     primaryContactMethod: "",
+
     infoSource: "",
-    applicantSignatureDate: "",
     teacherId: "",
-    primaryContactMethod: "",
-    studentSignatureDate: "",
+
+    applicantSignatureDate: "",
+
+    // 3rd page
+    // studentSignatureDate: "",
     attachments: {
-      attachStudentPhoto: "",
-      attachParentsPhoto: "",
-      attachBirthCertificate: "",
-      attachParentsNid: "",
-      attachReportCard: "",
+
       citizenshipCertificate: "",
+      birthCertificate: "",
+      guardianNid: "",
+      academicTranscript: "",
+
       boardRegCard: "",
-      orphanCertificate: ""
+      orphanCertificate: "",
     },
+
+    // officeSection
     officeUse: {
       examMark: "",
       comment: "",

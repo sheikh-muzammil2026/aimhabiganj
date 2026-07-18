@@ -530,7 +530,7 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
                 {/* রো ৩: একাডেমিক জেনারেল বিভাগ */}
                 <tr>
                   <td className="p-2 border-r border-gray-400 text-center print:p-1">
-                    <input type="checkbox" name="divisionAcademic.active" checked={formData.divisionAcademic?.active || false} onChange={handleAcademyActiveToggle} className="w-4 h-4 accent-orange-600 print:w-3 print:h-3 cursor-pointer" />
+                    <input type="checkbox" name="divisionAcademic.active" checked={formData.divisionAcademy?.active || false} onChange={handleAcademyActiveToggle} className="w-4 h-4 accent-orange-600 print:w-3 print:h-3 cursor-pointer" />
                   </td>
                   <td className="p-2 border-r border-gray-400 font-bold text-gray-700 print:p-1">একাডেমিক বিভাগ</td>
                   <td className="p-2 border-r border-gray-400 print:p-1">
@@ -543,7 +543,7 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
                         <option value="উচ্চমাধ্যমিক">উচ্চমাধ্যমিক</option>
                       </select>
                       {selectedAcademyType && (
-                        <select name="divisionAcademic.class" value={formData.divisionAcademic?.class || ""} onChange={handleChange} className="w-full bg-transparent focus:outline-none mt-1 font-bold" disabled={!formData.divisionAcademic?.active}>
+                        <select name="divisionAcademy.class" value={formData.divisionAcademy?.class || ""} onChange={handleChange} className="w-full bg-transparent focus:outline-none mt-1 font-bold" disabled={!formData.divisionAcademic?.active}>
                           <option value="">শ্রেণি বাছাই করুন</option>
                           {getAcademyClasses().map((cls) => (
                             <option key={cls} value={cls}>{cls}</option>
@@ -553,7 +553,7 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
                     </div>
                   </td>
                   <td className="p-2 print:p-1">
-                    <input type="text" name="divisionAcademic.type" value={formData.divisionAcademic?.type || ""} onChange={handleChange} className="w-full bg-transparent focus:outline-none" placeholder="যেমন: বিজ্ঞান/মানবিক" disabled={!formData.divisionAcademic?.active} />
+                    <input type="text" name="divisionAcademic.type" value={formData.divisionAcademy?.type || ""} onChange={handleChange} className="w-full bg-transparent focus:outline-none" placeholder="যেমন: বিজ্ঞান/মানবিক" disabled={!formData.divisionAcademic?.active} />
                   </td>
                 </tr>
               </tbody>
