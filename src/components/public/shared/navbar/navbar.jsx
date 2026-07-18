@@ -13,7 +13,7 @@ export default function Navbar() {
     const [isScrolled, setIsScrolled] = useState(false);
 
     const { data: session } = authClient.useSession();
-    
+
     const isLoggedIn = !!session?.user;
     const userRole = session?.user?.role;
     const userPhoto = session?.user?.image;
@@ -102,7 +102,7 @@ export default function Navbar() {
         },
         {
             name: "ভর্তি",
-            isAdmission: true, 
+            isAdmission: true,
             dropdown: [
                 { name: "ভর্তির সময়", href: "/admission#timeline" },
                 { name: "ভর্তি পরীক্ষা", href: "/admission#test" },
@@ -147,11 +147,11 @@ export default function Navbar() {
     return (
         <>
             {/* ডেস্কটপ নেভবার (ফিক্সড ক্লাসেস) */}
-            <nav className={`fixed top-0 left-0 w-full print:hidden text-white z-50 transition-all duration-300 ${
-                isScrolled 
-                    ? "bg-emerald-900/95 shadow-md border-b border-emerald-800 dark:bg-slate-900/95 dark:border-slate-800 backdrop-blur-sm bg-opacity-100 pointer-events-auto" 
-                    : "bg-transparent lg:bg-transparent"
-            }`}>
+
+            <nav className={`left-0 w-full print:hidden text-white z-50 transition-all duration-300 ${isScrolled
+                ? "fixed top-0 bg-emerald-900/95 shadow-md border-b border-emerald-800 dark:bg-slate-900/95 dark:border-slate-800 backdrop-blur-sm bg-opacity-100 pointer-events-auto"
+                : "absolute top-65  bg-transparent lg:bg-transparent"
+                }`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-end h-20">
 
@@ -163,9 +163,8 @@ export default function Navbar() {
                                         <>
                                             <button
                                                 onClick={() => setActiveDropdown(activeDropdown === item.name ? null : item.name)}
-                                                className={`px-2 py-2 rounded-md text-[13px] xl:text-sm font-semibold hover:bg-emerald-800/80 dark:hover:bg-slate-800/80 transition flex items-center gap-0.5 focus:outline-none text-white ${
-                                                    item.isAdmission ? "bg-amber-500 hover:bg-amber-600 text-slate-950 dark:text-slate-950 animate-pulse rounded-md px-3 font-bold" : ""
-                                                }`}
+                                                className={`px-2 py-2 rounded-md text-[13px] xl:text-sm font-semibold hover:bg-emerald-800/80 dark:hover:bg-slate-800/80 transition flex items-center gap-0.5 focus:outline-none text-white ${item.isAdmission ? "bg-amber-500 hover:bg-amber-600 text-slate-950 dark:text-slate-950 animate-pulse rounded-md px-3 font-bold" : ""
+                                                    }`}
                                             >
                                                 {item.name}
                                                 <svg className={`w-3 h-3 ${item.isAdmission ? "text-slate-950" : "text-emerald-200/70"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -232,15 +231,15 @@ export default function Navbar() {
                         </div>
                         {isLoggedIn ? (
                             <div className="space-y-2">
-                                <Link 
-                                    href={getDashboardPath()} 
-                                    onClick={closeMenu} 
+                                <Link
+                                    href={getDashboardPath()}
+                                    onClick={closeMenu}
                                     className="block text-center bg-amber-500 text-slate-950 font-bold py-2.5 rounded-xl shadow text-sm"
                                 >
                                     ড্যাশবোর্ড ({userRole})
                                 </Link>
-                                <button 
-                                    onClick={handleLogout} 
+                                <button
+                                    onClick={handleLogout}
                                     className="w-full text-center bg-red-600 text-white font-bold py-2.5 rounded-xl shadow text-sm"
                                 >
                                     লগআউট করুন
@@ -248,16 +247,16 @@ export default function Navbar() {
                             </div>
                         ) : (
                             <div className="flex flex-col gap-2">
-                                <Link 
-                                    href="/login" 
-                                    onClick={closeMenu} 
+                                <Link
+                                    href="/login"
+                                    onClick={closeMenu}
                                     className="block text-center bg-amber-500 text-slate-950 font-bold py-2.5 rounded-xl shadow text-sm"
                                 >
                                     লগইন
                                 </Link>
-                                <Link 
-                                    href="/register" 
-                                    onClick={closeMenu} 
+                                <Link
+                                    href="/register"
+                                    onClick={closeMenu}
                                     className="block text-center bg-transparent border border-amber-400 text-amber-400 font-bold py-2.5 rounded-xl shadow text-sm"
                                 >
                                     রেজিস্ট্রার

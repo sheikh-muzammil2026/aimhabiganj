@@ -8,6 +8,7 @@ import AdmissionFormCover from "@/components/dashboard/admission/AdmissionFormCo
 import AdmissionFormPage1 from "@/components/dashboard/admission/AdmissionFormPage1";
 import AdmissionFormPage2 from "@/components/dashboard/admission/AdmissionFormPage2";
 import AdmissionFormPage3 from "@/components/dashboard/admission/AdmissionFormPage3";
+import OfficeUseSection from '@/components/dashboard/admission/OfficeUseSection';
 
 export default function EditAdmissionPage() {
     const router = useRouter();
@@ -16,7 +17,7 @@ export default function EditAdmissionPage() {
 
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false); // এখানে 'isSaving' রাখা হলো
-    
+
     // ডাটাবেজের অবজেক্টের সাথে মিল রেখে স্টেট ইনিশিয়ালাইজেশন
     const [formData, setFormData] = useState({
         id: "",
@@ -107,13 +108,13 @@ export default function EditAdmissionPage() {
     // নির্দিষ্ট আইডির ডাটা লোড করা
     useEffect(() => {
         if (!id) return;
-        
+
         const fetchStudentData = async () => {
             try {
                 setIsLoading(true);
                 const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/admissions/edit/${id}`);
                 const result = await res.json();
-                
+
                 if (result.success && result.data) {
                     setFormData({
                         ...result.data,
@@ -200,53 +201,58 @@ export default function EditAdmissionPage() {
     }
 
     return (
-       <div className="min-h-screen bg-slate-100 py-4 sm:py-10 px-2 sm:px-4 flex flex-col items-center justify-center font-sans antialiased print:bg-white print:py-0 print:px-0">
+        <div className="min-h-screen bg-slate-100 py-4 sm:py-10 px-2 sm:px-4 flex flex-col items-center justify-center font-sans antialiased print:bg-white print:py-0 print:px-0">
 
-      {/* অ্যাকশন ও ব্যাক বাটন এরিয়া */}
-      <div className="w-full max-w-[8.27in] flex justify-between items-center mb-4 print:hidden px-2">
-        <Link href="/admission" className="text-xs sm:text-sm font-bold text-emerald-800 hover:underline flex items-center gap-1">
-          ⬅ নির্দেশিকাতে ফিরে যান
-        </Link>
-        <button
-          type="button"
-          onClick={() => window.print()}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-lg shadow-sm transition-all"
-        >
-          🖨️ প্রিন্ট / PDF সেভ করুন
-        </button>
-      </div>
+            {/* অ্যাকশন ও ব্যাক বাটন এরিয়া */}
+            <div className="w-full max-w-[8.27in] flex justify-between items-center mb-4 print:hidden px-2">
+                <Link href="/admission" className="text-xs sm:text-sm font-bold text-emerald-800 hover:underline flex items-center gap-1">
+                    ⬅ নির্দেশিকাতে ফিরে যান
+                </Link>
+                <button
+                    type="button"
+                    onClick={() => window.print()}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-lg shadow-sm transition-all"
+                >
+                    🖨️ প্রিন্ট / PDF সেভ করুন
+                </button>
+            </div>
 
-      <form
-        onSubmit={handleFormSubmit}
-        className="w-full md:w-[8.27in] max-w-full bg-white shadow-2xl rounded-sm print:shadow-none print:rounded-none flex flex-col gap-12 print:gap-0"
-      >
-        {/* এখানে handleNestedChange পাঠানো হয়েছে যদি আপনার চাইল্ড উপাদানে নেস্টেড ডাটা হ্যান্ডেল করতে হয় */}
-        <AdmissionFormCover formData={formData} handleChange={handleChange} handleNestedChange={handleNestedChange} />
-        <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} />
+            <form
+                onSubmit={handleFormSubmit}
+                className="w-full md:w-[8.27in] max-w-full bg-white shadow-2xl rounded-sm print:shadow-none print:rounded-none flex flex-col gap-12 print:gap-0"
+            >
+                {/* এখানে handleNestedChange পাঠানো হয়েছে যদি আপনার চাইল্ড উপাদানে নেস্টেড ডাটা হ্যান্ডেল করতে হয় */}
+                <AdmissionFormCover formData={formData} handleChange={handleChange} handleNestedChange={handleNestedChange} />
+                <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} />
 
-        <AdmissionFormPage1 formData={formData} handleChange={handleChange} handleNestedChange={handleNestedChange} />
-        <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} />
+                <AdmissionFormPage1 formData={formData} handleChange={handleChange} handleNestedChange={handleNestedChange} />
+                <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} />
 
-        <AdmissionFormPage2 formData={formData} handleChange={handleChange} handleNestedChange={handleNestedChange} />
-        <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} />
+                <AdmissionFormPage2 formData={formData} handleChange={handleChange} handleNestedChange={handleNestedChange} />
+                <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} />
 
-        <AdmissionFormPage3
-          formData={formData}
-          handleChange={handleChange}
-          handleCheckboxChange={handleCheckboxChange} // এখন এই ফাংশনটি ঠিকভাবে কাজ করবে
-        />
+                <AdmissionFormPage3
+                    formData={formData}
+                    handleChange={handleChange}
+                    handleCheckboxChange={handleCheckboxChange} // এখন এই ফাংশনটি ঠিকভাবে কাজ করবে
+                />
+                <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} />
+                <OfficeUseSection formData={formData}
+                    handleChange={handleChange}
+                    handleCheckboxChange={handleCheckboxChange}
+                />
 
-        {/* সাবমিট বাটন (isSubmitting পরিবর্তন করে isSaving করা হয়েছে) */}
-        <div className="p-4 sm:p-8 bg-gray-50 border-t border-gray-200 text-right print:hidden rounded-b-sm w-full">
-          <button
-            type="submit"
-            disabled={isSaving}
-            className={`bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base sm:text-lg px-8 sm:px-10 py-3 sm:py-3.5 rounded-lg shadow-md transition-all duration-150 active:scale-95 w-full sm:w-auto ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            {isSaving ? "সংরক্ষণ হচ্ছে, অপেক্ষা করুন..." : "ভর্তি ফরমটি ডাটাবেজে সংরক্ষণ করুন"}
-          </button>
+                {/* সাবমিট বাটন (isSubmitting পরিবর্তন করে isSaving করা হয়েছে) */}
+                <div className="p-4 sm:p-8 bg-gray-50 border-t border-gray-200 text-right print:hidden rounded-b-sm w-full">
+                    <button
+                        type="submit"
+                        disabled={isSaving}
+                        className={`bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base sm:text-lg px-8 sm:px-10 py-3 sm:py-3.5 rounded-lg shadow-md transition-all duration-150 active:scale-95 w-full sm:w-auto ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                        {isSaving ? "সংরক্ষণ হচ্ছে, অপেক্ষা করুন..." : "ভর্তি ফরমটি ডাটাবেজে সংরক্ষণ করুন"}
+                    </button>
+                </div>
+            </form>
         </div>
-      </form>
-    </div>
     );
 }

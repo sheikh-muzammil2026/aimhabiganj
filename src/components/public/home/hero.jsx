@@ -59,37 +59,36 @@ export default function HeroSection() {
     };
 
     return (
-        <div className="w-full select-none">
+        <div className="relative w-full select-none">
 
-            {/* ১. নোটিশবোর্ড স্ক্রোলার (Notice Ticker) */}
-            {/* সাদা অংশ রিমুভ করার জন্য mt-20 বাদ দিয়ে mt-0 বা রিলেটিভ রাখা হয়েছে */}
+
             <div className="bg-amber-500 dark:bg-amber-400 text-slate-900 font-medium py-2 px-4 shadow-sm flex items-center overflow-hidden border-b border-amber-600 dark:border-amber-500 transition-colors duration-300 relative z-30">
                 <div className="bg-red-600 text-white px-3 py-1 text-xs font-bold rounded uppercase tracking-wider z-10 whitespace-nowrap mr-3 animate-pulse">
                     জরুরী নোটিশ:
                 </div>
                 <div className="relative w-full overflow-hidden flex items-center">
                     <p className="animate-marquee whitespace-nowrap text-sm md:text-base font-semibold">
-                        📢 আস-সালাম আইডিয়াল মাদ্রাসা (AIM)-এ ২০২৬ শিক্ষাবর্ষে হিফজ ও একাডেমিক বিভাগে ভর্তি চলছে! আসন সংখ্যা সীমিত। বিস্তারিত জানতে ভর্তি মেনু ভিジット করুন। 🌟 আগামী ২৩ আগস্ট থেকে দ্বিতীয় সাময়িক পরীক্ষা শুরু হতে যাচ্ছে। সকল ছাত্রদের যথাসময়ে উপস্থিত থাকার নির্দেশ দেওয়া হলো।
+                        📢 আস-সালাম আইডিয়াল মাদ্রাসা (AIM)-এ ২০২৬ শিক্ষাবর্ষে হিফজ ও একাডেমিক বিভাগে ভর্তি চলছে! আসন সংখ্যা সীমিত। 🌟 আগামী ২৩ আগস্ট থেকে দ্বিতীয় সাময়িক পরীক্ষা শুরু হতে যাচ্ছে। সকল ছাত্রদের যথাসময়ে উপস্থিত থাকার নির্দেশ দেওয়া হলো।
                     </p>
                 </div>
             </div>
 
             {/* ২. ব্যানার ক্যারোসল (Hero Banner Carousel) */}
             <div className="relative h-[450px] md:h-[600px] w-full overflow-hidden bg-slate-900">
-                
+
                 {/* মোবাইল কন্ট্রোল বাটনসমূহ: নোটিসের নিচে এবং ইমেজের টপ রাইট অংশে প্লেস করা হয়েছে */}
                 <div className="absolute top-4 right-4 z-40 flex lg:hidden items-center gap-2 bg-slate-950/30 backdrop-blur-md p-1.5 rounded-full border border-white/10">
                     {/* থিম টগল বাটন */}
-                    <button 
-                        onClick={handleMobileThemeClick} 
+                    <button
+                        onClick={handleMobileThemeClick}
                         className="p-2 text-amber-300 hover:bg-white/10 rounded-full transition-colors focus:outline-none"
                     >
                         <span className="text-base">{isDark ? "☀️" : "🌙"}</span>
                     </button>
-                    
+
                     {/* প্রফেশনাল অ্যাকাউন্ট/ইউজার আইকন (হ্যামবার্গারের পরিবর্তে) */}
-                    <button 
-                        onClick={handleMobileMenuClick} 
+                    <button
+                        onClick={handleMobileMenuClick}
                         className="p-2 rounded-full text-emerald-300 hover:bg-white/10 hover:text-white transition-colors focus:outline-none"
                         aria-label="User Account Menu"
                     >
