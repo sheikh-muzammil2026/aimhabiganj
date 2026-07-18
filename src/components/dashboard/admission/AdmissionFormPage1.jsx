@@ -559,6 +559,91 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
               </tbody>
             </table>
           </div>
+          {/* নতুন ফিল্ডসমূহ: ছবি অনুযায়ী পূর্বে অধ্যয়নরত প্রতিষ্ঠানের তথ্যাদি */}
+<div className="space-y-4 print:space-y-2.5 pt-2 border-t border-gray-300">
+  {/* ১. পূর্বে অধ্যয়নরত প্রতিষ্ঠানের নাম */}
+  <div className="flex flex-col md:flex-row md:items-end gap-2 md:gap-3 print:flex-row print:items-end print:gap-2">
+    <span className="font-bold text-gray-700 whitespace-nowrap text-sm print:text-xs">পূর্বে অধ্যয়নরত প্রতিষ্ঠানের নাম :</span>
+    <input
+      type="text"
+      name="previousInstitutionName"
+      value={formData.previousInstitutionName || ""}
+      onChange={handleChange}
+      className="flex-1 border-b border-dotted border-gray-400 pb-0.5 focus:outline-none focus:border-orange-500 bg-transparent text-sm print:text-xs"
+    />
+  </div>
+
+  {/* ২. ঠিকানা এবং ৩. প্রিন্সিপালের মোবাইল */}
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end print:grid-cols-3 print:gap-2">
+    <div className="flex items-end gap-2 md:col-span-2 w-full">
+      <span className="font-bold text-gray-700 whitespace-nowrap text-sm print:text-xs">ঠিকানা :</span>
+      <input
+        type="text"
+        name="previousInstitutionAddress"
+        value={formData.previousInstitutionAddress || ""}
+        onChange={handleChange}
+        className="flex-1 border-b border-dotted border-gray-400 pb-0.5 focus:outline-none focus:border-orange-500 bg-transparent text-sm print:text-xs"
+      />
+    </div>
+    <div className="flex items-end gap-2 w-full">
+      <span className="font-bold text-gray-700 whitespace-nowrap text-sm print:text-xs">প্রিন্সিপালের মোবাইল :</span>
+      <input
+        type="text"
+        name="previousInstitutionPrincipalMobile"
+        value={formData.previousInstitutionPrincipalMobile || ""}
+        onChange={handleChange}
+        placeholder="০১৭XXXXXXXX"
+        className="flex-1 border-b border-dotted border-gray-400 pb-0.5 focus:outline-none focus:border-orange-500 bg-transparent font-mono text-sm print:text-xs print:placeholder-transparent"
+      />
+    </div>
+  </div>
+
+  {/* ৪. পূর্ব প্রতিষ্ঠান ছাড়ার কারণ */}
+  <div className="flex flex-col md:flex-row md:items-end gap-2 md:gap-3 print:flex-row print:items-end print:gap-2">
+    <span className="font-bold text-gray-700 whitespace-nowrap text-sm print:text-xs">পূর্ব প্রতিষ্ঠান ছাড়ার কারণ :</span>
+    <input
+      type="text"
+      name="reasonForLeaving"
+      value={formData.reasonForLeaving || ""}
+      onChange={handleChange}
+      className="flex-1 border-b border-dotted border-gray-400 pb-0.5 focus:outline-none focus:border-orange-500 bg-transparent text-sm print:text-xs"
+    />
+  </div>
+
+  {/* ৫. অধ্যয়নকৃত শ্রেণি ও ছাড়পত্র নং এবং６. তারিখ */}
+  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end print:grid-cols-3 print:gap-2">
+    <div className="flex items-end gap-2 w-full">
+      <span className="font-bold text-gray-700 whitespace-nowrap text-sm print:text-xs">অধ্যয়নকৃত শ্রেণি :</span>
+      <input
+        type="text"
+        name="previousClass"
+        value={formData.previousClass || ""}
+        onChange={handleChange}
+        className="flex-1 border-b border-dotted border-gray-400 pb-0.5 focus:outline-none focus:border-orange-500 bg-transparent text-sm print:text-xs"
+      />
+    </div>
+    <div className="flex items-end gap-2 w-full">
+      <span className="font-bold text-gray-700 whitespace-nowrap text-sm print:text-xs">ছাড়পত্র নং :</span>
+      <input
+        type="text"
+        name="transferCertificateNo"
+        value={formData.transferCertificateNo || ""}
+        onChange={handleChange}
+        className="flex-1 border-b border-dotted border-gray-400 pb-0.5 focus:outline-none focus:border-orange-500 bg-transparent text-sm print:text-xs"
+      />
+    </div>
+    <div className="flex items-center gap-2 w-full">
+      <span className="font-bold text-gray-700 whitespace-nowrap text-sm print:text-xs">তারিখ :</span>
+      <input
+        type="date"
+        name="leavingDate"
+        value={formData.leavingDate || ""}
+        onChange={handleChange}
+        className="border border-gray-400 rounded px-2 py-0.5 text-sm focus:outline-none focus:border-orange-500 text-gray-700 cursor-pointer w-full print:border-none print:border-b print:border-dotted print:px-0 print:text-xs"
+      />
+    </div>
+  </div>
+</div>
         </div>
 
       </div>
