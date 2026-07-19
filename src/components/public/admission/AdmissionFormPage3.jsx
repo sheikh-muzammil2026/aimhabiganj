@@ -49,7 +49,7 @@ export default function AdmissionFormPage3({ formData, handleChange }) {
           },
         });
       } else {
-        alert("فাইল আপলোড ব্যর্থ হয়েছে। পুনরায় চেষ্টা করুন।");
+        alert("ফাইল আপলোড ব্যর্থ হয়েছে। পুনরায় চেষ্টা করুন।");
       }
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -63,7 +63,7 @@ export default function AdmissionFormPage3({ formData, handleChange }) {
   const getFileStatus = (fieldName) => {
     if (uploadingField === fieldName) return "আপলোড হচ্ছে...";
     if (formData?.attachments?.[fieldName]) {
-      return "✓ আপলোড সম্পন্ন";
+      return "/ আপলোড সম্পন্ন";
     }
     return "ফাইল নির্বাচন করুন (ক্লিক করুন)";
   };
@@ -84,8 +84,8 @@ export default function AdmissionFormPage3({ formData, handleChange }) {
             আমি
             <input
               type="text"
-              name="studentCommitmentName"
-              value={formData.studenttNameBangla || ""}
+              name="studentNameBangla"
+              value={formData.studentNameBangla || ""}
               onChange={handleChange}
               placeholder="(শিক্ষার্থীর নাম লিখুন)"
               className="w-full sm:w-60 text-center font-bold border-b border-gray-400 focus:outline-none bg-transparent px-1 text-sm mt-1 sm:mt-0 text-emerald-850"
@@ -247,9 +247,10 @@ export default function AdmissionFormPage3({ formData, handleChange }) {
               <a href={formData.attachments.academicTranscript} target="_blank" rel="noreferrer" className="text-[10px] text-blue-500 underline mt-0.5">আপলোডকৃত ফাইল দেখুন</a>
             )}
           </div>
+         
 
           {/* ৫. নতুন ডাইনামিক ফিল্ড ১: ৭ম বা ৮ম শ্রেণীতে ভর্তি হতে চাইলে রেজিস্ট্রেশন কার্ড আপলোড */}
-          {(formData.admissionClass === "সপ্তম" || formData.admissionClass === "অষ্টম" || formData.admissionClass === "7" || formData.admissionClass === "8") && (
+          {(formData.divisionAcademy.class ===  "৭ম শ্রেণি" || formData.divisionAcademy.class === "৮ম শ্রেণি" ) && (
             <div className="flex flex-col gap-1.5 bg-amber-50/60 p-2.5 rounded border border-amber-300 md:col-span-2 animate-fade-in">
               <span className="font-bold text-amber-900">৫. পূর্ববর্তী বোর্ডের প্রাথমিক/জেএসডি রেজিস্ট্রেশন কার্ডের স্পষ্ট কপি (৭ম/৮ম শ্রেণীতে ভর্তির জন্য):</span>
               <div className="relative border border-dashed border-amber-500 rounded bg-white h-10 flex items-center justify-center cursor-pointer hover:bg-amber-100/50 transition-colors overflow-hidden">
@@ -270,7 +271,7 @@ export default function AdmissionFormPage3({ formData, handleChange }) {
           )}
 
           {/* ৬. নতুন ডাইনামিক ফিল্ড ২: পিতা মৃত হলে ইয়াতীম সনদপত্র আপলোড */}
-          {(formData.fatherStatus === "মৃত" || formData.fatherStatus === "مৃত") && (
+          {(formData.fatherStatus === "মৃত" || formData.fatherStatus === "মৃত") && (
             <div className="flex flex-col gap-1.5 bg-rose-50/60 p-2.5 rounded border border-rose-300 md:col-span-2 animate-fade-in">
               <span className="font-bold text-rose-900">৬. স্থানীয় চেয়ারম্যান/উপযুক্ত কর্তৃপক্ষ কর্তৃক প্রত্যয়িত অফিসিয়াল ইয়াতীম সনদপত্র:</span>
               <div className="relative border border-dashed border-rose-500 rounded bg-white h-10 flex items-center justify-center cursor-pointer hover:bg-rose-100/50 transition-colors overflow-hidden">

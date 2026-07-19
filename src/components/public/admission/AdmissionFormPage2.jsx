@@ -217,7 +217,7 @@ export default function AdmissionFormPage2({ formData, handleChange }) {
             <div className="flex gap-4 pb-1">
               <span className="font-bold text-gray-700">পিতা জীবিত নাকি মৃত?:</span>
               <label className="flex items-center gap-1 cursor-pointer"><input type="radio" name="fatherStatus" value="জীবিত" checked={formData.fatherStatus === "জীবিত"} onChange={handleChange} /> জীবিত</label>
-              <label className="flex items-center gap-1 cursor-pointer"><input type="radio" name="fatherStatus" value="مৃত" checked={formData.fatherStatus === "مৃত" || formData.fatherStatus === "মৃত"} onChange={handleChange} /> মৃত</label>
+              <label className="flex items-center gap-1 cursor-pointer"><input type="radio" name="fatherStatus" value="মৃত" checked={formData.fatherStatus === "মৃত" || formData.fatherStatus === "মৃত"} onChange={handleChange} /> মৃত</label>
             </div>
 
             {/* জীবিত থাকলে এই ফিল্ডগুলো শো হবে */}
