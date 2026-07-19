@@ -32,7 +32,7 @@ export default function AIChatbot() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: [...messages, userMsg] }),
       });
-      
+
       const data = await response.json();
       if (data.content) {
         setMessages((prev) => [...prev, { role: "assistant", content: data.content }]);
@@ -50,7 +50,7 @@ export default function AIChatbot() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Open AI Chatbot"
-        className="fixed bottom-20 left-6 z-50 bg-emerald-700 hover:bg-emerald-800 text-white p-3.5 rounded-full shadow-[0_4px_20px_rgba(4,120,87,0.3)] hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center group"
+        className="fixed bottom-20 left-6 z-50 bg-emerald-700 hover:bg-emerald-800 text-white p-3.5 rounded-full shadow-[0_4px_20px_rgba(4,120,87,0.3)] hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center group  print:hidden"
       >
         {isOpen ? <X className="w-6 h-6 animate-spin-slow" /> : <MessageSquare className="w-6 h-6 group-hover:rotate-12 transition-transform" />}
         {!isOpen && (
@@ -63,8 +63,8 @@ export default function AIChatbot() {
       {/* ২. চ্যাট উইন্ডো ইন্টারফেস */}
       {isOpen && (
         /* চ্যাট উইন্ডোটিও এখন বাম পাশে (left-4 sm:left-6) পপ-আপ হবে */
-        <div className="fixed bottom-36 left-4 right-4 sm:right-auto sm:w-96 z-50 bg-gradient-to-b from-white to-[#f7fdfa] rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.12)] border border-emerald-600/10 overflow-hidden flex flex-col h-[450px] sm:h-[500px] animate-slideUp">
-          
+        <div className="fixed bottom-36 left-4 right-4 sm:right-auto sm:w-96 z-50 bg-gradient-to-b from-white to-[#f7fdfa] rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.12)] border border-emerald-600/10 overflow-hidden flex flex-col h-[450px] sm:h-[500px] animate-slideUp  print:hidden">
+
           {/* চ্যাট হেডার (ইসলামিক থিম) */}
           <div className="bg-gradient-to-r from-emerald-800 to-emerald-700 text-white p-4 flex justify-between items-center shadow-md">
             <div className="flex items-center gap-2.5">
@@ -88,11 +88,10 @@ export default function AIChatbot() {
             {messages.map((msg, index) => (
               <div key={index} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fadeIn`}>
                 <div
-                  className={`max-w-[85%] rounded-2xl p-3 text-xs leading-relaxed shadow-xs ${
-                    msg.role === "user"
-                      ? "bg-emerald-700 text-white rounded-bl-none" // বাম পাশে চ্যাট উইন্ডো থাকায় ইউজারের মেসেজ ডানে চ্যাপ্টা হবে
-                      : "bg-white text-gray-800 border border-emerald-600/5 rounded-br-none" // এআইয়ের মেসেজ বামে চ্যাপ্টা হবে
-                  }`}
+                  className={`max-w-[85%] rounded-2xl p-3 text-xs leading-relaxed shadow-xs ${msg.role === "user"
+                    ? "bg-emerald-700 text-white rounded-bl-none" // বাম পাশে চ্যাট উইন্ডো থাকায় ইউজারের মেসেজ ডানে চ্যাপ্টা হবে
+                    : "bg-white text-gray-800 border border-emerald-600/5 rounded-br-none" // এআইয়ের মেসেজ বামে চ্যাপ্টা হবে
+                    }`}
                 >
                   {msg.content}
                 </div>

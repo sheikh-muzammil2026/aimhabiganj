@@ -2,21 +2,21 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  Home, 
-  FileText, 
-  GraduationCap, 
-  BookOpen, 
-  Menu, 
-  X, 
-  ChevronRight, 
-  Info, 
-  School, 
-  Hotel, 
-  MonitorPlay, 
-  Image, 
-  PhoneCall,
-  ArrowRight
+import {
+    Home,
+    FileText,
+    GraduationCap,
+    BookOpen,
+    Menu,
+    X,
+    ChevronRight,
+    Info,
+    School,
+    Hotel,
+    MonitorPlay,
+    Image,
+    PhoneCall,
+    ArrowRight
 } from "lucide-react";
 
 export default function BottomNavbar() {
@@ -67,7 +67,7 @@ export default function BottomNavbar() {
         },
         {
             name: "ভর্তি",
-            isAdmission: true, 
+            isAdmission: true,
             icon: <GraduationCap className="w-4 h-4" />,
             dropdown: [
                 { name: "ভর্তির সময়", href: "/admission#timeline" },
@@ -131,19 +131,18 @@ export default function BottomNavbar() {
     return (
         <>
             {/* ১. মূল বটম নেভিগেশন বার (শুধু মোবাইল ভিউ: md:hidden) */}
-            <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-b from-[#ffffff] to-[#f4fbf7] border-t-2 border-emerald-600/30 shadow-[0_-8px_30px_rgb(6,95,70,0.08)] rounded-t-2xl md:hidden pb-safe">
+            <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-b from-[#ffffff] to-[#f4fbf7] border-t-2 border-emerald-600/30 shadow-[0_-8px_30px_rgb(6,95,70,0.08)] rounded-t-2xl md:hidden pb-safe  print:hidden">
                 <div className="flex justify-around items-center h-16 px-2">
                     {primaryItems.map((item, idx) => {
                         const isActive = item.isLink ? pathname === item.href : isAcademicsOpen;
-                        
+
                         if (item.isLink) {
                             return (
-                                <Link 
-                                    key={idx} 
-                                    href={item.href} 
-                                    className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative group ${
-                                        isActive ? "text-emerald-700 font-bold" : "text-gray-500 hover:text-emerald-600"
-                                    }`}
+                                <Link
+                                    key={idx}
+                                    href={item.href}
+                                    className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative group ${isActive ? "text-emerald-700 font-bold" : "text-gray-500 hover:text-emerald-600"
+                                        }`}
                                 >
                                     {isActive && (
                                         <span className="absolute top-0 w-8 h-1 bg-amber-500 rounded-full shadow-[0_2px_10px_rgba(245,158,11,0.5)]" />
@@ -159,15 +158,14 @@ export default function BottomNavbar() {
                         } else {
                             // "শিক্ষা কার্যক্রম" বাটন ট্রিগার (সরাসরি পেজে না গিয়ে মেনু খুলবে)
                             return (
-                                <button 
-                                    key={idx} 
+                                <button
+                                    key={idx}
                                     onClick={() => {
                                         setIsMenuOpen(false); // অন্য ড্রয়ারটি বন্ধ করা
                                         setIsAcademicsOpen(!isAcademicsOpen);
                                     }}
-                                    className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative group ${
-                                        isActive ? "text-emerald-700 font-bold" : "text-gray-500 hover:text-emerald-600"
-                                    }`}
+                                    className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative group ${isActive ? "text-emerald-700 font-bold" : "text-gray-500 hover:text-emerald-600"
+                                        }`}
                                 >
                                     {isActive && (
                                         <span className="absolute top-0 w-8 h-1 bg-amber-500 rounded-full shadow-[0_2px_10px_rgba(245,158,11,0.5)]" />
@@ -189,9 +187,8 @@ export default function BottomNavbar() {
                             setIsAcademicsOpen(false); // শিক্ষা কার্যক্রম ড্রয়ার বন্ধ করা
                             setIsMenuOpen(!isMenuOpen);
                         }}
-                        className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative group ${
-                            isMenuOpen ? "text-amber-600 font-bold" : "text-gray-500 hover:text-emerald-600"
-                        }`}
+                        className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative group ${isMenuOpen ? "text-amber-600 font-bold" : "text-gray-500 hover:text-emerald-600"
+                            }`}
                     >
                         {isMenuOpen && (
                             <span className="absolute top-0 w-8 h-1 bg-amber-500 rounded-full" />
@@ -207,20 +204,20 @@ export default function BottomNavbar() {
             {/* ২.১ "শিক্ষা কার্যক্রম" ডেডিকেটেড বটম শিট ড্রয়ার */}
             {isAcademicsOpen && (
                 <div className="fixed inset-0 z-40 bg-emerald-950/40 backdrop-blur-xs md:hidden transition-all duration-300" onClick={() => setIsAcademicsOpen(false)}>
-                    <div 
+                    <div
                         className="fixed bottom-16 left-0 right-0 max-h-[60vh] bg-[#fafdfb] rounded-t-3xl overflow-y-auto p-4 shadow-[0_-15px_40px_rgba(6,95,70,0.15)] border-t border-emerald-600/10"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="w-16 h-1.5 bg-emerald-200/60 rounded-full mx-auto mb-5" />
-                        
+
                         <div className="flex items-center justify-between mb-4 border-b border-emerald-100 pb-3 px-1">
                             <div className="flex items-center gap-2">
                                 <BookOpen className="w-5 h-5 text-emerald-700" />
                                 <h3 className="font-bold text-emerald-950 text-base font-serif">শিক্ষা কার্যক্রম মেনু</h3>
                             </div>
                             {/* শিক্ষা কার্যক্রমের মূল পেজে যাওয়ার একটি ডিরেক্ট বাটন (যদি কেউ পুরো পেজ দেখতে চায়) */}
-                            <Link 
-                                href="/academics" 
+                            <Link
+                                href="/academics"
                                 onClick={() => setIsAcademicsOpen(false)}
                                 className="text-xs text-emerald-700 font-semibold flex items-center gap-1 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100"
                             >
@@ -253,17 +250,17 @@ export default function BottomNavbar() {
             {/* ২.২ "অন্যান্য" বটম শিট ড্রয়ার (বাকি সব মেনুর জন্য) */}
             {isMenuOpen && (
                 <div className="fixed inset-0 z-40 bg-emerald-950/40 backdrop-blur-xs md:hidden transition-all duration-300" onClick={() => setIsMenuOpen(false)}>
-                    <div 
+                    <div
                         className="fixed bottom-16 left-0 right-0 max-h-[75vh] bg-[#fafdfb] rounded-t-3xl overflow-y-auto p-4 shadow-[0_-15px_40px_rgba(6,95,70,0.15)] border-t border-emerald-600/10"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="w-16 h-1.5 bg-emerald-200/60 rounded-full mx-auto mb-5" />
-                        
+
                         <div className="flex items-center justify-center gap-2 mb-4 border-b border-emerald-100 pb-3">
                             <School className="w-5 h-5 text-emerald-700" />
                             <h3 className="text-center font-bold text-emerald-950 text-base font-serif">আস-সালাম মাদরাসা মেনু</h3>
                         </div>
-                        
+
                         <div className="space-y-2.5 pb-6">
                             {menuItems.map((item, idx) => {
                                 const hasDropdown = !!item.dropdown;
@@ -275,9 +272,8 @@ export default function BottomNavbar() {
                                             <div>
                                                 <button
                                                     onClick={() => toggleDropdown(idx)}
-                                                    className={`w-full flex justify-between items-center p-3.5 text-left font-medium transition-colors ${
-                                                        isDropdownOpen ? "bg-emerald-50 text-emerald-800" : "text-gray-700 hover:bg-emerald-50/40"
-                                                    }`}
+                                                    className={`w-full flex justify-between items-center p-3.5 text-left font-medium transition-colors ${isDropdownOpen ? "bg-emerald-50 text-emerald-800" : "text-gray-700 hover:bg-emerald-50/40"
+                                                        }`}
                                                 >
                                                     <div className="flex items-center gap-3">
                                                         <div className={`p-1.5 rounded-lg ${isDropdownOpen ? "bg-emerald-600 text-white" : "bg-emerald-50 text-emerald-700"}`}>
@@ -287,7 +283,7 @@ export default function BottomNavbar() {
                                                     </div>
                                                     <ChevronRight className={`w-4 h-4 text-emerald-600/60 transition-transform duration-300 ${isDropdownOpen ? "rotate-90 text-amber-500" : ""}`} />
                                                 </button>
-                                                
+
                                                 {/* সাব-মেনু আইটেমসমূহ */}
                                                 {isDropdownOpen && (
                                                     <div className="bg-[#f7fdfa] border-t border-emerald-100 divide-y divide-emerald-100/40">
