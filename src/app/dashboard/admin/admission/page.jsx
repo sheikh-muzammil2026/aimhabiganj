@@ -236,14 +236,15 @@ export default function AdminAdmissionDashboard() {
                                     <th className="p-4 text-right">অ্যাকশন</th>
                                 </tr>
                             </thead>
+
                             <tbody className="divide-y divide-gray-100 font-medium block md:table-row-group">
                                 {admissionRequests.map((req) => {
-                                    const reqId = req._id?.$oid || req._id;
+                                    const reqId = req.studentId || req._id;
                                     // ডেটাবেজ ফরম্যাট অনুযায়ী কোন কোন বিভাগগুলো active তা বের করার লজিক
                                     const activeDivisions = [];
                                     if (req.divisionPreHifz?.active) activeDivisions.push("Pre-Hifz");
                                     if (req.divisionHifz?.active) activeDivisions.push("Hifz");
-                                    if (req.divisionAcademic?.active) activeDivisions.push("Academic");
+                                    if (req.divisionAcademy?.active) activeDivisions.push("Academic");
                                     if (req.divisionArabicCourse?.active) activeDivisions.push("Arabic Course");
 
                                     return (
