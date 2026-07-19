@@ -53,21 +53,12 @@ export default function OfficeUseSection({ formData, handleChange }) {
 
                     </div>
                     <span className="font-bold text-gray-700 whitespace-nowrap text-xs sm:text-sm">শ্রেণিতে ভর্তি করা যেতে পারে</span>
-                    {/* <div className="flex flex-col lg:flex-row lg:items-end gap-1">
-                        <span className="font-bold text-gray-700 whitespace-nowrap text-xs sm:text-sm">:</span>
-                        <input
-                            type="text"
-                            name="recommendedClass"
-                            value={getValue("recommendedClass")}
-                            onChange={handleNestedChange}
-                            className="w-full lg:flex-1 border-b border-gray-400 text-left lg:text-center focus:outline-none bg-transparent pb-0.5"
-                        />
-                    </div> */}
+
                 </div>
 
                 {/* লাইন ৩: পরীক্ষকদের আইডি ও স্বাক্ষর সেকশন */}
                 <div className="border border-dashed border-gray-300 p-3 rounded-md bg-white/50 space-y-3">
-                    <span className="font-bold text-gray-600 text-xs block">পরীক্ষকবৃন্দের আইডি নং ও স্বাক্ষর:</span>
+                    <span className="font-bold text-gray-600 text-xs block">পরীক্ষকবৃন্দের আইডি নং :</span>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div className="flex flex-col gap-1.5">
                             <span className="text-xs text-gray-500">১ম পরীক্ষকের আইডি:</span>

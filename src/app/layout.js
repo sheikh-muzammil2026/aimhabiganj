@@ -39,7 +39,7 @@ export default function RootLayout({ children }) {
 }
 
 
-// MONGODB_URI=mongodb+srv://aimhabiganj:UZuWSyT3e3QYNal@cluster0.w9cbrwo.mongodb.net/?appName=Cluster0
+// MONGODB_URI=mongodb+srv://aimhabiganj:r9eTrIxDeV8lsUKI@cluster0.w9cbrwo.mongodb.net/?appName=Cluster0
 // # GEMINI_API_KEY=
 // BETTER_AUTH_URL=http://localhost:3000
 // BETTER_AUTH_SECRET=E1NnJYqNWZq0OIw49znddHpNbp4U2IAC

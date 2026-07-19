@@ -221,19 +221,39 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
       <div className="w-full min-h-[11.69in] bg-white p-4 md:p-10 flex flex-col justify-between box-border text-gray-800 relative font-bengali overflow-x-hidden print:min-h-0 print:h-full print:p-0 print:overflow-hidden">
 
 
-        {/* ছবি আপলোড */}
-        <div className="w-32 h-40 border-2 border-dashed border-gray-400 bg-gray-50 flex flex-col items-center justify-center p-2 text-center rounded relative group cursor-pointer overflow-hidden print:w-24 print:h-28 print:border print:border-solid">
-          {formData.studentImage ? (
-            <img src={formData.studentImage} alt="Student" className="w-full h-full object-cover" />
-          ) : (
-            <span className="text-xs font-bold text-gray-500 print:text-[10px]">{uploading ? "আপলোড হচ্ছে..." : "শিক্ষার্থীর ছবি"}</span>
-          )}
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            className="absolute inset-0 opacity-0 cursor-pointer print:hidden"
-          />
+        {/* প্রফেশনাল হেডার ও ছবি আপলোড সেকশন */}
+        <div className="w-full flex flex-row justify-between items-start gap-4 mb-6 pb-4 border-b-2 border-gray-800 print:mb-4 print:pb-2">
+
+          {/* বামপাশে: ভর্তি ফরমের প্রফেশনাল টাইটেল/হেডিং */}
+          <div className="flex-1 flex flex-col justify-center">
+            <h1 className="text-2xl md:text-3xl font-extrabold text-gray-950 tracking-wide font-bengali print:text-xl">
+              ভর্তি ফরম
+            </h1>
+            <p className="text-sm md:text-base text-gray-600 font-semibold mt-1 print:text-xs print:text-gray-700">
+              দয়া করে নিচের তথ্যগুলো সঠিকভাবে দেখে পূরণ করুন।
+            </p>
+            <div className="w-20 h-1 bg-orange-500 mt-2 rounded print:h-0.5 print:bg-black"></div>
+          </div>
+
+          {/* ডানপাশে: ছবি আপলোড ফিল্ড */}
+          <div className="flex-shrink-0">
+            <div className="w-32 h-40 border-2 border-dashed border-gray-400 bg-gray-50 flex flex-col items-center justify-center p-2 text-center rounded relative group cursor-pointer overflow-hidden print:w-24 print:h-28 print:border print:border-solid shadow-sm">
+              {formData.studentImage ? (
+                <img src={formData.studentImage} alt="Student" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-xs font-bold text-gray-500 print:text-[10px]">
+                  {uploading ? "আপলোড হচ্ছে..." : "শিক্ষার্থীর ছবি"}
+                </span>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="absolute inset-0 opacity-0 cursor-pointer print:hidden"
+              />
+            </div>
+
+          </div>
         </div>
 
 

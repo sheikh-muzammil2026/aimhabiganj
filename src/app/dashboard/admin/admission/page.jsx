@@ -114,32 +114,32 @@ export default function AdminAdmissionDashboard() {
     };
 
     // সম্পূর্ণ ভর্তি আবেদন তথ্য আপডেট হ্যান্ডলার (PUT)
-    const handleFullRequestUpdate = async (e) => {
-        e.preventDefault();
-        const id = selectedRequest._id?.$oid || selectedRequest._id;
-        try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/admissions/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(selectedRequest)
-            });
-            const data = await response.json();
+    // const handleFullRequestUpdate = async (e) => {
+    //     e.preventDefault();
+    //     const id = selectedRequest._id?.$oid || selectedRequest._id;
+    //     try {
+    //         const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/admissions/${id}`, {
+    //             method: 'PUT',
+    //             headers: { 'Content-Type': 'application/json' },
+    //             body: JSON.stringify(selectedRequest)
+    //         });
+    //         const data = await response.json();
 
-            if (data.success) {
-                toast.success("🎉 শিক্ষার্থীর তথ্য সফলভাবে আপডেট করা হয়েছে!");
-                setAdmissionRequests(prev =>
-                    prev.map(req => (req._id === id ? selectedRequest : req))
-                );
-                setActionMessage("শিক্ষার্থীর প্রোফাইল তথ্য আপডেট করা হয়েছে।");
-                setTimeout(() => setActionMessage(''), 4000);
-            } else {
-                toast.error(data.message || "আপডেট করা সম্ভব হয়নি।");
-            }
-        } catch (error) {
-            console.error("আপডেট করতে সমস্যা:", error);
-            toast.error("সার্ভারে সমস্যা হওয়ার কারণে তথ্য আপডেট করা যায়নি।");
-        }
-    };
+    //         if (data.success) {
+    //             toast.success("🎉 শিক্ষার্থীর তথ্য সফলভাবে আপডেট করা হয়েছে!");
+    //             setAdmissionRequests(prev =>
+    //                 prev.map(req => (req._id === id ? selectedRequest : req))
+    //             );
+    //             setActionMessage("শিক্ষার্থীর প্রোফাইল তথ্য আপডেট করা হয়েছে।");
+    //             setTimeout(() => setActionMessage(''), 4000);
+    //         } else {
+    //             toast.error(data.message || "আপডেট করা সম্ভব হয়নি।");
+    //         }
+    //     } catch (error) {
+    //         console.error("আপডেট করতে সমস্যা:", error);
+    //         toast.error("সার্ভারে সমস্যা হওয়ার কারণে তথ্য আপডেট করা যায়নি।");
+    //     }
+    // };
 
     // আবেদনপত্র চিরতরে মুছে ফেলার হ্যান্ডলার (DELETE API)
     const deleteAdmissionRequest = async (id) => {
@@ -239,7 +239,7 @@ export default function AdminAdmissionDashboard() {
 
                             <tbody className="divide-y divide-gray-100 font-medium block md:table-row-group">
                                 {admissionRequests.map((req) => {
-                                    const reqId = req.studentId || req._id;
+                                    const reqId = req.officeUse.studentId || req._id;
                                     // ডেটাবেজ ফরম্যাট অনুযায়ী কোন কোন বিভাগগুলো active তা বের করার লজিক
                                     const activeDivisions = [];
                                     if (req.divisionPreHifz?.active) activeDivisions.push("Pre-Hifz");
@@ -255,7 +255,7 @@ export default function AdminAdmissionDashboard() {
                                             {/* মঙ্গোডিবি আইডির পরিবর্তে ডেটাবেজের শর্ট আইডি (যেমন: 02420) প্রদর্শন */}
                                             <td className="p-0 md:p-4 font-mono font-bold text-gray-900 flex justify-between md:table-cell items-center before:content-['আইডি:'] before:md:hidden before:font-sans before:text-gray-400 before:text-[11px]">
                                                 <span className="bg-emerald-50 text-emerald-800 md:bg-transparent px-2 py-0.5 md:p-0 rounded-sm">
-                                                    {req.id || 'N/A'}
+                                                    {req.officeUse.studentId || 'N/A'}
                                                 </span>
                                             </td>
 

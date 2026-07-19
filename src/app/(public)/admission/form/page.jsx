@@ -3,16 +3,15 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { toast } from "react-toastify";
-import AdmissionFormPage1 from "@/components/public/admission/AdmissionFormPage1";
-import AdmissionFormPage2 from "@/components/public/admission/AdmissionFormPage2";
-import AdmissionFormPage3 from "@/components/public/admission/AdmissionFormPage3";
-import OfficeUseSection from "@/components/public/admission/OfficeUseSection";
-import AdmissionFormCover from "@/components/dashboard/admission/AdmissionFormCover";
+import AdmissionFormPage1 from "@/components/admission/AdmissionFormPage1";
+import AdmissionFormPage2 from "@/components/admission/AdmissionFormPage2";
+import AdmissionFormPage3 from "@/components/admission/AdmissionFormPage3";
 
 export default function AdmissionFormPage() {
   const [formData, setFormData] = useState({
     sessionYear: "২০২৬-২০২৭",
     status: "",
+    studentId: "",
     // 1st page
     studentImage: "",
     studentNameBangla: "",
@@ -213,8 +212,7 @@ export default function AdmissionFormPage() {
         className="w-full md:w-[8.27in] max-w-full bg-white shadow-2xl rounded-sm print:shadow-none print:rounded-none flex flex-col gap-12 print:gap-0"
       >
 
-        <AdmissionFormCover formData={formData} handleChange={handleChange} />
-        <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} />
+
         <AdmissionFormPage1 formData={formData} handleChange={handleChange} />
         <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} />
 
@@ -227,11 +225,7 @@ export default function AdmissionFormPage() {
           handleCheckboxChange={handleCheckboxChange}
         />
         <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} />
-        <OfficeUseSection
-          formData={formData}
-          handleChange={handleChange}
-          handleCheckboxChange={handleCheckboxChange}
-        />
+
 
         {/* সাবমিট বাটন */}
         <div className="p-4 sm:p-8 bg-gray-50 border-t border-gray-200 text-right print:hidden rounded-b-sm w-full">
