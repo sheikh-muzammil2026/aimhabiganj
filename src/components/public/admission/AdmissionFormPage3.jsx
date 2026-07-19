@@ -85,7 +85,7 @@ export default function AdmissionFormPage3({ formData, handleChange }) {
             <input
               type="text"
               name="studentCommitmentName"
-              value={formData.studentCommitmentName || ""}
+              value={formData.studenttNameBangla || ""}
               onChange={handleChange}
               placeholder="(শিক্ষার্থীর নাম লিখুন)"
               className="w-full sm:w-60 text-center font-bold border-b border-gray-400 focus:outline-none bg-transparent px-1 text-sm mt-1 sm:mt-0 text-emerald-850"
@@ -150,9 +150,17 @@ export default function AdmissionFormPage3({ formData, handleChange }) {
               className="border border-gray-400 rounded px-1.5 py-0.5 text-xs focus:outline-none bg-transparent cursor-pointer"
             />
           </div>
-          <div className="text-center w-36 sm:w-52 border-t border-gray-500 pt-1 text-xs sm:text-sm font-bold text-gray-700">
-            শিক্ষার্থীর স্বাক্ষর
-          </div>
+          <div className="flex flex-col items-center w-36 sm:w-52">
+    {/* শিক্ষার্থীর নাম (এখানে ফর্ম থেকে নাম দেখাবে) */}
+    <div className="text-xs sm:text-sm text-gray-800 mb-1 font-medium min-h-[20px]">
+      {formData.studentNameBangla || ""}
+    </div>
+    
+    {/* স্বাক্ষর লাইন */}
+    <div className="w-full text-center border-t border-gray-500 pt-1 text-xs sm:text-sm font-bold text-gray-700">
+      শিক্ষার্থীর স্বাক্ষর
+    </div>
+  </div>
         </div>
       </div>
 
