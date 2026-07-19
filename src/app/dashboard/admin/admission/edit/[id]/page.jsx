@@ -8,7 +8,7 @@ import AdmissionFormCover from "@/components/dashboard/admission/AdmissionFormCo
 import AdmissionFormPage1 from "@/components/dashboard/admission/AdmissionFormPage1";
 import AdmissionFormPage2 from "@/components/dashboard/admission/AdmissionFormPage2";
 import AdmissionFormPage3 from "@/components/dashboard/admission/AdmissionFormPage3";
-import OfficeUseSection from '@/components/dashboard/admission/OfficeUseSection';
+import OfficeUseSection from '@/components/public/admission/OfficeUseSection';
 
 export default function EditAdmissionPage() {
     const router = useRouter();

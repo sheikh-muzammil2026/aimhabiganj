@@ -37,3 +37,11 @@ export default function RootLayout({ children }) {
         </html>
     );
 }
+
+
+// MONGODB_URI=mongodb+srv://aimhabiganj:UZuWSyT3e3QYNal@cluster0.w9cbrwo.mongodb.net/?appName=Cluster0
+// # GEMINI_API_KEY=
+// BETTER_AUTH_URL=http://localhost:3000
+// BETTER_AUTH_SECRET=E1NnJYqNWZq0OIw49znddHpNbp4U2IAC
+// NEXT_PUBLIC_SERVER_API=http://localhost:5000
+// NEXT_PUBLIC_IMGBB_API_KEY=5a4f8c279ddcedf0d73f50444bad88b0

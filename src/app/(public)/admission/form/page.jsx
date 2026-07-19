@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import AdmissionFormPage1 from "@/components/public/admission/AdmissionFormPage1";
 import AdmissionFormPage2 from "@/components/public/admission/AdmissionFormPage2";
 import AdmissionFormPage3 from "@/components/public/admission/AdmissionFormPage3";
-import OfficeUseSection from "@/components/dashboard/admission/OfficeUseSection";
+import OfficeUseSection from "@/components/public/admission/OfficeUseSection";
 import AdmissionFormCover from "@/components/dashboard/admission/AdmissionFormCover";
 
 export default function AdmissionFormPage() {
@@ -34,13 +34,13 @@ export default function AdmissionFormPage() {
     divisionHifz: { active: false, type: "", class: "" },
     divisionAcademy: { active: false, type: "", class: "" },
     // divisionArabicCourse: { active: false, type: "", class: "" },
-   previousInstitutionName: "",          // ১. পূর্বে অধ্যয়নরত প্রতিষ্ঠানের নাম
-  previousInstitutionAddress: "",       // ২. ঠিকানা
-  previousInstitutionPrincipalMobile: "", // ৩. প্রিন্সিপালের মোবাইল
-  reasonForLeaving: "",                 // ৪. পূর্ব প্রতিষ্ঠান ছাড়ার কারণ
-  previousClass: "",                    // ৫. অধ্যয়নকৃত শ্রেণি
-  transferCertificateNo: "",            // ৬. ছাড়পত্র নং
-  leavingDate: "",        
+    previousInstitutionName: "",          // ১. পূর্বে অধ্যয়নরত প্রতিষ্ঠানের নাম
+    previousInstitutionAddress: "",       // ২. ঠিকানা
+    previousInstitutionPrincipalMobile: "", // ৩. প্রিন্সিপালের মোবাইল
+    reasonForLeaving: "",                 // ৪. পূর্ব প্রতিষ্ঠান ছাড়ার কারণ
+    previousClass: "",                    // ৫. অধ্যয়নকৃত শ্রেণি
+    transferCertificateNo: "",            // ৬. ছাড়পত্র নং
+    leavingDate: "",
 
     // 2nd page
     physicalProblem: "",
