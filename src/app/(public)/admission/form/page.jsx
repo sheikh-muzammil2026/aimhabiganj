@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import AdmissionFormPage1 from "@/components/admission/AdmissionFormPage1";
 import AdmissionFormPage2 from "@/components/admission/AdmissionFormPage2";
 import AdmissionFormPage3 from "@/components/admission/AdmissionFormPage3";
+import OfficeUseSection from "@/components/admission/OfficeUseSection";
 
 export default function AdmissionFormPage() {
   const [formData, setFormData] = useState({
@@ -223,6 +224,13 @@ export default function AdmissionFormPage() {
           formData={formData}
           handleChange={handleChange}
           handleCheckboxChange={handleCheckboxChange}
+        />
+        <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} />
+
+        <OfficeUseSection
+          formData={formData}
+          handleChange={handleChange}
+
         />
         <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} />
 

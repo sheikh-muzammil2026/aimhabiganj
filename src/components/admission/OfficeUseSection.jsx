@@ -19,6 +19,13 @@ export default function OfficeUseSection({ formData, handleChange }) {
             },
         });
     };
+    const totalMarks = (
+        (parseFloat(getValue("markTilawat")) || 0) +
+        (parseFloat(getValue("markArabic")) || 0) +
+        (parseFloat(getValue("markEnglish")) || 0) +
+        (parseFloat(getValue("markMath")) || 0) +
+        (parseFloat(getValue("markOthers")) || 0)
+    );
 
     return (
         <div className="w-full border-2 border-gray-400 rounded-lg p-4 sm:p-5 bg-gray-50/60 relative mt-8 font-bengali">
@@ -29,31 +36,125 @@ export default function OfficeUseSection({ formData, handleChange }) {
 
             <div className="space-y-5 text-sm mt-4">
 
-                {/* লাইন ২: ভর্তি পরীক্ষায় প্রাপ্ত নম্বর, মন্তব্য এবং শ্রেণি */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="flex flex-col lg:flex-row lg:items-end gap-1">
-                        <span className="font-bold text-gray-700 whitespace-nowrap text-xs sm:text-sm">ভর্তি পরীক্ষায় প্রাপ্ত নম্বর:</span>
-                        <input
-                            type="text"
-                            name="examMark"
-                            value={getValue("examMark")}
-                            onChange={handleNestedChange}
-                            className="w-full lg:flex-1 border-b border-gray-400 text-left lg:text-center font-mono focus:outline-none bg-transparent pb-0.5"
-                        />
+                {/* ১. ভর্তি পরীক্ষায় প্রাপ্ত নম্বরের সেকশন (রেসপন্সিভ গ্রিড) */}
+                <div className="border border-dashed border-gray-300 p-3 sm:p-4 rounded-md bg-white/50 space-y-4">
+                    <span className="font-bold text-gray-700 text-xs sm:text-sm block">
+                        ভর্তি পরীক্ষায় প্রাপ্ত নম্বরের বিবরণ :
+                    </span>
+
+                    {/* বিষয়ভিত্তিক ইনপুট (ছোট স্ক্রিনে ২ কলাম, বড় স্ক্রিনে ৫ কলাম) */}
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                        <div className="flex flex-col gap-1">
+                            <span className="text-xs font-semibold text-gray-600">তিলাওয়াত:</span>
+                            <input
+                                type="number"
+                                name="markTilawat"
+                                placeholder="০"
+                                value={getValue("markTilawat")}
+                                onChange={handleNestedChange}
+                                className="w-full border-b border-gray-400 focus:outline-none bg-transparent pb-0.5 font-mono text-center text-sm"
+                            />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <span className="text-xs font-semibold text-gray-600">আরবি:</span>
+                            <input
+                                type="number"
+                                name="markArabic"
+                                placeholder="০"
+                                value={getValue("markArabic")}
+                                onChange={handleNestedChange}
+                                className="w-full border-b border-gray-400 focus:outline-none bg-transparent pb-0.5 font-mono text-center text-sm"
+                            />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <span className="text-xs font-semibold text-gray-600">ইংরেজি:</span>
+                            <input
+                                type="number"
+                                name="markEnglish"
+                                placeholder="০"
+                                value={getValue("markEnglish")}
+                                onChange={handleNestedChange}
+                                className="w-full border-b border-gray-400 focus:outline-none bg-transparent pb-0.5 font-mono text-center text-sm"
+                            />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <span className="text-xs font-semibold text-gray-600">গণিত:</span>
+                            <input
+                                type="number"
+                                name="markMath"
+                                placeholder="০"
+                                value={getValue("markMath")}
+                                onChange={handleNestedChange}
+                                className="w-full border-b border-gray-400 focus:outline-none bg-transparent pb-0.5 font-mono text-center text-sm"
+                            />
+                        </div>
+                        <div className="col-span-2 md:col-span-1 flex flex-col gap-1">
+                            <span className="text-xs font-semibold text-gray-600">অন্যান্য:</span>
+                            <input
+                                type="number"
+                                name="markOthers"
+                                placeholder="০"
+                                value={getValue("markOthers")}
+                                onChange={handleNestedChange}
+                                className="w-full border-b border-gray-400 focus:outline-none bg-transparent pb-0.5 font-mono text-center text-sm"
+                            />
+                        </div>
                     </div>
-                    <div className="flex flex-col lg:flex-row lg:items-end gap-1">
+                </div>
+
+                {/* ২. সর্বমোট নম্বর ও মন্তব্য/ভর্তির শ্রেণি সেকশন */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                    {/* স্বয়ংক্রিয় মোট যোগফলের ফিল্ড */}
+                    <div className="flex items-end gap-1">
+                        <span className="font-bold text-gray-700 whitespace-nowrap text-xs sm:text-sm">সর্বমোট প্রাপ্ত নম্বর:</span>
+                        <div className="flex-1 md:w-24 border-b border-sky-600 text-center font-mono font-bold text-sky-800 pb-0.5 text-sm sm:text-base">
+                            {totalMarks}
+                        </div>
+                    </div>
+
+                    {/* মন্তব্য (যা মূলত শ্রেণির ড্রপডাউন) এবং পরবর্তী টেক্সট */}
+                    <div className="md:col-span-2 flex flex-col sm:flex-row sm:items-end gap-2 flex-wrap">
                         <span className="font-bold text-gray-700 whitespace-nowrap text-xs sm:text-sm">মন্তব্য:</span>
-                        <input
-                            type="text"
+
+                        <select
                             name="comment"
                             value={getValue("comment")}
                             onChange={handleNestedChange}
-                            className="w-full lg:flex-1 border-b border-gray-400 focus:outline-none bg-transparent pb-0.5"
-                        />
+                            className="min-w-[140px] flex-1 sm:flex-none border-b border-gray-400 focus:outline-none bg-transparent pb-0.5 font-bold text-sky-800 text-center cursor-pointer"
+                        >
+                            <option value="">বাছাই করুন...</option>
 
+                            <option disabled className="font-bold bg-gray-200 text-gray-700">-- হিফজ --</option>
+                            <option value="কায়দা/আমপারা">কায়দা/আমপারা</option>
+                            <option value="নাজেরা">নাজেরা</option>
+
+                            <option disabled className="font-bold bg-gray-200 text-gray-700">-- প্রাক-প্রাথমিক --</option>
+                            <option value="প্লে">প্লে</option>
+                            <option value="নার্সারি">নার্সারি</option>
+
+                            <option disabled className="font-bold bg-gray-200 text-gray-700">-- প্রাথমিক --</option>
+                            <option value="১ম শ্রেণি">১ম শ্রেণি</option>
+                            <option value="২য় শ্রেণি">২য় শ্রেণি</option>
+                            <option value="৩য় শ্রেণি">৩য় শ্রেণি</option>
+                            <option value="৪র্থ শ্রেণি">৪র্থ শ্রেণি</option>
+                            <option value="৫ম শ্রেণি">৫ম শ্রেণি</option>
+
+                            <option disabled className="font-bold bg-gray-200 text-gray-700">-- মাধ্যমিক --</option>
+                            <option value="৬ষ্ঠ শ্রেণি">৬ষ্ঠ শ্রেণি</option>
+                            <option value="৭ম শ্রেণি">৭ম শ্রেণি</option>
+                            <option value="৮ম শ্রেণি">৮ম শ্রেণি</option>
+                            <option value="নবম শ্রেণি">নবম শ্রেণি</option>
+                            <option value="দশম শ্রেণি">দশম শ্রেণি</option>
+
+                            <option disabled className="font-bold bg-gray-200 text-gray-700">-- উচ্চমাধ্যমিক --</option>
+                            <option value="১১শ শ্রেণি">১১শ শ্রেণি</option>
+                            <option value="১২শ শ্রেণি">১২শ শ্রেণি</option>
+                        </select>
+
+                        <span className="font-bold text-gray-700 whitespace-nowrap text-xs sm:text-sm pt-1 sm:pt-0">
+                            তে ভর্তি করা যেতে পারে।
+                        </span>
                     </div>
-                    <span className="font-bold text-gray-700 whitespace-nowrap text-xs sm:text-sm">শ্রেণিতে ভর্তি করা যেতে পারে</span>
-
                 </div>
 
                 {/* লাইন ৩: পরীক্ষকদের আইডি ও স্বাক্ষর সেকশন */}
@@ -127,6 +228,6 @@ export default function OfficeUseSection({ formData, handleChange }) {
                     <div className="border-t border-gray-400 pt-1 text-gray-800 whitespace-nowrap">প্রিন্সিপাল</div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
