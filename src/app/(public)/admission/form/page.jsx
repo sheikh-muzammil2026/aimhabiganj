@@ -105,15 +105,17 @@ export default function AdmissionFormPage() {
 
     // officeSection
     officeUse: {
-      examMark: "",
-      comment: "",
+      markTilawat: "",
+      markArabic: "",
+      markEnglish: "",
+      markMath: "",
+      markOthers: "",
+      totalMarks: 0,
       recommendedClass: "",
       examinerId1: "",
       examinerId2: "",
       examinerId3: "",
       receiptNo: "",
-      studentId: "",
-      admissionDate: ""
     }
   });
 

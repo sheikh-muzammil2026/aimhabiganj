@@ -239,8 +239,11 @@ export default function AdminAdmissionDashboard() {
 
                             <tbody className="divide-y divide-gray-100 font-medium block md:table-row-group">
                                 {admissionRequests.map((req) => {
-                                    const reqId = req.officeUse.studentId || req._id;
-                                    // ডেটাবেজ ফরম্যাট অনুযায়ী কোন কোন বিভাগগুলো active তা বের করার লজিক
+                                    // MongoDB ID এর বদলে সরাসরি অবজেক্টের studentId এবং ডিলিট/আপডেটের জন্য মঙ্গো আইডির স্ট্রিং ভ্যালু নেওয়া হচ্ছে
+                                    const studentIdField = req.studentId || 'N/A';
+                                    const mongoId = req._id?.$oid || req._id;
+
+                                    // ডেটাবেজ ফরম্যাট অনুযায়ী অ্যাক্টিভ বিভাগ বের করার লজিক
                                     const activeDivisions = [];
                                     if (req.divisionPreHifz?.active) activeDivisions.push("Pre-Hifz");
                                     if (req.divisionHifz?.active) activeDivisions.push("Hifz");
@@ -249,13 +252,13 @@ export default function AdminAdmissionDashboard() {
 
                                     return (
                                         <tr
-                                            key={reqId}
+                                            key={mongoId}
                                             className="hover:bg-gray-50/70 transition-colors block md:table-row p-4 md:p-0 space-y-3 md:space-y-0 border-b border-gray-100 md:border-b-0"
                                         >
-                                            {/* মঙ্গোডিবি আইডির পরিবর্তে ডেটাবেজের শর্ট আইডি (যেমন: 02420) প্রদর্শন */}
+                                            {/* মঙ্গোডিবি আইডির পরিবর্তে ডেটাবেজের studentId প্রদর্শন */}
                                             <td className="p-0 md:p-4 font-mono font-bold text-gray-900 flex justify-between md:table-cell items-center before:content-['আইডি:'] before:md:hidden before:font-sans before:text-gray-400 before:text-[11px]">
                                                 <span className="bg-emerald-50 text-emerald-800 md:bg-transparent px-2 py-0.5 md:p-0 rounded-sm">
-                                                    {req.officeUse.studentId || 'N/A'}
+                                                    {studentIdField}
                                                 </span>
                                             </td>
 
@@ -273,7 +276,6 @@ export default function AdminAdmissionDashboard() {
                                                 </div>
                                             </td>
 
-                                            {/* ডাইনামিকালি সচল অ্যাক্টিভ বিভাগ প্রদর্শন লজিক */}
                                             <td className="p-0 md:p-4 flex justify-between md:table-cell items-center before:content-['বিভাগ:'] before:md:hidden before:text-gray-400 before:text-[11px]">
                                                 <div className="flex flex-wrap gap-1 justify-end md:justify-start">
                                                     {activeDivisions.length > 0 ? (
@@ -298,13 +300,13 @@ export default function AdminAdmissionDashboard() {
                                             </td>
 
                                             <td className="p-0 md:p-4 pt-2 md:pt-4 flex flex-wrap gap-2 md:table-cell md:text-right md:space-x-1 sm:space-x-2 whitespace-nowrap justify-end border-t border-dashed border-gray-100 md:border-t-0">
-                                                {/* view button-টিকে Link tag এর ভেতরে দেওয়া হয়েছে */}
-                                                <Link href={`/admission/edit/${reqId}`} className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg cursor-pointer inline-block text-center flex-1 md:flex-none">
+                                                {/* রাউটিং এবং অ্যাকশনগুলোতে মঙ্গো আইডির স্ট্রিং ভ্যালু পাঠানো হচ্ছে যাতে ব্যাকএন্ডে API ঠিকমতো কাজ করে */}
+                                                <Link href={`/admission/edit/${mongoId}`} className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg cursor-pointer inline-block text-center flex-1 md:flex-none">
                                                     👁️ ভিউ & এডিট
                                                 </Link>
-                                                <button disabled={req.status === 'Approved'} onClick={() => updateStatus(reqId, 'Approved')} className="bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-lg disabled:opacity-30 cursor-pointer flex-1 md:flex-none text-center">✓ অ্যাপ্রুভ</button>
-                                                <button disabled={req.status === 'Rejected'} onClick={() => updateStatus(reqId, 'Rejected')} className="bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg disabled:opacity-30 cursor-pointer flex-1 md:flex-none text-center">✕ রিজেক্ট</button>
-                                                <button onClick={() => deleteAdmissionRequest(reqId)} className="bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-lg cursor-pointer flex-1 md:flex-none text-center">🗑️ ডিলিট</button>
+                                                <button disabled={req.status === 'Approved'} onClick={() => updateStatus(mongoId, 'Approved')} className="bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-lg disabled:opacity-30 cursor-pointer flex-1 md:flex-none text-center">✓ অ্যাপ্রুভ</button>
+                                                <button disabled={req.status === 'Rejected'} onClick={() => updateStatus(mongoId, 'Rejected')} className="bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg disabled:opacity-30 cursor-pointer flex-1 md:flex-none text-center">✕ রিজেক্ট</button>
+                                                <button onClick={() => deleteAdmissionRequest(mongoId)} className="bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-lg cursor-pointer flex-1 md:flex-none text-center">🗑️ ডিলিট</button>
                                             </td>
                                         </tr>
                                     );

@@ -4,28 +4,40 @@
 import React from "react";
 
 export default function OfficeUseSection({ formData, handleChange }) {
-    // নেস্টেড অবজেক্ট 'officeUse' ডাটা হ্যান্ডলিং নিরাপদ করার জন্য হেল্পার
+
     const getValue = (key) => formData?.officeUse?.[key] || "";
 
     const handleNestedChange = (e) => {
         const { name, value } = e.target;
+
+
+        const updatedOfficeUse = {
+            ...(formData?.officeUse || {}),
+            [name]: value,
+        };
+
+
+        const currentTotal = (
+            (parseFloat(updatedOfficeUse.markTilawat) || 0) +
+            (parseFloat(updatedOfficeUse.markArabic) || 0) +
+            (parseFloat(updatedOfficeUse.markEnglish) || 0) +
+            (parseFloat(updatedOfficeUse.markMath) || 0) +
+            (parseFloat(updatedOfficeUse.markOthers) || 0)
+        );
+
+
+        updatedOfficeUse.totalMarks = currentTotal;
+
         handleChange({
             target: {
                 name: "officeUse",
-                value: {
-                    ...(formData?.officeUse || {}),
-                    [name]: value,
-                },
+                value: updatedOfficeUse,
             },
         });
     };
-    const totalMarks = (
-        (parseFloat(getValue("markTilawat")) || 0) +
-        (parseFloat(getValue("markArabic")) || 0) +
-        (parseFloat(getValue("markEnglish")) || 0) +
-        (parseFloat(getValue("markMath")) || 0) +
-        (parseFloat(getValue("markOthers")) || 0)
-    );
+
+    // এখন নিচের ভ্যারিয়েবলটি সরাসরি স্টেট থেকে রিড করবে
+    const totalMarks = formData?.officeUse?.totalMarks || 0;
 
     return (
         <div className="w-full border-2 border-gray-400 rounded-lg p-4 sm:p-5 bg-gray-50/60 relative mt-8 font-bengali">
@@ -117,8 +129,8 @@ export default function OfficeUseSection({ formData, handleChange }) {
                         <span className="font-bold text-gray-700 whitespace-nowrap text-xs sm:text-sm">মন্তব্য:</span>
 
                         <select
-                            name="comment"
-                            value={getValue("comment")}
+                            name="recommendedClass"
+                            value={getValue("recommendedClass")}
                             onChange={handleNestedChange}
                             className="min-w-[140px] flex-1 sm:flex-none border-b border-gray-400 focus:outline-none bg-transparent pb-0.5 font-bold text-sky-800 text-center cursor-pointer"
                         >
@@ -183,7 +195,7 @@ export default function OfficeUseSection({ formData, handleChange }) {
                                 className="w-full border-b border-gray-400 focus:outline-none bg-transparent pb-0.5 font-mono text-xs"
                             />
                         </div>
-                        <div className="flex flex-col gap-1.5">
+                        <div className="flex flex-col gap-1.5 ">
                             <span className="text-xs text-gray-500">৩য় পরীক্ষকের আইডি:</span>
                             <input
                                 type="text"
@@ -198,7 +210,7 @@ export default function OfficeUseSection({ formData, handleChange }) {
                 </div>
 
                 {/* লাইন ৪: রসিদ নং এবং ছাত্র আইডি নং */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="w-full space-y-4">
                     <div className="flex flex-col sm:flex-row sm:items-end gap-1">
                         <span className="font-bold text-gray-700 whitespace-nowrap text-xs sm:text-sm">ভর্তির সমুদয় ফি পরিশোধের রশিদ নং:</span>
                         <input
@@ -206,19 +218,10 @@ export default function OfficeUseSection({ formData, handleChange }) {
                             name="receiptNo"
                             value={getValue("receiptNo")}
                             onChange={handleNestedChange}
-                            className="w-full sm:flex-1 border-b border-gray-400 focus:outline-none bg-transparent pb-0.5 font-mono"
+                            className="w-full flex-1 sm:flex-1 border-b border-gray-400 focus:outline-none bg-transparent pb-0.5 font-mono"
                         />
                     </div>
-                    <div className="flex flex-col sm:flex-row sm:items-end gap-1">
-                        <span className="font-bold text-gray-700 whitespace-nowrap text-emerald-800 text-xs sm:text-sm">ছাত্র আইডি নম্বর:</span>
-                        <input
-                            type="text"
-                            name="studentId"
-                            value={getValue("studentId")}
-                            onChange={handleNestedChange}
-                            className="w-full sm:flex-1 border-b border-orange-400 focus:outline-none bg-transparent pb-0.5 font-mono font-bold text-emerald-900 placeholder-gray-400"
-                        />
-                    </div>
+
                 </div>
 
                 {/* অফিসিয়াল স্বাক্ষরসমূহ */}

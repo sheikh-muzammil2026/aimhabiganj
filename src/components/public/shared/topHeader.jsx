@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 
 export default function TopHeader() {
   return (
@@ -16,32 +17,32 @@ export default function TopHeader() {
 
       {/* মেইন কন্টেইনার */}
       <div className="max-w-7xl mx-auto flex flex-row items-center relative z-10 gap-4 md:gap-6">
-        
+
         {/* লোগো সেকশন: মার্জিন ১ পিক্সেল বাড়ানো হয়েছে এবং scale কমিয়ে গোল অংশ নিখুঁত করা হয়েছে */}
         <div className="flex-shrink-0 w-[60px] h-[60px] md:w-[85px] md:h-[85px] relative rounded-full overflow-hidden p-[2px] bg-transparent">
-          <Image 
-            src="/aimlogo1.png" 
-            alt="As-Salam Ideal Madrasah Logo" 
+          <Link href={'/'}> <Image
+            src="/aimlogo1.png"
+            alt="As-Salam Ideal Madrasah Logo"
             fill
             sizes="(max-width: 768px) 60px, 85px"
-            className="object-cover scale-[1.06] rounded-full" 
+            className="object-cover scale-[1.06] rounded-full"
             priority
-          />
+          /></Link>
         </div>
 
         {/* নাম ও স্লোগান কন্টেইনার: ফুল উইডথ দখল করবে */}
         <div className="flex-1 flex flex-col space-y-1 w-full text-left">
-          
+
           {/* ১. আরবি নাম: ফন্ট সাইজ বাড়িয়ে স্বাভাবিক ফ্লুইড অবস্থায় আনা হয়েছে */}
           <p className="text-xl md:text-5xl font-arabic text-emerald-200/90 tracking-wide dark:text-slate-400" dir="rtl" lang="ar">
             مدرسة السلام النموذجية
           </p>
-          
+
           {/* ২. বাংলা নাম: ফন্ট সাইজ বড় করে রেগুলার এলাইনমেন্ট */}
           <p className="text-sm md:text-5xl font-bold text-emerald-50 tracking-normal dark:text-slate-200 leading-tight">
             আস-সালাম আইডিয়াল মাদ্রাসা
           </p>
-          
+
           {/* ৩. ইংরেজি নাম */}
           <h1 className="text-xl md:text-5xl font-black tracking-wide text-amber-400 dark:text-emerald-400 capitalize drop-shadow-sm font-sans leading-none">
             As-Salam Ideal Madrasah
@@ -53,7 +54,7 @@ export default function TopHeader() {
               AIM For Ultimate Success
             </p>
           </div>
-          
+
         </div>
 
       </div>
