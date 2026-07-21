@@ -16,130 +16,226 @@ export default function EditAdmissionPage() {
     const id = params.id; // URL থেকে id নেওয়া হচ্ছে
 
     const [isLoading, setIsLoading] = useState(true);
-    const [isSaving, setIsSaving] = useState(false); // এখানে 'isSaving' রাখা হলো
+    const [isSaving, setIsSaving] = useState(false);
 
-    // ডাটাবেজের অবজেক্টের সাথে মিল রেখে স্টেট ইনিশিয়ালাইজেশন
-    const [formData, setFormData] = useState({
-        id: "",
-        formNo: "",
-        sessionYear: "",
-        serialNo: "",
-        status: "Pending",
-        studentNameBangla: "",
-        studentNameEnglish: "",
-        studentNameArabic: "",
-        dateOfBirth: "",
-        age: "",
-        gender: "",
-        birthCertificateNo: "",
-        bloodGroup: "",
-        weight: "",
-        height: "",
-        nationality: "বাংলাদেশী",
-        currentAddress: { house: "", road: "", village: "", postOffice: "", thana: "", district: "" },
-        permanentAddress: { house: "", road: "", village: "", postOffice: "", thana: "", district: "" },
-        referenceName: "",
-        referenceMobile: "",
-        divisionPreHifz: { active: false, type: "", class: "" },
-        divisionHifz: { active: false, type: "", class: "" },
-        divisionAcademic: { active: false, type: "", class: "" },
-        divisionArabicCourse: { active: false, type: "", class: "" },
-        prevInstituteName: "",
-        prevInstituteAddress: "",
-        prevPrincipalMobile: "",
-        prevInstituteLeaveReason: "",
-        prevClass: "",
-        prevTransferCertificateNo: "",
-        prevTcDate: "",
-        physicalProblem: "",
-        physicalProblemDetails: "",
-        cleanlinessLover: "",
-        foodReluctance: "",
-        favFoodType: "",
-        prayerAddicted: "",
-        sleepTime: "",
-        wakeUpTime: "",
-        favThing: "",
-        anxietyReason: "",
-        fatherNameBangla: "",
-        fatherNameEnglish: "",
-        fatherNid: "",
-        fatherMobile: "",
-        fatherStatus: "Alive",
-        fatherProfession: "",
-        fatherEmail: "",
-        motherNameBangla: "",
-        motherNameEnglish: "",
-        motherNid: "",
-        motherMobile: "",
-        motherStatus: "Alive",
-        motherProfession: "",
-        motherEmail: "",
-        guardianNameAbsentParents: "",
-        guardianRelation: "",
+   const [formData, setFormData] = useState({
+      sessionYear: "২০২৬-২০২৭",
+      status: "",
+      studentId: "",
+      // 1st page
+      studentImage: "",
+      studentNameBangla: "",
+      studentNameEnglish: "",
+      studentNameArabic: "",
+      dateOfBirth: "",
+      age: "",
+      gender: "",
+      birthCertificateNo: "",
+      bloodGroup: "",
+      weight: "",
+      height: "",
+      nationality: "বাংলাদেশী",
+      currentAddress: { house: "", road: "", village: "", postOffice: "", thana: "", district: "" },
+      permanentAddress: { house: "", road: "", village: "", postOffice: "", thana: "", district: "" },
+      referenceName: "",
+      referenceMobile: "",
+      divisionPreHifz: { active: false, type: "", class: "" },
+      divisionHifz: { active: false, type: "", class: "" },
+      divisionAcademy: { active: false, type: "", class: "" },
+     
+      previousInstitutionName: "",        
+      previousInstitutionAddress: "",      
+      previousInstitutionPrincipalMobile: "",
+      reasonForLeaving: "",                
+      previousClass: "",                  
+      transferCertificateNo: "",            
+      leavingDate: "",
+  
+      // 2nd page
+      physicalProblem: "",
+      physicalProblemDetails: "",
+      cleanlinessLover: "",
+      foodReluctance: "",
+      favFoodType: "",
+      prayerHabit: "",
+      sleepTime: "",
+      wakeUpTime: "",
+      favThing: "",
+      anxietyReason: "",
+  
+      guardianImage: "",
+      fatherNameBangla: "",
+      fatherNameEnglish: "",
+      fatherNid: "",
+      fatherMobile: "",
+      fatherStatus: "",
+      fatherProfession: "",
+      fatherEmail: "",
+  
+      motherNameBangla: "",
+      motherNameEnglish: "",
+      motherNid: "",
+      motherMobile: "",
+      motherStatus: "",
+      motherProfession: "",
+      motherEmail: "",
+  
+  
+      guardianNameAbsentParents: "",
+      guardianRelation: "",
+      guardianNid: "",
+      guardianProfession: "",
+      guardianEmail: "",
+      guardianMobile: "",
+      guardianAnnualIncome: "",
+      guardianAnnualIncomeWords: "",
+  
+      admissionReason: "",
+  
+      primaryContactMethod: "",
+  
+      infoSource: "",
+      teacherId: "",
+  
+      applicantSignatureDate: "",
+  
+      // 3rd page
+      // studentSignatureDate: "",
+      attachments: {
+  
+        citizenshipCertificate: "",
+        birthCertificate: "",
         guardianNid: "",
-        guardianProfession: "",
-        guardianEmail: "",
-        guardianMobile: "",
-        guardianAnnualIncome: "",
-        guardianAnnualIncomeWords: "",
-        admissionReason: "",
-        applicantSignatureDate: "",
-        studentSignatureDate: "",
-        attachments: {
-            attachStudentPhoto: false,
-            attachParentsPhoto: false,
-            attachBirthCertificate: false,
-            attachParentsNid: false,
-            attachReportCard: false
-        },
-        officeUse: {
-            studentIdOffice: "",
-            examMark: "",
-            meritPosition: "",
-            officeRollNo: "",
-            admittedClass: "",
-            admittedSection: "",
-            academicSession: "",
-            admissionDate: ""
-        }
+        academicTranscript: "",
+  
+        boardRegCard: "",
+        orphanCertificate: "",
+      },
+  
+      // officeSection
+      officeUse: {
+        markTilawat: "",
+        markArabic: "",
+        markEnglish: "",
+        markMath: "",
+        markOthers: "",
+        totalMarks: 0,
+        recommendedClass: "",
+        examinerId1: "",
+        examinerId2: "",
+        examinerId3: "",
+        receiptNo: "",
+      }
     });
 
-    // নির্দিষ্ট আইডির ডাটা লোড করা
-    useEffect(() => {
-        if (!id) return;
+ // নির্দিষ্ট আইডির ডাটা লোড করা
+useEffect(() => {
+  if (!id) return;
 
-        const fetchStudentData = async () => {
-            try {
-                setIsLoading(true);
-                const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/admissions/edit/${id}`);
-                const result = await res.json();
+  const fetchStudentData = async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_API}/api/admissions/edit/${id}`
+      );
+      const result = await res.json();
 
-                if (result.success && result.data) {
-                    setFormData({
-                        ...result.data,
-                        currentAddress: result.data.currentAddress || { house: "", road: "", village: "", postOffice: "", thana: "", district: "" },
-                        permanentAddress: result.data.permanentAddress || { house: "", road: "", village: "", postOffice: "", thana: "", district: "" },
-                        divisionPreHifz: result.data.divisionPreHifz || { active: false, type: "", class: "" },
-                        divisionHifz: result.data.divisionHifz || { active: false, type: "", class: "" },
-                        divisionAcademic: result.data.divisionAcademic || { active: false, type: "", class: "" },
-                        divisionArabicCourse: result.data.divisionArabicCourse || { active: false, type: "", class: "" },
-                        attachments: result.data.attachments || { attachStudentPhoto: false, attachParentsPhoto: false, attachBirthCertificate: false, attachParentsNid: false, attachReportCard: false },
-                        officeUse: result.data.officeUse || { studentIdOffice: "", examMark: "", meritPosition: "", officeRollNo: "", admittedClass: "", admittedSection: "", academicSession: "", admissionDate: "" }
-                    });
-                } else {
-                    toast.error("শিক্ষার্থীর তথ্য পাওয়া যায়নি।");
-                }
-            } catch (error) {
-                console.error("ডাটা লোড করতে সমস্যা:", error);
-                toast.error("সার্ভার থেকে তথ্য আনতে ব্যর্থ হয়েছে।");
-            } finally {
-                setIsLoading(false);
-            }
-        };
+      if (result.success && result.data) {
+        setFormData({
+          // ১. ব্যাকএন্ডের সমস্ত প্রাইমারি ফিল্ড কপি করবে
+          ...result.data,
 
-        fetchStudentData();
-    }, [id]);
+          // ২. তারিখ সংক্রান্ত ফিল্ড সেফটি (যদি input type="date" ব্যবহার করেন)
+          dateOfBirth: result.data.dateOfBirth
+            ? String(result.data.dateOfBirth).split("T")[0]
+            : "",
+          leavingDate: result.data.leavingDate
+            ? String(result.data.leavingDate).split("T")[0]
+            : "",
+          applicantSignatureDate: result.data.applicantSignatureDate
+            ? String(result.data.applicantSignatureDate).split("T")[0]
+            : "",
+
+          // ৩. বর্তমান ও স্থায়ী ঠিকানা (ডিফল্ট ফলব্যাক সহ)
+          currentAddress: {
+            house: "",
+            road: "",
+            village: "",
+            postOffice: "",
+            thana: "",
+            district: "",
+            ...(result.data.currentAddress || {}),
+          },
+          permanentAddress: {
+            house: "",
+            road: "",
+            village: "",
+            postOffice: "",
+            thana: "",
+            district: "",
+            ...(result.data.permanentAddress || {}),
+          },
+
+          // ৪. বিভাগ সংক্রান্ত ফিল্ডসমূহ
+          divisionPreHifz: {
+            active: false,
+            type: "",
+            class: "",
+            ...(result.data.divisionPreHifz || {}),
+          },
+          divisionHifz: {
+            active: false,
+            type: "",
+            class: "",
+            ...(result.data.divisionHifz || {}),
+          },
+          divisionAcademy: {
+            active: false,
+            type: "",
+            class: "",
+            ...(result.data.divisionAcademy || result.data.divisionAcademic || {}),
+          },
+
+          // ৫. সংযুক্তি / Attachments
+          attachments: {
+            citizenshipCertificate: "",
+            birthCertificate: "",
+            guardianNid: "",
+            academicTranscript: "",
+            boardRegCard: "",
+            orphanCertificate: "",
+            ...(result.data.attachments || {}),
+          },
+
+          // ৬. অফিস সেকশন / Office Use
+          officeUse: {
+            markTilawat: "",
+            markArabic: "",
+            markEnglish: "",
+            markMath: "",
+            markOthers: "",
+            totalMarks: 0,
+            recommendedClass: "",
+            examinerId1: "",
+            examinerId2: "",
+            examinerId3: "",
+            receiptNo: "",
+            ...(result.data.officeUse || {}),
+          },
+        });
+      } else {
+        toast.error("শিক্ষার্থীর তথ্য পাওয়া যায়নি।");
+      }
+    } catch (error) {
+      console.error("ডাটা লোড করতে সমস্যা:", error);
+      toast.error("সার্ভার থেকে তথ্য আনতে ব্যর্থ হয়েছে।");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  fetchStudentData();
+}, [id]);
 
     // সাধারণ ইনপুট চেঞ্জ হ্যান্ডলার
     const handleChange = (e) => {

@@ -229,12 +229,12 @@ export default function AdmissionFormPage() {
         />
         <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} />
 
-        <OfficeUseSection
+        {/* <OfficeUseSection
           formData={formData}
           handleChange={handleChange}
 
         />
-        <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} />
+        <div className="hidden print:block page-break-after" style={{ pageBreakAfter: "always" }} /> */}
 
 
         {/* সাবমিট বাটন */}
