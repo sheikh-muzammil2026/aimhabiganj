@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'react-toastify';
-import Link from 'next/link'; 
+import Link from 'next/link';
 
 export default function AdminAdmissionDashboard() {
     const searchParams = useSearchParams();
@@ -98,7 +98,7 @@ export default function AdminAdmissionDashboard() {
             const data = await response.json();
 
             if (data.success) {
-                toast.success("📢 ফরমটি সফলভাবে আপ্রুভ করা হয়েছে!")
+                toast.success(`📢 ফরমটি সফলভাবে ${newStatus} করা হয়েছে!`)
                 setAdmissionRequests(prev =>
                     prev.map(req => req._id === id ? { ...req, status: newStatus } : req)
                 );
@@ -113,7 +113,7 @@ export default function AdminAdmissionDashboard() {
         }
     };
 
-    // সম্পূর্ণ ভর্তি আবেদন তথ্য আপডেট হ্যান্ডলার (PUT)
+
     // const handleFullRequestUpdate = async (e) => {
     //     e.preventDefault();
     //     const id = selectedRequest._id?.$oid || selectedRequest._id;
