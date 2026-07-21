@@ -68,17 +68,39 @@ const bdDistrictsAndThanas = {
   "ঠাকুরগাঁও": ["ঠাকুরগাঁও সদর", "পীরগঞ্জ", "রানীশংকৈল", "হরিপুর", "বালিয়াডাঙ্গী"],
 };
 
-export default function AdmissionFormPage1({ formData, handleChange }) {
+export default function AdmissionFormPage1({ formData, handleChange, handleNestedChange }) {
   const [uploading, setUploading] = useState(false);
   const [currentThanas, setCurrentThanas] = useState([]);
   const [permanentThanas, setPermanentThanas] = useState([]);
   const [isSameAddress, setIsSameAddress] = useState(false);
 
-  // একাডেমি সেকশনের জন্য ডাইনামিক বিভাগ স্টেট
-  const [selectedAcademyType, setSelectedAcademyType] = useState(formData.divisionAcademy?.academyType || "");
+  // ১. এডিটিং মোড এবং সাধারণ লোডের সময় বর্তমান ও স্থায়ী ঠিকানা একই কি না তা চেক করা
+  useEffect(() => {
+    if (formData?.currentAddress && formData?.permanentAddress) {
+      const keys = ["district", "thana", "postOffice", "village", "house", "road"];
 
+      const isMatch = keys.every(
+        (key) => (formData.currentAddress[key] || "") === (formData.permanentAddress[key] || "")
+      );
+      const hasValue = keys.some((key) => formData.currentAddress[key]);
+
+      // true এবং false দুটোই সঠিকভাবে সিঙ্ক হবে
+      setIsSameAddress(Boolean(isMatch && hasValue));
+    }
+  }, [formData?.currentAddress, formData?.permanentAddress]);
+
+  // ২. একাডেমি সেকশনের জন্য ডাইনামিক বিভাগ স্টেট
+  const [selectedAcademyType, setSelectedAcademyType] = useState(
+    formData?.divisionAcademy?.academyType || ""
+  );
+
+  useEffect(() => {
+    setSelectedAcademyType(formData?.divisionAcademy?.academyType || "");
+  }, [formData?.divisionAcademy?.academyType]);
+
+  // ৩. ছবি আপলোড হ্যান্ডলার
   const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
 
     setUploading(true);
@@ -107,64 +129,101 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
     }
   };
 
+  // ৪. থানার ডাইনামিক ড্রপডাউন লোড (বর্তমান ঠিকানা)
   useEffect(() => {
-    if (formData.currentAddress?.district) {
-      setCurrentThanas(bdDistrictsAndThanas[formData.currentAddress.district] || []);
+    const currentDist = formData?.currentAddress?.district;
+    if (currentDist && typeof bdDistrictsAndThanas !== "undefined" && bdDistrictsAndThanas[currentDist]) {
+      setCurrentThanas(bdDistrictsAndThanas[currentDist]);
     } else {
       setCurrentThanas([]);
     }
-  }, [formData.currentAddress?.district]);
+  }, [formData?.currentAddress?.district]);
 
+  // ৫. থানার ডাইনামিক ড্রপডাউন লোড (স্থায়ী ঠিকানা)
   useEffect(() => {
-    if (formData.permanentAddress?.district) {
-      setPermanentThanas(bdDistrictsAndThanas[formData.permanentAddress.district] || []);
+    const permDist = formData?.permanentAddress?.district;
+    if (permDist && typeof bdDistrictsAndThanas !== "undefined" && bdDistrictsAndThanas[permDist]) {
+      setPermanentThanas(bdDistrictsAndThanas[permDist]);
     } else {
       setPermanentThanas([]);
     }
-  }, [formData.permanentAddress?.district]);
+  }, [formData?.permanentAddress?.district]);
 
-  // বর্তমান ঠিকানা পরিবর্তনের সাথে সাথে যদি চেকবক্স টিক দেওয়া থাকে, তবে স্থায়ী ঠিকানাও স্বয়ংক্রিয় সিঙ্ক হবে
-  useEffect(() => {
-    if (isSameAddress && formData.currentAddress) {
-      const fields = ["district", "thana", "postOffice", "village", "house", "road"];
-      fields.forEach((key) => {
-        if (formData.permanentAddress?.[key] !== formData.currentAddress[key]) {
-          handleChange({
-            target: { name: `permanentAddress.${key}`, value: formData.currentAddress[key] || "" },
-          });
-        }
-      });
+  // ৬. বর্তমান ঠিকানা টাইপ করার সময় (যদি চেকবক্স টিক দেওয়া থাকে)
+  const handleCurrentAddressChange = (e) => {
+    handleChange(e);
+
+    if (isSameAddress) {
+      const fieldName = e.target.name.includes(".")
+        ? e.target.name.split(".")[1]
+        : e.target.name.replace("currentAddress.", "");
+
+      if (fieldName) {
+        handleChange({
+          target: {
+            name: `permanentAddress.${fieldName}`,
+            value: e.target.value,
+          },
+        });
+      }
     }
-  }, [formData.currentAddress, isSameAddress]);
+  };
 
-  // চেকবক্স হ্যান্ডলার যা টিক দেওয়া মাত্রই ইনস্ট্যান্ট সিঙ্ক করে দেয়
+  // ৭. চেকবক্স টিক দেওয়া/তোলার নিরাপদ হ্যান্ডলার
   const handleSameAddressChange = (e) => {
     const checked = e.target.checked;
     setIsSameAddress(checked);
 
-    if (checked && formData.currentAddress) {
-      const fields = ["district", "thana", "postOffice", "village", "house", "road"];
-      fields.forEach((key) => {
-        handleChange({
-          target: { name: `permanentAddress.${key}`, value: formData.currentAddress[key] || "" },
-        });
+    if (checked) {
+      // একবারে পুরো permanentAddress অবজেক্ট কপি করে আপডেট
+      handleChange({
+        target: {
+          name: "permanentAddress",
+          value: {
+            house: formData.currentAddress?.house || "",
+            road: formData.currentAddress?.road || "",
+            village: formData.currentAddress?.village || "",
+            postOffice: formData.currentAddress?.postOffice || "",
+            thana: formData.currentAddress?.thana || "",
+            district: formData.currentAddress?.district || "",
+          },
+        },
       });
-    } else if (!checked) {
-      const fields = ["district", "thana", "postOffice", "village", "house", "road"];
-      fields.forEach((key) => {
-        handleChange({
-          target: { name: `permanentAddress.${key}`, value: "" },
-        });
+    } else {
+      // চেকবক্স তুললে স্থায়ী ঠিকানা ও থানা রিসেট
+      handleChange({
+        target: {
+          name: "permanentAddress",
+          value: { house: "", road: "", village: "", postOffice: "", thana: "", district: "" },
+        },
       });
+      setPermanentThanas([]);
     }
   };
 
-  // একাডেমি চেকবক্স টগল হ্যান্ডলার
-  const handleAcademyActiveToggle = (e) => {
-    const checked = e.target.checked;
-    handleChange(e); // প্যারেন্ট স্টেট আপডেট
-    if (!checked) {
-      // চেকবক্স আনটিক করলে ডাটা ক্লিয়ার করা
+  // ৮. বিভাগ সিলেকশন হ্যান্ডলার
+  const handleDivisionSelect = (selectedDivision) => {
+    handleChange({
+      target: { name: "divisionPreHifz.active", value: selectedDivision === "preHifz" },
+    });
+    handleChange({
+      target: { name: "divisionHifz.active", value: selectedDivision === "hifz" },
+    });
+    handleChange({
+      target: { name: "divisionAcademy.active", value: selectedDivision === "academy" },
+    });
+
+    if (selectedDivision !== "preHifz") {
+      handleChange({ target: { name: "divisionPreHifz.class", value: "" } });
+      handleChange({ target: { name: "divisionPreHifz.type", value: "" } });
+    }
+
+    if (selectedDivision !== "hifz") {
+      handleChange({ target: { name: "divisionHifz.class", value: "" } });
+      handleChange({ target: { name: "divisionHifz.type", value: "" } });
+    }
+
+    if (selectedDivision !== "academy") {
       setSelectedAcademyType("");
       handleChange({ target: { name: "divisionAcademy.academyType", value: "" } });
       handleChange({ target: { name: "divisionAcademy.class", value: "" } });
@@ -172,7 +231,7 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
     }
   };
 
-  // একাডেমি টাইপ (বিভাগ) চেঞ্জ হ্যান্ডলার
+  // ৯. একাডেমি টাইপ হ্যান্ডলার
   const handleAcademyTypeChange = (e) => {
     const value = e.target.value;
     setSelectedAcademyType(value);
@@ -180,7 +239,7 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
     handleChange({ target: { name: "divisionAcademy.class", value: "" } });
   };
 
-  // একাডেমি টাইপ অনুযায়ী ক্লাস লিস্ট জেনারেট করা
+  // ১০. একাডেমি ক্লাস লিস্ট
   const getAcademyClasses = () => {
     if (selectedAcademyType === "প্রাক-প্রাথমিক") return ["প্লে", "নার্সারি"];
     if (selectedAcademyType === "প্রাথমিক") return ["১ম শ্রেণি", "২য় শ্রেণি", "৩য় শ্রেণি", "৪র্থ শ্রেণি", "৫ম শ্রেণি"];
@@ -188,7 +247,6 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
     if (selectedAcademyType === "উচ্চমাধ্যমিক") return ["১১শ শ্রেণি", "১২শ শ্রেণি"];
     return [];
   };
-
   return (
     <>
       <style jsx global>{`
@@ -363,7 +421,7 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
                   className="flex-1 border border-gray-400 rounded px-1.5 py-1 text-sm focus:outline-none focus:border-orange-500 bg-white print:text-xs print:py-0"
                 >
                   <option value="">বাছাই করুন</option>
-                  {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((bg) => (
+                  {["N/A", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((bg) => (
                     <option key={bg} value={bg}>{bg}</option>
                   ))}
                 </select>
@@ -391,7 +449,7 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 items-end pl-0 sm:pl-4 print:grid-cols-3 print:gap-2 print:pl-2">
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-600 whitespace-nowrap print:text-xs">জেলা:</span>
-                  <select name="currentAddress.district" value={formData.currentAddress?.district || ""} onChange={handleChange} className="flex-1 border border-gray-400 rounded p-1 text-sm bg-white print:text-xs print:p-0.5">
+                  <select name="currentAddress.district" value={formData.currentAddress?.district || ""} onChange={handleCurrentAddressChange} className="flex-1 border border-gray-400 rounded p-1 text-sm bg-white print:text-xs print:p-0.5">
                     <option value="">বাছাই করুন</option>
                     {Object.keys(bdDistrictsAndThanas).map((dist) => (
                       <option key={dist} value={dist}>{dist}</option>
@@ -400,7 +458,7 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-600 whitespace-nowrap print:text-xs">থানা:</span>
-                  <select name="currentAddress.thana" value={formData.currentAddress?.thana || ""} onChange={handleChange} className="flex-1 border border-gray-400 rounded p-1 text-sm bg-white print:text-xs print:p-0.5" disabled={!formData.currentAddress?.district}>
+                  <select name="currentAddress.thana" value={formData.currentAddress?.thana || ""} onChange={handleCurrentAddressChange} className="flex-1 border border-gray-400 rounded p-1 text-sm bg-white print:text-xs print:p-0.5" disabled={!formData.currentAddress?.district}>
                     <option value="">বাছাই করুন</option>
                     {currentThanas.map((thana) => (
                       <option key={thana} value={thana}>{thana}</option>
@@ -409,19 +467,19 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
                 </div>
                 <div className="flex items-end gap-2">
                   <span className="text-sm text-gray-600 whitespace-nowrap print:text-xs">ডাকঘর:</span>
-                  <input type="text" name="currentAddress.postOffice" value={formData.currentAddress?.postOffice || ""} onChange={handleChange} className="flex-1 border-b border-dotted border-gray-400 focus:outline-none text-sm print:text-xs" />
+                  <input type="text" name="currentAddress.postOffice" value={formData.currentAddress?.postOffice || ""} onChange={handleCurrentAddressChange} className="flex-1 border-b border-dotted border-gray-400 focus:outline-none text-sm print:text-xs" />
                 </div>
                 <div className="flex items-end gap-2">
                   <span className="text-sm text-gray-600 whitespace-nowrap print:text-xs">গ্রাম/মহল্লা:</span>
-                  <input type="text" name="currentAddress.village" value={formData.currentAddress?.village || ""} onChange={handleChange} className="flex-1 border-b border-dotted border-gray-400 focus:outline-none text-sm print:text-xs" />
+                  <input type="text" name="currentAddress.village" value={formData.currentAddress?.village || ""} onChange={handleCurrentAddressChange} className="flex-1 border-b border-dotted border-gray-400 focus:outline-none text-sm print:text-xs" />
                 </div>
                 <div className="flex items-end gap-2">
                   <span className="text-sm text-gray-600 whitespace-nowrap print:text-xs">বাড়ি নং:</span>
-                  <input type="text" name="currentAddress.house" value={formData.currentAddress?.house || ""} onChange={handleChange} className="flex-1 border-b border-dotted border-gray-400 focus:outline-none text-sm print:text-xs" />
+                  <input type="text" name="currentAddress.house" value={formData.currentAddress?.house || ""} onChange={handleCurrentAddressChange} className="flex-1 border-b border-dotted border-gray-400 focus:outline-none text-sm print:text-xs" />
                 </div>
                 <div className="flex items-end gap-2">
                   <span className="text-sm text-gray-600 whitespace-nowrap print:text-xs">রাস্তা নং:</span>
-                  <input type="text" name="currentAddress.road" value={formData.currentAddress?.road || ""} onChange={handleChange} className="flex-1 border-b border-dotted border-gray-400 focus:outline-none text-sm print:text-xs" />
+                  <input type="text" name="currentAddress.road" value={formData.currentAddress?.road || ""} onChange={handleCurrentAddressChange} className="flex-1 border-b border-dotted border-gray-400 focus:outline-none text-sm print:text-xs" />
                 </div>
               </div>
             </div>
@@ -504,7 +562,7 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
           {/* টেবিল কন্টেইনার - রেস্পন্সিভ সিএসএস সহ */}
           <div className="border border-gray-400 rounded overflow-hidden">
 
-            {/* বড় স্ক্রিনের জন্য ট্র্যাডিশনাল টেবিল (স্মার্টফোনে হাইড থাকবে) */}
+            {/* বড় স্ক্রিনের জন্য ট্র্যাডিশনাল টেবিল (স্মার্টফোনে হাইড থাকবে) */}
             <table className="hidden sm:table w-full text-left border-collapse text-sm print:table print:w-full print:text-xs">
               <thead>
                 <tr className="bg-gray-100 border-b border-gray-400 font-bold text-gray-700">
@@ -518,7 +576,13 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
                 {/* রো ১: প্রি-হিফজ */}
                 <tr>
                   <td className="p-1.5 border-r border-gray-400 text-center print:p-1">
-                    <input type="checkbox" name="divisionPreHifz.active" checked={formData.divisionPreHifz?.active || false} onChange={handleChange} className="w-4 h-4 accent-orange-600 print:w-3 print:h-3 cursor-pointer" />
+                    <input
+                      type="radio"
+                      name="selectedDivision"
+                      checked={formData.divisionPreHifz?.active || false}
+                      onChange={() => handleDivisionSelect("preHifz")}
+                      className="w-4 h-4 accent-orange-600 print:w-3 print:h-3 cursor-pointer"
+                    />
                   </td>
                   <td className="p-1.5 border-r border-gray-400 font-bold text-gray-700 print:p-1">প্রি-হিফজ</td>
                   <td className="p-1.5 border-r border-gray-400 print:p-1">
@@ -541,7 +605,13 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
                 {/* রো ২: হিফজ */}
                 <tr>
                   <td className="p-1.5 border-r border-gray-400 text-center print:p-1">
-                    <input type="checkbox" name="divisionHifz.active" checked={formData.divisionHifz?.active || false} onChange={handleChange} className="w-4 h-4 accent-orange-600 print:w-3 print:h-3 cursor-pointer" />
+                    <input
+                      type="radio"
+                      name="selectedDivision"
+                      checked={formData.divisionHifz?.active || false}
+                      onChange={() => handleDivisionSelect("hifz")}
+                      className="w-4 h-4 accent-orange-600 print:w-3 print:h-3 cursor-pointer"
+                    />
                   </td>
                   <td className="p-1.5 border-r border-gray-400 font-bold text-gray-700 print:p-1">হিফজ</td>
                   <td className="p-1.5 border-r border-gray-400 print:p-1">
@@ -561,14 +631,14 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
                   </td>
                 </tr>
 
-                {/* রো ৩: একাডেমি (আপনার নির্দেশিত কন্ডিশনাল ড্রপডাউন সহ) */}
+                {/* রো ৩: একাডেমি */}
                 <tr>
                   <td className="p-1.5 border-r border-gray-400 text-center print:p-1">
                     <input
-                      type="checkbox"
-                      name="divisionAcademy.active"
+                      type="radio"
+                      name="selectedDivision"
                       checked={formData.divisionAcademy?.active || false}
-                      onChange={handleAcademyActiveToggle}
+                      onChange={() => handleDivisionSelect("academy")}
                       className="w-4 h-4 accent-orange-600 print:w-3 print:h-3 cursor-pointer"
                     />
                   </td>
@@ -625,7 +695,14 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
               {/* প্রি-হিফজ কার্ড */}
               <div className="p-2 border border-gray-300 rounded bg-white">
                 <div className="flex items-center gap-2 mb-2">
-                  <input type="checkbox" id="m-prehifz" name="divisionPreHifz.active" checked={formData.divisionPreHifz?.active || false} onChange={handleChange} className="w-4 h-4 accent-orange-600" />
+                  <input
+                    type="radio"
+                    id="m-prehifz"
+                    name="selectedDivisionMobile"
+                    checked={formData.divisionPreHifz?.active || false}
+                    onChange={() => handleDivisionSelect("preHifz")}
+                    className="w-4 h-4 accent-orange-600"
+                  />
                   <label htmlFor="m-prehifz" className="font-bold text-gray-700">প্রি-হিফজ</label>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
@@ -646,7 +723,14 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
               {/* হিফজ কার্ড */}
               <div className="p-2 border border-gray-300 rounded bg-white">
                 <div className="flex items-center gap-2 mb-2">
-                  <input type="checkbox" id="m-hifz" name="divisionHifz.active" checked={formData.divisionHifz?.active || false} onChange={handleChange} className="w-4 h-4 accent-orange-600" />
+                  <input
+                    type="radio"
+                    id="m-hifz"
+                    name="selectedDivisionMobile"
+                    checked={formData.divisionHifz?.active || false}
+                    onChange={() => handleDivisionSelect("hifz")}
+                    className="w-4 h-4 accent-orange-600"
+                  />
                   <label htmlFor="m-hifz" className="font-bold text-gray-700">হিফজ</label>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
@@ -664,19 +748,19 @@ export default function AdmissionFormPage1({ formData, handleChange }) {
                 </div>
               </div>
 
-              {/* একাডেমি কার্ড (মোবাইল কন্ডিশনাল ড্রপডাউন) */}
+              {/* একাডেমি কার্ড */}
               <div className="p-2 border border-gray-300 rounded bg-white">
                 <div className="flex items-center gap-2 mb-2">
                   <input
-                    type="checkbox"
+                    type="radio"
                     id="m-academy"
-                    name="divisionAcademy.active"
+                    name="selectedDivisionMobile"
                     checked={formData.divisionAcademy?.active || false}
-                    onChange={handleAcademyActiveToggle}
+                    onChange={() => handleDivisionSelect("academy")}
                     className="w-4 h-4 accent-orange-600"
                   />
                   <label htmlFor="m-academy" className="font-bold text-gray-700">
-                    {formData.divisionAcademy?.active ? "একাডেমি (সক্রিয়)" : "একাডেমি"}
+                    {formData.divisionAcademy?.active ? "একাডেমি (সক্রিয়)" : "একাডেমি"}
                   </label>
                 </div>
 
