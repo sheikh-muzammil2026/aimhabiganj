@@ -92,7 +92,7 @@ export default function EditAdmissionPage() {
     admissionReason: "",
     primaryContactMethod: "",
     infoSource: "",
-    teacherId: "",
+    teacherName: "",
     applicantSignatureDate: "",
 
     // 3rd page

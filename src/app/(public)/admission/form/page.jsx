@@ -85,7 +85,7 @@ export default function AdmissionFormPage() {
     primaryContactMethod: "",
 
     infoSource: "",
-    teacherId: "",
+    teacherName: "",
 
     applicantSignatureDate: "",
 

@@ -92,6 +92,61 @@ export default function AdmissionFormPage2({ formData, handleChange }) {
     "অন্যান্য माध्यम"
   ];
 
+  // কন্টাক্ট নম্বর সর্ট করে primaryContactMethod ফিল্ডে সেট করার ইফেক্ট
+  useEffect(() => {
+    const method = formData.primaryContactMethod;
+    if (!method) return;
+
+    const fatherNum = formData.fatherMobile?.trim();
+    const motherNum = formData.motherMobile?.trim();
+    const guardianNum = formData.guardianMobile?.trim();
+
+    let primary = "";
+    let others = [];
+
+    // ১. ইউজার রেডিও বাটন থেকে টেক্সট সিলেক্ট করলে
+    if (method === "পিতা") {
+      primary = fatherNum;
+      others = [motherNum, guardianNum];
+    } else if (method === "মাতা") {
+      primary = motherNum;
+      others = [fatherNum, guardianNum];
+    } else if (method === "পিতামাতার অবর্তমানে অভিভাবক") {
+      primary = guardianNum;
+      others = [fatherNum, motherNum];
+    }
+    // ২. Edit Mode-এ অথবা নম্বর পরিবর্তনের সময়
+    else if (fatherNum && method.startsWith(fatherNum)) {
+      primary = fatherNum;
+      others = [motherNum, guardianNum];
+    } else if (motherNum && method.startsWith(motherNum)) {
+      primary = motherNum;
+      others = [fatherNum, guardianNum];
+    } else if (guardianNum && method.startsWith(guardianNum)) {
+      primary = guardianNum;
+      others = [fatherNum, motherNum];
+    } else {
+      return;
+    }
+
+    // ফাঁকা নম্বর বাদ দেওয়া এবং ইউনিক নম্বর সাজানো
+    const sorted = [primary, ...others].filter((num) => num && num !== "");
+    const sortedString = [...new Set(sorted)].join(", ");
+
+    // ভ্যালু পরিবর্তিত হলেই কেবল আপডেট হবে (ইনফিনিট লুপ রুকতে)
+    if (formData.primaryContactMethod !== sortedString) {
+      handleChange({
+        target: { name: "primaryContactMethod", value: sortedString },
+      });
+    }
+  }, [
+    formData.primaryContactMethod,
+    formData.fatherMobile,
+    formData.motherMobile,
+    formData.guardianMobile,
+    handleChange,
+  ]);
+
   return (
     <div className="w-full min-h-[11.69in] bg-white p-4 md:p-10 flex flex-col justify-between box-border text-gray-800 relative font-bengali print:min-h-screen overflow-x-hidden">
 
@@ -354,7 +409,10 @@ export default function AdmissionFormPage2({ formData, handleChange }) {
                   type="radio"
                   name="primaryContactMethod"
                   value="পিতা"
-                  checked={formData.primaryContactMethod === "পিতা"}
+                  checked={
+                    formData.primaryContactMethod === "পিতা" ||
+                    (!!formData.fatherMobile && formData.primaryContactMethod?.startsWith(formData.fatherMobile.trim()))
+                  }
                   onChange={handleChange}
                   disabled={formData.fatherStatus === "মৃত" || formData.fatherStatus === "মৃত"}
                 /> পিতা
@@ -364,7 +422,10 @@ export default function AdmissionFormPage2({ formData, handleChange }) {
                   type="radio"
                   name="primaryContactMethod"
                   value="মাতা"
-                  checked={formData.primaryContactMethod === "মাতা"}
+                  checked={
+                    formData.primaryContactMethod === "মাতা" ||
+                    (!!formData.motherMobile && formData.primaryContactMethod?.startsWith(formData.motherMobile.trim()))
+                  }
                   onChange={handleChange}
                   disabled={formData.motherStatus === "মৃত" || formData.motherStatus === "মৃত"}
                 /> মাতা
@@ -374,7 +435,10 @@ export default function AdmissionFormPage2({ formData, handleChange }) {
                   type="radio"
                   name="primaryContactMethod"
                   value="পিতামাতার অবর্তমানে অভিভাবক"
-                  checked={formData.primaryContactMethod === "পিতামাতার অবর্তমানে অভিভাবক"}
+                  checked={
+                    formData.primaryContactMethod === "পিতামাতার অবর্তমানে অভিভাবক" ||
+                    (!!formData.guardianMobile && formData.primaryContactMethod?.startsWith(formData.guardianMobile.trim()))
+                  }
                   onChange={handleChange}
                 /> পিতামাতার অবর্তমানে অভিভাবক
               </label>
@@ -430,11 +494,11 @@ export default function AdmissionFormPage2({ formData, handleChange }) {
             {/* শিক্ষক আইডি ফিল্ড */}
             {formData.infoSource && formData.infoSource.split(", ").includes("AIM এর শিক্ষকের মাধ্যমে") && (
               <div className="flex flex-col sm:flex-row sm:items-end gap-2 p-3 bg-orange-50/50 border-l-4 border-orange-500 rounded-r-md animate-fade-in w-full">
-                <span className="font-bold text-gray-700 text-xs md:text-sm whitespace-nowrap">● শিক্ষকের আইডি নাম্বার লিখুন:</span>
+                <span className="font-bold text-gray-700 text-xs md:text-sm whitespace-nowrap">● শিক্ষকের নাম লিখুন:</span>
                 <input
                   type="text"
-                  name="teacherId"
-                  value={formData.teacherId || ""}
+                  name="teacherName"
+                  value={formData.teacherName || ""}
                   onChange={handleChange}
                   placeholder="এখানে শিক্ষকের আইডি লিখুন..."
                   className="w-full sm:flex-1 border-b border-dotted border-orange-600 focus:outline-none bg-transparent px-1 font-semibold text-orange-800 placeholder-orange-300"
