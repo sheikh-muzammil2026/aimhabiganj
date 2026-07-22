@@ -114,33 +114,6 @@ export default function AdminAdmissionDashboard() {
     };
 
 
-    // const handleFullRequestUpdate = async (e) => {
-    //     e.preventDefault();
-    //     const id = selectedRequest._id?.$oid || selectedRequest._id;
-    //     try {
-    //         const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/admissions/${id}`, {
-    //             method: 'PUT',
-    //             headers: { 'Content-Type': 'application/json' },
-    //             body: JSON.stringify(selectedRequest)
-    //         });
-    //         const data = await response.json();
-
-    //         if (data.success) {
-    //             toast.success("🎉 শিক্ষার্থীর তথ্য সফলভাবে আপডেট করা হয়েছে!");
-    //             setAdmissionRequests(prev =>
-    //                 prev.map(req => (req._id === id ? selectedRequest : req))
-    //             );
-    //             setActionMessage("শিক্ষার্থীর প্রোফাইল তথ্য আপডেট করা হয়েছে।");
-    //             setTimeout(() => setActionMessage(''), 4000);
-    //         } else {
-    //             toast.error(data.message || "আপডেট করা সম্ভব হয়নি।");
-    //         }
-    //     } catch (error) {
-    //         console.error("আপডেট করতে সমস্যা:", error);
-    //         toast.error("সার্ভারে সমস্যা হওয়ার কারণে তথ্য আপডেট করা যায়নি।");
-    //     }
-    // };
-
     // আবেদনপত্র চিরতরে মুছে ফেলার হ্যান্ডলার (DELETE API)
     const deleteAdmissionRequest = async (id) => {
         if (confirm("আপনি কি নিশ্চিত যে এই ভর্তি আবেদনপত্রটি চিরতরে মুছে ফেলতে চান?")) {
@@ -231,7 +204,7 @@ export default function AdminAdmissionDashboard() {
                                     <th className="p-4">শিক্ষার্থী আইডি</th>
                                     <th className="p-4">ছাত্রের নাম</th>
                                     <th className="p-4">পিতার নাম & মোবাইল</th>
-                                    <th className="p-4">আবেদনকৃত বিভাগ</th>
+                                    <th className="p-4">আবেদনকৃত বিভাগ ও শ্রেণি </th>
                                     <th className="p-4 text-center">স্ট্যাটাস</th>
                                     <th className="p-4 text-right">অ্যাকশন</th>
                                 </tr>
@@ -282,7 +255,9 @@ export default function AdminAdmissionDashboard() {
                                                         activeDivisions.map((div, index) => (
                                                             <span key={index} className="bg-emerald-50 text-emerald-900 px-2 py-0.5 rounded text-[10px] font-bold border border-emerald-200/60 whitespace-nowrap">
                                                                 {div}
+                                                                <div className="text-gray-400 font-mono text-[11px]">{div.class}</div>
                                                             </span>
+                                                            
                                                         ))
                                                     ) : (
                                                         <span className="text-gray-400 text-[11px] italic">কোনোটিই নয়</span>

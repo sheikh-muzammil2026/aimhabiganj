@@ -167,6 +167,52 @@ export default function OfficeUseSection({ formData, handleChange }) {
                             তে ভর্তি করা যেতে পারে।
                         </span>
                     </div>
+                    <div className="flex flex-col gap-1">
+                            <span className="text-xs font-semibold text-gray-600">রোল নম্বর:</span>
+                            <input
+                                type="text"
+                                name="rollNumber"
+                                placeholder="রোল নং..."
+                                value={getValue("rollNumber")}
+                                onChange={handleNestedChange}
+                                className="w-full border-b border-gray-400 focus:outline-none bg-transparent pb-0.5 font-mono text-xs"
+                            />
+                        </div>
+                </div>
+
+                {/* ২.২. ফি সংক্রান্ত তথ্য সেকশন (নতুন যুক্ত করা হয়েছে) */}
+                <div className="border border-dashed border-gray-300 p-3 rounded-md bg-white/50 space-y-3">
+                    <span className="font-bold text-gray-700 text-xs sm:text-sm block">
+                        ফি সংক্রান্ত তথ্য :
+                    </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-1">
+                            <span className="text-xs font-semibold text-gray-600">ধার্যকৃত মাসিক ফি (টাকা):</span>
+                            <input
+                                type="number"
+                                name="monthlyFee"
+                                placeholder="০"
+                                value={getValue("monthlyFee")}
+                                onChange={handleNestedChange}
+                                className="w-full border-b border-gray-400 focus:outline-none bg-transparent pb-0.5 font-mono text-xs"
+                            />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <span className="text-xs font-semibold text-gray-600">ফি ক্যাটাগরি / স্কলারশিপ:</span>
+                            <select
+                                name="feeCategory"
+                                value={getValue("feeCategory")}
+                                onChange={handleNestedChange}
+                                className="w-full border-b border-gray-400 focus:outline-none bg-transparent pb-0.5 text-xs cursor-pointer font-bold text-gray-800"
+                            >
+                                <option value="General">সাধারণ (General)</option>
+                                <option value="Orphan">এতিম ফান্ড (Orphan)</option>
+                                <option value="Poor Fund">গরিব ফান্ড (Poor Fund)</option>
+                                <option value="Scholarship">স্কলারশিপ (Scholarship)</option>
+                                <option value="Staff Child">শিক্ষক/স্টাফ সন্তান</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
                 {/* লাইন ৩: পরীক্ষকদের আইডি ও স্বাক্ষর সেকশন */}
