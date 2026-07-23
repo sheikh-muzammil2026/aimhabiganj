@@ -80,9 +80,9 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     icon: "👥",
     roles: ["admin", "teacher"],
     dropdown: [
-        { title: "সকল শিক্ষার্থী তালিকা", href: "/dashboard/students" },
+        { title: "সকল শিক্ষার্থী তালিকা", href: "/dashboard/admin/students" },
         { title: "নতুন শিক্ষার্থী ভর্তি/এন্ট্রি", href: "/dashboard/students/add" },
-        { title: "শ্রেণী ও শাখা ভিত্তিক তালিকা", href: "/dashboard/students/by-class" },
+        { title: "শ্রেণী ও শাখা ভিত্তিক তালিকা", href: "/dashboard/admin/students/by-class" },
         { title: "শিক্ষার্থীর আইডি কার্ড জেনারেটর", href: "/dashboard/students/id-cards" },
         { title: "প্রসঙ্গ / ছাড়পত্র (TC & Character Cert)", href: "/dashboard/students/certificates" },
         { title: "অভিভাবকের তথ্য ও যোগাযোগ", href: "/dashboard/students/parents" },
