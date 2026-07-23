@@ -1,0 +1,269 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+
+export default function AllStudentsPage() {
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // ফিল্টারিং স্টেট
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedClass, setSelectedClass] = useState("all");
+
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+
+  const fetchStudents = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      // শুধু অনুমোদিত শিক্ষার্থীদের ডেটা ফেচ করা হচ্ছে
+      const response = await fetch("/api/students?status=Approved");
+      const result = await response.json();
+
+      if (result.success) {
+        setStudents(result.data || []);
+      } else {
+        setError(result.message || "শিক্ষার্থীদের তথ্য লোড করা যায়নি।");
+      }
+    } catch (err) {
+      console.error("Error fetching students:", err);
+      setError("সার্ভারের সাথে সংযোগ স্থাপন করা সম্ভব হয়নি।");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ক্লায়েন্ট-সাইড ফিল্টারিং (সার্চ এবং ক্লাস ফিল্টার)
+  const filteredStudents = students.filter((student) => {
+    const matchesSearch =
+      (student.name && student.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (student.rollNumber && student.rollNumber.toString().includes(searchTerm)) ||
+      (student.studentId && student.studentId.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (student.phone && student.phone.includes(searchTerm));
+
+    const matchesClass =
+      selectedClass === "all" || student.class === selectedClass;
+
+    return matchesSearch && matchesClass;
+  });
+
+  // ইউনিক ক্লাসের তালিকা তৈরি (ড্রপডাউনের জন্য)
+  const uniqueClasses = [...new Set(students.map((s) => s.class).filter(Boolean))];
+
+  return (
+    <div className="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen space-y-6">
+      
+      {/* ১. পেজ হেডার এবং অ্যাকশন বাটন */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-emerald-900/10 shadow-xs">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-black text-[#043e30] tracking-tight">
+            সকল শিক্ষার্থী তালিকা
+          </h1>
+          <p className="text-xs sm:text-sm text-emerald-700/80 mt-1 font-medium">
+            মাদ্রাসার সকল অনুমোদিত শিক্ষার্থীদের ডাটাবেজ ও প্রোফাইল
+          </p>
+        </div>
+        <Link
+          href="/dashboard/students/add"
+          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#043e30] hover:bg-emerald-900 text-amber-400 font-bold text-sm rounded-xl transition-all duration-200 shadow-md hover:shadow-lg active:scale-95"
+        >
+          <span>➕</span> নতুন শিক্ষার্থী যুক্ত করুন
+        </Link>
+      </div>
+
+      {/* ২. সংক্ষিপ্ত স্ট্যাটস/পরিসংখ্যান */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-white p-5 rounded-2xl border border-emerald-900/10 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-xl font-bold">
+            👥
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">মোট শিক্ষার্থী</p>
+            <p className="text-2xl font-black text-[#043e30]">{students.length}</p>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-emerald-900/10 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center text-xl font-bold">
+            🔍
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">ফিল্টার করা সংখ্যা</p>
+            <p className="text-2xl font-black text-amber-600">{filteredStudents.length}</p>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-emerald-900/10 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center text-xl font-bold">
+            📚
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">মোট শ্রেণী</p>
+            <p className="text-2xl font-black text-blue-900">{uniqueClasses.length}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ৩. ফিল্টারিং সেকশন */}
+      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-emerald-900/10 shadow-xs space-y-3 sm:space-y-0 sm:flex sm:items-center sm:gap-4">
+        {/* নাম/আইডি/রোল সার্চ */}
+        <div className="flex-1 relative">
+          <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">🔍</span>
+          <input
+            type="text"
+            placeholder="নাম, আইডি, রোল বা ফোন নম্বর দিয়ে খুঁজুন..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white transition-all duration-200"
+          />
+        </div>
+
+        {/* শ্রেণী অনুযায়ী ফিল্টার */}
+        <div className="w-full sm:w-56">
+          <select
+            value={selectedClass}
+            onChange={(e) => setSelectedClass(e.target.value)}
+            className="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white transition-all duration-200 font-medium text-slate-700"
+          >
+            <option value="all">সকল শ্রেণী</option>
+            {uniqueClasses.map((cls, idx) => (
+              <option key={idx} value={cls}>
+                {cls}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* ৪. মেইন ডাটা টেবিল */}
+      <div className="bg-white rounded-2xl border border-emerald-900/10 shadow-xs overflow-hidden">
+        {loading ? (
+          <div className="p-12 text-center space-y-3">
+            <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="text-sm font-semibold text-slate-600">শিক্ষার্থীদের তথ্য লোড হচ্ছে...</p>
+          </div>
+        ) : error ? (
+          <div className="p-8 text-center text-red-500 font-medium space-y-3">
+            <p>⚠️ {error}</p>
+            <button
+              onClick={fetchStudents}
+              className="px-4 py-1.5 bg-red-100 text-red-700 text-xs font-bold rounded-lg hover:bg-red-200 transition-all"
+            >
+              পুনরায় চেষ্টা করুন
+            </button>
+          </div>
+        ) : filteredStudents.length === 0 ? (
+          <div className="p-12 text-center text-slate-500 space-y-2">
+            <p className="text-3xl">📂</p>
+            <p className="text-base font-semibold">কোনো শিক্ষার্থীর তথ্য পাওয়া যায়নি!</p>
+            <p className="text-xs text-slate-400">আপনার সার্চ ফিল্টার পরিবর্তন করে দেখতে পারেন।</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-[#043e30] text-emerald-100 text-xs uppercase tracking-wider font-bold">
+                  <th className="py-4 px-4 sm:px-6">শিক্ষার্থী</th>
+                  <th className="py-4 px-4">আইডি / রোল</th>
+                  <th className="py-4 px-4">শ্রেণী ও শাখা</th>
+                  <th className="py-4 px-4">অভিভাবকের নাম</th>
+                  <th className="py-4 px-4">যোগাযোগ</th>
+                  <th className="py-4 px-4 text-center">অ্যাকশন</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-xs sm:text-sm font-medium text-slate-700">
+                {filteredStudents.map((student, idx) => (
+                  <tr
+                    key={student._id || idx}
+                    className="hover:bg-emerald-50/50 transition-colors duration-150"
+                  >
+                    {/* ছবি ও নাম */}
+                    <td className="py-3.5 px-4 sm:px-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center overflow-hidden shrink-0 border border-emerald-200">
+                          {student.photo ? (
+                            <img
+                              src={student.photo}
+                              alt={student.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            student.name?.charAt(0) || "S"
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-bold text-slate-900 leading-tight">
+                            {student.name || "নাম পাওয়া যায়নি"}
+                          </p>
+                          <span className="text-[10px] text-emerald-700 bg-emerald-100/60 px-2 py-0.5 rounded-md font-semibold mt-0.5 inline-block">
+                            {student.residentType || "সাধারণ"}
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* আইডি এবং রোল */}
+                    <td className="py-3.5 px-4">
+                      <div className="font-semibold text-slate-800">
+                        {student.studentId || "N/A"}
+                      </div>
+                      <div className="text-xs text-slate-400">
+                        রোল: {student.rollNumber || "N/A"}
+                      </div>
+                    </td>
+
+                    {/* শ্রেণী ও শাখা */}
+                    <td className="py-3.5 px-4">
+                      <span className="font-semibold text-slate-800">
+                        {student.class || "N/A"}
+                      </span>
+                      {student.section && (
+                        <span className="text-xs text-slate-500 block">
+                          শাখা: {student.section}
+                        </span>
+                      )}
+                    </td>
+
+                    {/* অভিভাবকের নাম */}
+                    <td className="py-3.5 px-4 font-medium text-slate-600">
+                      {student.fatherName || student.guardianName || "N/A"}
+                    </td>
+
+                    {/* মোবাইল নাম্বার */}
+                    <td className="py-3.5 px-4 text-slate-600">
+                      {student.phone || student.guardianPhone || "N/A"}
+                    </td>
+
+                    {/* অ্যাকশন বাটন */}
+                    <td className="py-3.5 px-4 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <Link
+                          href={`/dashboard/students/${student._id}`}
+                          title="প্রোফাইল দেখুন"
+                          className="p-1.5 text-slate-600 hover:text-emerald-700 hover:bg-emerald-100 rounded-lg transition-all"
+                        >
+                          👁️
+                        </Link>
+                        <Link
+                          href={`/dashboard/students/edit/${student._id}`}
+                          title="সম্পাদনা করুন"
+                          className="p-1.5 text-slate-600 hover:text-amber-700 hover:bg-amber-100 rounded-lg transition-all"
+                        >
+                          ✏️
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
