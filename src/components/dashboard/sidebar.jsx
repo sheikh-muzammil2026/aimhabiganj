@@ -74,7 +74,23 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             ]
         },
         { id: "attendance", title: "ডিজিটাল হাজিরা", icon: "📅", href: "/dashboard/attendance", roles: ["admin", "teacher"] },
-        { id: "students", title: "শিক্ষার্থী ব্যবস্থাপনা", icon: "👥", href: "/dashboard/students", roles: ["admin", "teacher"] },
+        {
+    id: "students",
+    title: "শিক্ষার্থী ব্যবস্থাপনা",
+    icon: "👥",
+    roles: ["admin", "teacher"],
+    dropdown: [
+        { title: "সকল শিক্ষার্থী তালিকা", href: "/dashboard/students" },
+        { title: "নতুন শিক্ষার্থী ভর্তি/এন্ট্রি", href: "/dashboard/students/add" },
+        { title: "শ্রেণী ও শাখা ভিত্তিক তালিকা", href: "/dashboard/students/by-class" },
+        { title: "শিক্ষার্থীর আইডি কার্ড জেনারেটর", href: "/dashboard/students/id-cards" },
+        { title: "প্রসঙ্গ / ছাড়পত্র (TC & Character Cert)", href: "/dashboard/students/certificates" },
+        { title: "অভিভাবকের তথ্য ও যোগাযোগ", href: "/dashboard/students/parents" },
+        { title: "শিক্ষার্থীর উপস্থিতি রিপোর্ট", href: "/dashboard/students/attendance-report" },
+        { title: "আবাসিক/হোস্টেল শিক্ষার্থী", href: "/dashboard/students/hostel" },
+        { title: "ঝরে পড়া / নিষ্ক্রিয় শিক্ষার্থী", href: "/dashboard/students/inactive" },
+    ]
+},
         { id: "teachers", title: "শিক্ষক ব্যবস্থাপনা", icon: "🕌", href: "/dashboard/teachers", roles: ["admin"] },
         { id: "administration", title: "প্রশাসনিক বিভাগ", icon: "🛡️", href: "/dashboard/administration", roles: ["admin"] },
         {
