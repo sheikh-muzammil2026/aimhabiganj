@@ -21,7 +21,7 @@ export default function AllStudentsPage() {
       setLoading(true);
       setError(null);
       // শুধু অনুমোদিত শিক্ষার্থীদের ডেটা ফেচ করা হচ্ছে
-      const response = await fetch("/api/students?status=approved");
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/students?status=Approved`);
       const result = await response.json();
 
       if (result.success) {
