@@ -430,7 +430,7 @@ export default function AllStudentsPage() {
               </td>
               <td className="py-3 px-4 text-center">
                 <div className="flex items-center justify-center gap-1.5">
-                  <Link href={`/dashboard/admin/students/edit/${id}`} title="বিস্তারিত প্রোফাইল" className="p-1.5 text-slate-600 hover:text-emerald-700 hover:bg-emerald-100 rounded-lg transition-all">👁️</Link>
+                  <Link href={`/dashboard/admin/students/studentProfile/${id}`} title="বিস্তারিত প্রোফাইল" className="p-1.5 text-slate-600 hover:text-emerald-700 hover:bg-emerald-100 rounded-lg transition-all">👁️</Link>
                   <Link href={`/dashboard/admin/students/edit/${id}`} title="এডিট করুন" className="p-1.5 text-slate-600 hover:text-amber-700 hover:bg-amber-100 rounded-lg transition-all">✏️</Link>
                 </div>
               </td>
