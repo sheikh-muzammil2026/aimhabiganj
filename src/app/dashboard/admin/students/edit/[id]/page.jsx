@@ -10,6 +10,22 @@ import AdmissionFormPage2 from "@/components/admission/AdmissionFormPage2";
 import AdmissionFormPage3 from "@/components/admission/AdmissionFormPage3";
 import OfficeUseSection from '@/components/admission/OfficeUseSection';
 
+const normalizeClassName = (clsName) => {
+  if (!clsName) return "";
+  const name = clsName.trim();
+  if (name === "আমপারা/কায়দা" || name === "কায়দা/আমপারা" || name === "কায়দা / আমপারা") return "কায়দা/আমপারা";
+  if (name === "নাযেরা" || name === "নাজেরা") return "নাজেরা";
+  if (name === "অষ্টম" || name === "৮ম শ্রেণি") return "৮ম শ্রেণি";
+  return name;
+};
+
+const normalizeAcademyType = (type) => {
+  if (!type) return "";
+  const t = type.trim();
+  if (t === "মাধ্যমিক (মুতাওয়াসসিতা)" || t === "মাধ্যমিক") return "মাধ্যমিক";
+  return t;
+};
+
 export default function EditStudentPage() {
   const router = useRouter();
   const params = useParams();
@@ -94,12 +110,12 @@ export default function EditStudentPage() {
     applicantSignatureDate: "",
 
     attachments: {
-      citizenshipCertificate: false,
-      birthCertificate: false,
-      guardianNid: false,
-      academicTranscript: false,
-      boardRegCard: false,
-      orphanCertificate: false,
+      citizenshipCertificate: "",
+      birthCertificate: "",
+      guardianNid: "",
+      academicTranscript: "",
+      boardRegCard: "",
+      orphanCertificate: "",
     },
 
     officeUse: {
@@ -154,24 +170,28 @@ export default function EditStudentPage() {
             divisionPreHifz: {
               active: false, type: "", class: "",
               ...(s.divisionPreHifz || {}),
+              class: normalizeClassName(s.divisionPreHifz?.class)
             },
             divisionHifz: {
               active: false, type: "", class: "",
               ...(s.divisionHifz || {}),
+              class: normalizeClassName(s.divisionHifz?.class)
             },
             divisionAcademy: {
               active: false, type: "", class: "", academyType: "",
-              ...(s.divisionAcademy || {}),
+              ...(s.divisionAcademy || s.divisionAcademic || {}),
+              academyType: normalizeAcademyType(s.divisionAcademy?.academyType || s.divisionAcademic?.academyType),
+              class: normalizeClassName(s.divisionAcademy?.class || s.divisionAcademic?.class)
             },
 
-            // empty string ("") আসলেও যেন boolean (true/false) হয়ে যায়
+            // empty string ("") আসলেও যেন boolean না হয়ে string URL থাকে
             attachments: {
-              citizenshipCertificate: Boolean(s.attachments?.citizenshipCertificate),
-              birthCertificate: Boolean(s.attachments?.birthCertificate),
-              guardianNid: Boolean(s.attachments?.guardianNid),
-              academicTranscript: Boolean(s.attachments?.academicTranscript),
-              boardRegCard: Boolean(s.attachments?.boardRegCard),
-              orphanCertificate: Boolean(s.attachments?.orphanCertificate),
+              citizenshipCertificate: s.attachments?.citizenshipCertificate || "",
+              birthCertificate: s.attachments?.birthCertificate || "",
+              guardianNid: s.attachments?.guardianNid || "",
+              academicTranscript: s.attachments?.academicTranscript || "",
+              boardRegCard: s.attachments?.boardRegCard || "",
+              orphanCertificate: s.attachments?.orphanCertificate || "",
             },
 
             officeUse: {
@@ -197,7 +217,8 @@ export default function EditStudentPage() {
 
   // স্মার্ট ইনপুট চেঞ্জ হ্যান্ডলার
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
+    const val = type === "checkbox" ? checked : value;
 
     if (name.includes(".")) {
       const [parent, child] = name.split(".");

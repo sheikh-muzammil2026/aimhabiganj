@@ -70,9 +70,10 @@ const bdDistrictsAndThanas = {
 
 export default function AdmissionFormPage1({ formData, handleChange, handleNestedChange }) {
   const [uploading, setUploading] = useState(false);
-  const [currentThanas, setCurrentThanas] = useState([]);
-  const [permanentThanas, setPermanentThanas] = useState([]);
   const [isSameAddress, setIsSameAddress] = useState(false);
+
+  const currentThanas = (formData?.currentAddress?.district && bdDistrictsAndThanas[formData.currentAddress.district]) || [];
+  const permanentThanas = (formData?.permanentAddress?.district && bdDistrictsAndThanas[formData.permanentAddress.district]) || [];
 
   // ১. এডিটিং মোড এবং সাধারণ লোডের সময় বর্তমান ও স্থায়ী ঠিকানা একই কি না তা চেক করা
   useEffect(() => {
@@ -129,26 +130,6 @@ export default function AdmissionFormPage1({ formData, handleChange, handleNeste
     }
   };
 
-  // ৪. থানার ডাইনামিক ড্রপডাউন লোড (বর্তমান ঠিকানা)
-  useEffect(() => {
-    const currentDist = formData?.currentAddress?.district;
-    if (currentDist && typeof bdDistrictsAndThanas !== "undefined" && bdDistrictsAndThanas[currentDist]) {
-      setCurrentThanas(bdDistrictsAndThanas[currentDist]);
-    } else {
-      setCurrentThanas([]);
-    }
-  }, [formData?.currentAddress?.district]);
-
-  // ৫. থানার ডাইনামিক ড্রপডাউন লোড (স্থায়ী ঠিকানা)
-  useEffect(() => {
-    const permDist = formData?.permanentAddress?.district;
-    if (permDist && typeof bdDistrictsAndThanas !== "undefined" && bdDistrictsAndThanas[permDist]) {
-      setPermanentThanas(bdDistrictsAndThanas[permDist]);
-    } else {
-      setPermanentThanas([]);
-    }
-  }, [formData?.permanentAddress?.district]);
-
   // ৬. বর্তমান ঠিকানা টাইপ করার সময় (যদি চেকবক্স টিক দেওয়া থাকে)
   const handleCurrentAddressChange = (e) => {
     handleChange(e);
@@ -197,7 +178,6 @@ export default function AdmissionFormPage1({ formData, handleChange, handleNeste
           value: { house: "", road: "", village: "", postOffice: "", thana: "", district: "" },
         },
       });
-      setPermanentThanas([]);
     }
   };
 
@@ -619,6 +599,8 @@ export default function AdmissionFormPage1({ formData, handleChange, handleNeste
                       <option value="">বাছাই করুন</option>
                       <option value="সবক">সবক</option>
                       <option value="শুনানি">শুনানি</option>
+                      <option value="কায়দা/আমপারা">কায়দা/আমপারা</option>
+                      <option value="নাজেরা">নাজেরা</option>
                     </select>
                   </td>
                   <td className="p-1.5 print:p-1">
@@ -738,6 +720,8 @@ export default function AdmissionFormPage1({ formData, handleChange, handleNeste
                     <option value="">শ্রেণি বাছাই</option>
                     <option value="সবক">সবক</option>
                     <option value="শুনানি">শুনানি</option>
+                    <option value="কায়দা/আমপারা">কায়দা/আমপারা</option>
+                    <option value="নাজেরা">নাজেরা</option>
                   </select>
                   <select name="divisionHifz.type" value={formData.divisionHifz?.type || ""} onChange={handleChange} className="border border-gray-300 rounded p-1 text-xs bg-white w-full">
                     <option value="">ধরণ বাছাই</option>

@@ -10,6 +10,22 @@ import AdmissionFormPage2 from "@/components/admission/AdmissionFormPage2";
 import AdmissionFormPage3 from "@/components/admission/AdmissionFormPage3";
 import OfficeUseSection from '@/components/admission/OfficeUseSection';
 
+const normalizeClassName = (clsName) => {
+  if (!clsName) return "";
+  const name = clsName.trim();
+  if (name === "আমপারা/কায়দা" || name === "কায়দা/আমপারা" || name === "কায়দা / আমপারা") return "কায়দা/আমপারা";
+  if (name === "নাযেরা" || name === "নাজেরা") return "নাজেরা";
+  if (name === "অষ্টম" || name === "৮ম শ্রেণি") return "৮ম শ্রেণি";
+  return name;
+};
+
+const normalizeAcademyType = (type) => {
+  if (!type) return "";
+  const t = type.trim();
+  if (t === "মাধ্যমিক (মুতাওয়াসসিতা)" || t === "মাধ্যমিক") return "মাধ্যমিক";
+  return t;
+};
+
 export default function EditAdmissionPage() {
   const router = useRouter();
   const params = useParams();
@@ -97,12 +113,12 @@ export default function EditAdmissionPage() {
 
     // 3rd page
     attachments: {
-      citizenshipCertificate: false,
-      birthCertificate: false,
-      guardianNid: false,
-      academicTranscript: false,
-      boardRegCard: false,
-      orphanCertificate: false,
+      citizenshipCertificate: "",
+      birthCertificate: "",
+      guardianNid: "",
+      academicTranscript: "",
+      boardRegCard: "",
+      orphanCertificate: "",
     },
 
     // officeSection
@@ -137,16 +153,17 @@ export default function EditAdmissionPage() {
         const result = await res.json();
 
         if (result.success && result.data) {
+          const s = result.data;
           setFormData({
-            ...result.data,
-            dateOfBirth: result.data.dateOfBirth
-              ? String(result.data.dateOfBirth).split("T")[0]
+            ...s,
+            dateOfBirth: s.dateOfBirth
+              ? String(s.dateOfBirth).split("T")[0]
               : "",
-            leavingDate: result.data.leavingDate
-              ? String(result.data.leavingDate).split("T")[0]
+            leavingDate: s.leavingDate
+              ? String(s.leavingDate).split("T")[0]
               : "",
-            applicantSignatureDate: result.data.applicantSignatureDate
-              ? String(result.data.applicantSignatureDate).split("T")[0]
+            applicantSignatureDate: s.applicantSignatureDate
+              ? String(s.applicantSignatureDate).split("T")[0]
               : "",
 
             currentAddress: {
@@ -156,7 +173,7 @@ export default function EditAdmissionPage() {
               postOffice: "",
               thana: "",
               district: "",
-              ...(result.data.currentAddress || {}),
+              ...(s.currentAddress || {}),
             },
             permanentAddress: {
               house: "",
@@ -165,37 +182,40 @@ export default function EditAdmissionPage() {
               postOffice: "",
               thana: "",
               district: "",
-              ...(result.data.permanentAddress || {}),
+              ...(s.permanentAddress || {}),
             },
 
             divisionPreHifz: {
               active: false,
               type: "",
               class: "",
-              ...(result.data.divisionPreHifz || {}),
+              ...(s.divisionPreHifz || {}),
+              class: normalizeClassName(s.divisionPreHifz?.class)
             },
             divisionHifz: {
               active: false,
               type: "",
               class: "",
-              ...(result.data.divisionHifz || {}),
+              ...(s.divisionHifz || {}),
+              class: normalizeClassName(s.divisionHifz?.class)
             },
             divisionAcademy: {
               active: false,
               type: "",
               class: "",
               academyType: "",
-              ...(result.data.divisionAcademy || result.data.divisionAcademic || {}),
+              ...(s.divisionAcademy || s.divisionAcademic || {}),
+              academyType: normalizeAcademyType(s.divisionAcademy?.academyType || s.divisionAcademic?.academyType),
+              class: normalizeClassName(s.divisionAcademy?.class || s.divisionAcademic?.class)
             },
 
             attachments: {
-              citizenshipCertificate: false,
-              birthCertificate: false,
-              guardianNid: false,
-              academicTranscript: false,
-              boardRegCard: false,
-              orphanCertificate: false,
-              ...(result.data.attachments || {}),
+              citizenshipCertificate: s.attachments?.citizenshipCertificate || "",
+              birthCertificate: s.attachments?.birthCertificate || "",
+              guardianNid: s.attachments?.guardianNid || "",
+              academicTranscript: s.attachments?.academicTranscript || "",
+              boardRegCard: s.attachments?.boardRegCard || "",
+              orphanCertificate: s.attachments?.orphanCertificate || "",
             },
 
             officeUse: {
@@ -210,7 +230,7 @@ export default function EditAdmissionPage() {
               examinerId2: "",
               examinerId3: "",
               receiptNo: "",
-              ...(result.data.officeUse || {}),
+              ...(s.officeUse || {}),
             },
           });
         } else {
@@ -229,7 +249,8 @@ export default function EditAdmissionPage() {
 
   // স্মার্ট ইনপুট চেঞ্জ হ্যান্ডলার (সাধারণ ইনপুট, নেস্টেড ডট-নোটেশন এবং পুরো অবজেক্ট পাস—সবই হ্যান্ডেল করবে)
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
+    const val = type === "checkbox" ? checked : value;
 
     // ১. যদি নেস্টেড নাম পাঠানো হয় (যেমন: "currentAddress.district")
     if (name.includes(".")) {
@@ -238,14 +259,14 @@ export default function EditAdmissionPage() {
         ...prev,
         [parent]: {
           ...(prev[parent] || {}),
-          [child]: value,
+          [child]: val,
         },
       }));
     } else {
       // ২. সাধারণ ইনপুট বা সরাসরি অবজেক্ট সিঙ্ক (যেমন: permanentAddress)
       setFormData((prev) => ({
         ...prev,
-        [name]: value,
+        [name]: val,
       }));
     }
   };
