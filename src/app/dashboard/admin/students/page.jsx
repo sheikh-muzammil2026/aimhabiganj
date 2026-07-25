@@ -369,122 +369,143 @@ export default function AllStudentsPage() {
             <p className="text-xs text-slate-400">আপনার নির্বাচন করা ফিল্টার পরিবর্তন করে দেখতে পারেন।</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[700px]">
-              <thead>
-                <tr className="bg-[#043e30] text-emerald-100 text-[11px] sm:text-xs uppercase tracking-wider font-bold">
-                  <th className="py-3.5 px-4">শিক্ষার্থী ও আইডি</th>
-                  <th className="py-3.5 px-4">বিভাগ, শ্রেণি ও টাইপ</th>
-                  <th className="py-3.5 px-4">পিতার নাম</th>
-                  <th className="py-3.5 px-4">যোগাযোগ মাধ্যম ও নম্বর</th>
-                  <th className="py-3.5 px-4">জেলা</th>
-                  <th className="py-3.5 px-4">সেশন</th>
-                  <th className="py-3.5 px-4 text-center">অ্যাকশন</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-xs sm:text-sm font-medium text-slate-700">
-                {filteredStudents.map((student) => {
-                  const details = getStudentClassDetails(student);
-                  const id = student._id?.$oid || student._id;
+          <div className="w-full">
+  {/* ১. ডেস্কটপ ও ট্যাবলেট ভিউ (md:block) */}
+  <div className="hidden md:block overflow-x-auto rounded-lg border border-slate-200">
+    <table className="w-full text-left border-collapse">
+      <thead>
+        <tr className="bg-[#043e30] text-emerald-100 text-xs uppercase tracking-wider font-bold">
+          <th className="py-3.5 px-4">শিক্ষার্থী ও আইডি</th>
+          <th className="py-3.5 px-4">বিভাগ, শ্রেণি ও টাইপ</th>
+          <th className="py-3.5 px-4">পিতার নাম</th>
+          <th className="py-3.5 px-4">যোগাযোগ মাধ্যম ও নম্বর</th>
+          <th className="py-3.5 px-4">জেলা</th>
+          <th className="py-3.5 px-4">সেশন</th>
+          <th className="py-3.5 px-4 text-center">অ্যাকশন</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-slate-100 text-sm font-medium text-slate-700">
+        {filteredStudents.map((student) => {
+          const details = getStudentClassDetails(student);
+          const id = student._id?.$oid || student._id;
 
-                  // প্রাথমিক যোগাযোগের মোবাইল বের করা
-                  const primaryMethod = student.primaryContactMethod || "পিতা";
-                  let contactNumber = student.fatherMobile || "N/A";
-                  if (primaryMethod === "মাতা" && student.motherMobile) contactNumber = student.motherMobile;
-                  if (primaryMethod === "অভিভাবক" && student.guardianMobile) contactNumber = student.guardianMobile;
+          const primaryMethod = student.primaryContactMethod || "পিতা";
+          let contactNumber = student.fatherMobile || "N/A";
+          if (primaryMethod === "মাতা" && student.motherMobile) contactNumber = student.motherMobile;
+          if (primaryMethod === "অভিভাবক" && student.guardianMobile) contactNumber = student.guardianMobile;
 
-                  return (
-                    <tr
-                      key={id}
-                      className="hover:bg-emerald-50/40 transition-colors duration-150"
-                    >
-                      {/* শিক্ষার্থী ছবি, নাম ও আইডি */}
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center overflow-hidden shrink-0 border border-emerald-200 text-xs">
-                            {student.studentImage ? (
-                              <img
-                                src={student.studentImage}
-                                alt={student.studentNameBangla}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              student.studentNameBangla?.charAt(0) || "S"
-                            )}
-                          </div>
-                          <div>
-                            <p className="font-bold text-slate-900 leading-tight">
-                              {student.studentNameBangla || "নাম বিহীন"}
-                            </p>
-                            <span className="text-[10px] text-emerald-800 font-extrabold bg-amber-400/20 px-1.5 py-0.5 rounded-md mt-0.5 inline-block">
-                              ID: {student.studentId || "N/A"}
-                            </span>
-                          </div>
-                        </div>
-                      </td>
+          return (
+            <tr key={id} className="hover:bg-emerald-50/40 transition-colors duration-150">
+              <td className="py-3 px-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center overflow-hidden shrink-0 border border-emerald-200 text-xs">
+                    {student.studentImage ? (
+                      <img src={student.studentImage} alt={student.studentNameBangla} className="w-full h-full object-cover" />
+                    ) : (
+                      student.studentNameBangla?.charAt(0) || "S"
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-900 leading-tight">{student.studentNameBangla || "নাম বিহীন"}</p>
+                    <span className="text-[10px] text-emerald-800 font-extrabold bg-amber-400/20 px-1.5 py-0.5 rounded-md mt-0.5 inline-block">
+                      ID: {student.studentId || "N/A"}
+                    </span>
+                  </div>
+                </div>
+              </td>
+              <td className="py-3 px-4">
+                <div className="font-bold text-slate-800">{details.className}</div>
+                <div className="text-[11px] text-slate-500">{details.divisionName} {details.type !== "N/A" && `(${details.type})`}</div>
+              </td>
+              <td className="py-3 px-4 font-semibold text-slate-800">{student.fatherNameBangla || "N/A"}</td>
+              <td className="py-3 px-4">
+                <div className="font-semibold text-slate-800">📞 {contactNumber !== "0" ? contactNumber : "N/A"}</div>
+                <div className="text-[10px] text-slate-400">মাধ্যম: {primaryMethod}</div>
+              </td>
+              <td className="py-3 px-4 text-slate-600">{student.currentAddress?.district || student.permanentAddress?.district || "N/A"}</td>
+              <td className="py-3 px-4">
+                <span className="inline-block text-[11px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-lg border border-slate-200">
+                  {student.sessionYear || "N/A"}
+                </span>
+              </td>
+              <td className="py-3 px-4 text-center">
+                <div className="flex items-center justify-center gap-1.5">
+                  <Link href={`/dashboard/admin/students/edit/${id}`} title="বিস্তারিত প্রোফাইল" className="p-1.5 text-slate-600 hover:text-emerald-700 hover:bg-emerald-100 rounded-lg transition-all">👁️</Link>
+                  <Link href={`/dashboard/admin/students/edit/${id}`} title="এডিট করুন" className="p-1.5 text-slate-600 hover:text-amber-700 hover:bg-amber-100 rounded-lg transition-all">✏️</Link>
+                </div>
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
 
-                      {/* বিভাগ, শ্রেণি ও টাইপ */}
-                      <td className="py-3 px-4">
-                        <div className="font-bold text-slate-800">
-                          {details.className}
-                        </div>
-                        <div className="text-[11px] text-slate-500">
-                          {details.divisionName} {details.type !== "N/A" && `(${details.type})`}
-                        </div>
-                      </td>
+  {/* ২. মোবাইল ভিউ (md:hidden) - ফিল্ডগুলোকে সুন্দর কার্ড আকারে উপস্থাপন */}
+  <div className="grid grid-cols-1 gap-3 md:hidden">
+    {filteredStudents.map((student) => {
+      const details = getStudentClassDetails(student);
+      const id = student._id?.$oid || student._id;
 
-                      {/* পিতার নাম */}
-                      <td className="py-3 px-4 font-semibold text-slate-800">
-                        {student.fatherNameBangla || "N/A"}
-                      </td>
+      const primaryMethod = student.primaryContactMethod || "পিতা";
+      let contactNumber = student.fatherMobile || "N/A";
+      if (primaryMethod === "মাতা" && student.motherMobile) contactNumber = student.motherMobile;
+      if (primaryMethod === "অভিভাবক" && student.guardianMobile) contactNumber = student.guardianMobile;
 
-                      {/* যোগাযোগ মাধ্যম ও মোবাইল */}
-                      <td className="py-3 px-4">
-                        <div className="font-semibold text-slate-800">
-                          📞 {contactNumber !== "0" ? contactNumber : "N/A"}
-                        </div>
-                        <div className="text-[10px] text-slate-400">
-                          মাধ্যম: {primaryMethod}
-                        </div>
-                      </td>
-
-                      {/* জেলা */}
-                      <td className="py-3 px-4 text-slate-600">
-                        {student.currentAddress?.district || student.permanentAddress?.district || "N/A"}
-                      </td>
-
-                      {/* সেশন বছর */}
-                      <td className="py-3 px-4">
-                        <span className="inline-block text-[10px] sm:text-[11px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-lg border border-slate-200">
-                          {student.sessionYear || "N/A"}
-                        </span>
-                      </td>
-
-                      {/* অ্যাকশন বাটন */}
-                      <td className="py-3 px-4 text-center">
-                        <div className="flex items-center justify-center gap-1.5">
-                          <Link
-                            href={`/dashboard/admin/students/edit/${id}`}
-                            title="বিস্তারিত প্রোফাইল"
-                            className="p-1.5 text-slate-600 hover:text-emerald-700 hover:bg-emerald-100 rounded-lg transition-all"
-                          >
-                            👁️
-                          </Link>
-                          <Link
-                            href={`/dashboard/admin/students/edit/${id}`}
-                            title="এডিট করুন"
-                            className="p-1.5 text-slate-600 hover:text-amber-700 hover:bg-amber-100 rounded-lg transition-all"
-                          >
-                            ✏️
-                          </Link>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+      return (
+        <div key={id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
+          {/* প্রোফাইল হেডার */}
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+            <div className="flex items-center gap-2.5">
+              <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center overflow-hidden shrink-0 border border-emerald-200 text-sm">
+                {student.studentImage ? (
+                  <img src={student.studentImage} alt={student.studentNameBangla} className="w-full h-full object-cover" />
+                ) : (
+                  student.studentNameBangla?.charAt(0) || "S"
+                )}
+              </div>
+              <div>
+                <p className="font-bold text-slate-900 text-sm">{student.studentNameBangla || "নাম বিহীন"}</p>
+                <span className="text-[10px] text-emerald-800 font-extrabold bg-amber-400/20 px-1.5 py-0.5 rounded-md inline-block">
+                  ID: {student.studentId || "N/A"}
+                </span>
+              </div>
+            </div>
+            {/* অ্যাকশন বাটন */}
+            <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-lg border border-slate-200">
+              <Link href={`/dashboard/admin/students/edit/${id}`} className="p-1.5 text-slate-600 hover:bg-emerald-100 rounded-md">👁️</Link>
+              <Link href={`/dashboard/admin/students/edit/${id}`} className="p-1.5 text-slate-600 hover:bg-amber-100 rounded-md">✏️</Link>
+            </div>
           </div>
+
+          {/* বিস্তারিত তথ্য বিবরণী */}
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <span className="text-slate-400 block text-[10px]">শ্রেণি ও বিভাগ:</span>
+              <span className="font-bold text-slate-800">{details.className}</span>
+              <span className="text-[10px] text-slate-500 block">{details.divisionName} {details.type !== "N/A" && `(${details.type})`}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 block text-[10px]">পিতার নাম:</span>
+              <span className="font-semibold text-slate-800">{student.fatherNameBangla || "N/A"}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 block text-[10px]">যোগাযোগ ({primaryMethod}):</span>
+              <span className="font-semibold text-slate-800">📞 {contactNumber !== "0" ? contactNumber : "N/A"}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 block text-[10px]">জেলা ও সেশন:</span>
+              <span className="text-slate-700 font-medium">{student.currentAddress?.district || student.permanentAddress?.district || "N/A"}</span>
+              <span className="ml-1.5 inline-block text-[10px] font-bold bg-slate-100 text-slate-700 px-1.5 py-0.2 rounded border border-slate-200">
+                {student.sessionYear || "N/A"}
+              </span>
+            </div>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+</div>
         )}
       </div>
     </div>
