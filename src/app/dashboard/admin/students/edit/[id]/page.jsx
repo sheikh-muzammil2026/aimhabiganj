@@ -143,7 +143,6 @@ export default function EditStudentPage() {
     const fetchStudentData = async () => {
       try {
         setIsLoading(true);
-        // নিশ্চিত করুন আপনার ব্যাকএন্ডের স্টুডেন্ট এডিটিং API রুটটি সঠিক আছে কিনা
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_SERVER_API}/api/students/edit/${id}`
         );
@@ -154,37 +153,59 @@ export default function EditStudentPage() {
 
           setFormData({
             ...s,
-            dateOfBirth: s.dateOfBirth ? String(s.dateOfBirth).split("T")[0] : "",
-            leavingDate: s.leavingDate ? String(s.leavingDate).split("T")[0] : "",
-            applicantSignatureDate: s.applicantSignatureDate ? String(s.applicantSignatureDate).split("T")[0] : "",
+            dateOfBirth: s.dateOfBirth
+              ? String(s.dateOfBirth).split("T")[0]
+              : "",
+            leavingDate: s.leavingDate
+              ? String(s.leavingDate).split("T")[0]
+              : "",
+            applicantSignatureDate: s.applicantSignatureDate
+              ? String(s.applicantSignatureDate).split("T")[0]
+              : "",
 
             currentAddress: {
-              house: "", road: "", village: "", postOffice: "", thana: "", district: "",
+              house: "",
+              road: "",
+              village: "",
+              postOffice: "",
+              thana: "",
+              district: "",
               ...(s.currentAddress || {}),
             },
             permanentAddress: {
-              house: "", road: "", village: "", postOffice: "", thana: "", district: "",
+              house: "",
+              road: "",
+              village: "",
+              postOffice: "",
+              thana: "",
+              district: "",
               ...(s.permanentAddress || {}),
             },
 
             divisionPreHifz: {
-              active: false, type: "", class: "",
+              active: false,
+              type: "",
+              class: "",
               ...(s.divisionPreHifz || {}),
               class: normalizeClassName(s.divisionPreHifz?.class)
             },
             divisionHifz: {
-              active: false, type: "", class: "",
+              active: false,
+              type: "",
+              class: "",
               ...(s.divisionHifz || {}),
               class: normalizeClassName(s.divisionHifz?.class)
             },
             divisionAcademy: {
-              active: false, type: "", class: "", academyType: "",
+              active: false,
+              type: "",
+              class: "",
+              academyType: "",
               ...(s.divisionAcademy || s.divisionAcademic || {}),
               academyType: normalizeAcademyType(s.divisionAcademy?.academyType || s.divisionAcademic?.academyType),
               class: normalizeClassName(s.divisionAcademy?.class || s.divisionAcademic?.class)
             },
 
-            // empty string ("") আসলেও যেন boolean না হয়ে string URL থাকে
             attachments: {
               citizenshipCertificate: s.attachments?.citizenshipCertificate || "",
               birthCertificate: s.attachments?.birthCertificate || "",
@@ -195,9 +216,20 @@ export default function EditStudentPage() {
             },
 
             officeUse: {
-              markTilawat: "", markArabic: "", markEnglish: "", markMath: "", markOthers: "",
-              totalMarks: 0, recommendedClass: "", rollNumber: "", monthlyFee: "", feeCategory: "",
-              examinerId1: "", examinerId2: "", examinerId3: "", receiptNo: "",
+              markTilawat: "",
+              markArabic: "",
+              markEnglish: "",
+              markMath: "",
+              markOthers: "",
+              totalMarks: 0,
+              recommendedClass: "",
+              rollNumber: "",
+              monthlyFee: "",
+              feeCategory: "",
+              examinerId1: "",
+              examinerId2: "",
+              examinerId3: "",
+              receiptNo: "",
               ...(s.officeUse || {}),
             },
           });
@@ -226,13 +258,13 @@ export default function EditStudentPage() {
         ...prev,
         [parent]: {
           ...(prev[parent] || {}),
-          [child]: value,
+          [child]: val,
         },
       }));
     } else {
       setFormData((prev) => ({
         ...prev,
-        [name]: value,
+        [name]: val,
       }));
     }
   };
@@ -353,4 +385,4 @@ export default function EditStudentPage() {
       </form>
     </div>
   );
-      }
+}
