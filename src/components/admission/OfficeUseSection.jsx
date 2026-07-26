@@ -145,18 +145,18 @@ export default function OfficeUseSection({ formData, handleChange }) {
                             <option value="নার্সারি">নার্সারি</option>
 
                             <option disabled className="font-bold bg-gray-200 text-gray-700">-- প্রাথমিক --</option>
-                            <option value="১ম শ্রেণি">১ম শ্রেণি</option>
-                            <option value="২য় শ্রেণি">২য় শ্রেণি</option>
-                            <option value="৩য় শ্রেণি">৩য় শ্রেণি</option>
-                            <option value="৪র্থ শ্রেণি">৪র্থ শ্রেণি</option>
-                            <option value="৫ম শ্রেণি">৫ম শ্রেণি</option>
+                            <option value="প্রথম">প্রথম</option>
+                            <option value="দ্বিতীয়">দ্বিতীয়</option>
+                            <option value="তৃতীয়">তৃতীয়</option>
+                            <option value="চতুর্থ">চতুর্থ</option>
+                            <option value="পঞ্চম">পঞ্চম</option>
 
                             <option disabled className="font-bold bg-gray-200 text-gray-700">-- মাধ্যমিক --</option>
-                            <option value="৬ষ্ঠ শ্রেণি">৬ষ্ঠ শ্রেণি</option>
-                            <option value="৭ম শ্রেণি">৭ম শ্রেণি</option>
-                            <option value="৮ম শ্রেণি">৮ম শ্রেণি</option>
-                            <option value="নবম শ্রেণি">নবম শ্রেণি</option>
-                            <option value="দশম শ্রেণি">দশম শ্রেণি</option>
+                            <option value="ষষ্ঠ">ষষ্ঠ</option>
+                            <option value="সপ্তম">সপ্তম</option>
+                            <option value="অষ্টম">অষ্টম</option>
+                            <option value="নবম">নবম</option>
+                            <option value="দশম">দশম</option>
 
                             <option disabled className="font-bold bg-gray-200 text-gray-700">-- উচ্চমাধ্যমিক --</option>
                             <option value="১১শ শ্রেণি">১১শ শ্রেণি</option>

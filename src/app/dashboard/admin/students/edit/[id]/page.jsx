@@ -15,7 +15,7 @@ const normalizeClassName = (clsName) => {
   const name = clsName.trim();
   if (name === "আমপারা/কায়দা" || name === "কায়দা/আমপারা" || name === "কায়দা / আমপারা") return "কায়দা/আমপারা";
   if (name === "নাযেরা" || name === "নাজেরা") return "নাজেরা";
-  if (name === "অষ্টম" || name === "৮ম শ্রেণি") return "৮ম শ্রেণি";
+  if (name === "অষ্টম" || name === "৮ম শ্রেণি") return "অষ্টম";
   return name;
 };
 

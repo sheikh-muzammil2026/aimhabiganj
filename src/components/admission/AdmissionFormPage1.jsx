@@ -223,8 +223,8 @@ export default function AdmissionFormPage1({ formData, handleChange, handleNeste
   // ১০. একাডেমি ক্লাস লিস্ট
   const getAcademyClasses = () => {
     if (selectedAcademyType === "প্রাক-প্রাথমিক") return ["প্লে", "নার্সারি"];
-    if (selectedAcademyType === "প্রাথমিক") return ["১ম শ্রেণি", "২য় শ্রেণি", "৩য় শ্রেণি", "৪র্থ শ্রেণি", "৫ম শ্রেণি"];
-    if (selectedAcademyType === "মাধ্যমিক") return ["৬ষ্ঠ শ্রেণি", "৭ম শ্রেণি", "৮ম শ্রেণি", "নবম শ্রেণি", "দশম শ্রেণি"];
+    if (selectedAcademyType === "প্রাথমিক") return ["প্রথম", "দ্বিতীয়", "তৃতীয়", "চতুর্থ", "পঞ্চম"];
+    if (selectedAcademyType === "মাধ্যমিক") return ["ষষ্ঠ", "সপ্তম", "অষ্টম", "নবম", "দশম"];
     if (selectedAcademyType === "উচ্চমাধ্যমিক") return ["১১শ শ্রেণি", "১২শ শ্রেণি"];
     return [];
   };

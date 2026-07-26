@@ -250,9 +250,9 @@ export default function AdmissionFormPage3({ formData, handleChange }) {
          
 
           {/* ৫. নতুন ডাইনামিক ফিল্ড ১: ৭ম বা ৮ম শ্রেণীতে ভর্তি হতে চাইলে রেজিস্ট্রেশন কার্ড আপলোড */}
-          {(formData.divisionAcademy.class ===  "৭ম শ্রেণি" || formData.divisionAcademy.class === "৮ম শ্রেণি" ) && (
+          {(formData.divisionAcademy.class ===  "সপ্তম" || formData.divisionAcademy.class === "অষ্টম" ) && (
             <div className="flex flex-col gap-1.5 bg-amber-50/60 p-2.5 rounded border border-amber-300 md:col-span-2 animate-fade-in">
-              <span className="font-bold text-amber-900">৫. পূর্ববর্তী বোর্ডের প্রাথমিক/জেএসডি রেজিস্ট্রেশন কার্ডের স্পষ্ট কপি (৭ম/৮ম শ্রেণীতে ভর্তির জন্য):</span>
+              <span className="font-bold text-amber-900">৫. পূর্ববর্তী বোর্ডের প্রাথমিক/জেএসডি রেজিস্ট্রেশন কার্ডের স্পষ্ট কপি (সপ্তম/অষ্টম শ্রেণীতে ভর্তির জন্য):</span>
               <div className="relative border border-dashed border-amber-500 rounded bg-white h-10 flex items-center justify-center cursor-pointer hover:bg-amber-100/50 transition-colors overflow-hidden">
                 <span className={`text-xs font-semibold ${formData?.attachments?.boardRegCard ? 'text-emerald-700' : 'text-amber-800'}`}>
                   {getFileStatus("boardRegCard")}
