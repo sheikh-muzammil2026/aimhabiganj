@@ -12,7 +12,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
     // Better Auth থেকে রিয়েল-টাইম সেশন এবং ইউজার ডেটা আনা
     const { data: session, isPending } = authClient.useSession();
-    
+
     // সেশন থেকে ইউজার ডেটা প্রসেস করা
     const user = session?.user;
     const userRole = user?.role?.toLowerCase() || "user"; // ডিফল্ট 'user' রোল
@@ -20,12 +20,12 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     const avatarLetter = user?.name ? user.name.charAt(0) : "ই";
 
     const menuConfig = [
-        { 
+        {
             id: "admin-dashboard",
-            title: "ওভারভিউ", 
-            icon: "🕌", 
-            href: "/dashboard/admin", 
-            roles: ["admin"] 
+            title: "ওভারভিউ",
+            icon: "🕌",
+            href: "/dashboard/admin",
+            roles: ["admin"]
         },
         {
             id: "academics",
@@ -33,22 +33,22 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             icon: "📚",
             roles: ["admin", "teacher"],
             dropdown: [
-                { title: "ক্লাস রুটিন", href: "/dashboard/admin/academics?section=class-routine" },
-                { title: "পরীক্ষা রুটিন", href: "/dashboard/admin/academics?section=exam-routine" },
-                { title: "পরীক্ষার ফলাফল (Results)", href: "/dashboard/admin/academics/results" },
+                { title: "ক্লাস রুটিন", href: "/dashboard/academics?section=class-routine" },
+                { title: "পরীক্ষা রুটিন", href: "/dashboard/academics?section=exam-routine" },
+                { title: "পরীক্ষার ফলাফল (Results)", href: "/dashboard/academics/results" },
             ]
         },
         {
             id: "admission",
             title: "ভর্তি ব্যবস্থাপনা",
             icon: "📝",
-            roles: ["admin", "accountant"], 
+            roles: ["admin", "accountant"],
             dropdown: [
-                { title: "ভর্তির সময়", href: "/dashboard/admin/admission?section=timeline" },
-                { title: "ভর্তি পরীক্ষা", href: "/dashboard/admin/admission?section=test" },
-                { title: "ভর্তি প্রক্রিয়া", href: "/dashboard/admin/admission?section=process" },
-                { title: "ভর্তি ফি", href: "/dashboard/admin/admission?section=fees" },
-                { title: "সকল আবেদন", href: "/dashboard/admin/admission" },
+                { title: "ভর্তির সময়", href: "/dashboard/admission?section=timeline" },
+                { title: "ভর্তি পরীক্ষা", href: "/dashboard/admission?section=test" },
+                { title: "ভর্তি প্রক্রিয়া", href: "/dashboard/admission?section=process" },
+                { title: "ভর্তি ফি", href: "/dashboard/admission?section=fees" },
+                { title: "সকল আবেদন", href: "/dashboard/admission" },
             ]
         },
         {
@@ -57,8 +57,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             icon: "🖼️",
             roles: ["admin"],
             dropdown: [
-                { title: "গ্যালারি নিয়ন্ত্রণ", href: "/dashboard/admin/gallery" },
-                { title: "ফটো এবং ভিডিও লিস্ট", href: "/dashboard/admin/gallery/list" },
+                { title: "গ্যালারি নিয়ন্ত্রণ", href: "/dashboard/gallery" },
+                { title: "ফটো এবং ভিডিও লিস্ট", href: "/dashboard/gallery/list" },
             ]
         },
         {
@@ -67,49 +67,49 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             icon: "💻",
             roles: ["admin", "teacher"],
             dropdown: [
-                { title: "লাইভ ক্লাস লিংক", href: "/dashboard/admin/smart-classroom/live" },
-                { title: "রেকর্ডেড ক্লাস আপলোড", href: "/dashboard/admin/smart-classroom/recorded" },
-                { title: "ই-বুক / লেকচার শিট", href: "/dashboard/admin/smart-classroom/ebooks" },
-                { title: "অনলাইন এক্সাম কন্ট্রোল", href: "/dashboard/admin/smart-classroom/exam" },
+                { title: "লাইভ ক্লাস লিংক", href: "/dashboard/smart-classroom/live" },
+                { title: "রেকর্ডেড ক্লাস আপলোড", href: "/dashboard/smart-classroom/recorded" },
+                { title: "ই-বুক / লেকচার শিট", href: "/dashboard/smart-classroom/ebooks" },
+                { title: "অনলাইন এক্সাম কন্ট্রোল", href: "/dashboard/smart-classroom/exam" },
             ]
         },
         { id: "attendance", title: "ডিজিটাল হাজিরা", icon: "📅", href: "/dashboard/attendance", roles: ["admin", "teacher"] },
         {
-    id: "students",
-    title: "শিক্ষার্থী ব্যবস্থাপনা",
-    icon: "👥",
-    roles: ["admin", "teacher"],
-    dropdown: [
-        { title: "সকল শিক্ষার্থী তালিকা", href: "/dashboard/admin/students" },
-        { title: "নতুন শিক্ষার্থী ভর্তি/এন্ট্রি", href: "/dashboard/students/add" },
-        { title: "শ্রেণী ও শাখা ভিত্তিক তালিকা", href: "/dashboard/admin/students/by-class" },
-        { title: "শিক্ষার্থীর আইডি কার্ড জেনারেটর", href: "/dashboard/students/id-cards" },
-        { title: "প্রসঙ্গ / ছাড়পত্র (TC & Character Cert)", href: "/dashboard/students/certificates" },
-        { title: "অভিভাবকের তথ্য ও যোগাযোগ", href: "/dashboard/students/parents" },
-        { title: "শিক্ষার্থীর উপস্থিতি রিপোর্ট", href: "/dashboard/students/attendance-report" },
-        { title: "আবাসিক/হোস্টেল শিক্ষার্থী", href: "/dashboard/students/hostel" },
-        { title: "ঝরে পড়া / নিষ্ক্রিয় শিক্ষার্থী", href: "/dashboard/students/inactive" },
-    ]
-},
+            id: "students",
+            title: "শিক্ষার্থী ব্যবস্থাপনা",
+            icon: "👥",
+            roles: ["admin", "teacher"],
+            dropdown: [
+                { title: "সকল শিক্ষার্থী তালিকা", href: "/dashboard/students" },
+                { title: "নতুন শিক্ষার্থী ভর্তি/এন্ট্রি", href: "/dashboard/students/add" },
+                { title: "শ্রেণী ও শাখা ভিত্তিক তালিকা", href: "/dashboard/students/by-class" },
+                { title: "শিক্ষার্থীর আইডি কার্ড জেনারেটর", href: "/dashboard/students/bulk-id-cards" },
+                { title: "প্রসঙ্গ / ছাড়পত্র (TC & Character Cert)", href: "/dashboard/students/certificates" },
+                { title: "অভিভাবকের তথ্য ও যোগাযোগ", href: "/dashboard/students/parents" },
+                { title: "শিক্ষার্থীর উপস্থিতি রিপোর্ট", href: "/dashboard/students/attendance-report" },
+                { title: "আবাসিক/হোস্টেল শিক্ষার্থী", href: "/dashboard/students/hostel" },
+                { title: "ঝরে পড়া / নিষ্ক্রিয় শিক্ষার্থী", href: "/dashboard/students/inactive" },
+            ]
+        },
         { id: "teachers", title: "শিক্ষক ব্যবস্থাপনা", icon: "🕌", href: "/dashboard/teachers", roles: ["admin"] },
         { id: "administration", title: "প্রশাসনিক বিভাগ", icon: "🛡️", href: "/dashboard/administration", roles: ["admin"] },
         {
-    id: "finance",
-    title: "হিসাব ও অর্থ বিভাগ",
-    icon: "💰",
-    roles: ["admin", "accountant"], 
-    dropdown: [
-        { title: "ফি ও তহবিল কনফিগার", href: "/dashboard/finance/fees-setup" }, // ১. এটিকে সবার উপরে আনা হয়েছে (যেহেতু এটি সেটিংস)
-        { title: "ফি কালেকশন (রসিদ)", href: "/dashboard/finance/collect" },      // ২. আমরা যে পেজটি বানালাম (/collect) সেটির রাউট যুক্ত করা হলো
-        { title: "রশিদ ইতিহাস/তালিকা", href: "/dashboard/finance/receipts" },   // আগের রসিদ পেজটিকে হিস্ট্রি হিসেবে ব্যবহার করা যাবে
-        { title: "খরচ ও ভাউচার ট্র্যাকিং", href: "/dashboard/finance/expenses" },
-        { title: "বেতন ও ভাতা (Payroll)", href: "/dashboard/finance/payroll" },
-        { title: "সদকা ও অনুদান", href: "/dashboard/finance/donations" },
-        { title: "জাকাত ফান্ড", href: "/dashboard/finance/zakat" },
-        { title: "ঋণ ও বকেয়া", href: "/dashboard/finance/dues" },
-        { title: "অ্যাকাউন্টিং রিপোর্টস", href: "/dashboard/finance/reports" },
-    ]
-},
+            id: "finance",
+            title: "হিসাব ও অর্থ বিভাগ",
+            icon: "💰",
+            roles: ["admin", "accountant"],
+            dropdown: [
+                { title: "ফি ও তহবিল কনফিগার", href: "/dashboard/finance/fees-setup" }, // ১. এটিকে সবার উপরে আনা হয়েছে (যেহেতু এটি সেটিংস)
+                { title: "ফি কালেকশন (রসিদ)", href: "/dashboard/finance/collect" },      // ২. আমরা যে পেজটি বানালাম (/collect) সেটির রাউট যুক্ত করা হলো
+                { title: "রশিদ ইতিহাস/তালিকা", href: "/dashboard/finance/receipts" },   // আগের রসিদ পেজটিকে হিস্ট্রি হিসেবে ব্যবহার করা যাবে
+                { title: "খরচ ও ভাউচার ট্র্যাকিং", href: "/dashboard/finance/expenses" },
+                { title: "বেতন ও ভাতা (Payroll)", href: "/dashboard/finance/payroll" },
+                { title: "সদকা ও অনুদান", href: "/dashboard/finance/donations" },
+                { title: "জাকাত ফান্ড", href: "/dashboard/finance/zakat" },
+                { title: "ঋণ ও বকেয়া", href: "/dashboard/finance/dues" },
+                { title: "অ্যাকাউন্টিং রিপোর্টস", href: "/dashboard/finance/reports" },
+            ]
+        },
 
         {
             id: "parent-corner",
@@ -145,7 +145,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     }, [pathname, isPending, userRole]);
 
     const displayRoleName = (role) => {
-        switch(role) {
+        switch (role) {
             case "admin": return "Admin";
             case "teacher": return "Teacher";
             case "accountant": return "Accountant";
@@ -174,11 +174,11 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 <div className="p-4 border-b border-emerald-800/40 flex items-center justify-between bg-emerald-950/30">
                     <Link href="/" className="group flex items-center gap-2.5 focus:outline-hidden">
                         <div className="w-10 h-10 p-1 bg-emerald-900/30 rounded-xl group-hover:bg-amber-500/10 border border-emerald-700/30 transition-all duration-300 group-hover:scale-105 shadow-sm flex items-center justify-center overflow-hidden">
-                            <Image 
-                                src="/aimlogo1.png" 
-                                alt="আস-সালাম আইডিয়াল মাদরাসা লোগো" 
-                                width={36} 
-                                height={36} 
+                            <Image
+                                src="/aimlogo1.png"
+                                alt="আস-সালাম আইডিয়াল মাদরাসা লোগো"
+                                width={36}
+                                height={36}
                                 className="object-contain"
                                 priority
                             />
@@ -211,8 +211,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                         <button
                                             onClick={() => setOpenDropdown(isDropdownOpen ? null : item.id)}
                                             className={`w-full flex items-center justify-between px-3 py-2.5 text-xs sm:text-sm rounded-xl transition-all duration-300 group/btn
-                                                ${isDropdownOpen 
-                                                    ? "bg-emerald-900/80 text-amber-300 shadow-inner border-l-4 border-amber-400 pl-2" 
+                                                ${isDropdownOpen
+                                                    ? "bg-emerald-900/80 text-amber-300 shadow-inner border-l-4 border-amber-400 pl-2"
                                                     : "text-emerald-100/90 hover:bg-emerald-800/40 hover:text-white hover:translate-x-1"}`}
                                         >
                                             <div className="flex items-center gap-3">
