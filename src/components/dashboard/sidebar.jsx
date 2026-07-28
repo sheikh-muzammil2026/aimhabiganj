@@ -83,7 +83,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 { title: "সকল শিক্ষার্থী তালিকা", href: "/dashboard/students" },
                 { title: "নতুন শিক্ষার্থী ভর্তি/এন্ট্রি", href: "/dashboard/students/add" },
                 { title: "শ্রেণী ও শাখা ভিত্তিক তালিকা", href: "/dashboard/students/by-class" },
-                { title: "শিক্ষার্থীর আইডি কার্ড জেনারেটর", href: "/dashboard/students/bulk-id-cards" },
+                { title: "শিক্ষার্থীর আইডি কার্ড জেনারেটর", href: "/dashboard/students/id-card" },
                 { title: "প্রসঙ্গ / ছাড়পত্র (TC & Character Cert)", href: "/dashboard/students/certificates" },
                 { title: "অভিভাবকের তথ্য ও যোগাযোগ", href: "/dashboard/students/parents" },
                 { title: "শিক্ষার্থীর উপস্থিতি রিপোর্ট", href: "/dashboard/students/attendance-report" },
