@@ -430,8 +430,8 @@ export default function AllStudentsPage() {
               </td>
               <td className="py-3 px-4 text-center">
                 <div className="flex items-center justify-center gap-1.5">
-                  <Link href={`/dashboard/admin/students/studentProfile/${id}`} title="বিস্তারিত প্রোফাইল" className="p-1.5 text-slate-600 hover:text-emerald-700 hover:bg-emerald-100 rounded-lg transition-all">👁️</Link>
-                  <Link href={`/dashboard/admin/students/edit/${id}`} title="এডিট করুন" className="p-1.5 text-slate-600 hover:text-amber-700 hover:bg-amber-100 rounded-lg transition-all">✏️</Link>
+                  <Link href={`/dashboard/students/studentProfile/${id}`} title="বিস্তারিত প্রোফাইল" className="p-1.5 text-slate-600 hover:text-emerald-700 hover:bg-emerald-100 rounded-lg transition-all">👁️</Link>
+                  <Link href={`/dashboard/students/edit/${id}`} title="এডিট করুন" className="p-1.5 text-slate-600 hover:text-amber-700 hover:bg-amber-100 rounded-lg transition-all">✏️</Link>
                 </div>
               </td>
             </tr>
@@ -473,8 +473,8 @@ export default function AllStudentsPage() {
             </div>
             {/* অ্যাকশন বাটন */}
             <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-lg border border-slate-200">
-              <Link href={`/dashboard/admin/students/edit/${id}`} className="p-1.5 text-slate-600 hover:bg-emerald-100 rounded-md">👁️</Link>
-              <Link href={`/dashboard/admin/students/edit/${id}`} className="p-1.5 text-slate-600 hover:bg-amber-100 rounded-md">✏️</Link>
+              <Link href={`/dashboard/students/edit/${id}`} className="p-1.5 text-slate-600 hover:bg-emerald-100 rounded-md">👁️</Link>
+              <Link href={`/dashboard/students/edit/${id}`} className="p-1.5 text-slate-600 hover:bg-amber-100 rounded-md">✏️</Link>
             </div>
           </div>
 
