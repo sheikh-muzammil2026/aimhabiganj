@@ -1,7 +1,9 @@
 "use client";
+
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 import {
     Home,
     FileText,
@@ -16,16 +18,25 @@ import {
     MonitorPlay,
     Image,
     PhoneCall,
-    ArrowRight
+    UserCheck,
+    LogIn
 } from "lucide-react";
 
 export default function BottomNavbar() {
     const pathname = usePathname();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isAcademicsOpen, setIsAcademicsOpen] = useState(false); // শিক্ষা কার্যক্রম ড্রয়ারের জন্য স্টেট
     const [activeDropdown, setActiveDropdown] = useState(null);
 
-    // প্রতিটি ক্যাটাগরির জন্য অর্থপূর্ণ ইসলামিক/মডার্ন আইকন সেটআপ
+    // Auth Session Check
+    const { data: session } = authClient.useSession();
+    const isLoggedIn = !!session?.user;
+    const userRole = session?.user?.role;
+
+    const getDashboardPath = () => {
+        if (!userRole) return "/";
+        return `/dashboard/${userRole.toLowerCase()}`;
+    };
+
     const menuItems = [
         { name: "হোম", href: "/", icon: <Home className="w-4 h-4" /> },
         {
@@ -113,15 +124,14 @@ export default function BottomNavbar() {
         },
     ];
 
-    // শিক্ষা কার্যক্রমের সাব-আইটেমগুলো সহজে ম্যাপ করার জন্য আলাদাকরণ
-    const academicSubItems = menuItems.find(item => item.name === "শিক্ষা কার্যক্রম")?.dropdown || [];
-
-    // মূল বারের আইটেমসমূহ (শিক্ষা কার্যক্রম ও ফলাফল যুক্ত)
+    // মূল বারের আইটেমসমূহ (লগইন স্ট্যাটাস অনুযায়ী ড্যাশবোর্ড বা লগইন প্রদর্শন)
     const primaryItems = [
-        { name: "হোম", href: "/", icon: <Home className="w-[22px] h-[22px]" />, isLink: true },
-        { name: "শিক্ষা কার্যক্রম", href: "/academics", icon: <BookOpen className="w-[22px] h-[22px]" />, isLink: false }, // এটি বাটনের মতো কাজ করবে
-        { name: "ফলাফল", href: "/results", icon: <GraduationCap className="w-[22px] h-[22px]" />, isLink: true },
-        { name: "নোটিশ", href: "/notices", icon: <FileText className="w-[22px] h-[22px]" />, isLink: true },
+        { name: "হোম", href: "/", icon: <Home className="w-[22px] h-[22px]" /> },
+        { name: "ফলাফল", href: "/results", icon: <GraduationCap className="w-[22px] h-[22px]" /> },
+        { name: "নোটিশ", href: "/notices", icon: <FileText className="w-[22px] h-[22px]" /> },
+        isLoggedIn
+            ? { name: "ড্যাশবোর্ড", href: getDashboardPath(), icon: <UserCheck className="w-[22px] h-[22px]" /> }
+            : { name: "লগইন", href: "/login", icon: <LogIn className="w-[22px] h-[22px]" /> },
     ];
 
     const toggleDropdown = (index) => {
@@ -131,62 +141,34 @@ export default function BottomNavbar() {
     return (
         <>
             {/* ১. মূল বটম নেভিগেশন বার (শুধু মোবাইল ভিউ: md:hidden) */}
-            <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-b from-[#ffffff] to-[#f4fbf7] border-t-2 border-emerald-600/30 shadow-[0_-8px_30px_rgb(6,95,70,0.08)] rounded-t-2xl md:hidden pb-safe  print:hidden">
+            <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-b from-[#ffffff] to-[#f4fbf7] border-t-2 border-emerald-600/30 shadow-[0_-8px_30px_rgb(6,95,70,0.08)] rounded-t-2xl md:hidden pb-safe print:hidden">
                 <div className="flex justify-around items-center h-16 px-2">
                     {primaryItems.map((item, idx) => {
-                        const isActive = item.isLink ? pathname === item.href : isAcademicsOpen;
+                        const isActive = pathname === item.href;
 
-                        if (item.isLink) {
-                            return (
-                                <Link
-                                    key={idx}
-                                    href={item.href}
-                                    className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative group ${isActive ? "text-emerald-700 font-bold" : "text-gray-500 hover:text-emerald-600"
-                                        }`}
-                                >
-                                    {isActive && (
-                                        <span className="absolute top-0 w-8 h-1 bg-amber-500 rounded-full shadow-[0_2px_10px_rgba(245,158,11,0.5)]" />
-                                    )}
-                                    <div className={`transition-transform duration-300 ${isActive ? "scale-110 drop-shadow-[0_2px_4px_rgba(4,120,87,0.2)]" : "group-hover:scale-105"}`}>
-                                        {item.icon}
-                                    </div>
-                                    <span className="text-[10.5px] mt-1 break-keep text-center tracking-tight font-medium">
-                                        {item.name}
-                                    </span>
-                                </Link>
-                            );
-                        } else {
-                            // "শিক্ষা কার্যক্রম" বাটন ট্রিগার (সরাসরি পেজে না গিয়ে মেনু খুলবে)
-                            return (
-                                <button
-                                    key={idx}
-                                    onClick={() => {
-                                        setIsMenuOpen(false); // অন্য ড্রয়ারটি বন্ধ করা
-                                        setIsAcademicsOpen(!isAcademicsOpen);
-                                    }}
-                                    className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative group ${isActive ? "text-emerald-700 font-bold" : "text-gray-500 hover:text-emerald-600"
-                                        }`}
-                                >
-                                    {isActive && (
-                                        <span className="absolute top-0 w-8 h-1 bg-amber-500 rounded-full shadow-[0_2px_10px_rgba(245,158,11,0.5)]" />
-                                    )}
-                                    <div className={`transition-transform duration-300 ${isActive ? "scale-110 drop-shadow-[0_2px_4px_rgba(4,120,87,0.2)]" : "group-hover:scale-105"}`}>
-                                        {item.icon}
-                                    </div>
-                                    <span className="text-[10.5px] mt-1 break-keep text-center tracking-tight font-medium">
-                                        {item.name}
-                                    </span>
-                                </button>
-                            );
-                        }
+                        return (
+                            <Link
+                                key={idx}
+                                href={item.href}
+                                className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative group ${isActive ? "text-emerald-700 font-bold" : "text-gray-500 hover:text-emerald-600"
+                                    }`}
+                            >
+                                {isActive && (
+                                    <span className="absolute top-0 w-8 h-1 bg-amber-500 rounded-full shadow-[0_2px_10px_rgba(245,158,11,0.5)]" />
+                                )}
+                                <div className={`transition-transform duration-300 ${isActive ? "scale-110 drop-shadow-[0_2px_4px_rgba(4,120,87,0.2)]" : "group-hover:scale-105"}`}>
+                                    {item.icon}
+                                </div>
+                                <span className="text-[10.5px] mt-1 break-keep text-center tracking-tight font-medium">
+                                    {item.name}
+                                </span>
+                            </Link>
+                        );
                     })}
 
-                    {/* ৫ নম্বর আকর্ষণীয় "অন্যান্য" বাটন */}
+                    {/* অন্যান্য বাটন */}
                     <button
-                        onClick={() => {
-                            setIsAcademicsOpen(false); // শিক্ষা কার্যক্রম ড্রয়ার বন্ধ করা
-                            setIsMenuOpen(!isMenuOpen);
-                        }}
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
                         className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative group ${isMenuOpen ? "text-amber-600 font-bold" : "text-gray-500 hover:text-emerald-600"
                             }`}
                     >
@@ -201,53 +183,7 @@ export default function BottomNavbar() {
                 </div>
             </div>
 
-            {/* ২.১ "শিক্ষা কার্যক্রম" ডেডিকেটেড বটম শিট ড্রয়ার */}
-            {isAcademicsOpen && (
-                <div className="fixed inset-0 z-40 bg-emerald-950/40 backdrop-blur-xs md:hidden transition-all duration-300" onClick={() => setIsAcademicsOpen(false)}>
-                    <div
-                        className="fixed bottom-16 left-0 right-0 max-h-[60vh] bg-[#fafdfb] rounded-t-3xl overflow-y-auto p-4 shadow-[0_-15px_40px_rgba(6,95,70,0.15)] border-t border-emerald-600/10"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div className="w-16 h-1.5 bg-emerald-200/60 rounded-full mx-auto mb-5" />
-
-                        <div className="flex items-center justify-between mb-4 border-b border-emerald-100 pb-3 px-1">
-                            <div className="flex items-center gap-2">
-                                <BookOpen className="w-5 h-5 text-emerald-700" />
-                                <h3 className="font-bold text-emerald-950 text-base font-serif">শিক্ষা কার্যক্রম মেনু</h3>
-                            </div>
-                            {/* শিক্ষা কার্যক্রমের মূল পেজে যাওয়ার একটি ডিরেক্ট বাটন (যদি কেউ পুরো পেজ দেখতে চায়) */}
-                            <Link
-                                href="/academics"
-                                onClick={() => setIsAcademicsOpen(false)}
-                                className="text-xs text-emerald-700 font-semibold flex items-center gap-1 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100"
-                            >
-                                মূল পাতা <ArrowRight className="w-3 h-3" />
-                            </Link>
-                        </div>
-
-                        {/* সাব-মেনু লিঙ্কগুলো ২ কলামের সুন্দর কার্ড ডিজাইনে গ্রিড আকারে সাজানো */}
-                        <div className="grid grid-cols-2 gap-3 pb-6">
-                            {academicSubItems.map((subItem, subIdx) => (
-                                <Link
-                                    key={subIdx}
-                                    href={subItem.href}
-                                    onClick={() => setIsAcademicsOpen(false)}
-                                    className="flex flex-col p-3 bg-white border border-emerald-600/5 rounded-xl shadow-[0_2px_8px_rgba(6,95,70,0.02)] hover:bg-emerald-50/45 text-left group transition-all"
-                                >
-                                    <span className="text-xs font-semibold text-gray-800 group-hover:text-emerald-700 transition-colors">
-                                        {subItem.name}
-                                    </span>
-                                    <span className="text-[10px] text-emerald-600/70 mt-1 flex items-center gap-0.5">
-                                        পজিশন দেখুন →
-                                    </span>
-                                </Link>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* ২.২ "অন্যান্য" বটম শিট ড্রয়ার (বাকি সব মেনুর জন্য) */}
+            {/* ২. "অন্যান্য" বটম শিট ড্রয়ার (বাকি সব মেনুর জন্য) */}
             {isMenuOpen && (
                 <div className="fixed inset-0 z-40 bg-emerald-950/40 backdrop-blur-xs md:hidden transition-all duration-300" onClick={() => setIsMenuOpen(false)}>
                     <div
@@ -322,4 +258,4 @@ export default function BottomNavbar() {
             )}
         </>
     );
-}
+                    }
