@@ -146,16 +146,15 @@ export default function Navbar() {
 
     return (
         <>
-            {/* ডেস্কটপ নেভবার (ফিক্সড ক্লাসেস) */}
-
-            <nav className={`left-0 w-full print:hidden text-white z-50 transition-all duration-300 ${isScrolled
+            {/* ডেস্কটপ নেভবার (মোবাইলে হাইড করার জন্য hidden lg:block যোগ করা হয়েছে) */}
+            <nav className={`hidden lg:block left-0 w-full print:hidden text-white z-50 transition-all duration-300 ${isScrolled
                 ? "fixed top-0 bg-emerald-900/95 shadow-md border-b border-emerald-800 dark:bg-slate-900/95 dark:border-slate-800 backdrop-blur-sm bg-opacity-100 pointer-events-auto"
-                : "absolute top-65  bg-transparent lg:bg-transparent"
+                : "absolute top-65 bg-transparent lg:bg-transparent"
                 }`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-end h-20">
 
-                        {/* মেনু কন্টেইনার - নিশ্চিত করা হয়েছে যেন বড় স্ক্রিনে সবসময় দৃশ্যমান থাকে */}
+                        {/* মেনু কন্টেইনার */}
                         <div className="hidden lg:flex items-center space-x-0.5">
                             {menuItems.map((item, index) => (
                                 <div key={index} className="relative group">
@@ -281,4 +280,4 @@ function GlobalMobileNavTrigger({ isOpen, setIsOpen, darkMode, toggleDarkMode })
         }
     }, [isOpen, darkMode]);
     return null;
-}
+                    }
