@@ -1,5 +1,30 @@
 @import "tailwindcss";
 
+/* --- কাস্টম ফন্ট ডিক্লেয়ারেশন --- */
+@font-face {
+  font-family: 'ShaldaMJ';
+  src: url('/shaldaMJ.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'BritanicBold';
+  src: url('/britanic.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-shalda {
+  font-family: 'ShaldaMJ', sans-serif;
+}
+
+.font-britanic {
+  font-family: 'BritanicBold', sans-serif;
+}
+
 /* --- Notice Board Marquee Animation --- */
 html {
   scroll-behavior: smooth;
@@ -8,7 +33,6 @@ html {
   0% {
     transform: translateX(100%);
   }
-
   100% {
     transform: translateX(-100%);
   }
@@ -23,7 +47,11 @@ html {
   animation-play-state: paused;
 }
 
-
 @utility font-arabic {
   font-family: var(--font-reem-kufi), sans-serif;
+}
+
+/* পুরো ওয়েবসাইটের ডিফল্ট ফন্ট আকর্ষণীয় করার জন্য */
+body {
+  font-family: var(--font-hind-siliguri), sans-serif;
 }
