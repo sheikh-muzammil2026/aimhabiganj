@@ -545,7 +545,7 @@ export default function IdCardGenerator() {
   {/* মাদ্রাসার নামের ব্যানার/ছবি */}
   <div className="flex-1 flex items-center justify-center h-8">
     <img 
-      src="/dynamic_madrasah_name.png" 
+      src="/banner.jpeg" 
       alt="As-Salam Ideal Madrasah Name and Slogan"
       className="h-full object-contain"
     />
