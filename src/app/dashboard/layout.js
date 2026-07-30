@@ -20,18 +20,18 @@ const DashboardLayout = ({ children }) => {
 
     return (
         <div className="flex h-screen bg-[#f4f6f4] text-slate-800 antialiased font-sans w-full selection:bg-emerald-800 selection:text-white overflow-hidden">
-            
+
             {/* ১. সাইডবার কম্পোনেন্ট (নতুন লোকেশন অনুযায়ী) */}
             <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
 
             {/* ২. মেইন কন্টেন্ট এরিয়া */}
-            <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-                
+            <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden ">
+
                 {/* ৩. প্রফেশনাল টপ নেভিগেশন বার (সব স্ক্রিনের জন্য ফিক্সড) */}
-                <header className="bg-white border-b border-emerald-900/10 h-16 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs flex-shrink-0">
-                    
+                <header className="bg-white border-b border-emerald-900/10 h-16 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs flex-shrink-0 print:hidden">
+
                     {/* বাম পাশ: মোবাইল টগল এবং মাদরাসার নাম */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 ">
                         <button
                             onClick={() => setSidebarOpen(!sidebarOpen)}
                             className="p-2 -ml-2 text-slate-600 hover:text-emerald-800 focus:outline-hidden lg:hidden transition-colors"
@@ -39,8 +39,8 @@ const DashboardLayout = ({ children }) => {
                         >
                             <span className="text-xl">☰</span>
                         </button>
-                        
-                        <div className="flex flex-col">
+
+                        <div className="flex flex-col ">
                             <h2 className="font-black text-sm sm:text-base text-emerald-900 tracking-wide lg:block hidden">
                                 মারকাযি নিয়ন্ত্রণ বোর্ড
                             </h2>
@@ -72,7 +72,7 @@ const DashboardLayout = ({ children }) => {
                         {children}
                     </div>
                 </main>
-                
+
             </div>
         </div>
     );

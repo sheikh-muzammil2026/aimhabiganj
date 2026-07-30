@@ -375,8 +375,8 @@ export default function IdCardGenerator() {
             onClick={handlePrint}
             disabled={selectedIds.length === 0}
             className={`px-6 py-2.5 rounded-md font-bold text-white transition ${selectedIds.length === 0
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-green-600 hover:bg-green-700 shadow-lg'
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-green-600 hover:bg-green-700 shadow-lg'
               }`}
           >
             🖨️ সিলেক্টেড আইডি কার্ড প্রিন্ট করুন ({selectedIds.length})
@@ -476,7 +476,7 @@ export default function IdCardGenerator() {
       {/* ----------------- ২. কার্ড প্রিভিউ এবং প্রিন্ট জোন ----------------- */}
       <div className="max-w-6xl mx-auto">
         <h2 className="print:hidden text-xl font-bold mb-4 text-gray-700">
-          আইডি কার্ডের প্রিভিউ (A4 গ্রিড লেআউট)
+          আইডি কার্ডের প্রিভিউ
         </h2>
 
         {studentsToPrint.length === 0 ? (
@@ -486,15 +486,15 @@ export default function IdCardGenerator() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 print:grid-cols-3 gap-6 print:gap-4 print:m-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 print:grid-cols-3 gap-2 print:gap-2 print:m-0">
             {studentsToPrint.map((student) => {
               const details = getStudentClassDetails(student);
               return (
                 <div
                   key={student._id}
-                  className="w-[340px] h-[520px] bg-white rounded-2xl p-[6px] relative shadow-xl overflow-hidden mx-auto print:shadow-none print:break-inside-avoid"
+                  className="w-[2.125in] h-[3.375in] bg-white rounded-xl p-[3px] relative shadow-xl overflow-hidden mx-auto print:shadow-none print:break-inside-avoid"
                   style={{
-                    border: '12px solid #0022C8',
+                    border: '6px solid #0022C8',
                     boxSizing: 'border-box',
                   }}
                 >
@@ -504,7 +504,7 @@ export default function IdCardGenerator() {
                   >
                     {/* ================= ১. হেডার সেকশন ================= */}
                     <div className="w-full pt-2 px-2 pb-1 border-b-2 border-[#0022C8] flex items-center gap-1">
-                      <div className="w-14 h-14 rounded-full border border-blue-900 p-0.5 flex-shrink-0 flex items-center justify-center bg-white">
+                      <div className="w-8 h-8 rounded-full border border-blue-900 p-0.5 flex-shrink-0 flex items-center justify-center bg-white">
                         {student.logoUrl ? (
                           <img
                             src={student.logoUrl}
@@ -519,14 +519,14 @@ export default function IdCardGenerator() {
                       </div>
 
                       <div className="flex-1 text-center">
-                        <h2 className="text-[13px] font-extrabold text-blue-950 font-serif leading-none tracking-tight">
+                        <h2 className="text-[10px] font-extrabold text-blue-950 font-serif leading-none tracking-tight">
                           مدرسة السلام النموذجية
                         </h2>
-                        <h1 className="text-[14px] font-extrabold text-black font-sans leading-tight mt-0.5">
+                        <h1 className="text-[11px] font-extrabold text-black font-sans leading-tight mt-0.5">
                           আস-সালাম আইডিয়াল মাদ্রাসা{' '}
                           <span className="text-xs font-semibold">(এইম)</span>
                         </h1>
-                        <h3 className="text-[13px] font-black text-[#D00000] leading-none font-sans">
+                        <h3 className="text-[10px] font-black text-[#D00000] leading-none font-sans">
                           As-Salam Ideal Madrasah
                         </h3>
                         <p className="text-[8px] font-extrabold text-[#008080] tracking-tighter mt-0.5">
@@ -537,7 +537,7 @@ export default function IdCardGenerator() {
 
                     {/* ================= ২. মিডল সেকশন (ছবি, আইডি নম্বর ও বারকোড) ================= */}
                     <div className="flex justify-between items-center px-2 pt-2 relative">
-                      <div className="w-[155px] h-[155px] rounded-full border-4 border-[#38BDF8] overflow-hidden bg-gray-100 flex items-center justify-center shadow-inner ml-1">
+                      <div className="w-[85px] h-[85px] rounded-full border-2 border-[#38BDF8] overflow-hidden bg-gray-100 flex items-center justify-center shadow-inner ml-1">
                         {student.photoUrl ? (
                           <img
                             src={student.photoUrl}
@@ -557,16 +557,16 @@ export default function IdCardGenerator() {
 
                       <div className="flex items-center gap-1.5 pr-1">
                         <div className="flex flex-col items-center justify-center transform -rotate-90 origin-center whitespace-nowrap -mr-3">
-                          <span className="text-[18px] font-black text-[#B00070] tracking-wider">
+                          <span className="text-[12px] font-black text-[#B00070] tracking-wider">
                             ID CARD
                           </span>
-                          <span className="text-[13px] font-black text-[#0022C8] tracking-tight">
+                          <span className="text-[9px] font-black text-[#0022C8] tracking-tight">
                             ID NO-{student.studentId || student.roll || student._id?.slice(-6)}
                           </span>
                         </div>
 
                         {/* বারকোড ডিজাইন */}
-                        <div className="w-8 h-36 bg-white flex flex-col justify-between p-1 items-center border border-gray-200">
+                        <div className="w-5 h-24 bg-white flex flex-col justify-between p-1 items-center border border-gray-200">
                           <div className="w-full h-[2px] bg-black"></div>
                           <div className="w-full h-[4px] bg-black"></div>
                           <div className="w-full h-[1px] bg-black"></div>
@@ -590,13 +590,13 @@ export default function IdCardGenerator() {
 
                     {/* ================= ৩. ইনফরমেশন সেকশন ================= */}
                     <div className="px-3 pt-1 pb-2 flex-1 flex flex-col justify-around">
-                      <h2 className="text-[18px] font-black text-black font-serif tracking-normal leading-tight truncate">
+                      <h2 className="text-[12px] font-black text-black font-serif tracking-normal leading-tight truncate">
                         {student.studentNameEnglish || student.studentNameBangla || 'N/A'}
                       </h2>
 
-                      <div className="space-y-[2px] text-[14px] font-serif">
+                      <div className="space-y-[2px] text-[9px] font-serif">
                         <div className="flex items-center">
-                          <span className="w-[95px] font-bold text-[#A0006D]">
+                          <span className="w-[65px] font-bold text-[#A0006D]">
                             Father
                           </span>
                           <span className="font-bold text-[#A0006D] mr-2">:</span>
@@ -606,7 +606,7 @@ export default function IdCardGenerator() {
                         </div>
 
                         <div className="flex items-center">
-                          <span className="w-[95px] font-bold text-[#A0006D]">
+                          <span className="w-[65px] font-bold text-[#A0006D]">
                             Ad.Session
                           </span>
                           <span className="font-bold text-[#A0006D] mr-2">:</span>
@@ -616,7 +616,7 @@ export default function IdCardGenerator() {
                         </div>
 
                         <div className="flex items-center">
-                          <span className="w-[95px] font-bold text-[#A0006D]">
+                          <span className="w-[65px] font-bold text-[#A0006D]">
                             Division
                           </span>
                           <span className="font-bold text-[#A0006D] mr-2">:</span>
@@ -626,7 +626,7 @@ export default function IdCardGenerator() {
                         </div>
 
                         <div className="flex items-center">
-                          <span className="w-[95px] font-bold text-[#A0006D]">
+                          <span className="w-[65px] font-bold text-[#A0006D]">
                             D.O.B
                           </span>
                           <span className="font-bold text-[#A0006D] mr-2">:</span>
@@ -636,7 +636,7 @@ export default function IdCardGenerator() {
                         </div>
 
                         <div className="flex items-center">
-                          <span className="w-[95px] font-bold text-[#A0006D]">
+                          <span className="w-[65px] font-bold text-[#A0006D]">
                             Mobile
                           </span>
                           <span className="font-bold text-[#A0006D] mr-2">:</span>
@@ -646,7 +646,7 @@ export default function IdCardGenerator() {
                         </div>
 
                         <div className="flex items-center">
-                          <span className="w-[95px] font-bold text-[#A0006D]">
+                          <span className="w-[65px] font-bold text-[#A0006D]">
                             Blood Group
                           </span>
                           <span className="font-bold text-[#A0006D] mr-2">:</span>
