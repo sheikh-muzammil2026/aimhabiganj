@@ -210,25 +210,27 @@ export default function IdCardGenerator() {
 
   const studentsToPrint = students.filter((s) => selectedIds.includes(s._id));
 
-  // অটো-ফিট নাম এবং তথ্যের জন্য SVG টেক্সট কম্পোনেন্ট (ফন্ট অটো ছোট হবে)
-  const AutoScaledText = ({ text, className = "", fontWeight = "bold", fill = "#000" }) => {
-    return (
-      <div className="w-full h-4 flex items-center overflow-hidden">
-        <svg className="w-full h-full" viewBox="0 0 300 24" preserveAspectRatio="xMinYMid meet">
-          <text
-            x="0"
-            y="18"
-            fontSize="18"
-            fontWeight={fontWeight}
-            fill={fill}
-            fontFamily="sans-serif"
-          >
-            {text || 'N/A'}
-          </text>
-        </svg>
-      </div>
-    );
-  };
+  // অটো-ফিট নাম এবং তথ্যের জন্য SVG টেক্সট কম্পোনেন্ট (ফুল উইডথ নিবে ও অটো ছোট/বড় হবে)
+const AutoScaledText = ({ text, className = "", fontWeight = "bold", fill = "#000" }) => {
+  return (
+    <div className={`w-full h-4 flex items-center overflow-hidden ${className}`}>
+      <svg className="w-full h-full" viewBox="0 0 300 24" preserveAspectRatio="none">
+        <text
+          x="0"
+          y="18"
+          fontSize="18"
+          fontWeight={fontWeight}
+          fill={fill}
+          fontFamily="sans-serif"
+          textLength="300"
+          lengthAdjust="spacingAndGlyphs"
+        >
+          {text || 'N/A'}
+        </text>
+      </svg>
+    </div>
+  );
+};
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -543,7 +545,7 @@ export default function IdCardGenerator() {
   </div>
 
   {/* মাদ্রাসার নামের ব্যানার/ছবি */}
-  <div className="flex-1 flex items-center justify-center h-10">
+  <div className="flex items-center h-10">
     <img 
       src="/banner.jpeg" 
       alt="As-Salam Ideal Madrasah Name and Slogan"
@@ -600,15 +602,15 @@ export default function IdCardGenerator() {
                     </div>
 
                     {/* ================= ৩. ইনফরমেশন সেকশন ================= */}
-                    <div className="px-2 pt-0.5 pb-1 flex-1 flex flex-col justify-around">
+                    <div className="px-2 pt-0.5 pb-1 flex-1 flex flex-col justify-start">
                       {/* স্টুডেন্টের নাম - অটো ছোট হয়ে জায়গা মত বসবে */}
-                      <span className="w-full">
+                      <div className="w-full">
                         <AutoScaledText
                           text={student.studentNameBangla || student.studentNameEnglish || 'N/A'}
                           fill="#000"
                           fontWeight="bold"
                         />
-                      </span>
+                      </div>
 
                       <div className="space-y-[1px] text-[8px] font-serif">
                         {/* পিতা */}
