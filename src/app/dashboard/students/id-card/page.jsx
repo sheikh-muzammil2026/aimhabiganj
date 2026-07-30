@@ -545,7 +545,7 @@ const AutoScaledText = ({ text, className = "", fontWeight = "bold", fill = "#00
   </div>
 
   {/* মাদ্রাসার নামের ব্যানার/ছবি */}
-  <div className="flex items-center h-10">
+  <div className="flex-1 flex items-center h-10">
     <img 
       src="/banner.jpeg" 
       alt="As-Salam Ideal Madrasah Name and Slogan"
@@ -602,7 +602,7 @@ const AutoScaledText = ({ text, className = "", fontWeight = "bold", fill = "#00
                     </div>
 
                     {/* ================= ৩. ইনফরমেশন সেকশন ================= */}
-                    <div className="px-2 pt-0.5 pb-1 flex-1 flex flex-col justify-start">
+                    <div className="px-2 pt-0.5 pb-1 flex-1 flex flex-col space-y-1">
                       {/* স্টুডেন্টের নাম - অটো ছোট হয়ে জায়গা মত বসবে */}
                       <div className="w-full">
                         <AutoScaledText
