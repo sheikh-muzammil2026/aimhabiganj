@@ -532,7 +532,7 @@ export default function IdCardGenerator() {
                   >
                     {/* ================= ১. হেডার সেকশন ================= */}
                     
-                      <div className="w-full pt-1.5 px-2 pb-1 border-b-2 border-[#0022C8] flex items-center gap-1.5">
+                      <div className="w-full  border-b-2 border-[#0022C8] flex items-center">
   {/* লোগোর সেকশন */}
   <div className="w-9 h-9 relative rounded-full overflow-hidden flex-shrink-0 bg-white">
     <img
@@ -543,7 +543,7 @@ export default function IdCardGenerator() {
   </div>
 
   {/* মাদ্রাসার নামের ব্যানার/ছবি */}
-  <div className="flex-1 flex items-center justify-center h-8">
+  <div className="flex-1 flex items-center justify-center h-10">
     <img 
       src="/banner.jpeg" 
       alt="As-Salam Ideal Madrasah Name and Slogan"
