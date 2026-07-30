@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image"; // লোগো ইমেজের জন্য ইমপোর্ট করা হলো
 import { usePathname } from "next/navigation";
 import { authClient } from "@/lib/auth-client"; // Better Auth ক্লায়েন্ট
 
 export default function Sidebar({ isOpen, setIsOpen }) {
     const pathname = usePathname();
     const [openDropdown, setOpenDropdown] = useState(null);
+
+    // const [isMounted, setIsMounted] = useState(false);
 
     // Better Auth থেকে রিয়েল-টাইম সেশন এবং ইউজার ডেটা আনা
     const { data: session, isPending } = authClient.useSession();
@@ -173,14 +174,12 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 {/* ব্র্যান্ড লোগো সেকশন */}
                 <div className="p-4 border-b border-emerald-800/40 flex items-center justify-between bg-emerald-950/30">
                     <Link href="/" className="group flex items-center gap-2.5 focus:outline-hidden">
-                        <div className="w-10 h-10 p-1 bg-emerald-900/30 rounded-xl group-hover:bg-amber-500/10 border border-emerald-700/30 transition-all duration-300 group-hover:scale-105 shadow-sm flex items-center justify-center overflow-hidden">
-                            <Image
+
+                        <div className="w-10 h-10 rounded-full border border-blue-900 p-0.5 flex-shrink-0 flex items-center justify-center bg-white">
+                            <img
                                 src="/aimlogo1.png"
-                                alt="আস-সালাম আইডিয়াল মাদরাসা লোগো"
-                                width={36}
-                                height={36}
-                                className="object-contain"
-                                priority
+                                alt="AIM Logo"
+                                className="w-full h-full object-contain rounded-full"
                             />
                         </div>
                         <div>

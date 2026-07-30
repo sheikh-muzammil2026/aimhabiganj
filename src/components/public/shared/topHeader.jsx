@@ -7,13 +7,13 @@ export default function TopHeader() {
   return (
     <div className="w-full print:hidden bg-gradient-to-r from-emerald-900 via-emerald-850 to-emerald-900 text-white py-3 px-4 md:px-6 border-b border-amber-500/30 relative overflow-hidden transition-colors duration-300 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 dark:border-emerald-800">
 
-      {/* ব্যাকগ্রাউন্ড জলছাপ/মেহরাব ইফেক্ট */}
+      {/* ব্যাকগ্রাউন্ড জলছাপ/মেহরাব ইফেক্ট
       <div className="absolute inset-0 opacity-10 pointer-events-none mix-blend-overlay">
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
           <path d="M50 0 L100 50 L50 100 L0 50 Z" fill="none" stroke="currentColor" strokeWidth="1" />
           <circle cx="50" cy="50" r="20" fill="none" stroke="currentColor" strokeWidth="1" />
         </svg>
-      </div>
+      </div> */}
 
       {/* মেইন কন্টেইনার */}
       <div className="max-w-7xl mx-auto flex flex-row items-center relative z-10 gap-4 md:gap-6">

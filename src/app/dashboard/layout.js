@@ -42,7 +42,7 @@ const DashboardLayout = ({ children }) => {
 
                         <div className="flex flex-col ">
                             <h2 className="font-black text-sm sm:text-base text-emerald-900 tracking-wide lg:block hidden">
-                                মারকাযি নিয়ন্ত্রণ বোর্ড
+                                Control panel
                             </h2>
                             <h2 className="font-black text-sm text-emerald-900 tracking-wide lg:hidden block">
                                 আস-সালাম আইডিয়াল মাদরাসা
