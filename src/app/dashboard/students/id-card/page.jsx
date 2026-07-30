@@ -602,13 +602,13 @@ export default function IdCardGenerator() {
                     {/* ================= ৩. ইনফরমেশন সেকশন ================= */}
                     <div className="px-2 pt-0.5 pb-1 flex-1 flex flex-col justify-around">
                       {/* স্টুডেন্টের নাম - অটো ছোট হয়ে জায়গা মত বসবে */}
-                      <div className="w-full flex-1">
+                      <span className="w-full">
                         <AutoScaledText
                           text={student.studentNameBangla || student.studentNameEnglish || 'N/A'}
                           fill="#000"
                           fontWeight="bold"
                         />
-                      </div>
+                      </span>
 
                       <div className="space-y-[1px] text-[8px] font-serif">
                         {/* পিতা */}
