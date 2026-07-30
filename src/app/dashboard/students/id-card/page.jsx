@@ -534,7 +534,7 @@ export default function IdCardGenerator() {
                     
                       <div className="w-full  border-b-2 border-[#0022C8] flex items-center">
   {/* লোগোর সেকশন */}
-  <div className="w-9 h-9 relative rounded-full overflow-hidden flex-shrink-0 bg-white">
+  <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 bg-white">
     <img
       src="/aimlogo1.png"
       alt="AIM Logo"
@@ -602,7 +602,7 @@ export default function IdCardGenerator() {
                     {/* ================= ৩. ইনফরমেশন সেকশন ================= */}
                     <div className="px-2 pt-0.5 pb-1 flex-1 flex flex-col justify-around">
                       {/* স্টুডেন্টের নাম - অটো ছোট হয়ে জায়গা মত বসবে */}
-                      <div className="w-full">
+                      <div className="w-full flex-1">
                         <AutoScaledText
                           text={student.studentNameBangla || student.studentNameEnglish || 'N/A'}
                           fill="#000"
