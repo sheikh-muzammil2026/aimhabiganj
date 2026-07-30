@@ -531,37 +531,27 @@ export default function IdCardGenerator() {
                     style={{ border: '2px solid #1E40AF' }}
                   >
                     {/* ================= ১. হেডার সেকশন ================= */}
-                    <div className="w-full pt-1 px-1.5 pb-0.5 border-b-2 border-[#0022C8] flex items-center gap-1">
-                      <div className="w-7 h-7 rounded-full border border-blue-900 p-0.5 flex-shrink-0 flex items-center justify-center bg-white">
-                        {student.logoUrl ? (
-                          <img
-                            src={student.logoUrl}
-                            alt="Logo"
-                            className="w-full h-full object-contain rounded-full"
-                          />
-                        ) : (
-                          <div className="w-full h-full rounded-full bg-blue-100 flex items-center justify-center text-[7px] font-bold text-blue-900 text-center">
-                            LOGO
-                          </div>
-                        )}
-                      </div>
+                    
+                      <div className="w-full pt-1.5 px-2 pb-1 border-b-2 border-[#0022C8] flex items-center gap-1.5">
+  {/* লোগোর সেকশন */}
+  <div className="w-9 h-9 relative rounded-full overflow-hidden flex-shrink-0 bg-white">
+    <img
+      src="/aimlogo1.png"
+      alt="AIM Logo"
+      className="w-full h-full object-cover scale-[1.06] rounded-full"
+    />
+  </div>
 
-                      <div className="flex-1 text-center">
-                        <h2 className="text-[9px] font-extrabold text-blue-950 font-serif leading-none tracking-tight">
-                          مدرسة السلام النموذجية
-                        </h2>
-                        <h1 className="text-[10px] font-extrabold text-black font-sans leading-tight mt-0.5">
-                          আস-সালাম আইডিয়াল মাদ্রাসা{' '}
-                          <span className="text-[9px] font-semibold">(এইম)</span>
-                        </h1>
-                        <h3 className="text-[9px] font-black text-[#D00000] leading-none font-sans">
-                          As-Salam Ideal Madrasah
-                        </h3>
-                        <p className="text-[7px] font-extrabold text-[#008080] tracking-tighter mt-0.5">
-                          A&amp;M For Ultimate Success
-                        </p>
-                      </div>
-                    </div>
+  {/* মাদ্রাসার নামের ব্যানার/ছবি */}
+  <div className="flex-1 flex items-center justify-center h-8">
+    <img 
+      src="/dynamic_madrasah_name.png" 
+      alt="As-Salam Ideal Madrasah Name and Slogan"
+      className="h-full object-contain"
+    />
+  </div>
+</div>
+                
 
                     {/* ================= ২. মিডল সেকশন (ছবি, আইডি নম্বর ও বারকোড) ================= */}
                     <div className="flex justify-between items-center px-2 pt-1 relative">
