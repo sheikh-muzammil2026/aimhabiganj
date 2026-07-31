@@ -545,11 +545,11 @@ const AutoScaledText = ({ text, className = "", fontWeight = "bold", fill = "#00
   </div>
 
   {/* মাদ্রাসার নামের ব্যানার/ছবি */}
-  <div className="flex-1 flex items-center h-10">
+  <div className="flex-1 flex items-center h-11">
     <img 
       src="/banner.jpeg" 
       alt="As-Salam Ideal Madrasah Name and Slogan"
-      className="h-full object-contain"
+      className="h-full object-cover"
     />
   </div>
 </div>
@@ -686,7 +686,7 @@ const AutoScaledText = ({ text, className = "", fontWeight = "bold", fill = "#00
                       <img
                         src="/principle's_signature.png" // আপনার public ফোল্ডারে রাখা Transparent PNG ফাইলের নাম
                         alt="Authorized Signature"
-                        className="absolute -top-5 right-2 h-7 object-contain pointer-events-none"
+                        className="absolute -top-5 right-2 h-7 object-contain mix-blend-multiply contrast-200 brightness-125"
                       />
 
                       <p className="text-[8px] font-sans font-medium tracking-wide relative z-10">
