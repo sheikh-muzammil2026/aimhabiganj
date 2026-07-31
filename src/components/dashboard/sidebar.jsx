@@ -30,13 +30,14 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         },
         {
             id: "academics",
-            title: "শিক্ষা কার্যক্রম",
+            title: "পরিক্ষা ও ফলাফল",
             icon: "📚",
             roles: ["admin", "teacher"],
             dropdown: [
                 { title: "ক্লাস রুটিন", href: "/dashboard/academics?section=class-routine" },
                 { title: "পরীক্ষা রুটিন", href: "/dashboard/academics?section=exam-routine" },
                 { title: "পরীক্ষার ফলাফল (Results)", href: "/dashboard/academics/results" },
+                { title: "নম্বর ইনপুট", href: "/dashboard/academics/results/input" },
             ]
         },
         {
