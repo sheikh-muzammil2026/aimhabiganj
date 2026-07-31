@@ -534,7 +534,7 @@ const AutoScaledText = ({ text, className = "", fontWeight = "bold", fill = "#00
                   >
                     {/* ================= ১. হেডার সেকশন ================= */}
                     
-                      <div className="w-full  border-b-2 border-[#0022C8] flex items-center">
+                      <div className="w-full  border-b-2 border-[#0022C8] flex items-center justify-around">
   {/* লোগোর সেকশন */}
   <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 bg-white">
     <img
