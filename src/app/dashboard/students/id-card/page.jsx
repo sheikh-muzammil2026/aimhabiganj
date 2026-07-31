@@ -534,7 +534,7 @@ const AutoScaledText = ({ text, className = "", fontWeight = "bold", fill = "#00
                   >
                     {/* ================= ১. হেডার সেকশন ================= */}
                     
-                      <div className="w-full  border-b-2 border-[#0022C8] flex items-center justify-around">
+                      <div className="w-full  border-b-2 border-[#0022C8] flex items-center justify-center">
   {/* লোগোর সেকশন */}
   <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 bg-white">
     <img
@@ -556,7 +556,7 @@ const AutoScaledText = ({ text, className = "", fontWeight = "bold", fill = "#00
                 
 
                     {/* ================= ২. মিডল সেকশন (ছবি, আইডি নম্বর ও বারকোড) ================= */}
-                    <div className="flex justify-between items-center px-2 pt-1 relative">
+                    <div className="flex justify-between items-center px-2 pt-1 mb-2 relative">
                       <div className="w-[75px] h-[75px] rounded-full border-2 border-[#38BDF8] overflow-hidden bg-gray-100 flex items-center justify-center shadow-inner">
                         {student.photoUrl ? (
                           <img
@@ -675,14 +675,21 @@ const AutoScaledText = ({ text, className = "", fontWeight = "bold", fill = "#00
 
                     {/* Authorized Signature ফুটলাইন (প্রিন্ট ব্যাকগ্রাউন্ড ফিক্স করা) */}
                     <div
-                      className="bg-[#0022C8] text-white text-right px-3 py-0.5"
+                      className="bg-[#0022C8] text-white text-right px-3 py-1 relative flex flex-col items-end justify-end"
                       style={{
                         backgroundColor: '#0022C8',
                         WebkitPrintColorAdjust: 'exact',
                         printColorAdjust: 'exact'
                       }}
                     >
-                      <p className="text-[8px] font-sans font-medium tracking-wide">
+                      {/* সিগনেচার ইমেজ - নীল বক্সের ঠিক ওপরে ওভারল্যাপ করে সুন্দরভাবে বসবে */}
+                      <img
+                        src="/principle's_signature.png" // আপনার public ফোল্ডারে রাখা Transparent PNG ফাইলের নাম
+                        alt="Authorized Signature"
+                        className="absolute -top-5 right-2 h-7 object-contain pointer-events-none"
+                      />
+
+                      <p className="text-[8px] font-sans font-medium tracking-wide relative z-10">
                         Authorized Signature
                       </p>
                     </div>
