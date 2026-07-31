@@ -15,41 +15,46 @@ export default function TeacherMarkInput() {
     const [message, setMessage] = useState({ type: '', text: '' });
 
     // ১. নির্বাচিত ক্লাসের স্টুডেন্ট ডাটা লোড করা
-    useEffect(() => {
-        const fetchStudents = async () => {
-            setLoading(true);
-            setMessage({ type: '', text: '' });
-            try {
-                // আপনার API Endpoint অনুযায়ী স্টুডেন্ট আনছে
-                const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/students?class=${encodeURIComponent(selectedClass)}&status=approved`);
-                const data = await res.json();
+   
+// ১. নির্বাচিত ক্লাসের স্টুডেন্ট ডাটা লোড করা
+useEffect(() => {
+    const fetchStudents = async () => {
+        setLoading(true);
+        setMessage({ type: '', text: '' });
+        try {
+            // API কল - স্ট্যাটাস Approved/approved যাই পাঠানো হোক ব্যাকএন্ড হ্যান্ডেল করবে
+            const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/students?class=${encodeURIComponent(selectedClass)}&status=Approved`);
+            const data = await res.json();
+            
+            if (data.success) {
+                setStudents(data.data);
                 
-                if (data.success) {
-                    setStudents(data.data);
-                    // প্রারম্ভিক মার্ক অবজেক্ট সেটআপ
-                    const initialMarks = {};
-                    data.data.forEach(std => {
+                // প্রারম্ভিক মার্ক অবজেক্ট সেটআপ
+                const initialMarks = {};
+                data.data.forEach(std => {
+                    if (std.studentId) {
                         initialMarks[std.studentId] = {
                             ctMark: '',
                             examMark: ''
                         };
-                    });
-                    setMarksData(initialMarks);
-                } else {
-                    setStudents([]);
-                }
-            } catch (err) {
-                console.error("Student Fetch Error:", err);
-                setMessage({ type: 'error', text: 'শিক্ষার্থীদের তালিকা লোড করতে ব্যর্থ হয়েছে।' });
-            } finally {
-                setLoading(false);
+                    }
+                });
+                setMarksData(initialMarks);
+            } else {
+                setStudents([]);
             }
-        };
-
-        if (selectedClass) {
-            fetchStudents();
+        } catch (err) {
+            console.error("Student Fetch Error:", err);
+            setMessage({ type: 'error', text: 'শিক্ষার্থীদের তালিকা লোড করতে ব্যর্থ হয়েছে।' });
+        } finally {
+            setLoading(false);
         }
-    }, [selectedClass]);
+    };
+
+    if (selectedClass) {
+        fetchStudents();
+    }
+}, [selectedClass]);
 
     // মার্ক ইনপুট হ্যান্ডলার
     const handleMarkChange = (studentId, field, value) => {
