@@ -298,7 +298,7 @@ export default function EditStudentPage() {
 
       if (data.success) {
         toast.success("🎉 শিক্ষার্থীর তথ্য সফলভাবে আপডেট করা হয়েছে!");
-        router.push("/dashboard/admin/students");
+        router.push("/dashboard/students");
       } else {
         toast.error(data.message || "আপডেট করা সম্ভব হয়নি।");
       }
@@ -375,9 +375,8 @@ export default function EditStudentPage() {
           <button
             type="submit"
             disabled={isSaving}
-            className={`bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base sm:text-lg px-8 sm:px-10 py-3 sm:py-3.5 rounded-lg shadow-md transition-all duration-150 active:scale-95 w-full sm:w-auto ${
-              isSaving ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className={`bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base sm:text-lg px-8 sm:px-10 py-3 sm:py-3.5 rounded-lg shadow-md transition-all duration-150 active:scale-95 w-full sm:w-auto ${isSaving ? "opacity-50 cursor-not-allowed" : ""
+              }`}
           >
             {isSaving ? "সংরক্ষণ হচ্ছে, অপেক্ষা করুন..." : "আপডেট সেভ করুন"}
           </button>
