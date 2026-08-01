@@ -684,7 +684,7 @@ export default function IdCardGenerator() {
                     >
                       {/* সিগনেচার ইমেজ - ব্যাকগ্রাউন্ড ও বর্ডার ছাড়া শুধু গাঢ় কালি */}
                       <img
-                        src="/principle's_signature.png"
+                        src="/principle's_signature.jpg"
                         alt="Authorized Signature"
                         className="absolute -top-14 -right-2 h-20 w-36 object-contain mix-blend-multiply contrast-[800%] brightness-[105%] grayscale"
                       />
