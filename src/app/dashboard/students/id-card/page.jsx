@@ -1,5 +1,6 @@
 'use client';
 
+import { IdCardBack } from '@/components/dashboard/IdCardBack';
 import React, { useState, useEffect } from 'react';
 import BarcodeSVG from 'react-barcode';
 
@@ -211,26 +212,26 @@ export default function IdCardGenerator() {
   const studentsToPrint = students.filter((s) => selectedIds.includes(s._id));
 
   // অটো-ফিট নাম এবং তথ্যের জন্য SVG টেক্সট কম্পোনেন্ট (ফুল উইডথ নিবে ও অটো ছোট/বড় হবে)
-const AutoScaledText = ({ text, className = "", fontWeight = "bold", fill = "#000" }) => {
-  return (
-    <div className={`w-full h-4 flex items-center overflow-hidden ${className}`}>
-      <svg className="w-full h-full" viewBox="0 0 300 24" preserveAspectRatio="none">
-        <text
-          x="0"
-          y="18"
-          fontSize="18"
-          fontWeight={fontWeight}
-          fill={fill}
-          fontFamily="sans-serif"
-          textLength="300"
-          lengthAdjust="spacingAndGlyphs"
-        >
-          {text || 'N/A'}
-        </text>
-      </svg>
-    </div>
-  );
-};
+  const AutoScaledText = ({ text, className = "", fontWeight = "bold", fill = "#000" }) => {
+    return (
+      <div className={`w-full h-4 flex items-center overflow-hidden ${className}`}>
+        <svg className="w-full h-full" viewBox="0 0 300 24" preserveAspectRatio="none">
+          <text
+            x="0"
+            y="18"
+            fontSize="18"
+            fontWeight={fontWeight}
+            fill={fill}
+            fontFamily="sans-serif"
+            textLength="300"
+            lengthAdjust="spacingAndGlyphs"
+          >
+            {text || 'N/A'}
+          </text>
+        </svg>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -502,7 +503,7 @@ const AutoScaledText = ({ text, className = "", fontWeight = "bold", fill = "#00
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 print:grid-cols-3 gap-2 print:gap-2 print:m-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 print:grid-cols-3 gap-2 print:gap-2 print:mt-2">
             {studentsToPrint.map((student) => {
               const details = getStudentClassDetails(student);
 
@@ -533,27 +534,26 @@ const AutoScaledText = ({ text, className = "", fontWeight = "bold", fill = "#00
                     style={{ border: '2px solid #1E40AF' }}
                   >
                     {/* ================= ১. হেডার সেকশন ================= */}
-                    
-                      <div className="w-full  border-b-2 border-[#0022C8] flex items-center justify-center">
-  {/* লোগোর সেকশন */}
-  <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 bg-white">
-    <img
-      src="/aimlogo1.png"
-      alt="AIM Logo"
-      className="w-full h-full object-cover scale-[1.06] rounded-full"
-    />
-  </div>
 
-  {/* মাদ্রাসার নামের ব্যানার/ছবি */}
-  <div className="flex-1 flex items-center h-11">
-    <img 
-      src="/banner.jpeg" 
-      alt="As-Salam Ideal Madrasah Name and Slogan"
-      className="h-full object-cover"
-    />
-  </div>
-</div>
-                
+                    <div className="w-full  border-b-2 border-[#0022C8] flex items-center justify-center">
+                      {/* লোগোর সেকশন */}
+                      <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 bg-white">
+                        <img
+                          src="/aimlogo1.png"
+                          alt="AIM Logo"
+                          className="w-full h-full object-cover scale-[1.06] rounded-full"
+                        />
+                      </div>
+
+                      {/* মাদ্রাসার নামের ব্যানার/ছবি */}
+                      <div className="flex-1 flex items-center h-11">
+                        <img
+                          src="/banner.jpeg"
+                          alt="As-Salam Ideal Madrasah Name and Slogan"
+                          className="h-full object-cover"
+                        />
+                      </div>
+                    </div>
 
                     {/* ================= ২. মিডল সেকশন (ছবি, আইডি নম্বর ও বারকোড) ================= */}
                     <div className="flex justify-between items-center px-2 pt-1 mb-2 relative">
@@ -682,11 +682,11 @@ const AutoScaledText = ({ text, className = "", fontWeight = "bold", fill = "#00
                         printColorAdjust: 'exact'
                       }}
                     >
-                      {/* সিগনেচার ইমেজ - নীল বক্সের ঠিক ওপরে ওভারল্যাপ করে সুন্দরভাবে বসবে */}
+                      {/* সিগনেচার ইমেজ - ব্যাকগ্রাউন্ড ও বর্ডার ছাড়া শুধু গাঢ় কালি */}
                       <img
-                        src="/principle's_signature.png" // আপনার public ফোল্ডারে রাখা Transparent PNG ফাইলের নাম
+                        src="/principle's_signature.png"
                         alt="Authorized Signature"
-                        className="absolute -top-5 right-2 h-7 object-contain mix-blend-multiply contrast-200 brightness-125"
+                        className="absolute -top-14 -right-2 h-20 w-36 object-contain mix-blend-multiply contrast-[800%] brightness-[105%] grayscale"
                       />
 
                       <p className="text-[8px] font-sans font-medium tracking-wide relative z-10">
@@ -697,6 +697,7 @@ const AutoScaledText = ({ text, className = "", fontWeight = "bold", fill = "#00
                 </div>
               );
             })}
+            <IdCardBack />
           </div>
         )}
       </div>
