@@ -234,7 +234,7 @@ export default function IdCardGenerator() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="min-h-screen bg-gray-100 p-3 sm:p-4 md:p-6">
       {/* প্রিন্ট সিএসএস ফিক্স (ব্যাকগ্রাউন্ড কালার ঠিক রাখার জন্য) */}
       <style jsx global>{`
         @media print {
@@ -246,8 +246,8 @@ export default function IdCardGenerator() {
       `}</style>
 
       {/* ----------------- ১. এডমিন কন্ট্রোল প্যানেল (প্রিন্টে হাইড থাকবে) ----------------- */}
-      <div className="print:hidden max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md mb-8">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">
+      <div className="print:hidden max-w-7xl mx-auto bg-white p-4 sm:p-6 rounded-lg shadow-md mb-6 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 border-b pb-2">
           আইডি কার্ড জেনারেটর ড্যাশবোর্ড
         </h1>
 
@@ -257,7 +257,7 @@ export default function IdCardGenerator() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1">
               খুঁজুন (নাম/আইডি/মোবাইল)
@@ -385,14 +385,14 @@ export default function IdCardGenerator() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between border-t pt-4 mb-4">
-          <span className="text-sm text-gray-600 font-semibold">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t pt-4 mb-4">
+          <span className="text-xs sm:text-sm text-gray-600 font-semibold text-center sm:text-left">
             মোট স্টুডেন্ট: {filteredStudents.length} জন | সিলেক্ট করা হয়েছে: {selectedIds.length} জন
           </span>
           <button
             onClick={handlePrint}
             disabled={selectedIds.length === 0}
-            className={`px-6 py-2.5 rounded-md font-bold text-white transition ${selectedIds.length === 0
+            className={`w-full sm:w-auto px-4 sm:px-6 py-2.5 rounded-md font-bold text-sm sm:text-base text-white transition ${selectedIds.length === 0
               ? 'bg-gray-400 cursor-not-allowed'
               : 'bg-green-600 hover:bg-green-700 shadow-lg'
               }`}
@@ -402,7 +402,7 @@ export default function IdCardGenerator() {
         </div>
 
         <div className="overflow-x-auto max-h-72 border rounded-lg">
-          <table className="w-full text-left text-sm text-gray-600">
+          <table className="w-full text-left text-sm text-gray-600 min-w-[600px]">
             <thead className="bg-gray-100 sticky top-0 border-b">
               <tr>
                 <th className="p-3">
@@ -492,18 +492,18 @@ export default function IdCardGenerator() {
 
       {/* ----------------- ২. কার্ড প্রিভিউ এবং প্রিন্ট জোন ----------------- */}
       <div className="max-w-6xl mx-auto">
-        <h2 className="print:hidden text-xl font-bold mb-4 text-gray-700">
+        <h2 className="print:hidden text-lg sm:text-xl font-bold mb-4 text-gray-700">
           আইডি কার্ডের প্রিভিউ
         </h2>
 
         {studentsToPrint.length === 0 ? (
-          <div className="print:hidden text-center py-12 bg-white rounded-lg border-2 border-dashed border-gray-300">
-            <p className="text-gray-500 font-medium">
+          <div className="print:hidden text-center py-8 sm:py-12 bg-white rounded-lg border-2 border-dashed border-gray-300 p-4">
+            <p className="text-sm sm:text-base text-gray-500 font-medium">
               প্রিন্ট প্রিভিউ দেখতে টেবিল থেকে শিক্ষার্থী নির্বাচন (Checkbox Select) করুন।
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 print:grid-cols-3 gap-2 print:gap-2 print:mt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 print:grid-cols-3 gap-4 sm:gap-6 print:gap-2 print:mt-2 justify-items-center">
             {studentsToPrint.map((student) => {
               const details = getStudentClassDetails(student);
 
@@ -518,7 +518,7 @@ export default function IdCardGenerator() {
               return (
                 <div
                   key={student._id}
-                  className="w-[2.125in] h-[3.375in] bg-white rounded-xl p-[3px] relative shadow-xl overflow-hidden mx-auto print:shadow-none print:break-inside-avoid"
+                  className="w-[2.125in] h-[3.375in] bg-white rounded-xl p-[3px] relative shadow-xl overflow-hidden mx-auto print:shadow-none print:break-inside-avoid shrink-0"
                   style={{
                     border: '6px solid #0022C8',
                     boxSizing: 'border-box',
@@ -695,4 +695,4 @@ export default function IdCardGenerator() {
       </div>
     </div>
   );
-}
+  }
