@@ -22,22 +22,39 @@ export default function ClassWiseResult() {
                 setClassData([]);
             }
         } catch (err) {
-            console.error(err);
+            console.error("Class Results Fetch Error:", err);
+            setClassData([]);
         } finally {
             setLoading(false);
         }
     };
 
+    const handlePrint = () => {
+        window.print();
+    };
+
     return (
         <div className="p-4 sm:p-6 bg-slate-50 min-h-screen">
-            <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-7">
-                <div className="border-b border-slate-100 pb-4 mb-6">
-                    <h1 className="text-xl sm:text-2xl font-black text-[#043e30]">শ্রেণীভিত্তিক সম্পূর্ণ ফলাফল</h1>
-                    <p className="text-xs text-slate-500 mt-1">পুরো ক্লাসের শিক্ষার্থীর বিষয়ভিত্তিক নম্বর ও সামারি এক সাথে পর্যালোচনা করুন</p>
+            <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-7 print:shadow-none print:border-none print:p-0">
+                
+                {/* হেডার - প্রিন্ট ও স্ক্রিন ভিউ */}
+                <div className="border-b border-slate-100 pb-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <h1 className="text-xl sm:text-2xl font-black text-[#043e30]">শ্রেণীভিত্তিক সম্পূর্ণ ফলাফল</h1>
+                        <p className="text-xs text-slate-500 mt-1">শ্রেণী: <span className="font-bold text-slate-800">{selectedClass}</span> | শিক্ষাবর্ষ: <span className="font-bold text-slate-800">{year}</span></p>
+                    </div>
+                    {classData.length > 0 && (
+                        <button
+                            onClick={handlePrint}
+                            className="print:hidden self-start sm:self-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors shadow-sm"
+                        >
+                            🖨️ তালিকা প্রিন্ট করুন
+                        </button>
+                    )}
                 </div>
 
-                {/* সার্চ কন্ট্রোল */}
-                <div className="flex flex-col sm:flex-row items-end gap-4 bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 mb-6">
+                {/* সার্চ কন্ট্রোল - প্রিন্টের সময় হাইড থাকবে */}
+                <div className="print:hidden flex flex-col sm:flex-row items-end gap-4 bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 mb-6">
                     <div className="flex-1 w-full">
                         <label className="block text-xs font-bold text-slate-700 mb-1.5">শ্রেণী নির্বাচন করুন</label>
                         <select 
@@ -87,7 +104,7 @@ export default function ClassWiseResult() {
                     <button
                         onClick={handleFetchClassResults}
                         disabled={loading}
-                        className="w-full sm:w-auto bg-[#043e30] hover:bg-emerald-900 text-amber-400 font-extrabold px-6 py-2.5 rounded-lg shadow-sm transition-all duration-200 text-xs sm:text-sm"
+                        className="w-full sm:w-auto bg-[#043e30] hover:bg-emerald-900 text-amber-400 font-extrabold px-6 py-2.5 rounded-lg shadow-sm transition-all duration-200 text-xs sm:text-sm disabled:opacity-50"
                     >
                         {loading ? 'লোড হচ্ছে...' : 'ফলাফল দেখুন'}
                     </button>
@@ -101,17 +118,17 @@ export default function ClassWiseResult() {
                         এই শ্রেণীর কোনো পরীক্ষার ফলাফল ডাটাবেজে পাওয়া যায়নি।
                     </div>
                 ) : classData.length > 0 && (
-                    <div className="overflow-x-auto rounded-xl border border-slate-200">
+                    <div className="overflow-x-auto rounded-xl border border-slate-200 print:border-slate-300">
                         <table className="w-full text-left border-collapse text-xs sm:text-sm">
                             <thead>
-                                <tr className="bg-[#043e30] text-amber-300">
-                                    <th className="p-3 border-b border-emerald-800 font-bold w-28">আইডি</th>
-                                    <th className="p-3 border-b border-emerald-800 font-bold">শিক্ষার্থীর নাম</th>
-                                    <th className="p-3 border-b border-emerald-800 font-bold text-center">মোট বিষয়</th>
-                                    <th className="p-3 border-b border-emerald-800 font-bold">বিষয়ভিত্তিক বার্ষিক মোট নম্বর</th>
+                                <tr className="bg-[#043e30] text-amber-300 print:bg-slate-100 print:text-slate-800">
+                                    <th className="p-3 border-b border-emerald-800 print:border-slate-300 font-bold w-28">আইডি</th>
+                                    <th className="p-3 border-b border-emerald-800 print:border-slate-300 font-bold">শিক্ষার্থীর নাম</th>
+                                    <th className="p-3 border-b border-emerald-800 print:border-slate-300 font-bold text-center">মোট বিষয়</th>
+                                    <th className="p-3 border-b border-emerald-800 print:border-slate-300 font-bold">বিষয়ভিত্তিক ফলাফল (বার্ষিক)</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100 bg-white">
+                            <tbody className="divide-y divide-slate-100 print:divide-slate-200 bg-white">
                                 {classData.map((student, idx) => (
                                     <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
                                         <td className="p-3 font-mono font-bold text-emerald-800">{student.studentId}</td>
@@ -124,7 +141,7 @@ export default function ClassWiseResult() {
                                                     return (
                                                         <span key={sIdx} className="inline-flex items-center gap-1 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-[11px] font-medium text-slate-700">
                                                             <span>{sub.subject}:</span>
-                                                            <strong className="text-emerald-800">{annualTotal}</strong>
+                                                            <strong className="text-emerald-800">{annualTotal || 0}</strong>
                                                         </span>
                                                     );
                                                 })}
@@ -139,4 +156,4 @@ export default function ClassWiseResult() {
             </div>
         </div>
     );
-}
+                            }
