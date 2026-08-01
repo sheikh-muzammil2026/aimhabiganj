@@ -401,92 +401,177 @@ export default function IdCardGenerator() {
           </button>
         </div>
 
-        <div className="overflow-x-auto max-h-72 border rounded-lg">
-          <table className="w-full text-left text-sm text-gray-600 min-w-[600px]">
-            <thead className="bg-gray-100 sticky top-0 border-b">
-              <tr>
-                <th className="p-3">
-                  <input
-                    type="checkbox"
-                    onChange={handleSelectAll}
-                    checked={
-                      filteredStudents.length > 0 &&
-                      selectedIds.length === filteredStudents.length
-                    }
-                  />
-                </th>
-                <th className="p-3">ছবি</th>
-                <th className="p-3">আইডি / রোল</th>
-                <th className="p-3">নাম</th>
-                <th className="p-3">বিভাগ ও শ্রেণি</th>
-                <th className="p-3">মোবাইল</th>
-                <th className="p-3">স্ট্যাটাস</th>
-              </tr>
-            </thead>
-            <tbody>
+        {/* ----------------- রেসপন্সিভ স্টুডেন্ট ডাটা ভিউ ----------------- */}
+        <div className="border rounded-lg overflow-hidden bg-white">
+          {/* ১. মোবাইল ভিউ (কার্ড ফরম্যাট - md স্ক্রিনের নিচে) */}
+          <div className="block md:hidden">
+            {/* মোবাইল সিলেক্ট অল বার */}
+            <div className="p-3 bg-gray-100 border-b flex items-center justify-between text-xs font-semibold text-gray-700">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  onChange={handleSelectAll}
+                  checked={
+                    filteredStudents.length > 0 &&
+                    selectedIds.length === filteredStudents.length
+                  }
+                  className="rounded border-gray-300"
+                />
+                <span>সবাইকে সিলেক্ট করুন</span>
+              </label>
+            </div>
+
+            <div className="max-h-96 overflow-y-auto divide-y divide-gray-200">
               {loading ? (
-                <tr>
-                  <td colSpan="7" className="text-center p-4">
-                    ডাটা লোড হচ্ছে...
-                  </td>
-                </tr>
+                <div className="text-center p-6 text-sm text-gray-500">ডাটা লোড হচ্ছে...</div>
               ) : filteredStudents.length === 0 ? (
-                <tr>
-                  <td colSpan="7" className="text-center p-4">
-                    কোনো শিক্ষার্থী পাওয়া যায়নি!
-                  </td>
-                </tr>
+                <div className="text-center p-6 text-sm text-gray-500">কোনো শিক্ষার্থী পাওয়া যায়নি!</div>
               ) : (
                 filteredStudents.map((student) => {
                   const details = getStudentClassDetails(student);
+                  const isSelected = selectedIds.includes(student._id);
                   return (
-                    <tr key={student._id} className="border-b hover:bg-gray-50">
-                      <td className="p-3">
-                        <input
-                          type="checkbox"
-                          checked={selectedIds.includes(student._id)}
-                          onChange={() => handleSelectStudent(student._id)}
-                        />
-                      </td>
-                      <td className="p-3">
-                        <img
-                          src={student.photoUrl || '/default-avatar.png'}
-                          alt={student.studentNameEnglish || 'Student'}
-                          className="w-8 h-8 rounded-full object-cover border"
-                        />
-                      </td>
-                      <td className="p-3 font-medium text-gray-700">
-                        {student.studentId || student.roll || 'N/A'}
-                      </td>
-                      <td className="p-3 font-medium text-gray-800">
-                        {student.studentNameBangla || student.studentNameEnglish || 'N/A'}
-                      </td>
-                      <td className="p-3">
-                        <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded mr-1">
-                          {details.divisionName}
-                        </span>
-                        {details.className}
-                      </td>
-                      <td className="p-3">
-                        {student.fatherMobile || student.guardianMobile || 'N/A'}
-                      </td>
-                      <td className="p-3">
-                        {!student.photoUrl ? (
-                          <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded">
-                            ছবি মিসিং
+                    <div
+                      key={student._id}
+                      onClick={() => handleSelectStudent(student._id)}
+                      className={`p-3 flex items-start gap-3 cursor-pointer transition ${
+                        isSelected ? 'bg-blue-50/70' : 'hover:bg-gray-50'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => {}} // হ্যান্ডেল করা হচ্ছে প্যারেন্ট div ক্লিক দিয়ে
+                        className="mt-1 rounded border-gray-300"
+                      />
+                      <img
+                        src={student.photoUrl || '/default-avatar.png'}
+                        alt={student.studentNameEnglish || 'Student'}
+                        className="w-12 h-12 rounded-full object-cover border shrink-0"
+                      />
+                      <div className="flex-1 min-w-0 text-xs space-y-1">
+                        <div className="flex justify-between items-start gap-1">
+                          <p className="font-bold text-gray-900 text-sm truncate">
+                            {student.studentNameBangla || student.studentNameEnglish || 'N/A'}
+                          </p>
+                          {!student.photoUrl ? (
+                            <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded shrink-0">
+                              ছবি মিসিং
+                            </span>
+                          ) : (
+                            <span className="text-[10px] bg-green-100 text-green-600 px-1.5 py-0.5 rounded shrink-0">
+                              ওকে
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-gray-600 font-medium">
+                          আইডি/রোল: <span className="text-gray-900 font-semibold">{student.studentId || student.roll || 'N/A'}</span>
+                        </p>
+                        <div className="flex items-center gap-1.5">
+                          <span className="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded text-[10px] font-medium">
+                            {details.divisionName}
                           </span>
-                        ) : (
-                          <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded">
-                            ওকে
-                          </span>
-                        )}
-                      </td>
-                    </tr>
+                          <span className="text-gray-600">{details.className}</span>
+                        </div>
+                        <p className="text-gray-500">
+                          মোবাইল: {student.fatherMobile || student.guardianMobile || 'N/A'}
+                        </p>
+                      </div>
+                    </div>
                   );
                 })
               )}
-            </tbody>
-          </table>
+            </div>
+          </div>
+
+          {/* ২. ডেস্কটপ ও ট্যাবলেট ভিউ (টেবিল ফরম্যাট - md স্ক্রিন ও তার উপরে) */}
+          <div className="hidden md:block overflow-x-auto max-h-72">
+            <table className="w-full text-left text-sm text-gray-600">
+              <thead className="bg-gray-100 sticky top-0 border-b">
+                <tr>
+                  <th className="p-3">
+                    <input
+                      type="checkbox"
+                      onChange={handleSelectAll}
+                      checked={
+                        filteredStudents.length > 0 &&
+                        selectedIds.length === filteredStudents.length
+                      }
+                    />
+                  </th>
+                  <th className="p-3">ছবি</th>
+                  <th className="p-3">আইডি / রোল</th>
+                  <th className="p-3">নাম</th>
+                  <th className="p-3">বিভাগ ও শ্রেণি</th>
+                  <th className="p-3">মোবাইল</th>
+                  <th className="p-3">স্ট্যাটাস</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan="7" className="text-center p-4">
+                      ডাটা লোড হচ্ছে...
+                    </td>
+                  </tr>
+                ) : filteredStudents.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="text-center p-4">
+                      কোনো শিক্ষার্থী পাওয়া যায়নি!
+                    </td>
+                  </tr>
+                ) : (
+                  filteredStudents.map((student) => {
+                    const details = getStudentClassDetails(student);
+                    return (
+                      <tr key={student._id} className="border-b hover:bg-gray-50">
+                        <td className="p-3">
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.includes(student._id)}
+                            onChange={() => handleSelectStudent(student._id)}
+                          />
+                        </td>
+                        <td className="p-3">
+                          <img
+                            src={student.photoUrl || '/default-avatar.png'}
+                            alt={student.studentNameEnglish || 'Student'}
+                            className="w-8 h-8 rounded-full object-cover border"
+                          />
+                        </td>
+                        <td className="p-3 font-medium text-gray-700">
+                          {student.studentId || student.roll || 'N/A'}
+                        </td>
+                        <td className="p-3 font-medium text-gray-800">
+                          {student.studentNameBangla || student.studentNameEnglish || 'N/A'}
+                        </td>
+                        <td className="p-3">
+                          <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded mr-1">
+                            {details.divisionName}
+                          </span>
+                          {details.className}
+                        </td>
+                        <td className="p-3">
+                          {student.fatherMobile || student.guardianMobile || 'N/A'}
+                        </td>
+                        <td className="p-3">
+                          {!student.photoUrl ? (
+                            <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded">
+                              ছবি মিসিং
+                            </span>
+                          ) : (
+                            <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded">
+                              ওকে
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -695,4 +780,4 @@ export default function IdCardGenerator() {
       </div>
     </div>
   );
-  }
+                             }
