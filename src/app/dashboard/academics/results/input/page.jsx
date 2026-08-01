@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { authClient } from '@/lib/auth-client';
 
 export default function TeacherMarkInput() {
     const [selectedClass, setSelectedClass] = useState('প্রথম');
