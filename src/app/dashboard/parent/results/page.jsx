@@ -11,12 +11,12 @@ export default function StudentResultSearch() {
 
     const handleSearch = async (e) => {
         e.preventDefault();
-        if (!searchId) return;
+        if (!searchId.trim()) return;
 
         setLoading(true);
         setErrorMsg('');
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/results/student/${searchId}?year=${encodeURIComponent(year)}`);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/results/student/${searchId.trim()}?year=${encodeURIComponent(year)}`);
             const data = await res.json();
 
             if (data.success) {
@@ -26,7 +26,7 @@ export default function StudentResultSearch() {
                 setErrorMsg(data.message || 'শিক্ষার্থীর কোনো রেজাল্ট তথ্য পাওয়া যায়নি।');
             }
         } catch (err) {
-            console.error(err);
+            console.error("Student Result Fetch Error:", err);
             setErrorMsg('সার্ভারে সমস্যা হয়েছে, আবার চেষ্টা করুন।');
         } finally {
             setLoading(false);
@@ -40,22 +40,34 @@ export default function StudentResultSearch() {
     return (
         <div className="p-4 sm:p-6 bg-slate-100 min-h-screen">
             <div className="max-w-4xl mx-auto">
-                {/* সার্চ ফিল্টার কার্ড - প্রিন্টের সময় এটি লুকানো থাকবে */}
-                <div className="print:hidden bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6">
+                {/* সার্চ ফিল্টার কার্ড - প্রিন্টের সময় লুকানো থাকবে */}
+                <div className="print:hidden bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
                     <h2 className="text-lg font-black text-[#043e30] mb-4">ব্যক্তিগত ফলাফল ও নম্বরপত্র অনুসন্ধান</h2>
                     <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3">
-                        <input
-                            type="text"
-                            placeholder="শিক্ষার্থী আইডি (যেমন: 0401)"
-                            value={searchId}
-                            onChange={(e) => setSearchId(e.target.value)}
-                            className="flex-1 border border-slate-300 rounded-xl p-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-emerald-600 focus:outline-none"
-                            required
-                        />
+                        <div className="flex-1">
+                            <input
+                                type="text"
+                                placeholder="শিক্ষার্থী আইডি (যেমন: 04337)"
+                                value={searchId}
+                                onChange={(e) => setSearchId(e.target.value)}
+                                className="w-full border border-slate-300 rounded-xl p-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-emerald-600 focus:outline-none"
+                                required
+                            />
+                        </div>
+                        <div className="w-full sm:w-36">
+                            <input
+                                type="text"
+                                placeholder="শিক্ষাবর্ষ"
+                                value={year}
+                                onChange={(e) => setYear(e.target.value)}
+                                className="w-full border border-slate-300 rounded-xl p-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-emerald-600 focus:outline-none"
+                                required
+                            />
+                        </div>
                         <button
                             type="submit"
                             disabled={loading}
-                            className="bg-[#043e30] text-amber-400 font-bold px-6 py-2.5 rounded-xl text-xs sm:text-sm hover:bg-emerald-900 transition-colors"
+                            className="bg-[#043e30] text-amber-400 font-bold px-6 py-2.5 rounded-xl text-xs sm:text-sm hover:bg-emerald-900 transition-colors disabled:opacity-50"
                         >
                             {loading ? 'খোঁজা হচ্ছে...' : 'রেজাল্ট দেখুন'}
                         </button>
@@ -65,7 +77,7 @@ export default function StudentResultSearch() {
 
                 {/* রেজাল্ট মার্কশিট (Print Friendly) */}
                 {result && (
-                    <div id="mark-sheet" className="bg-white p-8 sm:p-10 rounded-2xl shadow-md border border-slate-300 print:shadow-none print:border-none print:p-0">
+                    <div id="mark-sheet" className="bg-white p-6 sm:p-10 rounded-2xl shadow-md border border-slate-300 print:shadow-none print:border-none print:p-0">
                         {/* মাদরাসা হেডার */}
                         <div className="text-center border-b-2 border-emerald-900 pb-5 mb-6">
                             <div className="flex items-center justify-center gap-3 mb-2">
@@ -98,9 +110,9 @@ export default function StudentResultSearch() {
                                 <thead>
                                     <tr className="bg-slate-100 text-slate-800 text-center font-bold">
                                         <th className="border border-slate-300 p-2.5 text-left">বিষয়</th>
-                                        <th className="border border-slate-300 p-2.5">১ম সাময়িক (CT+Exam)</th>
-                                        <th className="border border-slate-300 p-2.5">২য় সাময়িক (CT+Exam)</th>
-                                        <th className="border border-slate-300 p-2.5">বার্ষিক (CT+Exam)</th>
+                                        <th className="border border-slate-300 p-2.5">১ম সাময়িক<br/><span className="text-[10px] font-normal text-slate-500">(CT + Exam)</span></th>
+                                        <th className="border border-slate-300 p-2.5">২য় সাময়িক<br/><span className="text-[10px] font-normal text-slate-500">(CT + Exam)</span></th>
+                                        <th className="border border-slate-300 p-2.5">বার্ষিক<br/><span className="text-[10px] font-normal text-slate-500">(CT + Exam)</span></th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-200 text-center">
@@ -110,16 +122,19 @@ export default function StudentResultSearch() {
                                         </tr>
                                     ) : (
                                         result.results.map((item, idx) => {
-                                            const t1Total = (item.term1?.ct || 0) + (item.term1?.exam || 0);
-                                            const t2Total = (item.term2?.ct || 0) + (item.term2?.exam || 0);
-                                            const annualTotal = (item.annual?.ct || 0) + (item.annual?.exam || 0);
+                                            const renderMark = (term) => {
+                                                if (!term || (term.ct === undefined && term.exam === undefined)) return '-';
+                                                const ct = term.ct || 0;
+                                                const exam = term.exam || 0;
+                                                return `${ct + exam} (${ct}+${exam})`;
+                                            };
 
                                             return (
                                                 <tr key={idx} className="hover:bg-slate-50">
                                                     <td className="border border-slate-300 p-2.5 text-left font-bold text-slate-800">{item.subject}</td>
-                                                    <td className="border border-slate-300 p-2.5 font-semibold">{t1Total || '-'}</td>
-                                                    <td className="border border-slate-300 p-2.5 font-semibold">{t2Total || '-'}</td>
-                                                    <td className="border border-slate-300 p-2.5 font-semibold text-emerald-900">{annualTotal || '-'}</td>
+                                                    <td className="border border-slate-300 p-2.5 font-semibold">{renderMark(item.term1)}</td>
+                                                    <td className="border border-slate-300 p-2.5 font-semibold">{renderMark(item.term2)}</td>
+                                                    <td className="border border-slate-300 p-2.5 font-semibold text-emerald-900">{renderMark(item.annual)}</td>
                                                 </tr>
                                             );
                                         })
@@ -130,12 +145,12 @@ export default function StudentResultSearch() {
 
                         {/* স্বাক্ষর এলাকা */}
                         <div className="mt-16 pt-6 flex justify-between text-xs text-slate-700 font-bold border-t border-slate-200">
-                            <div className="text-center"><p className="border-t border-slate-400 pt-1 w-32">শ্রেণী শিক্ষকের স্বাক্ষর</p></div>
-                            <div className="text-center"><p className="border-t border-slate-400 pt-1 w-32">অভিভাবকের স্বাক্ষর</p></div>
-                            <div className="text-center"><p className="border-t border-slate-400 pt-1 w-32">অধ্যক্ষ / মুহতামিম</p></div>
+                            <div className="text-center"><p className="border-t border-slate-400 pt-1 w-28 sm:w-32">শ্রেণী শিক্ষকের স্বাক্ষর</p></div>
+                            <div className="text-center"><p className="border-t border-slate-400 pt-1 w-28 sm:w-32">অভিভাবকের স্বাক্ষর</p></div>
+                            <div className="text-center"><p className="border-t border-slate-400 pt-1 w-28 sm:w-32">অধ্যক্ষ / মুহতামিম</p></div>
                         </div>
 
-                        {/* প্রিন্ট বাটন - প্রিন্টের সময় হাইড থাকবে */}
+                        {/* প্রিন্ট বাটন */}
                         <div className="print:hidden mt-8 text-center">
                             <button
                                 onClick={handlePrint}
@@ -149,4 +164,4 @@ export default function StudentResultSearch() {
             </div>
         </div>
     );
-}
+                                                                               }
