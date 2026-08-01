@@ -75,12 +75,12 @@ useEffect(() => {
         e.preventDefault();
         setSubmitting(true);
         setMessage({ type: '', text: '' });
-        const currentTeacherId = user?.id || user?.email || "UNKNOWN-TEACHER";
+        const currentTeacherId = user?.id || "UNKNOWN-TEACHER";
 
         try {
-            const requests = students.map(student => {
+            const requests = students.map(async (student) => {
                 const markInfo = marksData[student.studentId] || {};
-                return fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/marks/input`, {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/marks/input`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -92,16 +92,21 @@ useEffect(() => {
                         ctMark: markInfo.ctMark,
                         examMark: markInfo.examMark,
                         year,
-                        teacherId: currentTeacherId // ব্যাকএন্ডে সেশন থেকে নেওয়া সম্ভব
+                        teacherId: currentTeacherId
                     })
                 });
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.message || `শিক্ষার্থী ${student.studentId}-এর নম্বর সংরক্ষণ করতে ব্যর্থ হয়েছে।`);
+                }
+                return res.json();
             });
 
             await Promise.all(requests);
             setMessage({ type: 'success', text: 'সকল শিক্ষার্থীর নম্বর সফলভাবে সংরক্ষিত হয়েছে!' });
         } catch (error) {
             console.error("Submit Error:", error);
-            setMessage({ type: 'error', text: 'নম্বর সংরক্ষণ করতে সমস্যা হয়েছে।' });
+            setMessage({ type: 'error', text: error.message || 'নম্বর সংরক্ষণ করতে সমস্যা হয়েছে।' });
         } finally {
             setSubmitting(false);
         }

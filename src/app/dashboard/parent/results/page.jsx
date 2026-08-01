@@ -108,11 +108,11 @@ export default function StudentResultSearch() {
                         <div className="overflow-x-auto mb-8">
                             <table className="w-full border-collapse border border-slate-300 text-xs sm:text-sm">
                                 <thead>
-                                    <tr className="bg-slate-100 text-slate-800 text-center font-bold">
-                                        <th className="border border-slate-300 p-2.5 text-left">বিষয়</th>
-                                        <th className="border border-slate-300 p-2.5">১ম সাময়িক<br/><span className="text-[10px] font-normal text-slate-500">(CT + Exam)</span></th>
-                                        <th className="border border-slate-300 p-2.5">২য় সাময়িক<br/><span className="text-[10px] font-normal text-slate-500">(CT + Exam)</span></th>
-                                        <th className="border border-slate-300 p-2.5">বার্ষিক<br/><span className="text-[10px] font-normal text-slate-500">(CT + Exam)</span></th>
+                                    <tr className="bg-[#043e30] text-amber-300 print:bg-slate-100 print:text-slate-800 text-center font-bold">
+                                        <th className="border border-slate-300 p-3 text-left w-1/4">বিষয় (Subject)</th>
+                                        <th className="border border-slate-300 p-3 w-1/4">1st Term (১ম সাময়িক)</th>
+                                        <th className="border border-slate-300 p-3 w-1/4">2nd Term (২য় সাময়িক)</th>
+                                        <th className="border border-slate-300 p-3 w-1/4">Annual (বার্ষিক)</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-200 text-center">
@@ -122,19 +122,34 @@ export default function StudentResultSearch() {
                                         </tr>
                                     ) : (
                                         result.results.map((item, idx) => {
-                                            const renderMark = (term) => {
-                                                if (!term || (term.ct === undefined && term.exam === undefined)) return '-';
+                                            const renderMarkCell = (term, isAnnual = false) => {
+                                                if (!term || (term.ct === undefined && term.exam === undefined)) {
+                                                    return <span className="text-slate-400 font-semibold">-</span>;
+                                                }
                                                 const ct = term.ct || 0;
                                                 const exam = term.exam || 0;
-                                                return `${ct + exam} (${ct}+${exam})`;
+                                                const total = ct + exam;
+                                                
+                                                return (
+                                                    <div className={`flex flex-col items-center justify-center py-1 ${isAnnual ? 'bg-emerald-50/10' : ''}`}>
+                                                        <span className={`text-sm sm:text-base font-extrabold ${isAnnual ? 'text-emerald-900' : 'text-slate-800'}`}>{total}</span>
+                                                        <span className={`text-[10px] sm:text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
+                                                            isAnnual 
+                                                                ? 'text-emerald-700 bg-emerald-100/50 border-emerald-200/30' 
+                                                                : 'text-slate-500 bg-slate-100/80 border-slate-200/50'
+                                                        }`}>
+                                                            CT: {ct} + Exam: {exam}
+                                                        </span>
+                                                    </div>
+                                                );
                                             };
 
                                             return (
                                                 <tr key={idx} className="hover:bg-slate-50">
                                                     <td className="border border-slate-300 p-2.5 text-left font-bold text-slate-800">{item.subject}</td>
-                                                    <td className="border border-slate-300 p-2.5 font-semibold">{renderMark(item.term1)}</td>
-                                                    <td className="border border-slate-300 p-2.5 font-semibold">{renderMark(item.term2)}</td>
-                                                    <td className="border border-slate-300 p-2.5 font-semibold text-emerald-900">{renderMark(item.annual)}</td>
+                                                    <td className="border border-slate-300 p-2.5">{renderMarkCell(item.term1)}</td>
+                                                    <td className="border border-slate-300 p-2.5">{renderMarkCell(item.term2)}</td>
+                                                    <td className="border border-slate-300 p-2.5">{renderMarkCell(item.annual, true)}</td>
                                                 </tr>
                                             );
                                         })
