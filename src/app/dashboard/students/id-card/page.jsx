@@ -513,11 +513,6 @@ export default function IdCardGenerator() {
               // ২) বারকোডের জন্য সমস্ত ডাইনামিক ডাটা স্ট্রিং আকারে প্যাক করা
               const barcodePayload = JSON.stringify({
                 id: student.studentId || '',
-                name: student.studentNameEnglish || 'studentName',
-                father: student.fatherNameEnglish || 'fotherName',
-                mobile: student.fatherMobile || student.guardianMobile || ''
-                // session: sessionOnlyYear,
-                // division: details.divisionName
               });
 
               return (
@@ -612,7 +607,7 @@ export default function IdCardGenerator() {
                         />
                       </div>
 
-                      <div className="space-y-[1px] text-[8px] font-serif">
+                      <div className="space-y-1 text-[9px] font-serif">
                         {/* পিতা */}
                         <div className="flex items-center">
                           <span className="w-[55px] font-bold text-[#A0006D] shrink-0">Father</span>
@@ -663,8 +658,8 @@ export default function IdCardGenerator() {
                         </div>
 
                         {/* ব্ল্যাড গ্রুপ */}
-                        <div className="flex items-center">
-                          <span className="w-[55px] font-bold text-[#A0006D] shrink-0">Blood Group</span>
+                        <div className="flex  items-center">
+                          <span className="w-[55px] font-bold text-[8px]  text-[#A0006D] shrink-0">Blood Group</span>
                           <span className="font-bold text-[#A0006D] mr-1">:</span>
                           <span className="font-semibold text-black flex-1">
                             {student.bloodGroup || 'N/A'}
@@ -673,25 +668,22 @@ export default function IdCardGenerator() {
                       </div>
                     </div>
 
-                    {/* Authorized Signature ফুটলাইন (প্রিন্ট ব্যাকগ্রাউন্ড ফিক্স করা) */}
-                    <div
-                      className="bg-[#0022C8] text-white text-right px-3 py-1 relative flex flex-col items-end justify-end"
-                      style={{
-                        backgroundColor: '#0022C8',
-                        WebkitPrintColorAdjust: 'exact',
-                        printColorAdjust: 'exact'
-                      }}
-                    >
-                      {/* সিগনেচার ইমেজ - ব্যাকগ্রাউন্ড ও বর্ডার ছাড়া শুধু গাঢ় কালি */}
+                    <div className="relative px-3 py-1 flex flex-col items-end justify-end bg-white">
+                      {/* টপ অ্যান্ড রাইট প্রিমিয়াম অ্যাক্সেন্ট লাইন */}
+                      <div className="absolute top-0 right-0 w-full h-[2px] bg-gradient-to-l from-[#047857] via-[#D97706] to-transparent"></div>
+
+                      {/* সিগনেচার ইমেজ */}
                       <img
                         src="/principle's_signature.jpg"
                         alt="Authorized Signature"
-                        className="absolute -top-14 -right-2 h-20 w-36 object-contain mix-blend-multiply contrast-[800%] brightness-[105%] grayscale"
+                        className="absolute -top-9 -right-3 h-10 w-18 object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45"
                       />
 
-                      <p className="text-[8px] font-sans font-medium tracking-wide relative z-10">
-                        Authorized Signature
-                      </p>
+                      <div className="border-b-2 border-[#047857] pb-0.5 relative z-10">
+                        <p className="text-[8px] font-serif font-bold tracking-wide text-[#047857]">
+                          Authorized Signature
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
