@@ -14,6 +14,8 @@ export default function TeacherMarkInput() {
     const [submitting, setSubmitting] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
 
+    const { data: session } = authClient.useSession();
+    const user = session?.user;
     // ১. নির্বাচিত ক্লাসের স্টুডেন্ট ডাটা লোড করা
    
 // ১. নির্বাচিত ক্লাসের স্টুডেন্ট ডাটা লোড করা
@@ -72,6 +74,7 @@ useEffect(() => {
         e.preventDefault();
         setSubmitting(true);
         setMessage({ type: '', text: '' });
+        const currentTeacherId = user?.id || user?.email || "UNKNOWN-TEACHER";
 
         try {
             const requests = students.map(student => {
@@ -88,7 +91,7 @@ useEffect(() => {
                         ctMark: markInfo.ctMark,
                         examMark: markInfo.examMark,
                         year,
-                        teacherId: "TCH-LOGGED-IN" // ব্যাকএন্ডে সেশন থেকে নেওয়া সম্ভব
+                        teacherId: currentTeacherId // ব্যাকএন্ডে সেশন থেকে নেওয়া সম্ভব
                     })
                 });
             });
