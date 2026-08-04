@@ -194,7 +194,7 @@ export default function BottomNavbar() {
 
                         <div className="flex items-center justify-center gap-2 mb-4 border-b border-emerald-100 pb-3">
                             <School className="w-5 h-5 text-emerald-700" />
-                            <h3 className="text-center font-bold text-emerald-950 text-base font-serif">আস-সালাম মাদরাসা মেনু</h3>
+                            <h3 className="text-center font-bold text-emerald-950 text-base font-serif">আস-সালাম আইডিয়াল মাদরাসা (এইম) মেনু</h3>
                         </div>
 
                         <div className="space-y-2.5 pb-6">

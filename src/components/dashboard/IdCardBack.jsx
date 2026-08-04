@@ -29,7 +29,7 @@ export const IdCardBack = () => {
                         This card remains the property of
                     </p>
                     <p className="text-[8.5px] font-bold font-serif text-black leading-tight">
-                        As-Salam Ideal Madrasah (AIM)
+                        As-Salam Ideal Madrasah  (AIM)
                     </p>
                     <p className="text-[7.5px] font-serif leading-tight font-normal text-black">
                         Not Transferable
@@ -38,7 +38,7 @@ export const IdCardBack = () => {
                         This card identifies you as a student of
                     </p>
                     <p className="text-[8px] font-bold font-serif text-black leading-tight">
-                        As-Salam Ideal Madrasah (AIM)
+                        As-Salam Ideal Madrasah  (AIM)
                     </p>
                     <p className="text-[7px] leading-tight font-serif font-normal text-black">
                         You must produce this card on demand
@@ -60,7 +60,7 @@ export const IdCardBack = () => {
                     </div>
 
                     <p className="text-[8.5px] font-bold font-serif text-black leading-none mt-0.5">
-                        As-Salam Ideal Madrasah (AIM)
+                        As-Salam Ideal Madrasah  (AIM)
                     </p>
 
                     {/* ঠিকানা ও যোগাযোগ */}

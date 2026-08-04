@@ -57,7 +57,7 @@ export default function AdmissionFormCover({ formData, handleChange }) {
           </h1>
           {/* ইংরেজি নাম */}
           <h2 className="text-base sm:text-[24px] font-black text-[#231f20] font-sans tracking-tight mb-1 print:text-[22px]">
-            As-Salam Ideal Madrasah
+            As-Salam Ideal Madrasah  (AIM)
           </h2>
 
           {/* স্লোগান সেকশন */}

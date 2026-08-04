@@ -15,10 +15,10 @@ export default function Footer() {
               </div>
               <div className="flex flex-col">
                 <span className="font-extrabold text-base text-amber-400 tracking-wide leading-none capitalize">
-                  As-Salam Ideal
+                  As-Salam Ideal Madrasah  (AIM)
                 </span>
                 <span className="text-xs font-semibold text-emerald-100 mt-1 dark:text-emerald-400">
-                  আস-সালাম আইডিয়াল মাদরাসা
+                  আস-সালাম আইডিয়াল মাদরাসা (এইম)
                 </span>
               </div>
             </div>
@@ -134,7 +134,7 @@ export default function Footer() {
       <div className="bg-emerald-950 border-t border-emerald-900/60 text-xs py-5 px-4 dark:bg-slate-950 dark:border-slate-900">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3 text-center sm:text-left">
           <p className="text-gray-400 font-medium dark:text-slate-500">
-            &copy; ২০২৬ আস-সালাম আইডিয়াল মাদরাসা, হবিগঞ্জ। সর্বস্বত্ব সংরক্ষিত।
+            &copy; ২০২৬ আস-সালাম আইডিয়াল মাদরাসা (এইম), হবিগঞ্জ। সর্বস্বত্ব সংরক্ষিত।
           </p>
           <p className="text-emerald-300/70 font-serif tracking-wide text-sm sm:text-base dark:text-slate-600" dir="rtl">
             مدرسة السلام النموذجية، حبيغنج

@@ -44,7 +44,7 @@ export default function WhyChooseUs() {
                         আমাদের বৈশিষ্ট্য
                     </h2>
                     <p className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 dark:text-white leading-tight">
-                        কেন আপনার সন্তানের জন্য <br className="hidden sm:inline" /> আস-সালাম মাদ্রাসা নির্বাচন করবেন?
+                        কেন আপনার সন্তানের জন্য <br className="hidden sm:inline" /> আস-সালাম আইডিয়াল মাদরাসা (এইম) নির্বাচন করবেন?
                     </p>
                     <div className="w-16 h-1 bg-amber-500 mx-auto mt-4 rounded-full" />
                 </div>

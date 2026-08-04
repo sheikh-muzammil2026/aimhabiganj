@@ -14,7 +14,7 @@ export default function Header() {
           {/* বাংলা ও আরবি নাম একসাথে এক লাইনে বা পাশাপাশি */}
           <div className="flex flex-wrap justify-center md:justify-start items-baseline gap-2.5">
             <h1 className="text-lg sm:text-xl font-extrabold text-white tracking-wide">
-              আস-সালাম আইডিয়াল মাদ্রাসাহ
+              আস-সালাম আইডিয়াল মাদরাসা (এইম)
             </h1>
             <span className="text-sm sm:text-base font-bold text-[#E8C87C] tracking-wide dir-rtl" style={{ fontFamily: "'Amiri', serif" }}>
               مدرسة السلام النموذجية
@@ -23,7 +23,7 @@ export default function Header() {
 
           {/* ইংরেজি নাম */}
           <h2 className="text-xs sm:text-sm font-semibold text-gray-300">
-            As-Salam Ideal Madrasah, Habiganj
+            As-Salam Ideal Madrasah  (AIM), Habiganj
           </h2>
 
           {/* স্লোগান */}

@@ -629,7 +629,7 @@ export default function IdCardGenerator() {
                       <div className="flex-1 flex items-center h-11">
                         <img
                           src="/banner.jpeg"
-                          alt="As-Salam Ideal Madrasah Name and Slogan"
+                          alt="As-Salam Ideal Madrasah  (AIM) Name and Slogan"
                           className="h-full object-cover"
                         />
                       </div>

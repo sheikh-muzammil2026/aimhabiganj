@@ -39,7 +39,7 @@ export default function ContactComponent() {
           <div>
             <h3 className="text-lg sm:text-xl font-bold text-amber-400 mb-2">প্রধান কার্যালয়</h3>
             <p className="text-xs sm:text-sm leading-relaxed opacity-90 font-medium">
-              জামিয়া ইসলামিয়া মাদরাসা ক্যাম্পাস<br />
+              আস-সালাম আইডিয়াল মাদরাসা (এইম) ক্যাম্পাস<br />
               প্রধান সড়ক, ব্লক-সি, সেক্টর-২,<br />
               ঢাকা - ১২২৯, বাংলাদেশ।
             </p>

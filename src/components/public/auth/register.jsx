@@ -74,7 +74,7 @@ export default function RegisterPage() {
                         নতুন অ্যাকাউন্ট তৈরি করুন
                     </h2>
                     <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                        আস-সালাম আইডিয়াল মাদ্রাসার ডিজিটাল পোর্টালে যুক্ত হোন
+                        আস-সালাম আইডিয়াল মাদরাসা (এইম) এর ডিজিটাল পোর্টালে যুক্ত হোন
                     </p>
                 </div>
 

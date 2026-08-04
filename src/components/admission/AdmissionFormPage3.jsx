@@ -90,7 +90,7 @@ export default function AdmissionFormPage3({ formData, handleChange }) {
               placeholder="(শিক্ষার্থীর নাম লিখুন)"
               className="w-full sm:w-60 text-center font-bold border-b border-gray-400 focus:outline-none bg-transparent px-1 text-sm mt-1 sm:mt-0 text-emerald-850"
             />
-            <span>আস-সালাম আইডিয়াল মাদরাসা (AIM) এ ভর্তি হওয়ার আগ্রহ প্রকাশ করে অঙ্গীকার করছি যে—</span>
+            <span>আস-সালাম আইডিয়াল মাদরাসা (এইম) এ ভর্তি হওয়ার আগ্রহ প্রকাশ করে অঙ্গীকার করছি যে—</span>
           </div>
 
           {/* ১০টি পয়েন্ট */}

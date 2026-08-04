@@ -77,7 +77,7 @@ export default function LoginPage() {
                         অ্যাকাউন্টে লগইন করুন
                     </h2>
                     <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                        আস-সালাম আইডিয়াল মাদ্রাসা ম্যানেজমেন্ট সিস্টেম
+                        আস-সালাম আইডিয়াল মাদরাসা (এইম) ম্যানেজমেন্ট সিস্টেম
                     </p>
                 </div>
 

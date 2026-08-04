@@ -8,16 +8,16 @@ import WhatsAppButton from '@/components/WhatsAppButton';
 
 export const metadata = {
   title: {
-    default: "As-Salam Ideal Madrasah | আস-সালাম আইডিয়াল মাদ্রাসা",
-    template: "%s | As-Salam Ideal Madrasah",
+    default: "As-Salam Ideal Madrasah  (AIM) | আস-সালাম আইডিয়াল মাদরাসা (এইম)",
+    template: "%s | As-Salam Ideal Madrasah  (AIM)",
   },
   description: "আধুনিক ও সুশৃঙ্খল আবাসন ব্যবস্থাসহ চারবর্ষে হিফজ ও একাডেমিক শিক্ষার এক অনন্য প্রতিষ্ঠান, হবিগঞ্জ।",
-  keywords: ["aimhabiganj", "As-Salam Ideal Madrasah", "আস-সালাম আইডিয়াল মাদ্রাসা", "হবিগঞ্জ মাদ্রাসা", "Hifz Madrasah Habiganj"],
+  keywords: ["aimhabiganj", "As-Salam Ideal Madrasah  (AIM)", "আস-সালাম আইডিয়াল মাদরাসা (এইম)", "হবিগঞ্জ মাদ্রাসা", "Hifz Madrasah Habiganj"],
   openGraph: {
-    title: "As-Salam Ideal Madrasah, Habiganj",
+    title: "As-Salam Ideal Madrasah  (AIM), Habiganj",
     description: "আধুনিক ও সুশৃঙ্খল আবাসন ব্যবস্থাসহ ৬ মাসে হিফজ একাডেমিক শিক্ষার এক অনন্য প্রতিষ্ঠান।",
     url: "https://aimhabiganj.vercel.app", // আপনার বর্তমান ডোমেইন
-    siteName: "As-Salam Ideal Madrasah",
+    siteName: "As-Salam Ideal Madrasah  (AIM)",
     locale: "bn_BD",
     type: "website",
   },

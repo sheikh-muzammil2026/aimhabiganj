@@ -45,7 +45,7 @@ const DashboardLayout = ({ children }) => {
                                 Control panel
                             </h2>
                             <h2 className="font-black text-sm text-emerald-900 tracking-wide lg:hidden block">
-                                আস-সালাম আইডিয়াল মাদরাসা
+                                আস-সালাম আইডিয়াল মাদরাসা (এইম)
                             </h2>
                         </div>
                     </div>

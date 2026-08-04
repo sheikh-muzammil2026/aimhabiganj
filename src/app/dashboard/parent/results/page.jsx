@@ -83,7 +83,7 @@ export default function StudentResultSearch() {
                             <div className="flex items-center justify-center gap-3 mb-2">
                                 <img src="/aimlogo1.png" alt="Logo" className="w-14 h-14 object-contain" />
                                 <div>
-                                    <h1 className="text-xl sm:text-2xl font-black text-[#043e30]">আস-সালাম আইডিয়াল মাদরাসা</h1>
+                                    <h1 className="text-xl sm:text-2xl font-black text-[#043e30]">আস-সালাম আইডিয়াল মাদরাসা (এইম)</h1>
                                     <p className="text-xs font-semibold text-emerald-800">হবিগঞ্জ, বাংলাদেশ</p>
                                 </div>
                             </div>

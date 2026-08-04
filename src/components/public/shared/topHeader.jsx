@@ -22,7 +22,7 @@ export default function TopHeader() {
         <div className="flex-shrink-0 w-[60px] h-[60px] md:w-[85px] md:h-[85px] relative rounded-full overflow-hidden p-[2px] bg-transparent">
           <Link href={'/'}> <Image
             src="/aimlogo1.png"
-            alt="As-Salam Ideal Madrasah Logo"
+            alt="As-Salam Ideal Madrasah  (AIM) Logo"
             fill
             sizes="(max-width: 768px) 60px, 85px"
             className="object-cover scale-[1.06] rounded-full"
@@ -40,12 +40,12 @@ export default function TopHeader() {
 
           {/* ২. বাংলা নাম: ফন্ট সাইজ বড় করে রেগুলার এলাইনমেন্ট */}
           <p className="text-sm md:text-5xl font-bold text-emerald-50 tracking-normal dark:text-slate-200 leading-tight font-shalda">
-            আস-সালাম আইডিয়াল মাদ্রাসা
+            আস-সালাম আইডিয়াল মাদরাসা (এইম)
           </p>
 
           {/* ৩. ইংরেজি নাম */}
           <h1 className="text-xl md:text-5xl font-black tracking-wide text-amber-400 dark:text-emerald-400 capitalize drop-shadow-sm leading-none font-britanic">
-            As-Salam Ideal Madrasah
+            As-Salam Ideal Madrasah  (AIM)
           </h1>
 
           {/* ৪. স্লোগান: সম্পূর্ণ নতুন লাইনে এবং রাইট সাইডে পুশ করা হয়েছে */}

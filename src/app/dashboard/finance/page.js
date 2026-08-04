@@ -865,7 +865,7 @@ export default function FinanceDashboard() {
     <div className="max-w-4xl mx-auto bg-white border-2 border-emerald-900/10 rounded-2xl shadow-xs overflow-hidden print:hidden">
       {/* Header Banner representing physical Madrasa Voucher header */}
       <div className="bg-emerald-900 text-white p-4 sm:p-6 text-center space-y-1">
-        <h2 className="text-lg sm:text-xl font-black tracking-wide">আস-সালাম আইডিয়াল মাদরাসা</h2>
+        <h2 className="text-lg sm:text-xl font-black tracking-wide">আস-সালাম আইডিয়াল মাদরাসা (এইম)</h2>
         <p className="text-xs text-emerald-100 font-medium">হবিগঞ্জ সদর, হবিগঞ্জ</p>
         <div className="inline-block bg-white text-emerald-950 font-black text-xs px-3 sm:px-4 py-1 sm:py-1.5 rounded-full mt-2 sm:mt-3 shadow-xs">
           খরচ ভাউচার ফর্ম (Voucher Entry)
@@ -1075,7 +1075,7 @@ export default function FinanceDashboard() {
       <div className="bg-white border border-slate-200 p-4 sm:p-6 md:p-12 rounded-2xl shadow-xs print:border-none print:shadow-none print:p-0 print:m-0 overflow-x-auto">
         {/* Logo/Header */}
         <div className="text-center pb-6 sm:pb-8 border-b border-emerald-900/15">
-          <h2 className="text-xl sm:text-2xl font-black text-emerald-950">আস-সালাম আইডিয়াল মাদরাসা</h2>
+          <h2 className="text-xl sm:text-2xl font-black text-emerald-950">আস-সালাম আইডিয়াল মাদরাসা (এইম)</h2>
           <p className="text-xs text-slate-500 font-bold mt-1">হবিগঞ্জ সদর, হবিগঞ্জ</p>
           <h3 className="text-sm sm:text-base font-black bg-slate-100 border border-slate-200 inline-block px-4 sm:px-6 py-1.5 rounded-full text-slate-700 mt-3 sm:mt-4 tracking-wide">
             মাসিক আয় ও ব্যয় বিবরণী
