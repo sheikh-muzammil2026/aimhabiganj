@@ -34,10 +34,12 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             icon: "📚",
             roles: ["admin", "teacher"],
             dropdown: [
-                { title: "ক্লাস রুটিন", href: "/dashboard/academics?section=class-routine" },
+               // { title: "ক্লাস রুটিন", href: "/dashboard/academics?section=class-routine" },
                 { title: "পরীক্ষা রুটিন", href: "/dashboard/academics?section=exam-routine" },
-                { title: "পরীক্ষার ফলাফল (Results)", href: "/dashboard/academics/results" },
                 { title: "নম্বর ইনপুট", href: "/dashboard/academics/results/input" },
+                { title: "ক্লাসভিত্তিক ফলাফল দেখুন", href: "/dashboard/academics/results/class-wise-result" },
+                { title: "ব্যক্তিগত ফলাফল দেখুন", href: "/dashboard/academics/results/individual-result" },
+                
             ]
         },
         {
