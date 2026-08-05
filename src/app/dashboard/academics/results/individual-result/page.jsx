@@ -105,8 +105,66 @@ export default function StudentResultSearch() {
     </div>
 
     {/* নম্বর টেবিল */}
-    <div className="overflow-x-auto mb-6 sm:mb-8 border border-slate-300 rounded-lg sm:rounded-none">
-        <table className="w-full border-collapse text-xs sm:text-sm min-w-[500px] sm:min-w-full">
+ <div className="mb-6 sm:mb-8 border border-slate-300 rounded-lg sm:rounded-none overflow-hidden">
+    {/* মোবাইল ভিউ - কার্ড লেআউট (sm স্ক্রিনের নিচে দেখাবে) */}
+    <div className="block sm:hidden divide-y divide-slate-200 bg-white">
+        {result.results.length === 0 ? (
+            <div className="p-4 text-center text-slate-500 text-xs">
+                কোনো বিষয়ের নম্বর এখনও ইনপুট দেওয়া হয়নি।
+            </div>
+        ) : (
+            result.results.map((item, idx) => {
+                const renderMobileMark = (term, title, isAnnual = false) => {
+                    if (!term || (term.ct === undefined && term.exam === undefined)) {
+                        return (
+                            <div className="flex justify-between items-center py-1">
+                                <span className="text-slate-500 font-medium text-xs">{title}:</span>
+                                <span className="text-slate-400 font-semibold text-xs">-</span>
+                            </div>
+                        );
+                    }
+                    const ct = term.ct || 0;
+                    const exam = term.exam || 0;
+                    const total = ct + exam;
+
+                    return (
+                        <div className={`flex justify-between items-center py-1 px-2 rounded-md ${isAnnual ? 'bg-emerald-50/50' : ''}`}>
+                            <span className="text-slate-600 font-semibold text-xs">{title}:</span>
+                            <div className="flex items-center gap-2">
+                                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
+                                    isAnnual 
+                                        ? 'text-emerald-700 bg-emerald-100/50 border-emerald-200/30' 
+                                        : 'text-slate-500 bg-slate-100/80 border-slate-200/50'
+                                }`}>
+                                    CT: {ct} + Exam: {exam}
+                                </span>
+                                <span className={`text-sm font-extrabold ${isAnnual ? 'text-emerald-900' : 'text-slate-800'}`}>
+                                    {total}
+                                </span>
+                            </div>
+                        </div>
+                    );
+                };
+
+                return (
+                    <div key={idx} className="p-3 space-y-2">
+                        <div className="bg-[#043e30] text-amber-300 font-bold px-3 py-1.5 rounded-md text-xs">
+                            বিষয়: {item.subject}
+                        </div>
+                        <div className="space-y-1 pt-1">
+                            {renderMobileMark(item.term1, "1st Term (১ম সাময়িক)")}
+                            {renderMobileMark(item.term2, "2nd Term (২য় সাময়িক)")}
+                            {renderMobileMark(item.annual, "Annual (বার্ষিক)", true)}
+                        </div>
+                    </div>
+                );
+            })
+        )}
+    </div>
+
+    {/* ট্যাবলেট ও ডেক্সটপ ভিউ (sm স্ক্রিন এবং তার ওপরে টেবিল আকারে দেখাবে) */}
+    <div className="hidden sm:block overflow-x-auto">
+        <table className="w-full border-collapse text-xs sm:text-sm min-w-full">
             <thead>
                 <tr className="bg-[#043e30] text-amber-300 print:bg-slate-100 print:text-slate-800 text-center font-bold">
                     <th className="border border-slate-300 p-2 sm:p-3 text-left w-1/4">বিষয় (Subject)</th>
@@ -157,7 +215,7 @@ export default function StudentResultSearch() {
             </tbody>
         </table>
     </div>
-
+</div>
     {/* স্বাক্ষর এলাকা */}
     <div className="mt-10 sm:mt-16 pt-4 sm:pt-6 flex flex-wrap sm:flex-nowrap justify-between items-center gap-4 text-[11px] sm:text-xs text-slate-700 font-bold border-t border-slate-200">
         <div className="text-center w-1/2 sm:w-auto"><p className="border-t border-slate-400 pt-1 mx-auto w-24 sm:w-32">শ্রেণী শিক্ষকের স্বাক্ষর</p></div>
