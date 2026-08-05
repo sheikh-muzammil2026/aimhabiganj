@@ -237,7 +237,7 @@ export default function ClassResultView() {
             </tbody>
         </table>
     </div>
-                   
+                    </div> 
                 )}
             </div>
         </div>
