@@ -289,64 +289,78 @@ export default function TeacherMarkInput() {
                     </div>
                 ) : (
                     <form onSubmit={handleSubmitAllMarks}>
-                        <div className="overflow-x-auto rounded-xl border border-slate-200 mb-6">
-                            <table className="w-full text-left border-collapse text-xs sm:text-sm">
-                                <thead>
-                                    <tr className="bg-[#043e30] text-amber-300">
-                                        <th className="p-3 border border-emerald-800 font-bold w-16 text-center">রোল</th>
-                                        <th className="p-3 border border-emerald-800 font-bold w-28">আইডি</th>
-                                        <th className="p-3 border border-emerald-800 font-bold">শিক্ষার্থীর নাম</th>
-                                        <th className="p-3 border border-emerald-800 font-bold text-center w-36">সিটি</th>
-                                        <th className="p-3 border border-emerald-800 font-bold text-center w-36">প্রধান পরীক্ষা</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100 bg-white">
-                                    {studentsMarksList.map((student, idx) => (
-                                        <tr key={student.studentId || idx} className="hover:bg-slate-50 transition-colors">
-                                            <td className="p-3 border border-slate-100 font-bold text-slate-600 text-center">
-                                                {student.rollNumber}
-                                            </td>
-                                            <td className="p-3 border border-slate-100 font-mono font-bold text-emerald-800">
-                                                {student.studentId}
-                                            </td>
-                                            <td className="p-3 border border-slate-100 font-bold text-slate-800">
-                                                {student.studentName}
-                                            </td>
-                                            <td className="p-2 border border-slate-100 text-center">
-                                                <input
-                                                    type="number"
-                                                    value={student.ctMark}
-                                                    onChange={(e) => handleMarkChange(idx, 'ctMark', e.target.value)}
-                                                    placeholder="ফাঁকা"
-                                                    className="w-full p-2 text-center border border-slate-300 rounded-md focus:ring-2 focus:ring-emerald-600 focus:outline-none"
-                                                />
-                                            </td>
-                                            <td className="p-2 border border-slate-100 text-center">
-                                                <input
-                                                    type="number"
-                                                    value={student.examMark}
-                                                    onChange={(e) => handleMarkChange(idx, 'examMark', e.target.value)}
-                                                    placeholder="ফাঁকা"
-                                                    className="w-full p-2 text-center border border-slate-300 rounded-md focus:ring-2 focus:ring-emerald-600 focus:outline-none"
-                                                />
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+    <div className="mb-6 rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+        <table className="w-full text-left border-collapse text-xs sm:text-sm">
+            {/* ডেক্সটপ ও ট্যাবলেটের জন্য হেডার */}
+            <thead className="hidden sm:table-header-group">
+                <tr className="bg-[#043e30] text-amber-300">
+                    <th className="p-3 border border-emerald-800 font-bold w-16 text-center">রোল</th>
+                    <th className="p-3 border border-emerald-800 font-bold w-28">আইডি</th>
+                    <th className="p-3 border border-emerald-800 font-bold">শিক্ষার্থীর নাম</th>
+                    <th className="p-3 border border-emerald-800 font-bold text-center w-36">সিটি</th>
+                    <th className="p-3 border border-emerald-800 font-bold text-center w-36">প্রধান পরীক্ষা</th>
+                </tr>
+            </thead>
 
-                        {/* সেভ বাটন */}
-                        <div className="flex justify-end">
-                            <button
-                                type="submit"
-                                disabled={saving}
-                                className="bg-[#043e30] hover:bg-emerald-900 text-amber-400 font-extrabold px-8 py-3 rounded-xl shadow-md transition-all duration-200 text-sm disabled:opacity-50"
-                            >
-                                {saving ? "সংরক্ষণ হচ্ছে..." : "সকল মার্কস সংরক্ষণ করুন"}
-                            </button>
-                        </div>
-                    </form>
+            <tbody className="divide-y divide-slate-200 bg-white sm:divide-slate-100">
+                {studentsMarksList.map((student, idx) => (
+                    <tr 
+                        key={student.studentId || idx} 
+                        className="flex flex-col p-4 border-b border-slate-200 hover:bg-slate-50 transition-colors sm:table-row sm:p-0 sm:border-none"
+                    >
+                        {/* রোল */}
+                        <td className="p-1 sm:p-3 border-none sm:border sm:border-slate-100 font-bold text-slate-600 text-left sm:text-center flex justify-between items-center sm:table-cell before:content-['রোল:'] before:font-bold before:text-slate-400 sm:before:content-none">
+                            <span>{student.rollNumber}</span>
+                        </td>
+
+                        {/* আইডি */}
+                        <td className="p-1 sm:p-3 border-none sm:border sm:border-slate-100 font-mono font-bold text-emerald-800 flex justify-between items-center sm:table-cell before:content-['আইডি:'] before:font-bold before:text-slate-400 sm:before:content-none">
+                            <span>{student.studentId}</span>
+                        </td>
+
+                        {/* শিক্ষার্থীর নাম */}
+                        <td className="p-1 sm:p-3 border-none sm:border sm:border-slate-100 font-bold text-slate-800 flex justify-between items-center sm:table-cell before:content-['শিক্ষার্থীর_নাম:'] before:font-bold before:text-slate-400 sm:before:content-none">
+                            <span>{student.studentName}</span>
+                        </td>
+
+                        {/* সিটি */}
+                        <td className="p-1 sm:p-2 border-none sm:border sm:border-slate-100 text-center flex justify-between items-center sm:table-cell before:content-['সিটি:'] before:font-bold before:text-slate-400 sm:before:content-none mt-2 sm:mt-0">
+                            <input
+                                type="number"
+                                value={student.ctMark}
+                                onChange={(e) => handleMarkChange(idx, 'ctMark', e.target.value)}
+                                placeholder="ফাঁকা"
+                                className="w-28 sm:w-full p-2 text-center border border-slate-300 rounded-md focus:ring-2 focus:ring-emerald-600 focus:outline-none"
+                            />
+                        </td>
+
+                        {/* প্রধান পরীক্ষা */}
+                        <td className="p-1 sm:p-2 border-none sm:border sm:border-slate-100 text-center flex justify-between items-center sm:table-cell before:content-['প্রধান_পরীক্ষা:'] before:font-bold before:text-slate-400 sm:before:content-none mt-2 sm:mt-0">
+                            <input
+                                type="number"
+                                value={student.examMark}
+                                onChange={(e) => handleMarkChange(idx, 'examMark', e.target.value)}
+                                placeholder="ফাঁকা"
+                                className="w-28 sm:w-full p-2 text-center border border-slate-300 rounded-md focus:ring-2 focus:ring-emerald-600 focus:outline-none"
+                            />
+                        </td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    </div>
+
+    {/* সেভ বাটন */}
+    <div className="flex justify-end">
+        <button
+            type="submit"
+            disabled={saving}
+            className="w-full sm:w-auto bg-[#043e30] hover:bg-emerald-900 text-amber-400 font-extrabold px-8 py-3 rounded-xl shadow-md transition-all duration-200 text-sm disabled:opacity-50"
+        >
+            {saving ? "সংরক্ষণ হচ্ছে..." : "সকল মার্কস সংরক্ষণ করুন"}
+        </button>
+    </div>
+</form>
                 )}
             </div>
         </div>
