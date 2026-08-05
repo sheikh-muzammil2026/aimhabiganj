@@ -77,104 +77,104 @@ export default function StudentResultSearch() {
 
                 {/* রেজাল্ট মার্কশিট (Print Friendly) */}
                 {result && (
-                    <div id="mark-sheet" className="bg-white p-6 sm:p-10 rounded-2xl shadow-md border border-slate-300 print:shadow-none print:border-none print:p-0">
-                        {/* মাদরাসা হেডার */}
-                        <div className="text-center border-b-2 border-emerald-900 pb-5 mb-6">
-                            <div className="flex items-center justify-center gap-3 mb-2">
-                                <img src="/aimlogo1.png" alt="Logo" className="w-14 h-14 object-contain" />
-                                <div>
-                                    <h1 className="text-xl sm:text-2xl font-black text-[#043e30]">আস-সালাম আইডিয়াল মাদরাসা (এইম)</h1>
-                                    <p className="text-xs font-semibold text-emerald-800">হবিগঞ্জ, বাংলাদেশ</p>
+                    <div id="mark-sheet" className="bg-white p-4 sm:p-6 md:p-10 rounded-2xl shadow-md border border-slate-300 print:shadow-none print:border-none print:p-0">
+    {/* মাদরাসা হেডার */}
+    <div className="text-center border-b-2 border-emerald-900 pb-4 sm:pb-5 mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-2">
+            <img src="/aimlogo1.png" alt="Logo" className="w-12 h-12 sm:w-14 sm:h-14 object-contain" />
+            <div className="text-center sm:text-left">
+                <h1 className="text-lg sm:text-xl md:text-2xl font-black text-[#043e30]">আস-সালাম আইডিয়াল মাদরাসা (এইম)</h1>
+                <p className="text-[11px] sm:text-xs font-semibold text-emerald-800">হবিগঞ্জ, বাংলাদেশ</p>
+            </div>
+        </div>
+        <span className="inline-block bg-amber-400 text-[#043e30] font-black px-3 sm:px-4 py-1 rounded-full text-[10px] sm:text-xs uppercase tracking-widest mt-1">
+            একাডেমিক মার্কশিট - {result.year}
+        </span>
+    </div>
+
+    {/* শিক্ষার্থী প্রোফাইল সামারি */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm bg-slate-50 p-3 sm:p-4 rounded-xl border border-slate-200 mb-6">
+        <div className="space-y-1 sm:space-y-0">
+            <p className="text-slate-600">শিক্ষার্থীর নাম: <strong className="text-slate-900 font-bold">{result.student.name}</strong></p>
+            <p className="text-slate-600 sm:mt-1">আইডি নম্বর: <strong className="text-emerald-800 font-mono font-bold">{result.student.studentId}</strong></p>
+        </div>
+        <div className="text-left sm:text-right space-y-1 sm:space-y-0">
+            <p className="text-slate-600">শ্রেণী: <strong className="text-slate-900 font-bold">{result.student.class}</strong></p>
+            <p className="text-slate-600 sm:mt-1">রোল নম্বর: <strong className="text-slate-900 font-bold">{result.student.roll || 'N/A'}</strong></p>
+        </div>
+    </div>
+
+    {/* নম্বর টেবিল */}
+    <div className="overflow-x-auto mb-6 sm:mb-8 border border-slate-300 rounded-lg sm:rounded-none">
+        <table className="w-full border-collapse text-xs sm:text-sm min-w-[500px] sm:min-w-full">
+            <thead>
+                <tr className="bg-[#043e30] text-amber-300 print:bg-slate-100 print:text-slate-800 text-center font-bold">
+                    <th className="border border-slate-300 p-2 sm:p-3 text-left w-1/4">বিষয় (Subject)</th>
+                    <th className="border border-slate-300 p-2 sm:p-3 w-1/4">1st Term (১ম সাময়িক)</th>
+                    <th className="border border-slate-300 p-2 sm:p-3 w-1/4">2nd Term (২য় সাময়িক)</th>
+                    <th className="border border-slate-300 p-2 sm:p-3 w-1/4">Annual (বার্ষিক)</th>
+                </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 text-center">
+                {result.results.length === 0 ? (
+                    <tr>
+                        <td colSpan="4" className="p-4 text-slate-500">কোনো বিষয়ের নম্বর এখনও ইনপুট দেওয়া হয়নি।</td>
+                    </tr>
+                ) : (
+                    result.results.map((item, idx) => {
+                        const renderMarkCell = (term, isAnnual = false) => {
+                            if (!term || (term.ct === undefined && term.exam === undefined)) {
+                                return <span className="text-slate-400 font-semibold">-</span>;
+                            }
+                            const ct = term.ct || 0;
+                            const exam = term.exam || 0;
+                            const total = ct + exam;
+                            
+                            return (
+                                <div className={`flex flex-col items-center justify-center py-1 ${isAnnual ? 'bg-emerald-50/10' : ''}`}>
+                                    <span className={`text-xs sm:text-base font-extrabold ${isAnnual ? 'text-emerald-900' : 'text-slate-800'}`}>{total}</span>
+                                    <span className={`text-[9px] sm:text-[11px] font-semibold px-1.5 sm:px-2 py-0.5 rounded-full border ${
+                                        isAnnual 
+                                            ? 'text-emerald-700 bg-emerald-100/50 border-emerald-200/30' 
+                                            : 'text-slate-500 bg-slate-100/80 border-slate-200/50'
+                                    }`}>
+                                        CT: {ct} + Exam: {exam}
+                                    </span>
                                 </div>
-                            </div>
-                            <span className="inline-block bg-amber-400 text-[#043e30] font-black px-4 py-1 rounded-full text-xs uppercase tracking-widest mt-1">
-                                একাডেমিক মার্কশিট - {result.year}
-                            </span>
-                        </div>
+                            );
+                        };
 
-                        {/* শিক্ষার্থী প্রোফাইল সামারি */}
-                        <div className="grid grid-cols-2 gap-4 text-xs sm:text-sm bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
-                            <div>
-                                <p className="text-slate-600">শিক্ষার্থীর নাম: <strong className="text-slate-900 font-bold">{result.student.name}</strong></p>
-                                <p className="text-slate-600 mt-1">আইডি নম্বর: <strong className="text-emerald-800 font-mono font-bold">{result.student.studentId}</strong></p>
-                            </div>
-                            <div className="text-right">
-                                <p className="text-slate-600">শ্রেণী: <strong className="text-slate-900 font-bold">{result.student.class}</strong></p>
-                                <p className="text-slate-600 mt-1">রোল নম্বর: <strong className="text-slate-900 font-bold">{result.student.roll || 'N/A'}</strong></p>
-                            </div>
-                        </div>
+                        return (
+                            <tr key={idx} className="hover:bg-slate-50">
+                                <td className="border border-slate-300 p-2 sm:p-2.5 text-left font-bold text-slate-800">{item.subject}</td>
+                                <td className="border border-slate-300 p-2 sm:p-2.5">{renderMarkCell(item.term1)}</td>
+                                <td className="border border-slate-300 p-2 sm:p-2.5">{renderMarkCell(item.term2)}</td>
+                                <td className="border border-slate-300 p-2 sm:p-2.5">{renderMarkCell(item.annual, true)}</td>
+                            </tr>
+                        );
+                    })
+                )}
+            </tbody>
+        </table>
+    </div>
 
-                        {/* নম্বর টেবিল */}
-                        <div className="overflow-x-auto mb-8">
-                            <table className="w-full border-collapse border border-slate-300 text-xs sm:text-sm">
-                                <thead>
-                                    <tr className="bg-[#043e30] text-amber-300 print:bg-slate-100 print:text-slate-800 text-center font-bold">
-                                        <th className="border border-slate-300 p-3 text-left w-1/4">বিষয় (Subject)</th>
-                                        <th className="border border-slate-300 p-3 w-1/4">1st Term (১ম সাময়িক)</th>
-                                        <th className="border border-slate-300 p-3 w-1/4">2nd Term (২য় সাময়িক)</th>
-                                        <th className="border border-slate-300 p-3 w-1/4">Annual (বার্ষিক)</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-200 text-center">
-                                    {result.results.length === 0 ? (
-                                        <tr>
-                                            <td colSpan="4" className="p-4 text-slate-500">কোনো বিষয়ের নম্বর এখনও ইনপুট দেওয়া হয়নি।</td>
-                                        </tr>
-                                    ) : (
-                                        result.results.map((item, idx) => {
-                                            const renderMarkCell = (term, isAnnual = false) => {
-                                                if (!term || (term.ct === undefined && term.exam === undefined)) {
-                                                    return <span className="text-slate-400 font-semibold">-</span>;
-                                                }
-                                                const ct = term.ct || 0;
-                                                const exam = term.exam || 0;
-                                                const total = ct + exam;
-                                                
-                                                return (
-                                                    <div className={`flex flex-col items-center justify-center py-1 ${isAnnual ? 'bg-emerald-50/10' : ''}`}>
-                                                        <span className={`text-sm sm:text-base font-extrabold ${isAnnual ? 'text-emerald-900' : 'text-slate-800'}`}>{total}</span>
-                                                        <span className={`text-[10px] sm:text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
-                                                            isAnnual 
-                                                                ? 'text-emerald-700 bg-emerald-100/50 border-emerald-200/30' 
-                                                                : 'text-slate-500 bg-slate-100/80 border-slate-200/50'
-                                                        }`}>
-                                                            CT: {ct} + Exam: {exam}
-                                                        </span>
-                                                    </div>
-                                                );
-                                            };
+    {/* স্বাক্ষর এলাকা */}
+    <div className="mt-10 sm:mt-16 pt-4 sm:pt-6 flex flex-wrap sm:flex-nowrap justify-between items-center gap-4 text-[11px] sm:text-xs text-slate-700 font-bold border-t border-slate-200">
+        <div className="text-center w-1/2 sm:w-auto"><p className="border-t border-slate-400 pt-1 mx-auto w-24 sm:w-32">শ্রেণী শিক্ষকের স্বাক্ষর</p></div>
+        <div className="text-center w-1/2 sm:w-auto"><p className="border-t border-slate-400 pt-1 mx-auto w-24 sm:w-32">অভিভাবকের স্বাক্ষর</p></div>
+        <div className="text-center w-full sm:w-auto mt-2 sm:mt-0"><p className="border-t border-slate-400 pt-1 mx-auto w-28 sm:w-32">অধ্যক্ষ / মুহতামিম</p></div>
+    </div>
 
-                                            return (
-                                                <tr key={idx} className="hover:bg-slate-50">
-                                                    <td className="border border-slate-300 p-2.5 text-left font-bold text-slate-800">{item.subject}</td>
-                                                    <td className="border border-slate-300 p-2.5">{renderMarkCell(item.term1)}</td>
-                                                    <td className="border border-slate-300 p-2.5">{renderMarkCell(item.term2)}</td>
-                                                    <td className="border border-slate-300 p-2.5">{renderMarkCell(item.annual, true)}</td>
-                                                </tr>
-                                            );
-                                        })
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {/* স্বাক্ষর এলাকা */}
-                        <div className="mt-16 pt-6 flex justify-between text-xs text-slate-700 font-bold border-t border-slate-200">
-                            <div className="text-center"><p className="border-t border-slate-400 pt-1 w-28 sm:w-32">শ্রেণী শিক্ষকের স্বাক্ষর</p></div>
-                            <div className="text-center"><p className="border-t border-slate-400 pt-1 w-28 sm:w-32">অভিভাবকের স্বাক্ষর</p></div>
-                            <div className="text-center"><p className="border-t border-slate-400 pt-1 w-28 sm:w-32">অধ্যক্ষ / মুহতামিম</p></div>
-                        </div>
-
-                        {/* প্রিন্ট বাটন */}
-                        <div className="print:hidden mt-8 text-center">
-                            <button
-                                onClick={handlePrint}
-                                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition-colors text-xs sm:text-sm"
-                            >
-                                🖨️ মার্কশিট প্রিন্ট / পিডিএফ ডাউনলোড
-                            </button>
-                        </div>
-                    </div>
+    {/* প্রিন্ট বাটন */}
+    <div className="print:hidden mt-6 sm:mt-8 text-center">
+        <button
+            onClick={handlePrint}
+            className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition-colors text-xs sm:text-sm"
+        >
+            🖨️ মার্কশিট প্রিন্ট / পিডিএফ ডাউনলোড
+        </button>
+    </div>
+</div>
                 )}
             </div>
         </div>
