@@ -216,13 +216,24 @@ export default function StudentResultSearch() {
         </table>
     </div>
 </div>
-    {/* স্বাক্ষর এলাকা */}
-    <div className="mt-10 sm:mt-16 pt-4 sm:pt-6 flex flex-wrap sm:flex-nowrap justify-between items-center gap-4 text-[11px] sm:text-xs text-slate-700 font-bold border-t border-slate-200">
-        <div className="text-center w-1/2 sm:w-auto"><p className="border-t border-slate-400 pt-1 mx-auto w-24 sm:w-32">শ্রেণী শিক্ষকের স্বাক্ষর</p></div>
-        <div className="text-center w-1/2 sm:w-auto"><p className="border-t border-slate-400 pt-1 mx-auto w-24 sm:w-32">অভিভাবকের স্বাক্ষর</p></div>
-        <div className="text-center w-full sm:w-auto mt-2 sm:mt-0"><p className="border-t border-slate-400 pt-1 mx-auto w-28 sm:w-32">অধ্যক্ষ / মুহতামিম</p></div>
+                        {/* স্বাক্ষর এলাকা */}
+<div className="mt-10 sm:mt-16 pt-4 sm:pt-6 grid grid-cols-3 gap-2 sm:gap-4 items-end text-[10px] sm:text-xs text-slate-700 font-bold border-t border-slate-200">
+    <div className="text-center">
+        <p className="border-t border-slate-400 pt-1 mx-auto w-full max-w-[100px] sm:max-w-[130px] truncate">
+            শ্রেণী শিক্ষকের স্বাক্ষর
+        </p>
     </div>
-
+    <div className="text-center">
+        <p className="border-t border-slate-400 pt-1 mx-auto w-full max-w-[100px] sm:max-w-[130px] truncate">
+            অভিভাবকের স্বাক্ষর
+        </p>
+    </div>
+    <div className="text-center">
+        <p className="border-t border-slate-400 pt-1 mx-auto w-full max-w-[100px] sm:max-w-[130px] truncate">
+            প্রিন্সিপাল
+        </p>
+    </div>
+</div>
     {/* প্রিন্ট বাটন */}
     <div className="print:hidden mt-6 sm:mt-8 text-center">
         <button
