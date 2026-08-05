@@ -128,58 +128,116 @@ export default function ClassResultView() {
                         এই শ্রেণিতে কোনো ফলাফলের রেকর্ড পাওয়া যায়নি।
                     </div>
                 ) : (
-                    <div className="overflow-x-auto rounded-xl border border-slate-200">
-                        <table className="w-full text-left border-collapse text-xs sm:text-sm">
-                            <thead>
-                                <tr className="bg-[#043e30] text-amber-300">
-                                    <th className="p-3 border border-emerald-800 font-bold text-center w-16">রোল</th>
-                                    <th className="p-3 border border-emerald-800 font-bold w-28">আইডি</th>
-                                    <th className="p-3 border border-emerald-800 font-bold">শিক্ষার্থীর নাম</th>
-                                    <th className="p-3 border border-emerald-800 font-bold">বিষয়ভিত্তিক মার্কস</th>
-                                    <th className="p-3 border border-emerald-800 font-bold text-center w-28">মোট নম্বর</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 bg-white">
-                                {results.map((student) => {
-                                    const total = calculateTotalMark(student.allSubjects);
+                    <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+    {/* মোবাইল ভিউ - কার্ড লেআউট (sm স্ক্রিনের নিচে দেখাবে) */}
+    <div className="block sm:hidden divide-y divide-slate-200 bg-white">
+        {results.map((student) => {
+            const total = calculateTotalMark(student.allSubjects);
 
-                                    return (
-                                        <tr key={student.studentId} className="hover:bg-slate-50 transition-colors">
-                                            <td className="p-3 border border-slate-100 font-bold text-slate-600 text-center">
-                                                {student.rollNumber || 'N/A'}
-                                            </td>
-                                            <td className="p-3 border border-slate-100 font-mono font-bold text-emerald-800">
-                                                {student.studentId}
-                                            </td>
-                                            <td className="p-3 border border-slate-100 font-bold text-slate-800">
-                                                {student.studentName || 'N/A'}
-                                            </td>
-                                            <td className="p-3 border border-slate-100">
-                                                <div className="flex flex-wrap gap-2">
-                                                    {student.allSubjects?.map((sub, idx) => {
-                                                        const termData = sub[examType] || {};
-                                                        const ct = parseFloat(termData.ct) || 0;
-                                                        const exam = parseFloat(termData.exam) || 0;
-                                                        const subTotal = ct + exam;
-
-                                                        return (
-                                                            <span key={idx} className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 px-2 py-1 rounded text-xs">
-                                                                <span className="font-semibold">{sub.subject}:</span>
-                                                                <span className="text-emerald-700 font-bold">{subTotal}</span>
-                                                            </span>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </td>
-                                            <td className="p-3 border border-slate-100 text-center font-extrabold text-emerald-900 text-sm">
-                                                {total}
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
+            return (
+                <div key={student.studentId} className="p-4 space-y-3">
+                    {/* হেডার: রোল ও মোট নম্বর */}
+                    <div className="flex justify-between items-center bg-emerald-50/60 p-2.5 rounded-lg border border-emerald-100">
+                        <div className="flex items-center gap-2">
+                            <span className="bg-[#043e30] text-amber-300 font-bold px-2 py-0.5 rounded text-xs">
+                                রোল: {student.rollNumber || 'N/A'}
+                            </span>
+                            <span className="font-mono font-bold text-emerald-800 text-xs">
+                                ID: {student.studentId}
+                            </span>
+                        </div>
+                        <div className="text-right">
+                            <span className="text-[10px] text-slate-500 block leading-tight">মোট নম্বর</span>
+                            <span className="font-extrabold text-emerald-900 text-sm">
+                                {total}
+                            </span>
+                        </div>
                     </div>
+
+                    {/* শিক্ষার্থীর নাম */}
+                    <div>
+                        <span className="text-[11px] font-semibold text-slate-500 block">শিক্ষার্থীর নাম</span>
+                        <h4 className="font-bold text-slate-800 text-sm">{student.studentName || 'N/A'}</h4>
+                    </div>
+
+                    {/* বিষয়ভিত্তিক মার্কস */}
+                    <div>
+                        <span className="text-[11px] font-semibold text-slate-500 block mb-1.5">বিষয়ভিত্তিক মার্কস</span>
+                        <div className="flex flex-wrap gap-1.5">
+                            {student.allSubjects?.map((sub, idx) => {
+                                const termData = sub[examType] || {};
+                                const ct = parseFloat(termData.ct) || 0;
+                                const exam = parseFloat(termData.exam) || 0;
+                                const subTotal = ct + exam;
+
+                                return (
+                                    <span key={idx} className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 px-2 py-1 rounded text-xs border border-slate-200/60">
+                                        <span className="font-semibold">{sub.subject}:</span>
+                                        <span className="text-emerald-700 font-bold">{subTotal}</span>
+                                    </span>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            );
+        })}
+    </div>
+
+    {/* ট্যাবলেট ও ডেক্সটপ ভিউ (sm স্ক্রিন এবং তার ওপরে ক্লাসিক টেবিল আকারে দেখাবে) */}
+    <div className="hidden sm:block overflow-x-auto">
+        <table className="w-full text-left border-collapse text-xs sm:text-sm">
+            <thead>
+                <tr className="bg-[#043e30] text-amber-300">
+                    <th className="p-3 border border-emerald-800 font-bold text-center w-16">রোল</th>
+                    <th className="p-3 border border-emerald-800 font-bold w-28">আইডি</th>
+                    <th className="p-3 border border-emerald-800 font-bold">শিক্ষার্থীর নাম</th>
+                    <th className="p-3 border border-emerald-800 font-bold">বিষয়ভিত্তিক মার্কস</th>
+                    <th className="p-3 border border-emerald-800 font-bold text-center w-28">মোট নম্বর</th>
+                </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 bg-white">
+                {results.map((student) => {
+                    const total = calculateTotalMark(student.allSubjects);
+
+                    return (
+                        <tr key={student.studentId} className="hover:bg-slate-50 transition-colors">
+                            <td className="p-3 border border-slate-100 font-bold text-slate-600 text-center">
+                                {student.rollNumber || 'N/A'}
+                            </td>
+                            <td className="p-3 border border-slate-100 font-mono font-bold text-emerald-800">
+                                {student.studentId}
+                            </td>
+                            <td className="p-3 border border-slate-100 font-bold text-slate-800">
+                                {student.studentName || 'N/A'}
+                            </td>
+                            <td className="p-3 border border-slate-100">
+                                <div className="flex flex-wrap gap-2">
+                                    {student.allSubjects?.map((sub, idx) => {
+                                        const termData = sub[examType] || {};
+                                        const ct = parseFloat(termData.ct) || 0;
+                                        const exam = parseFloat(termData.exam) || 0;
+                                        const subTotal = ct + exam;
+
+                                        return (
+                                            <span key={idx} className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 px-2 py-1 rounded text-xs">
+                                                <span className="font-semibold">{sub.subject}:</span>
+                                                <span className="text-emerald-700 font-bold">{subTotal}</span>
+                                            </span>
+                                        );
+                                    })}
+                                </div>
+                            </td>
+                            <td className="p-3 border border-slate-100 text-center font-extrabold text-emerald-900 text-sm">
+                                {total}
+                            </td>
+                        </tr>
+                    );
+                })}
+            </tbody>
+        </table>
+    </div>
+                   
                 )}
             </div>
         </div>
