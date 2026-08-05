@@ -34,11 +34,15 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             icon: "📚",
             roles: ["admin", "teacher"],
             dropdown: [
-               // { title: "ক্লাস রুটিন", href: "/dashboard/academics?section=class-routine" },
-                { title: "পরীক্ষা রুটিন", href: "/dashboard/academics?section=exam-routine" },
+              // { title: "পরিক্ষা ফি", href: "/dashboard/academics?exam-fee" },
+                { title: "পরিক্ষা ফি", href: "/dashboard/academics?exam-fee" },
+                { title: "পরীক্ষা রুটিন", href: "/dashboard/academics?exam-routine" },
+                { title: "সাক্ষরপত্র", href: "/dashboard/academics?attendance-sheet" },
+                { title: "এডমিট কার্ড", href: "/dashboard/academics?admit-card" },
+                { title: "সীট প্লান", href: "/dashboard/academics?seat-plan" },
                 { title: "নম্বর ইনপুট", href: "/dashboard/academics/results/input" },
-                { title: "ক্লাসভিত্তিক ফলাফল দেখুন", href: "/dashboard/academics/results/class-wise-result" },
-                { title: "ব্যক্তিগত ফলাফল দেখুন", href: "/dashboard/academics/results/individual-result" },
+                { title: "ক্লাসভিত্তিক ফলাফল", href: "/dashboard/academics/results/class-wise-result" },
+                { title: "ব্যক্তিগত ফলাফল", href: "/dashboard/academics/results/individual-result" },
                 
             ]
         },
