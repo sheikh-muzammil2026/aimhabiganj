@@ -434,14 +434,13 @@ export default function IdCardGenerator() {
                     <div
                       key={student._id}
                       onClick={() => handleSelectStudent(student._id)}
-                      className={`p-3 flex items-start gap-3 cursor-pointer transition ${
-                        isSelected ? 'bg-blue-50/70' : 'hover:bg-gray-50'
-                      }`}
+                      className={`p-3 flex items-start gap-3 cursor-pointer transition ${isSelected ? 'bg-blue-50/70' : 'hover:bg-gray-50'
+                        }`}
                     >
                       <input
                         type="checkbox"
                         checked={isSelected}
-                        onChange={() => {}} // হ্যান্ডেল করা হচ্ছে প্যারেন্ট div ক্লিক দিয়ে
+                        onChange={() => { }} // হ্যান্ডেল করা হচ্ছে প্যারেন্ট div ক্লিক দিয়ে
                         className="mt-1 rounded border-gray-300"
                       />
                       <img
@@ -588,7 +587,8 @@ export default function IdCardGenerator() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 print:grid-cols-3 gap-4 sm:gap-6 print:gap-2 print:mt-2 justify-items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 print:grid-cols-3 gap-1 sm:gap-6 print:gap-4 print:mt-3 justify-items-center">
+            {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 print:block gap-4 sm:gap-6 print:mt-3"> */}
             {studentsToPrint.map((student) => {
               const details = getStudentClassDetails(student);
 
@@ -596,9 +596,7 @@ export default function IdCardGenerator() {
               const sessionOnlyYear = student.sessionYear ? student.sessionYear.split('-')[0] : 'N/A';
 
               // ২) বারকোডের জন্য সমস্ত ডাইনামিক ডাটা স্ট্রিং আকারে প্যাক করা
-              const barcodePayload = JSON.stringify({
-                id: student.studentId || '',
-              });
+              const barcodePayload = String(student.studentId || student.roll || '');
 
               return (
                 <div
@@ -668,11 +666,13 @@ export default function IdCardGenerator() {
                         {/* ডাইনামিক বারকোড রেন্ডারিং */}
                         <div className="w-6 h-20 bg-white flex items-center justify-center overflow-hidden">
                           <div className="transform rotate-90 origin-center scale-90">
+                            {/* ✅ নতুন কোড: */}
                             <BarcodeSVG
-                              value={barcodePayload}
-                              width={0.8}
-                              height={18}
-                              fontSize={0}
+                              value={barcodePayload || '0000'}
+                              format="CODE128"
+                              width={1.2}              // লাইনগুলো একটু মোটা করা হয়েছে যেন সহজে স্ক্যান হয়
+                              height={28}             // বারকোডের উচ্চতা বাড়ানো হয়েছে
+                              displayValue={false}    // শুধু বারকোড দেখাবে, কোনো টেক্সট বা আইডি বারকোডের নিচে দেখাবে না
                               margin={0}
                               background="transparent"
                             />
@@ -753,11 +753,11 @@ export default function IdCardGenerator() {
                       </div>
                     </div>
 
-                    <div className="relative px-3 py-1 flex flex-col items-end justify-end bg-white">
-                      {/* টপ অ্যান্ড রাইট প্রিমিয়াম অ্যাক্সেন্ট লাইন */}
+                    {/* <div className="relative px-3 py-1 flex flex-col items-end justify-end bg-white">
+                      টপ অ্যান্ড রাইট প্রিমিয়াম অ্যাক্সেন্ট লাইন
                       <div className="absolute top-0 right-0 w-full h-[2px] bg-gradient-to-l from-[#047857] via-[#D97706] to-transparent"></div>
 
-                      {/* সিগনেচার ইমেজ */}
+                      সিগনেচার ইমেজ
                       <img
                         src="/principle's_signature.jpg"
                         alt="Authorized Signature"
@@ -769,6 +769,25 @@ export default function IdCardGenerator() {
                           Authorized Signature
                         </p>
                       </div>
+                    </div> */}
+                    <div
+                      className="bg-[#047857] text-white text-right px-3 py-1 relative flex flex-col items-end justify-end border-t border-amber-500"
+                      style={{
+                        backgroundColor: '#047857', // ইমারাল্ড গ্রিন
+                        WebkitPrintColorAdjust: 'exact',
+                        printColorAdjust: 'exact'
+                      }}
+                    >
+                      {/* সিগনেচার ইমেজ */}
+                      <img
+                        src="/principle's_signature.jpg"
+                        alt="Authorized Signature"
+                        className="absolute -top-9 -right-2 h-10 w-18 object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45"
+                      />
+
+                      <p className="text-[8px] font-sans font-medium tracking-wide relative z-10 text-amber-300">
+                        Authorized Signature
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -776,8 +795,10 @@ export default function IdCardGenerator() {
             })}
             <IdCardBack />
           </div>
+
         )}
+
       </div>
     </div>
   );
-                             }
+}

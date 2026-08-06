@@ -64,7 +64,7 @@ export const IdCardBack = () => {
                     </p>
 
                     {/* ঠিকানা ও যোগাযোগ */}
-                    <div className="text-[7.5px] font-serif leading-snug text-black mt-0.5">
+                    <div className="text-[7.5px] font-serif leading-snug text-black mt-0.5 space-y-1">
                         <p className="font-normal text-gray-900">Holding No: 4577-03</p>
                         <p className="font-normal text-gray-900">South Shaymoli R/A</p>
                         <p className="font-normal text-gray-900">Habiganj-3300</p>
@@ -77,7 +77,7 @@ export const IdCardBack = () => {
                     </div>
 
                     {/* সোশ্যাল মিডিয়া ও ওয়েব ফুটলাইন লিংক (ডার্কার অ্যান্ড ক্লিয়ার টেক্সট) */}
-                    <div className="pt-1 border-t border-gray-300 grid grid-cols-2 gap-x-1 gap-y-0.5 font-sans w-full px-0.5">
+                    <div className="pt-2 border-t border-gray-300 grid grid-cols-2 gap-x-1 gap-y-0.5 font-sans w-full px-0.6">
                         <div className="flex items-center justify-center gap-0.5 text-[6.5px]">
                             <span className="text-blue-600 font-bold">f</span>
                             <span className="truncate font-medium">aimhabiganj</span>
