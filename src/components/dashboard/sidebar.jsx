@@ -36,7 +36,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             dropdown: [
                 // { title: "পরিক্ষা ফি", href: "/dashboard/academics?exam-fee" },
                 { title: "পরিক্ষা ফি", href: "/dashboard/exam-fee" },
-                { title: "পরীক্ষা রুটিন", href: "/dashboard/routine" },
+                { title: "পরীক্ষা রুটিন", href: "/dashboard/academics/routine" },
                 { title: "এডমিট কার্ড", href: "/dashboard/admit-card" },
                 { title: "সীট প্লান", href: "/dashboard/seat-plan" },
                 { title: "সাক্ষরপত্র", href: "/dashboard/academics?attendance-sheet" },
