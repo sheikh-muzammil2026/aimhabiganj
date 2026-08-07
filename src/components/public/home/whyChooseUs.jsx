@@ -36,6 +36,17 @@ export default function WhyChooseUs() {
 
     return (
         <section className="py-16 md:py-24 bg-slate-50 dark:bg-slate-950 transition-colors duration-300" id="features">
+            {/* CSS Animation Keyframes Injecting */}
+            <style jsx>{`
+                @keyframes spinGradient {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+                .animate-border-spin {
+                    animation: spinGradient 4s linear infinite;
+                }
+            `}</style>
+
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
                 {/* সেকশন হেডার */}
@@ -54,18 +65,29 @@ export default function WhyChooseUs() {
                     {features.map((item, index) => (
                         <div
                             key={index}
-                            className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-emerald-500/30 dark:hover:border-emerald-500/30 transition-all duration-300 group hover:-translate-y-1"
+                            className="relative p-[2px] rounded-2xl overflow-hidden group hover:-translate-y-1 transition-all duration-300 shadow-sm hover:shadow-xl"
                         >
-                            {/* আইকন বক্স - লাইট মোডে হালকা ব্যাকগ্রাউন্ড, ডার্ক মোডে সলিড */}
-                            <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-slate-950 text-emerald-700 dark:text-amber-400 flex items-center justify-center text-2xl shadow-inner group-hover:bg-emerald-700 group-hover:text-white dark:group-hover:bg-amber-500 dark:group-hover:text-slate-950 transition-all duration-300 mb-6">
-                                {item.icon}
+                            {/* ১. এনিমেটেড ঘূর্ণায়মান বর্ডার লেয়ার (Conic Gradient) */}
+                            <div 
+                                className="absolute inset-[-100%] animate-border-spin opacity-80 group-hover:opacity-100 transition-opacity duration-300"
+                                style={{
+                                    background: `conic-gradient(from 0deg, transparent 70%, #059669 85%, #f59e0b 100%)`
+                                }}
+                            />
+
+                            {/* ২. ভেতরের আসল কার্ড (যা বর্ডারের ওপর বসে আসল কন্টেন্ট দেখাবে) */}
+                            <div className="relative bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-[14px] h-full w-full z-10">
+                                {/* আইকন বক্স */}
+                                <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-slate-950 text-emerald-700 dark:text-amber-400 flex items-center justify-center text-2xl shadow-inner group-hover:bg-emerald-700 group-hover:text-white dark:group-hover:bg-amber-500 dark:group-hover:text-slate-950 transition-all duration-300 mb-6">
+                                    {item.icon}
+                                </div>
+                                <h3 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-gray-100 mb-3">
+                                    {item.title}
+                                </h3>
+                                <p className="text-sm text-slate-600 dark:text-gray-400 leading-relaxed">
+                                    {item.description}
+                                </p>
                             </div>
-                            <h3 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-gray-100 mb-3">
-                                {item.title}
-                            </h3>
-                            <p className="text-sm text-slate-600 dark:text-gray-400 leading-relaxed">
-                                {item.description}
-                            </p>
                         </div>
                     ))}
                 </div>
