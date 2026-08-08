@@ -91,14 +91,14 @@ export default function RoutinePreview({ routine }) {
                         </div>
                         <div className="flex-grow text-center ">
                             <Image
-                                src={"/banner_final.png"}
+                                src={"/banner_routine.png"}
                                 alt="Institution Banner"
                                 width={2000}
                                 height={400}
                                 quality={100}
                                 priority
-                                // unoptimized
-                                className="w-full h-auto max-h-40 object-fill mx-auto print:max-h-20"
+
+                                className="w-full h-auto max-h-45 object-fill mx-auto print:max-h-45"
                             />
                         </div>
                     </div>
@@ -174,7 +174,7 @@ export default function RoutinePreview({ routine }) {
                             width={150}
                             height={60}
                             unoptimized
-                            className="absolute -top-9 right-10 h-10 w-18 object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45"
+                            className="absolute -top-7 right-10 h-10 w-18 object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45"
                         />
                         <div className="border-t border-gray-800 pt-1 font-bold text-xs text-gray-900">
                             প্রিন্সিপাল
