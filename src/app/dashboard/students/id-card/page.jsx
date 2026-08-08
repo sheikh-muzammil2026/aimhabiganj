@@ -753,23 +753,7 @@ export default function IdCardGenerator() {
                       </div>
                     </div>
 
-                    {/* <div className="relative px-3 py-1 flex flex-col items-end justify-end bg-white">
-                      টপ অ্যান্ড রাইট প্রিমিয়াম অ্যাক্সেন্ট লাইন
-                      <div className="absolute top-0 right-0 w-full h-[2px] bg-gradient-to-l from-[#047857] via-[#D97706] to-transparent"></div>
 
-                      সিগনেচার ইমেজ
-                      <img
-                        src="/principle's_signature.jpg"
-                        alt="Authorized Signature"
-                        className="absolute -top-9 -right-3 h-10 w-18 object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45"
-                      />
-
-                      <div className="border-b-2 border-[#047857] pb-0.5 relative z-10">
-                        <p className="text-[8px] font-serif font-bold tracking-wide text-[#047857]">
-                          Authorized Signature
-                        </p>
-                      </div>
-                    </div> */}
                     <div
                       className="bg-[#047857] text-white text-right px-3 py-1 relative flex flex-col items-end justify-end border-t border-amber-500"
                       style={{

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import RoutinePreview from "../../../../components/dashboard/academics/RoutinePreview";
 import { toast } from "react-toastify";
 
@@ -34,6 +34,51 @@ export default function AdminRoutineForm() {
     ]);
 
     const [routineMatrix, setRoutineMatrix] = useState({});
+
+    // 🟢 ডাটাবেস থেকে পূর্বের রুটিন চেক ও অটো-ফিল করার লজিক
+    useEffect(() => {
+        const fetchExistingRoutine = async () => {
+            if (!examTitle) return;
+            try {
+                const res = await fetch(
+                    `${process.env.NEXT_PUBLIC_SERVER_API}/api/admin/routine?examTitle=${encodeURIComponent(examTitle)}&hijriYear=${encodeURIComponent(hijriYear)}&division=all`
+                );
+                const data = await res.json();
+
+                if (data.success && data.data) {
+                    const routine = data.data;
+
+                    // ডাটাবেস থেকে পাওয়া তথ্য দিয়ে স্টেট ফিলআপ
+                    if (routine.dates) setDates(routine.dates);
+                    if (routine.gregorianYear) setGregorianYear(routine.gregorianYear);
+                    if (routine.note) setNote(routine.note);
+
+                    // routineData 배열 থেকে routineMatrix তৈরি করা
+                    if (Array.isArray(routine.routineData)) {
+                        const newMatrix = {};
+                        const fetchedClasses = [];
+
+                        routine.routineData.forEach((item) => {
+                            if (item.class) {
+                                fetchedClasses.push(item.class);
+                                newMatrix[item.class] = item.subjects || {};
+                            }
+                        });
+
+                        if (fetchedClasses.length > 0) {
+                            setClasses(fetchedClasses);
+                        }
+                        setRoutineMatrix(newMatrix);
+                    }
+                    toast.info("পূর্বের সেভ করা রুটিন পাওয়া গিয়েছে এবং লোড করা হয়েছে।");
+                }
+            } catch (err) {
+                console.log("No previous routine found or fetch error:", err);
+            }
+        };
+
+        fetchExistingRoutine();
+    }, [examTitle, hijriYear]);
 
     // ১. Gregorian Date (YYYY-MM-DD) থেকে Hijri (YYYY/MM/DD) অটো-কনভার্ট করার ফাংশন
     const convertToHijri = (isoDateStr) => {
@@ -123,8 +168,6 @@ export default function AdminRoutineForm() {
     const updateDate = (id, field, value) => {
         setDates((prev) => prev.map((d) => (d.id === id ? { ...d, [field]: value } : d)));
     };
-
-
 
     const addClassRow = () => {
         setClasses((prev) => [...prev, `নতুন শ্রেণি ${prev.length + 1}`]);
@@ -288,7 +331,6 @@ export default function AdminRoutineForm() {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                             {dates.map((d, index) => {
-                                // DD/MM/YYYY ফরম্যাট থেকে YYYY-MM-DD ফরম্যাটে আনা input element এর জন্য
                                 let inputDateValue = "";
                                 if (d.gregorian) {
                                     if (d.gregorian.includes('/')) {
@@ -351,11 +393,11 @@ export default function AdminRoutineForm() {
                                                 >
                                                     <option value="শনিবার">শনিবার</option>
                                                     <option value="রবিবার">রবিবার</option>
-                                                    <option value="সোমবার">সোমবার</option>
+                                                    <option value="সোমবার">Monday</option>
                                                     <option value="মঙ্গলবার">মঙ্গলবার</option>
                                                     <option value="বুধবার">বুধবার</option>
                                                     <option value="বৃহস্পতিবার">বৃহস্পতিবার</option>
-                                                    <option value="শুক্রবার">শুক্রবার</option>
+                                                    <option value="শুক্রবার">Friday</option>
                                                 </select>
                                             </div>
                                         </div>
