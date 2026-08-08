@@ -5,70 +5,100 @@ import { toast } from "react-toastify";
 
 export default function AdminRoutineForm() {
     const [activeTab, setActiveTab] = useState("form");
-    const [examTitle, setExamTitle] = useState("");
-    const [hijriYear, setHijriYear] = useState("1446 - 1447");
-    const [gregorianYear, setGregorianYear] = useState("2025 - 2025");
+    const [examTitle, setExamTitle] = useState("প্রথম সাময়িক পরীক্ষা");
+    const [hijriYear, setHijriYear] = useState("1447");
+    const [gregorianYear, setGregorianYear] = useState("2026");
     const [note, setNote] = useState("সকল বিভাগের পরীক্ষার সময় সকাল ৯:০০ থেকে ১১:৩০ মিনিট পর্যন্ত");
 
-    const [selectedDivision, setSelectedDivision] = useState("all")
-    const [selectedAcademyType, setSelectedAcademyType] = useState('all');
-    const [selectedClass, setSelectedClass] = useState('all');
-
-
-    const getAcademyClasses = (type) => {
-        if (type === 'হিফজ') return []
-        if (type === 'প্রাক-প্রাথমিক') return ['প্লে', 'নার্সারি'];
-        if (type === 'প্রাথমিক') return ['প্রথম', 'দ্বিতীয়', 'তৃতীয়', 'চতুর্থ', 'পঞ্চম'];
-        if (type === 'মাধ্যমিক') return ['ষষ্ঠ', 'সপ্তম', 'অষ্টম', 'নবম', 'দশম'];
-        if (type === 'উচ্চমাধ্যমিক') return ['১১শ শ্রেণি', '১২ব শ্রেণি'];
-        return [];
-    };
-
-    const getClassOptions = () => {
-        if (selectedDivision === 'preHifz') {
-            return ['কায়দা/আমপারা', 'নাজেরা'];
-        }
-        if (selectedDivision === 'hifz') {
-            return ['সবক', 'শুনানি'];
-        }
-        if (selectedDivision === 'academy') {
-            if (selectedAcademyType !== 'all') {
-                return getAcademyClasses(selectedAcademyType);
-            }
-            return [
-                'প্লে',
-                'নার্সারি',
-                'প্রথম',
-                'দ্বিতীয়',
-                'তৃতীয়',
-                'চতুর্থ',
-                'পঞ্চম',
-                'ষষ্ঠ',
-                'সপ্তম',
-                'অষ্টম',
-                'নবম',
-                'দশম',
-                '১১শ শ্রেণি',
-                '১২ব শ্রেণি',
-            ];
-        }
-        return [];
-    };
-
     const [dates, setDates] = useState([
-        { id: "col_1", hijri: "23/02/1447", gregorian: "18/08/2025", day: "সোমবার" },
-        { id: "col_2", hijri: "24/02/1447", gregorian: "19/08/2025", day: "মঙ্গলবার" }
+        { id: "col_1", hijri: "1447/02/23", gregorian: "18/08/2025", day: "সোমবার" },
+        { id: "col_2", hijri: "1447/02/24", gregorian: "19/08/2025", day: "মঙ্গলবার" }
     ]);
 
-    const [classes, setClasses] = useState(['প্রথম', 'দ্বিতীয়']);
+    // ম্যানুয়ালি সকল বিভাগের সকল শ্রেণির নাম ইনিশিয়াল স্টেট হিসেবে সেট করা
+    const [classes, setClasses] = useState([
+        'প্লে',
+        'নার্সারি',
+        'প্রথম',
+        'দ্বিতীয়',
+        'তৃতীয়',
+        'চতুর্থ',
+        'পঞ্চম',
+        'ষষ্ঠ',
+        'সপ্তম',
+        'অষ্টম',
+        'কায়দা/আমপারা',
+        'নাজেরা',
+        'সবক',
+        'শুনানি',
+    ]);
+
     const [routineMatrix, setRoutineMatrix] = useState({});
 
-    const handleAcademyTypeChange = (type) => {
-        setAcademyType(type);
-        const defaultClasses = getAcademyClasses(type);
-        if (defaultClasses.length > 0) {
-            setClasses(defaultClasses);
+    // ১. Gregorian Date (YYYY-MM-DD) থেকে Hijri (YYYY/MM/DD) অটো-কনভার্ট করার ফাংশন
+    const convertToHijri = (isoDateStr) => {
+        if (!isoDateStr) return "";
+        try {
+            const [year, month, day] = isoDateStr.split('-').map(Number);
+            if (!year || !month || !day) return "";
+
+            // UTC Date তৈরি
+            const dateObj = new Date(Date.UTC(year, month - 1, day));
+            if (isNaN(dateObj.getTime())) return "";
+
+            const formatter = new Intl.DateTimeFormat('en-u-ca-islamic-umaalqura', {
+                timeZone: 'UTC',
+                day: 'numeric',
+                month: 'numeric',
+                year: 'numeric'
+            });
+
+            const parts = formatter.formatToParts(dateObj);
+            let hYear = "", hMonth = "", hDay = "";
+
+            parts.forEach(p => {
+                if (p.type === 'year') hYear = p.value;
+                if (p.type === 'month') hMonth = p.value.padStart(2, '0');
+                if (p.type === 'day') hDay = p.value.padStart(2, '0');
+            });
+
+            return hYear && hMonth && hDay ? `${hYear}/${hMonth}/${hDay}` : "";
+        } catch (e) {
+            return "";
         }
+    };
+
+    // ২. ঈসায়ী তারিখ পরিবর্তনের সাথে সাথে হিজরী ও বারের নাম অটো-সেট করার হ্যান্ডলার
+    const handleGregorianChange = (id, rawValue) => {
+        if (!rawValue) {
+            setDates((prev) => prev.map((d) => d.id === id ? { ...d, gregorian: "", gregorianRaw: "", hijri: "" } : d));
+            return;
+        }
+
+        // YYYY-MM-DD -> DD/MM/YYYY ফরম্যাট
+        const parts = rawValue.split('-');
+        const formattedGregorian = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : rawValue;
+
+        // অটো হিজরী ক্যালকুলেশন
+        const calculatedHijri = convertToHijri(rawValue);
+
+        // অটো বার (Day) ক্যালকুলেশন
+        const daysMap = ["রবিবার", "সোমবার", "মঙ্গলবার", "বুধবার", "বৃহস্পতিবার", "শুক্রবার", "শনিবার"];
+        const dateObj = new Date(rawValue);
+        const dayName = !isNaN(dateObj.getTime()) ? daysMap[dateObj.getDay()] : "";
+
+        setDates((prev) => prev.map((d) => {
+            if (d.id === id) {
+                return {
+                    ...d,
+                    gregorianRaw: rawValue,
+                    gregorian: formattedGregorian,
+                    hijri: calculatedHijri, // হিজরী অটো আপডেট
+                    day: dayName || d.day   // বার অটো আপডেট
+                };
+            }
+            return d;
+        }));
     };
 
     const addDateColumn = () => {
@@ -78,7 +108,6 @@ export default function AdminRoutineForm() {
 
     const removeDateColumn = (id) => {
         setDates((prev) => prev.filter((d) => d.id !== id));
-        // Clean up date column from matrix
         setRoutineMatrix((prev) => {
             const next = { ...prev };
             Object.keys(next).forEach((cls) => {
@@ -95,6 +124,8 @@ export default function AdminRoutineForm() {
         setDates((prev) => prev.map((d) => (d.id === id ? { ...d, [field]: value } : d)));
     };
 
+
+
     const addClassRow = () => {
         setClasses((prev) => [...prev, `নতুন শ্রেণি ${prev.length + 1}`]);
     };
@@ -103,7 +134,6 @@ export default function AdminRoutineForm() {
         const targetClass = classes[index];
         setClasses((prev) => prev.filter((_, idx) => idx !== index));
 
-        // Clean up deleted class from matrix
         setRoutineMatrix((prev) => {
             const next = { ...prev };
             delete next[targetClass];
@@ -185,17 +215,15 @@ export default function AdminRoutineForm() {
             <div className="flex space-x-4 border-b mb-6 print:hidden">
                 <button
                     onClick={() => setActiveTab("form")}
-                    className={`px-4 py-2 font-bold rounded-t ${activeTab === "form" ? "bg-emerald-600 text-white" : "bg-gray-200 text-gray-700"
-                        }`}
+                    className={`px-4 py-2 font-bold rounded-t ${activeTab === "form" ? "bg-emerald-600 text-white" : "bg-gray-200 text-gray-700"}`}
                 >
-                    📝 রুটিন ইনপুট ফরম (Admin)
+                    📝 রুটিন ইনপুট ফরম
                 </button>
                 <button
                     onClick={() => setActiveTab("preview")}
-                    className={`px-4 py-2 font-bold rounded-t ${activeTab === "preview" ? "bg-emerald-600 text-white" : "bg-gray-200 text-gray-700"
-                        }`}
+                    className={`px-4 py-2 font-bold rounded-t ${activeTab === "preview" ? "bg-emerald-600 text-white" : "bg-gray-200 text-gray-700"}`}
                 >
-                    👁️ প্রিভিউ ও প্রিন্ট (Preview & Print)
+                    👁️ প্রিভিউ ও প্রিন্ট
                 </button>
             </div>
 
@@ -235,68 +263,7 @@ export default function AdminRoutineForm() {
                             />
                         </div>
 
-                        <div>
-                            <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                বিভাগ
-                            </label>
-                            <select
-                                value={selectedDivision}
-                                onChange={(e) => {
-                                    setSelectedDivision(e.target.value);
-                                    setSelectedAcademyType('all');
-                                    setSelectedClass('all');
-                                }}
-                                className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500"
-                            >
-                                <option value="all">সকল বিভাগ</option>
-                                <option value="preHifz">প্রি-হিফজ</option>
-                                <option value="hifz">হিফজ</option>
-                                <option value="academy">একাডেমিক</option>
-                            </select>
-                        </div>
-
-                        {selectedDivision === 'academy' && (
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                    একাডেমি টাইপ
-                                </label>
-                                <select
-                                    value={selectedAcademyType}
-                                    onChange={(e) => {
-                                        setSelectedAcademyType(e.target.value);
-                                        setSelectedClass('all');
-                                    }}
-                                    className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500"
-                                >
-                                    <option value="all">সকল টাইপ</option>
-                                    <option value="প্রাক-প্রাথমিক">প্রাক-প্রাথমিক</option>
-                                    <option value="প্রাথমিক">প্রাথমিক</option>
-                                    <option value="মাধ্যমিক">মাধ্যমিক</option>
-                                    <option value="উচ্চমাধ্যমিক">উচ্চমাধ্যমিক</option>
-                                </select>
-                            </div>
-                        )}
-
-                        <div>
-                            <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                শ্রেণি
-                            </label>
-                            <select
-                                value={selectedClass}
-                                onChange={(e) => setSelectedClass(e.target.value)}
-                                disabled={selectedDivision === 'all'}
-                                className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-                            >
-                                <option value="all">সকল শ্রেণি</option>
-                                {getClassOptions().map((cls) => (
-                                    <option key={cls} value={cls}>
-                                        {cls}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div>
+                        <div className="md:col-span-3">
                             <label className="block text-sm font-semibold mb-1">বিশেষ দ্রষ্টব্য:</label>
                             <input
                                 type="text"
@@ -320,51 +287,81 @@ export default function AdminRoutineForm() {
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                            {dates.map((d, index) => (
-                                <div key={d.id} className="border p-3 rounded bg-gray-50 relative">
-                                    <span className="text-xs font-bold bg-gray-200 px-2 py-0.5 rounded">
-                                        কলাম {index + 1}
-                                    </span>
-                                    {dates.length > 1 && (
-                                        <button
-                                            type="button"
-                                            onClick={() => removeDateColumn(d.id)}
-                                            className="text-red-600 font-bold text-xs absolute top-2 right-2 hover:underline"
-                                        >
-                                            মুছে ফেলুন
-                                        </button>
-                                    )}
-                                    <div className="mt-2 space-y-2">
-                                        <input
-                                            type="text"
-                                            placeholder="হিজরী (যেমন: 23/02/1447)"
-                                            value={d.hijri}
-                                            onChange={(e) => updateDate(d.id, "hijri", e.target.value)}
-                                            className="w-full border p-1 text-sm rounded"
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="ঈসায়ী (যেমন: 18/08/2025)"
-                                            value={d.gregorian}
-                                            onChange={(e) => updateDate(d.id, "gregorian", e.target.value)}
-                                            className="w-full border p-1 text-sm rounded"
-                                        />
-                                        <select
-                                            value={d.day}
-                                            onChange={(e) => updateDate(d.id, "day", e.target.value)}
-                                            className="w-full border p-1 text-sm rounded"
-                                        >
-                                            <option value="শনিবার">শনিবার</option>
-                                            <option value="রবিবার">রবিবার</option>
-                                            <option value="সোমবার">সোমবার</option>
-                                            <option value="মঙ্গলবার">মঙ্গলবার</option>
-                                            <option value="বুধবার">বুধবার</option>
-                                            <option value="বৃহস্পতিবার">বৃহস্পতিবার</option>
-                                            <option value="শুক্রবার">শুক্রবার</option>
-                                        </select>
+                            {dates.map((d, index) => {
+                                // DD/MM/YYYY ফরম্যাট থেকে YYYY-MM-DD ফরম্যাটে আনা input element এর জন্য
+                                let inputDateValue = "";
+                                if (d.gregorian) {
+                                    if (d.gregorian.includes('/')) {
+                                        const p = d.gregorian.split('/');
+                                        if (p.length === 3) inputDateValue = `${p[2]}-${p[1]}-${p[0]}`;
+                                    } else {
+                                        inputDateValue = d.gregorian;
+                                    }
+                                }
+
+                                return (
+                                    <div key={d.id} className="border p-3 rounded bg-gray-50 relative">
+                                        <span className="text-xs font-bold bg-gray-200 px-2 py-0.5 rounded">
+                                            কলাম {index + 1}
+                                        </span>
+                                        {dates.length > 1 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => removeDateColumn(d.id)}
+                                                className="text-red-600 font-bold text-xs absolute top-2 right-2 hover:underline"
+                                            >
+                                                মুছে ফেলুন
+                                            </button>
+                                        )}
+                                        <div className="mt-2 space-y-2">
+                                            <div>
+                                                <label className="block text-[10px] text-gray-500 font-bold mb-0.5">ঈসায়ী তারিখ :</label>
+                                                <input
+                                                    type="date"
+                                                    value={inputDateValue}
+                                                    onChange={(e) => handleGregorianChange(d.id, e.target.value)}
+                                                    className="w-full border p-1 text-sm rounded bg-white"
+                                                />
+                                            </div>
+                                            <div>
+                                                <div className="flex justify-between items-center mb-0.5">
+                                                    <label className="block text-[10px] text-gray-500 font-bold">হিজরী তারিখ:</label>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => updateDate(d.id, "hijri", convertToHijri(d.gregorian))}
+                                                        className="text-[10px] text-emerald-600 underline font-semibold"
+                                                    >
+                                                        Auto Sync
+                                                    </button>
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    placeholder="হিজরী (যেমন: 1447/02/23)"
+                                                    value={d.hijri}
+                                                    onChange={(e) => updateDate(d.id, "hijri", e.target.value)}
+                                                    className="w-full border p-1 text-sm rounded bg-white"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] text-gray-500 font-bold mb-0.5">দিন:</label>
+                                                <select
+                                                    value={d.day}
+                                                    onChange={(e) => updateDate(d.id, "day", e.target.value)}
+                                                    className="w-full border p-1 text-sm rounded bg-white"
+                                                >
+                                                    <option value="শনিবার">শনিবার</option>
+                                                    <option value="রবিবার">রবিবার</option>
+                                                    <option value="সোমবার">সোমবার</option>
+                                                    <option value="মঙ্গলবার">মঙ্গলবার</option>
+                                                    <option value="বুধবার">বুধবার</option>
+                                                    <option value="বৃহস্পতিবার">বৃহস্পতিবার</option>
+                                                    <option value="শুক্রবার">শুক্রবার</option>
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
 
