@@ -444,7 +444,7 @@ export default function IdCardGenerator() {
                         className="mt-1 rounded border-gray-300"
                       />
                       <img
-                        src={student.photoUrl || '/default-avatar.png'}
+                        src={student.studentImage || '/default-avatar.png'}
                         alt={student.studentNameEnglish || 'Student'}
                         className="w-12 h-12 rounded-full object-cover border shrink-0"
                       />
@@ -453,7 +453,7 @@ export default function IdCardGenerator() {
                           <p className="font-bold text-gray-900 text-sm truncate">
                             {student.studentNameBangla || student.studentNameEnglish || 'N/A'}
                           </p>
-                          {!student.photoUrl ? (
+                          {!student.studentImage ? (
                             <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded shrink-0">
                               ছবি মিসিং
                             </span>
