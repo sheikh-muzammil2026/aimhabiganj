@@ -76,8 +76,8 @@ export default function RoutinePreview({ routine }) {
             <div id="printable" className="p-2 print:p-0 w-full mx-auto flex flex-col justify-between min-h-[90vh] print:min-h-[190mm]">
                 <div>
                     {/* Header with separate Logo and Banner */}
-                    <div className="flex items-center justify-center mb-2 border-b pb-2">
-                        <div className="w-20 md:w-28 rounded-full overflow-hidden flex-shrink-0 bg-white">
+                    <div className="flex items-center justify-center mb-2 border-b-4 border-double border-gray-800 pb-1">
+                        <div className="w-20 h-20 md:w-28 md:h-28 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center">
                             <Image
                                 src={"/aimlogo1.png"}
                                 alt="Institution Logo"
@@ -85,8 +85,7 @@ export default function RoutinePreview({ routine }) {
                                 height={200}
                                 quality={100}
                                 priority
-                                // unoptimized
-                                className="w-full h-auto object-cover mx-auto"
+                                className="w-full h-full object-cover scale-[1.05] transform-gpu"
                             />
                         </div>
                         <div className="flex-grow text-center ">
@@ -97,7 +96,6 @@ export default function RoutinePreview({ routine }) {
                                 height={400}
                                 quality={100}
                                 priority
-
                                 className="w-full h-auto max-h-45 object-fill mx-auto print:max-h-45"
                             />
                         </div>
@@ -119,7 +117,7 @@ export default function RoutinePreview({ routine }) {
                         <table className="w-full h-full border-collapse border border-gray-800 text-gray-900 table-fixed">
                             <thead>
                                 <tr className="bg-gray-200 text-center font-bold print:bg-gray-200">
-                                    <th className={`border border-gray-800 text-left w-[120px] ${textSizeClass}`}>
+                                    <th className={`border border-gray-800 text-center w-[60px] md:w-[80px] ${textSizeClass}`}>
                                         শ্রেণি
                                     </th>
                                     {routine.dates?.map((d) => (
@@ -140,7 +138,7 @@ export default function RoutinePreview({ routine }) {
                             <tbody>
                                 {routine.routineData?.map((row, index) => (
                                     <tr key={index} className="text-center hover:bg-gray-50">
-                                        <td className={`border border-gray-800 font-bold bg-gray-100 text-left print:bg-gray-100 ${textSizeClass}`}>
+                                        <td className={`border border-gray-800 font-bold bg-gray-100 text-center print:bg-gray-100 ${textSizeClass}`}>
                                             {row.class || row.jamaat}
                                         </td>
                                         {routine.dates?.map((d) => (
@@ -158,11 +156,10 @@ export default function RoutinePreview({ routine }) {
                     </div>
 
                     {/* Note Footer */}
-                    {routine.note && (
-                        <div className="mt-3 p-1.5 border-l-4 text-center border-gray-800 bg-gray-50 text-[11px] print:text-[10px] font-semibold text-gray-900 leading-snug print:bg-transparent print:p-0 print:border-none">
-                            বিশেষ দ্রষ্টব্য: {routine.note}
-                        </div>
-                    )}
+                    <div className="mt-3 p-1.5 border-l-4 text-center border-gray-800 bg-gray-50 text-[11px] print:text-[10px] font-semibold text-gray-900 leading-snug print:bg-transparent print:p-0 print:border-none space-y-0.5">
+                        <p>বিশেষ দ্রষ্টব্য: ১. সকল বিভাগের পরীক্ষার সময় <span className="text-amber-600">সকাল ৯:০০ থেকে ১১:৩০ মিনিট </span> পর্যন্ত।</p>
+                        <p className="">২. ১২ই রবিউল আওয়াল উপলক্ষে ২৬ আগস্ট রোজ বুধবার মাদ্রাসাহ বন্ধ থাকবে।</p>
+                    </div>
                 </div>
 
                 {/* Principal Signature Section */}
@@ -174,9 +171,9 @@ export default function RoutinePreview({ routine }) {
                             width={150}
                             height={60}
                             unoptimized
-                            className="absolute -top-7 right-10 h-10 w-18 object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45"
+                            className="absolute -top-8 right-14 h-9 w-17 object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45"
                         />
-                        <div className="border-t border-gray-800 pt-1 font-bold text-xs text-gray-900">
+                        <div className="border-t border-gray-800 pt-1 font-bold text-xs text-gray-900 max-w-[100px] mx-auto">
                             প্রিন্সিপাল
                         </div>
                     </div>
