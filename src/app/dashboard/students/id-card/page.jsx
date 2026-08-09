@@ -636,9 +636,9 @@ export default function IdCardGenerator() {
                     {/* ================= ২. মিডল সেকশন (ছবি, আইডি নম্বর ও বারকোড) ================= */}
                     <div className="flex justify-between items-center px-2 pt-1 mb-2 relative">
                       <div className="w-[75px] h-[75px] rounded-full border-2 border-[#38BDF8] overflow-hidden bg-gray-100 flex items-center justify-center shadow-inner">
-                        {student.photoUrl ? (
+                        {student.studentImage? (
                           <img
-                            src={student.photoUrl}
+                            src={student.studentImage}
                             alt={student.studentNameEnglish || 'Student'}
                             className="w-full h-full object-cover"
                           />
