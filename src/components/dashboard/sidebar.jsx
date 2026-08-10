@@ -38,7 +38,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 { title: "পরিক্ষা ফি", href: "/dashboard/exam-fee" },
                 { title: "পরীক্ষা রুটিন", href: "/dashboard/academics/routine" },
                 { title: "এডমিট কার্ড", href: "/dashboard/admit-card" },
-                { title: "সীট প্লান", href: "/dashboard/seat-plan" },
+                { title: "সীট প্লান", href: "/dashboard/academics/seat-plan" },
                 { title: "সাক্ষরপত্র", href: "/dashboard/academics?attendance-sheet" },
                 { title: "নম্বর ইনপুট", href: "/dashboard/academics/results/input" },
                 { title: "ক্লাসভিত্তিক ফলাফল", href: "/dashboard/academics/results/class-wise-result" },
