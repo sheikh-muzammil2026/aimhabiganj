@@ -532,3 +532,13 @@ export default function AllStudentsPage() {
         </div>
     );
 }
+
+
+/**
+ * 1) seat_plan theke info ene table er sticker bananu . 
+ * 2) seat_plan er moddhe ager bochorer sokol info bosanu
+ * 3) seat_plan er moddhe hall 5 ta bananu. 
+ * 4) hifj er sokol students er seat plane niye asa.
+ * 5) ager bochorer result database e rakha
+ * 6) admit-card bosanu.
+ * */ 
