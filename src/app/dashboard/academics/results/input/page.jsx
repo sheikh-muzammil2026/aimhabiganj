@@ -3,32 +3,29 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 
-// শ্রেণিভিত্তিক বিষয় তালিকা
 const CLASS_SUBJECTS = {
     "প্লে": ["আরবি-০১", "ইংরেজি", "বাংলা", "গণিত"],
     "নার্সারি": ["আরবি-০২", "ইংরেজি", "বাংলা", "গণিত"],
     "প্রথম": ["কুরআন ও তাজভীদ-০১", "আরবি", "তাওহীদ ও ফিকহ-১", "ইংরেজি", "বাংলা", "গণিত", "সাধারণ জ্ঞান"],
     "দ্বিতীয়": ["কুরআন ও তাজভীদ-০২", "আরবি", "তাওহীদ ও ফিকহ-২", "ইংরেজি", "বাংলা", "গণিত", "সাধারণ জ্ঞান"],
-    "তৃতীয়": ["কুরআন ও তাজভীদ-০৩", "আরবি", "আদব ও দোয়া", "তাওহীদ ও ফিকহ-৩", "ইংরেজি", "বাংলা", "গণিত", "বাংলাদেশ ও বিশ্বপরিচয়", "বিজ্ঞান", "হাতের লেখা"],
-    "চতুর্থ": ["কুরআন ও তাজভীদ-০৪", "এসো আরবি শিখি", "এসো তামরিন শিখি", "আদাব ও দোয়া", "তাওহীদ ও ফিকহ-৪", "ইংরেজি", "বাংলা", "গণিত", "বাংলাদেশ ও বিশ্ব পরিচয়",],
+    "তৃতীয়": ["কুরআন ও তাজভীদ-০৩", "আরবি", "আদব ও দোয়া", "তাওহীদ ও ফিকহ-৩", "ইংরেজি", "বাংলা", "গণিত", "বাংলাদেশ ও বিশ্বপরিচয়", "বিজ্ঞান", "হাতের লেখা"],
+    "চতুর্থ": ["কুরআন ও তাজভীদ-০৪", "এসো আরবি শিখি", "এসো তামরিন শিখি", "আদাব ও দোয়া", "তাওহীদ ও ফিকহ-৪", "ইংরেজি", "বাংলা", "গণিত", "বাংলাদেশ ও বিশ্ব পরিচয়"],
     "পঞ্চম": ["কুরআন ও তাজভীদ-০৫", "এসো আরবি শিখি", "এসো তামরিন শিখি", "সরফ", "তাওহীদ ও ফিকহ-৫", "ইংরেজি", "বাংলা", "গণিত", "বিজ্ঞান"],
     "ষষ্ঠ": ["হিফজুল কুরআন ও তাজভীদ-০১", "কুরআন অনুবাদ-০১", "হাদিস আরবাঈন", "আরবি", "সরফ", "নাহু", "তাওহীদ ও ফিকহ-৫", "ইংরেজি ১ম ও ২য়", "বাংলা ১ম ও ২য়", "গণিত", "বিজ্ঞান"],
     "সপ্তম": ["হিফজুল কুরআন ও তাজভীদ-০২", "কুরআন অনুবাদ-০২", "হাদিস", "আরবি", "সরফ", "নাহু", "তাওহীদ", "ফিকহ", "ইংরেজি ১ম ও ২য়", "বাংলা ১ম ও ২য়", "গণিত", "বিজ্ঞান"],
     "অষ্টম": ["হিফজুল কুরআন ও তাজভীদ-০৩", "কুরআন অনুবাদ-০৩", "হাদিস", "উসুলুল হাদিস", "আরবি", "সরফ", "নাহু", "তাওহীদ", "ফিকহ", "ইংরেজি ১ম ও ২য়", "বাংলা ১ম ও ২য়", "গণিত", "বিজ্ঞান"],
-    "কায়দা/আমপারা": ["কুরআন", "তাজভীদ ও দোয়া", "আরবি", "ইংরেজি", "বাংলা", "গণিত"],
-    "নাজেরা": ["কুরআন", "তাজভীদ ও দোয়া", "আরবি", "ইংরেজি", "বাংলা", "গণিত"],
-    "সবক": ["কুরআন", "তাজভীদ ও দোয়া"],
-    "শুনানি": ["কুরআন", "তাজভীদ ও দোয়া"],
-
+    "কায়দা/আমপারা": ["কুরআন", "তাজভীদ ও দোয়া", "আরবি", "ইংরেজি", "বাংলা", "গণিত"],
+    "নাজেরা": ["কুরআন", "তাজভীদ ও দোয়া", "আরবি", "ইংরেজি", "বাংলা", "গণিত"],
+    "সবক": ["কুরআন", "তাজভীদ ও দোয়া"],
+    "শুনানি": ["কুরআন", "তাজভীদ ও দোয়া"],
 };
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL || process.env.NEXT_PUBLIC_SERVER_API || 'http://localhost:5000';
-
+const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_API
 export default function TeacherMarkInput() {
     const [selectedClass, setSelectedClass] = useState('প্রথম');
     const [selectedSubject, setSelectedSubject] = useState('');
     const [examType, setExamType] = useState('term1');
-    const [year, setYear] = useState('২০২৬');
+    const [year, setYear] = useState('২০২৬-২০২৭');
 
     const [availableSubjects, setAvailableSubjects] = useState([]);
     const [studentsMarksList, setStudentsMarksList] = useState([]);
@@ -36,7 +33,7 @@ export default function TeacherMarkInput() {
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
 
-    // ১. শ্রেণি পরিবর্তন হলে বিষয় ড্রপডাউন ডাইনামিকালি আপডেট
+    // ১. শ্রেণি পরিবর্তন হলে বিষয় ড্রপডাউন ডাইনামিকালি আপডেট
     useEffect(() => {
         if (selectedClass && CLASS_SUBJECTS[selectedClass]) {
             const subjects = CLASS_SUBJECTS[selectedClass];
@@ -48,7 +45,7 @@ export default function TeacherMarkInput() {
         }
     }, [selectedClass]);
 
-    // ২. শ্রেণি, বিষয়, পরীক্ষা ও বছর পরিবর্তন হলে শিক্ষার্থীদের তথ্য ও পূর্বের নম্বর ফেচ করা
+    // ২. শ্রেণি, বিষয়, পরীক্ষা ও বছর পরিবর্তন হলে শিক্ষার্থীদের তথ্য ও পূর্বের নম্বর ফেচ করা
     useEffect(() => {
         const fetchClassData = async () => {
             if (!selectedClass) return;
@@ -69,7 +66,7 @@ export default function TeacherMarkInput() {
                     const initialList = rawStudents.map(student => ({
                         studentId: student.studentId || '',
                         studentName: student.studentNameBangla || student.studentNameEnglish || 'N/A',
-                        rollNumber: student.officeUse?.rollNumber || '',
+                        rollNumber: student.officeUse?.rollNumber || 'N/A',
                         ctMark: '',
                         examMark: ''
                     }));
@@ -78,24 +75,21 @@ export default function TeacherMarkInput() {
                     return;
                 }
 
-                // ২য় ধাপ: এই শ্রেণির উক্ত বিষয় ও টার্মের জন্য পূর্বে দেওয়া কোনো মার্কস ডেটা আছে কিনা ফেচ করা
+                // ২য় ধাপ: /api/marks/get থেকে সরাসরি ওই বিষয় ও ক্লাসের মার্কস আনা
                 const markQueryParams = new URLSearchParams({
                     class: selectedClass,
                     subject: selectedSubject,
-                    year: year,
-                    term: examType
+                    year: year
                 });
 
-                const marksRes = await fetch(`${API_BASE_URL}/api/results/class?${markQueryParams}`);
+                const marksRes = await fetch(`${API_BASE_URL}/api/marks/get?${markQueryParams}`);
                 const marksResult = await marksRes.json();
 
                 let existingMarksMap = {};
 
                 if (marksResult.success && Array.isArray(marksResult.data)) {
                     marksResult.data.forEach(item => {
-                        const targetSubject = (item.allSubjects || []).find(s => s.subject === selectedSubject);
-                        const termData = targetSubject?.[examType] || {};
-
+                        const termData = item[examType] || {};
                         existingMarksMap[item.studentId] = {
                             ctMark: termData.ct !== undefined && termData.ct !== null ? termData.ct : '',
                             examMark: termData.exam !== undefined && termData.exam !== null ? termData.exam : ''
@@ -103,7 +97,7 @@ export default function TeacherMarkInput() {
                     });
                 }
 
-                // ৩য় ধাপ: শিক্ষার্থীদের ব্যাকএন্ড স্ট্রাকচার অনুযায়ী মার্জ করা (যদি আগে মার্কস থাকে তবে সেটা বসবে, না থাকলে ফাঁকা থাকবে)
+                // ৩য় ধাপ: শিক্ষার্থীদের লিস্ট এবং মার্কস মার্জ করা
                 const mergedList = rawStudents.map(student => {
                     const id = student.studentId;
                     const existing = existingMarksMap[id];
@@ -188,7 +182,7 @@ export default function TeacherMarkInput() {
                         শ্রেণিভিত্তিক মার্কস ইনপুট ও আপডেট
                     </h1>
                     <p className="text-xs text-slate-500 mt-1">
-                        শ্রেণি ও বিষয় নির্বাচন করুন। পূর্বে ইনপুট করা নম্বর থাকলে তা দেখা যাবে, অন্যথায় খালি থাকবে।
+                        শ্রেণি ও বিষয় নির্বাচন করুন। পূর্বে ইনপুট করা নম্বর থাকলে তা দেখা যাবে, অন্যথায় খালি থাকবে।
                     </p>
                 </div>
 
@@ -203,7 +197,6 @@ export default function TeacherMarkInput() {
                             onChange={(e) => setSelectedClass(e.target.value)}
                             className="w-full bg-white border border-slate-300 text-slate-800 text-xs sm:text-sm rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-600 focus:outline-none"
                         >
-
                             <optgroup label="-- প্রি-হিফজ --">
                                 <option value="কায়দা/আমপারা">কায়দা/আমপারা</option>
                                 <option value="নাজেরা">নাজেরা</option>
@@ -230,10 +223,6 @@ export default function TeacherMarkInput() {
                                 <option value="নবম">নবম</option>
                                 <option value="দশম">দশম</option>
                             </optgroup>
-                            <optgroup label="-- উচ্চমাধ্যমিক --">
-                                <option value="১১শ শ্রেণি">১১শ শ্রেণি</option>
-                                <option value="১২ শ্রেণি">১২ শ্রেণি</option>
-                            </optgroup>
                         </select>
                     </div>
 
@@ -247,7 +236,7 @@ export default function TeacherMarkInput() {
                             className="w-full bg-white border border-slate-300 text-slate-800 text-xs sm:text-sm rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-600 focus:outline-none disabled:bg-slate-100"
                         >
                             {availableSubjects.length === 0 ? (
-                                <option value="">বিষয় পাওয়া যায়নি</option>
+                                <option value="">বিষয় পাওয়া যায়নি</option>
                             ) : (
                                 availableSubjects.map((sub) => (
                                     <option key={sub} value={sub}>{sub}</option>
@@ -264,8 +253,8 @@ export default function TeacherMarkInput() {
                             onChange={(e) => setExamType(e.target.value)}
                             className="w-full bg-white border border-slate-300 text-slate-800 text-xs sm:text-sm rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-600 focus:outline-none"
                         >
-                            <option value="term1">প্রথম সাময়িক পরিক্ষা</option>
-                            <option value="term2">দ্বিতীয় সাময়িক পরিক্ষা</option>
+                            <option value="term1">প্রথম সাময়িক পরীক্ষা</option>
+                            <option value="term2">দ্বিতীয় সাময়িক পরীক্ষা</option>
                             <option value="annual">বার্ষিক পরীক্ষা</option>
                         </select>
                     </div>
@@ -289,13 +278,12 @@ export default function TeacherMarkInput() {
                     </div>
                 ) : studentsMarksList.length === 0 ? (
                     <div className="py-12 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200 text-slate-500 text-sm">
-                        এই শ্রেণির কোনো অনুমোদিত (Approved) শিক্ষার্থীর তথ্য পাওয়া যায়নি।
+                        এই শ্রেণির কোনো অনুমোদিত (Approved) শিক্ষার্থীর তথ্য পাওয়া যায়নি।
                     </div>
                 ) : (
                     <form onSubmit={handleSubmitAllMarks}>
                         <div className="mb-6 rounded-xl border border-slate-200 overflow-hidden shadow-sm">
                             <table className="w-full text-left border-collapse text-xs sm:text-sm">
-                                {/* ডেক্সটপ ও ট্যাবলেটের জন্য হেডার */}
                                 <thead className="hidden sm:table-header-group">
                                     <tr className="bg-[#043e30] text-amber-300">
                                         <th className="p-3 border border-emerald-800 font-bold w-16 text-center">রোল</th>
@@ -312,25 +300,23 @@ export default function TeacherMarkInput() {
                                             key={student.studentId || idx}
                                             className="flex flex-col p-4 border-b border-slate-200 hover:bg-slate-50 transition-colors sm:table-row sm:p-0 sm:border-none"
                                         >
-                                            {/* রোল */}
                                             <td className="p-1 sm:p-3 border-none sm:border sm:border-slate-100 font-bold text-slate-600 text-left sm:text-center flex justify-between items-center sm:table-cell before:content-['রোল:'] before:font-bold before:text-slate-400 sm:before:content-none">
                                                 <span>{student.rollNumber}</span>
                                             </td>
 
-                                            {/* আইডি */}
                                             <td className="p-1 sm:p-3 border-none sm:border sm:border-slate-100 font-mono font-bold text-emerald-800 flex justify-between items-center sm:table-cell before:content-['আইডি:'] before:font-bold before:text-slate-400 sm:before:content-none">
                                                 <span>{student.studentId}</span>
                                             </td>
 
-                                            {/* শিক্ষার্থীর নাম */}
                                             <td className="p-1 sm:p-3 border-none sm:border sm:border-slate-100 font-bold text-slate-800 flex justify-between items-center sm:table-cell before:content-['শিক্ষার্থীর_নাম:'] before:font-bold before:text-slate-400 sm:before:content-none">
                                                 <span>{student.studentName}</span>
                                             </td>
 
-                                            {/* সিটি */}
                                             <td className="p-1 sm:p-2 border-none sm:border sm:border-slate-100 text-center flex justify-between items-center sm:table-cell before:content-['সিটি:'] before:font-bold before:text-slate-400 sm:before:content-none mt-2 sm:mt-0">
                                                 <input
                                                     type="number"
+                                                    step="any"
+                                                    min="0"
                                                     value={student.ctMark}
                                                     onChange={(e) => handleMarkChange(idx, 'ctMark', e.target.value)}
                                                     placeholder="ফাঁকা"
@@ -338,10 +324,11 @@ export default function TeacherMarkInput() {
                                                 />
                                             </td>
 
-                                            {/* প্রধান পরীক্ষা */}
                                             <td className="p-1 sm:p-2 border-none sm:border sm:border-slate-100 text-center flex justify-between items-center sm:table-cell before:content-['প্রধান_পরীক্ষা:'] before:font-bold before:text-slate-400 sm:before:content-none mt-2 sm:mt-0">
                                                 <input
                                                     type="number"
+                                                    step="any"
+                                                    min="0"
                                                     value={student.examMark}
                                                     onChange={(e) => handleMarkChange(idx, 'examMark', e.target.value)}
                                                     placeholder="ফাঁকা"
@@ -354,7 +341,6 @@ export default function TeacherMarkInput() {
                             </table>
                         </div>
 
-                        {/* সেভ বাটন */}
                         <div className="flex justify-end">
                             <button
                                 type="submit"
