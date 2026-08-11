@@ -1,5 +1,3 @@
----
-
 ```markdown
 # 🏫 AIM Habiganj - Comprehensive Madrasah Management System
 
