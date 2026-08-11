@@ -34,7 +34,7 @@ export default function TopHeader() {
         <div className="flex-1 flex flex-col space-y-1 w-full text-center">
 
          {/* ১. আরবি নাম: ة এবং لا এর জন্য ফালব্যাক ফন্ট ব্যবহার করা হয়েছে */}
-<p className="text-2xl md:text-5xl kufi-custom text-emerald-200/90 tracking-wide dark:text-slate-400" dir="rtl" lang="ar">
+<p className="text-[25px] md:text-5xl kufi-custom text-emerald-200/90 tracking-wide dark:text-slate-400" dir="rtl" lang="ar">
   مدرس<span className="font-sans">ة</span> الس<span className="font-sans">لا</span>م النموذجي<span className="font-sans">ة</span>
 </p>
 
@@ -44,7 +44,7 @@ export default function TopHeader() {
           </p>
 
           {/* ৩. ইংরেজি নাম */}
-          <h1 className="text-[18px] md:text-5xl font-black tracking-wide text-amber-400 dark:text-emerald-400 capitalize drop-shadow-sm leading-none font-britanic">
+          <h1 className="text-[16px] md:text-5xl font-black tracking-wide text-amber-400 dark:text-emerald-400 capitalize drop-shadow-sm leading-none font-britanic">
             As-Salam Ideal Madrasah  (AIM)
           </h1>
 
