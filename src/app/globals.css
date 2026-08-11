@@ -46,13 +46,14 @@ html {
 .animate-marquee:hover {
   animation-play-state: paused;
 }
+
 /* কাস্টম রিমি কুফিক ক্লাস */
 .kufi-custom {
   font-family: var(--font-reem-kufi), sans-serif;
   
-  /* ss01 অপশন সক্রিয় করার মাধ্যমে ة এর নুকতা এবং لا এর ট্র্যাডিশনাল শেপ ফিরে আসবে */
-  font-feature-settings: "ss01" 1;
-  font-variant-numeric: tabular-nums;
+  /* ফন্টের সব অল্টারনেট/কাস্টম শেপ অফ করে ডিফল্ট স্ট্যান্ডার্ড আরবি শেপ চালু করা হলো */
+  font-feature-settings: normal;
+  font-variant-alternates: normal;
 }
 /* পুরো ওয়েবসাইটের ডিফল্ট ফন্ট আকর্ষণীয় করার জন্য */
 body {
