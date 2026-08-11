@@ -44,7 +44,7 @@ export default function TopHeader() {
           </p>
 
           {/* ৩. ইংরেজি নাম */}
-          <h1 className="text-[22px] md:text-5xl font-black tracking-wide text-amber-400 dark:text-emerald-400 capitalize drop-shadow-sm leading-none font-britanic">
+          <h1 className="text-[18px] md:text-5xl font-black tracking-wide text-amber-400 dark:text-emerald-400 capitalize drop-shadow-sm leading-none font-britanic">
             As-Salam Ideal Madrasah  (AIM)
           </h1>
 
