@@ -50,7 +50,14 @@ html {
 @utility font-arabic {
   font-family: var(--font-reem-kufi), sans-serif;
 }
-
+/* কাস্টম রিমি কুফিক ক্লাস */
+.kufi-custom {
+  font-family: 'Reem Kufi', sans-serif;
+  
+  /* cv01 এবং cv03 বন্ধ (0) রাখা হয়েছে যাতে 'ة' এর নুকতা ও 'لا' ট্র্যাডিশনাল থাকে।
+     বাকি অক্ষরের কাস্টম ফাতেমি স্টাইল সচল রাখতে cv02 অন (1) করা যেতে পারে। */
+  font-feature-settings: "cv01" 0, "cv03" 0, "cv02" 1;
+}
 /* পুরো ওয়েবসাইটের ডিফল্ট ফন্ট আকর্ষণীয় করার জন্য */
 body {
   font-family: var(--font-hind-siliguri), sans-serif;
