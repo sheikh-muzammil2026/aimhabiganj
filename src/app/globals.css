@@ -48,13 +48,12 @@ html {
 }
 /* কাস্টম রিমি কুফিক ক্লাস */
 .kufi-custom {
-  /* Next.js এর লোকাল ভেরিয়েবলটি এখানে কল করা হলো */
   font-family: var(--font-reem-kufi), sans-serif;
   
-  /* আপনার রিকোয়েস্ট অনুযায়ী: ة এবং لا ট্র্যাডিশনাল থাকবে */
-  font-feature-settings: "cv01" 0, "cv03" 0, "cv02" 1;
+  /* ss01 অপশন সক্রিয় করার মাধ্যমে ة এর নুকতা এবং لا এর ট্র্যাডিশনাল শেপ ফিরে আসবে */
+  font-feature-settings: "ss01" 1;
+  font-variant-numeric: tabular-nums;
 }
-
 /* পুরো ওয়েবসাইটের ডিফল্ট ফন্ট আকর্ষণীয় করার জন্য */
 body {
   font-family: var(--font-hind-siliguri), sans-serif;
