@@ -33,10 +33,10 @@ export default function TopHeader() {
         {/* নাম ও স্লোগান কন্টেইনার: ফুল উইডথ দখল করবে */}
         <div className="flex-1 flex flex-col space-y-1 w-full text-left">
 
-          {/* ১. আরবি নাম: ফন্ট সাইজ বাড়িয়ে স্বাভাবিক ফ্লুইড অবস্থায় আনা হয়েছে */}
-          <p className="text-xl md:text-5xl kufi-custom text-emerald-200/90 tracking-wide dark:text-slate-400" dir="rtl" lang="ar">
-            مدرسة السلام النموذجية
-          </p>
+         {/* ১. আরবি নাম: ة এবং لا এর জন্য ফালব্যাক ফন্ট ব্যবহার করা হয়েছে */}
+<p className="text-xl md:text-5xl kufi-custom text-emerald-200/90 tracking-wide dark:text-slate-400" dir="rtl" lang="ar">
+  مدرس<span className="font-sans">ة</span> الس<span className="font-sans">لا</span>م النموذجي<span className="font-sans">ة</span>
+</p>
 
           {/* ২. বাংলা নাম: ফন্ট সাইজ বড় করে রেগুলার এলাইনমেন্ট */}
           <p className="text-sm md:text-5xl font-bold text-emerald-50 tracking-normal dark:text-slate-200 leading-tight font-shalda">
