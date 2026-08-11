@@ -17,7 +17,8 @@ const CLASS_SUBJECTS = {
     "অষ্টম": ["হিফজুল কুরআন-৪", "কুরআন অনুবাদ", "হাদিস", "উসুলুল হাদিস", "আরবি", "সরফ", "নাহু", "তাওহীদ", "ফিকহ", "ইংরেজি ১ম ও ২য়", "বাংলা ১ম ও ২য়", "গণিত", "বিজ্ঞান", "বিশেষ ক্লাস আরবি"],
     "কায়দা/আমপারা": ["কুরআন", "তাজভীদ ও দোয়া", "আরবি", "ইংরেজি", "বাংলা", "গণিত"],
     "নাজেরা": ["কুরআন", "তাজভীদ ও দোয়া", "আরবি", "ইংরেজি", "বাংলা", "গণিত"],
-    "হিফজ": ["কুরআন", "তাজভীদ ও দোয়া"]
+    "সবক": ["কুরআন", "তাজভীদ ও দোয়া"],
+    "শুনানি": ["কুরআন", "তাজভীদ ও দোয়া"],
 
 };
 
@@ -202,9 +203,14 @@ export default function TeacherMarkInput() {
                             onChange={(e) => setSelectedClass(e.target.value)}
                             className="w-full bg-white border border-slate-300 text-slate-800 text-xs sm:text-sm rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-600 focus:outline-none"
                         >
-                            <optgroup label="-- হিফজ --">
+
+                            <optgroup label="-- প্রি-হিফজ --">
                                 <option value="কায়দা/আমপারা">কায়দা/আমপারা</option>
                                 <option value="নাজেরা">নাজেরা</option>
+                            </optgroup>
+                            <optgroup label="-- হিফজ --">
+                                <option value="সবক">সবক</option>
+                                <option value="শুনানি">শুনানি</option>
                             </optgroup>
                             <optgroup label="-- প্রাক-প্রাথমিক --">
                                 <option value="প্লে">প্লে</option>

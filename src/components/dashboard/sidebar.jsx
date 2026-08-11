@@ -37,7 +37,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 // { title: "পরিক্ষা ফি", href: "/dashboard/academics?exam-fee" },
                 { title: "পরিক্ষা ফি", href: "/dashboard/exam-fee" },
                 { title: "পরীক্ষা রুটিন", href: "/dashboard/academics/routine" },
-                { title: "এডমিট কার্ড", href: "/dashboard/admit-card" },
+                { title: "এডমিট কার্ড", href: "/dashboard/academics/admit-card" },
                 { title: "সীট প্লান", href: "/dashboard/academics/seat-plan" },
                 { title: "সাক্ষরপত্র", href: "/dashboard/academics?attendance-sheet" },
                 { title: "নম্বর ইনপুট", href: "/dashboard/academics/results/input" },
@@ -79,6 +79,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 { title: "রেকর্ডেড ক্লাস আপলোড", href: "/dashboard/smart-classroom/recorded" },
                 { title: "ই-বুক / লেকচার শিট", href: "/dashboard/smart-classroom/ebooks" },
                 { title: "অনলাইন এক্সাম কন্ট্রোল", href: "/dashboard/smart-classroom/exam" },
+                { title: "একাডেমিক ক্যালেন্ডার", href: "/dashboard/calendar" },
             ]
         },
         { id: "attendance", title: "ডিজিটাল হাজিরা", icon: "📅", href: "/dashboard/attendance", roles: ["admin", "teacher"] },
@@ -107,7 +108,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             icon: "💰",
             roles: ["admin", "accountant"],
             dropdown: [
-                // { title: "ফি ও তহবিল কনফিগার", href: "/dashboard/finance/fees-setup" }, // ১. এটিকে সবার উপরে আনা হয়েছে (যেহেতু এটি সেটিংস)
+                // ১. এটিকে সবার উপরে আনা হয়েছে (যেহেতু এটি সেটিংস)
                 // { title: "ফি কালেকশন (রসিদ)", href: "/dashboard/finance/collect" },      // ২. আমরা যে পেজটি বানালাম (/collect) সেটির রাউট যুক্ত করা হলো
                 // { title: "রশিদ ইতিহাস/তালিকা", href: "/dashboard/finance/receipts" },   // আগের রসিদ পেজটিকে হিস্ট্রি হিসেবে ব্যবহার করা যাবে
                 // { title: "খরচ ও ভাউচার ট্র্যাকিং", href: "/dashboard/finance/expenses" },
