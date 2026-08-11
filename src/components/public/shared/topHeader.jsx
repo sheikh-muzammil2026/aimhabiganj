@@ -39,12 +39,12 @@ export default function TopHeader() {
 </p>
 
           {/* ২. বাংলা নাম: ফন্ট সাইজ বড় করে রেগুলার এলাইনমেন্ট */}
-          <p className="text-sm md:text-5xl font-bold text-emerald-50 tracking-normal dark:text-slate-200 leading-tight font-shalda">
+          <p className="text-[13px] md:text-5xl font-bold text-emerald-50 tracking-normal dark:text-slate-200 leading-tight font-shalda">
             আস-সালাম আইডিয়াল মাদরাসা (এইম)
           </p>
 
           {/* ৩. ইংরেজি নাম */}
-          <h1 className="text-sm md:text-5xl font-black tracking-wide text-amber-400 dark:text-emerald-400 capitalize drop-shadow-sm leading-none font-britanic">
+          <h1 className="text-[22px] md:text-5xl font-black tracking-wide text-amber-400 dark:text-emerald-400 capitalize drop-shadow-sm leading-none font-britanic">
             As-Salam Ideal Madrasah  (AIM)
           </h1>
 
