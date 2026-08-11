@@ -34,7 +34,7 @@ export default function TopHeader() {
         <div className="flex-1 flex flex-col space-y-1 w-full text-left">
 
           {/* ১. আরবি নাম: ফন্ট সাইজ বাড়িয়ে স্বাভাবিক ফ্লুইড অবস্থায় আনা হয়েছে */}
-          <p className="text-xl md:text-5xl font-arabic text-emerald-200/90 tracking-wide dark:text-slate-400" dir="rtl" lang="ar">
+          <p className="text-xl md:text-5xl kufi-custom text-emerald-200/90 tracking-wide dark:text-slate-400" dir="rtl" lang="ar">
             مدرسة السلام النموذجية
           </p>
 
