@@ -12,15 +12,15 @@ const geistMono = Geist_Mono({
     subsets: ["latin"],
 });
 
-// আরবি ফন্ট
+// আরবি ফন্ট (variable প্রপার্টি যুক্ত করা হয়েছে)
 const reemKufi = Reem_Kufi({
     variable: "--font-reem-kufi",
-    subsets: ["arabic"],
-    weight: ["400", "700"],
+    subsets: ['arabic'],
+    weight: ['400', '500', '600', '700'], 
     display: "swap",
 });
 
-// পুরো ওয়েবসাইটের জন্য আকর্ষণীয় বাংলা ফন্ট (Hind Siliguri)
+// বাংলা ফন্ট
 const hindSiliguri = Hind_Siliguri({
     variable: "--font-hind-siliguri",
     subsets: ["bengali"],
@@ -36,11 +36,13 @@ export const metadata = {
 export default function RootLayout({ children }) {
     return (
         <html
+            lang="en" // অথবা প্রয়োজন অনুযায়ী "bn" বা "ar" দিতে পারেন
             className={`${geistSans.variable} ${geistMono.variable} ${reemKufi.variable} ${hindSiliguri.variable} h-full antialiased`}
         >
-            <body className="min-h-full flex flex-col">
+            {/* বডিতে ডিফল্টভাবে বাংলা ফন্ট চালু রাখতে hindSiliguri.className যোগ করতে পারেন */}
+            <body className={`${hindSiliguri.className} min-h-full flex flex-col`}>
                 <Providers>{children}</Providers>
             </body>
         </html>
     );
-            }
+}
