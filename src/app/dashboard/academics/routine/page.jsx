@@ -393,11 +393,11 @@ export default function AdminRoutineForm() {
                                                 >
                                                     <option value="শনিবার">শনিবার</option>
                                                     <option value="রবিবার">রবিবার</option>
-                                                    <option value="সোমবার">Monday</option>
+                                                    <option value="সোমবার">সোমবার</option>
                                                     <option value="মঙ্গলবার">মঙ্গলবার</option>
                                                     <option value="বুধবার">বুধবার</option>
                                                     <option value="বৃহস্পতিবার">বৃহস্পতিবার</option>
-                                                    <option value="শুক্রবার">Friday</option>
+                                                    <option value="শুক্রবার">শুক্রবার</option>
                                                 </select>
                                             </div>
                                         </div>
