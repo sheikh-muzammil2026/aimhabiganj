@@ -1,7 +1,10 @@
 'use client';
 
+import { MessageCircle, Phone } from 'lucide-react';
 import Image from 'next/image';
 import React, { useState, useEffect } from 'react';
+import { BsWhatsapp, BsYoutube } from 'react-icons/bs';
+import { FaFacebook } from 'react-icons/fa';
 
 export default function AdmitCardGenerator() {
     const [students, setStudents] = useState([]);
@@ -261,152 +264,32 @@ export default function AdmitCardGenerator() {
 
     const studentsToPrint = students.filter((s) => selectedIds.includes(s._id));
 
+    // অটো-ফিট নাম এবং তথ্যের জন্য SVG টেক্সট কম্পোনেন্ট (ফুল উইডথ নিবে ও অটো ছোট/বড় হবে)
+    const AutoScaledText = ({ text, className = "", fontWeight = "bold", fill = "#000" }) => {
+        return (
+            <div className={`w-full h-4 flex items-center overflow-hidden ${className}`}>
+                <svg className="w-full h-full" viewBox="0 0 300 24" preserveAspectRatio="none">
+                    <text
+                        x="0"
+                        y="18"
+                        fontSize="18"
+                        fontWeight={fontWeight}
+                        fill={fill}
+                        fontFamily="sans-serif"
+                        textLength="300"
+                        lengthAdjust="spacingAndGlyphs"
+                    >
+                        {text || 'N/A'}
+                    </text>
+                </svg>
+            </div>
+        );
+    };
+
     return (
         <div className="min-h-screen bg-gray-100 p-3 sm:p-4 md:p-6">
             {/* প্রিন্ট সিএসএস ফিক্স */}
-            <style jsx global>{`
-  @media print {
-    body, html {
-      margin: 0 !important;
-      padding: 0 !important;
-      background: white !important;
-    }
-    @page {
-      size: 148mm 210mm;
-      margin: 0;
-    }
-    /* Hide non-printable elements by visibility */
-    body * {
-      visibility: hidden;
-    }
-    .print-area-container,
-    .print-area-container * {
-      visibility: visible;
-    }
-    .print-area-container {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 148mm;
-      margin: 0 !important;
-      padding: 0 !important;
-    }
-    .page-break {
-      visibility: visible !important;
-      page-break-after: always !important;
-      break-after: page !important;
-      width: 148mm !important;
-      height: 210mm !important;
-      min-height: 210mm !important;
-      max-height: 210mm !important;
-      margin: 0 !important;
-      padding: 10px 14px !important;
-      border: 6px double #C5A059 !important;
-      box-sizing: border-box !important;
-      display: flex !important;
-      flex-direction: column !important;
-      justify-content: space-between !important;
-      background: white !important;
-      position: relative !important;
-      overflow: hidden !important;
-    }
 
-    /* A5 scaling overrides */
-    .print-logo-container {
-      width: 52px !important;
-      height: 52px !important;
-    }
-    .print-banner-container {
-      max-height: 40px !important;
-    }
-    .print-photo-container {
-      width: 60px !important;
-      height: 70px !important;
-    }
-    .print-title {
-      font-size: 16px !important;
-      line-height: 1.1 !important;
-    }
-    .print-subtitle {
-      font-size: 10px !important;
-      margin-top: 1px !important;
-    }
-    .print-class-info {
-      font-size: 12px !important;
-      margin-top: 1px !important;
-    }
-    .print-details-grid {
-      grid-template-columns: 1fr 1fr !important;
-      gap: 4px 10px !important;
-      margin: 6px 0 !important;
-      font-size: 10px !important;
-      padding: 0 4px !important;
-    }
-    .print-details-grid span {
-      font-size: 10px !important;
-    }
-    .print-label {
-      width: 72px !important;
-    }
-    .print-label-right {
-      width: 50px !important;
-    }
-    .print-signature-section {
-      margin: 8px 0 2px 0 !important;
-      padding: 0 10px !important;
-      display: flex !important;
-      justify-content: space-between !important;
-      position: relative !important;
-    }
-    .print-signature-box {
-      width: 100px !important;
-      position: relative !important;
-      text-align: center !important;
-    }
-    .print-signature-line {
-      width: 90px !important;
-      border-top: 1px solid #000 !important;
-      margin: 0 auto 2px auto !important;
-    }
-    .print-signature-text {
-      font-size: 8px !important;
-    }
-    .print-signature-img {
-      height: 24px !important;
-      width: 48px !important;
-      position: absolute !important;
-      bottom: 15px !important;
-      left: 50% !important;
-      transform: translateX(-50%) !important;
-      object-fit: contain !important;
-    }
-    .print-routine-section {
-      margin: 4px 0 !important;
-    }
-    .print-routine-title {
-      font-size: 11px !important;
-      margin-bottom: 2px !important;
-    }
-    .print-routine-table th,
-    .print-routine-table td {
-      font-size: 9px !important;
-      padding: 2px 6px !important;
-    }
-    .print-instructions-section {
-      margin: 4px 0 !important;
-      font-size: 8px !important;
-      line-height: 1.2 !important;
-    }
-    .print-instructions-title {
-      font-size: 9px !important;
-    }
-    .print-footer {
-      font-size: 8px !important;
-      padding-top: 3px !important;
-      margin-top: auto !important;
-    }
-  }
-`}</style>
 
             {/* ----------------- ১. এডমিন কন্ট্রোল প্যানেল (প্রিন্টে হাইড থাকবে) ----------------- */}
             <div className="print:hidden max-w-7xl mx-auto bg-white p-4 sm:p-6 rounded-lg shadow-md mb-6 sm:mb-8">
@@ -527,7 +410,7 @@ export default function AdmitCardGenerator() {
 
                     <div>
                         <label className="block text-xs font-semibold text-gray-600 mb-1">
-                            শ্রেণি / জামাত
+                            শ্রেণি
                         </label>
                         <select
                             value={selectedClass}
@@ -544,7 +427,7 @@ export default function AdmitCardGenerator() {
                         </select>
                     </div>
 
-                    <div>
+                    {/* <div>
                         <label className="block text-xs font-semibold text-gray-600 mb-1">
                             আবাসিক স্ট্যাটাস
                         </label>
@@ -558,9 +441,9 @@ export default function AdmitCardGenerator() {
                             <option value="অনাবাসিক">অনাবাসিক</option>
                             <option value="ডে-কেয়ার">ডে-কেয়ার</option>
                         </select>
-                    </div>
+                    </div> */}
 
-                    <div>
+                    {/* <div>
                         <label className="block text-xs font-semibold text-gray-600 mb-1">
                             ফি ক্যাটাগরি
                         </label>
@@ -576,7 +459,7 @@ export default function AdmitCardGenerator() {
                                 </option>
                             ))}
                         </select>
-                    </div>
+                    </div> */}
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t pt-4 mb-4">
@@ -701,242 +584,288 @@ export default function AdmitCardGenerator() {
             ) : (
                 <div className="print-area-container flex flex-col items-center gap-8">
                     {admitCards.map((card) => {
+                        // রুটিন ৫টির বেশি হলে ২ কলামে ভাগ করার জন্য হেলপার লজিক
+                        const routine = card.routine || [];
+                        const isMultiColumn = routine.length > 5;
+                        const midIndex = Math.ceil(routine.length / 2);
+                        const routineColumns = isMultiColumn
+                            ? [routine.slice(0, midIndex), routine.slice(midIndex)]
+                            : [routine];
+
                         return (
                             <div
                                 key={card._id || card.studentId}
-                                className="page-break w-[210mm] min-h-[297mm] bg-white border-[10px] border-double border-[#C5A059] p-8 relative font-sans text-gray-800 shadow-2xl print:shadow-none print:m-0 print:border-[8px] box-border flex flex-col justify-between"
-                            >
-                                {/* ওয়াটারমার্ক (Watermark) */}
-                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 opacity-[0.05]">
-                                    <Image
-                                        src="/aimlogo1.png"
-                                        alt="Watermark Logo"
-                                        width={400}
-                                        height={400}
-                                        className="object-contain"
-                                    />
-                                </div>
+                                className="page-break relative bg-white box-border flex flex-col justify-between"                            >
+                                <div className="w-full h-full border-[4px] border-double border-[#C5A059] p-3 flex flex-col justify-between box-border">
 
-                                <div className="relative z-10">
-                                    {/* ১. হেডার সেকশন: Logo + Optimized Banner + Student Photo */}
-                                    <div className="flex justify-between items-center pb-2 relative">
-                                        {/* মাদ্রাসার লোগো */}
-                                        <div className="print-logo-container w-20 h-20 md:w-28 md:h-28 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center">
-                                            <Image
-                                                src={"/aimlogo1.png"}
-                                                alt="Institution Logo"
-                                                width={200}
-                                                height={200}
-                                                quality={100}
-                                                priority
-                                                className="w-full h-full object-cover scale-[1.05] transform-gpu"
-                                            />
-                                        </div>
+                                    {/* ওয়াটারমার্ক (Watermark) */}
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 opacity-[0.08]">
+                                        <Image
+                                            src="/aimlogo1.png"
+                                            alt="Watermark Logo"
+                                            width={260}
+                                            height={260}
+                                            className="object-contain"
+                                        />
+                                    </div>
 
-                                        {/* লোগো ও ছবির মাঝখানে ব্যানার */}
-                                        <div className="print-banner-container flex-1 px-4 text-center">
-                                            <div className="flex-grow text-center ">
+                                    {/* মেইন কন্টেন্ট এলাকা */}
+                                    <div className="relative z-10 flex-1 flex flex-col justify-between overflow-hidden">
+
+                                        {/* ১. হেডার সেকশন: Logo + Banner + Student Photo */}
+                                        <div className="flex justify-between items-center relative gap-2 flex-shrink-0 w-full overflow-hidden">
+                                            {/* মাদ্রাসার লোগো */}
+                                            <div className="w-22 h-22 rounded-full overflow-hidden flex-shrink-0 relative flex items-center justify-center">
                                                 <Image
-                                                    src={"/banner_routine.png"}
-                                                    alt="Institution Banner"
-                                                    width={2000}
-                                                    height={400}
+                                                    src={"/aimlogo1.png"}
+                                                    alt="Institution Logo"
+                                                    width={120}
+                                                    height={120}
                                                     quality={100}
                                                     priority
-                                                    className="w-full h-auto max-h-45 object-fill mx-auto print:max-h-45"
+                                                    className="w-full h-full object-cover scale-[1.05] transform-gpu"
                                                 />
+                                            </div>
+
+                                            {/* লোগো ও ছবির মাঝখানে ব্যানার */}
+                                            <div className="flex-1 text-center min-w-0">
+                                                <div className="w-full text-center">
+                                                    <Image
+                                                        src={"/banner.png"}
+                                                        alt="Institution Banner"
+                                                        width={1200}
+                                                        height={240}
+                                                        quality={100}
+                                                        priority
+                                                        className="w-full h-auto max-h-24 object-contain mx-auto"
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
 
-                                        {/* স্টুডেন্ট ফটো (গোল্ডেন ফ্রেমসহ) */}
-                                        <div className="print-photo-container w-24 h-28 border-2 border-[#C5A059] rounded-xl bg-white p-1 shadow-md relative overflow-hidden flex-shrink-0 flex items-center justify-center">
-                                            {card.studentImage || card.photoUrl ? (
-                                                <Image
-                                                    src={card.studentImage || card.photoUrl}
-                                                    alt={card.studentNameEnglish || "Student Photo"}
-                                                    fill
-                                                    className="object-cover rounded-lg"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full bg-gray-100 rounded-lg flex items-center justify-center text-center p-1">
-                                                    <span className="text-[11px] font-semibold text-[#8B6B23]">
-                                                        N/A
+                                        <div className='flex justify-between items-center border-t-4 border-double border-[#C5A059]'>
+                                            {/* ২. অ্যাডমিট কার্ড টাইটেল ও সেশন */}
+                                            <div className="text-center my-0.5 flex-shrink-0 flex-1">
+                                                <h2 className="text-base font-bold text-[#8B6B23] tracking-wide leading-tight">
+                                                    এডমিট কার্ড
+                                                </h2>
+                                                <p className="text-[11px] font-semibold text-gray-700 leading-tight">
+                                                    {card.examName || "পরীক্ষা"} - {card.sessionYear || "২০২৬"}
+                                                </p>
+                                                <p className="text-[11px] font-bold text-gray-900 mt-0.5">
+                                                    শ্রেণি: {card.className || "N/A"}
+                                                </p>
+                                            </div>
+                                            {/* স্টুডেন্ট ফটো */}
+                                            <div className="w-16 h-20 border border-[#C5A059] rounded-lg bg-white p-0.5 shadow-sm relative overflow-hidden flex-shrink-0 flex items-center justify-center mt-1">
+                                                {card.studentImage ? (
+                                                    <Image
+                                                        src={card.studentImage}
+                                                        alt={card.studentNameEnglish || "Student Photo"}
+                                                        fill
+                                                        className="object-cover rounded"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full bg-gray-100 rounded flex items-center justify-center text-center p-0.5">
+                                                        <span className="text-[9px] font-semibold text-[#8B6B23]">
+                                                            N/A
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* ৩. শিক্ষার্থীর তথ্যাবলী (২ কলামে গ্রিড লেআউট) */}
+                                        <div className="grid grid-cols-2 gap-x-3 gap-y-1 my-1 text-[11px] font-semibold px-1 flex-shrink-0">
+                                            {/* বাম কলাম */}
+                                            <div className="space-y-1">
+                                                <div className="flex items-center">
+                                                    <span className="w-22 text-gray-800 flex-shrink-0">পরীক্ষার্থীর নাম:</span>
+                                                    <div className="flex-1 border-b border-dotted border-gray-400 pb-0.5 overflow-hidden">
+                                                        <AutoScaledText
+                                                            text={card.studentNameBangla || card.studentNameEnglish || "N/A"}
+                                                            fill="#111827"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center">
+                                                    <span className="w-22 text-gray-800 flex-shrink-0">পিতার নাম:</span>
+                                                    <div className="flex-1 border-b border-dotted border-gray-400 pb-0.5 overflow-hidden">
+                                                        <AutoScaledText
+                                                            text={card.fatherNameBangla || card.fatherNameEnglish || "N/A"}
+                                                            fill="#111827"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-baseline">
+                                                    <span className="w-22 text-gray-800 flex-shrink-0">উপজেলা/থানা:</span>
+                                                    <span className="font-bold text-gray-900 flex-1 border-b border-dotted border-gray-400 pb-0.5 truncate">
+                                                        {card.upazila || "N/A"}
                                                     </span>
                                                 </div>
-                                            )}
-                                        </div>
-                                    </div>
+                                                <div className="flex items-baseline">
+                                                    <span className="w-22 text-gray-800 flex-shrink-0">জেলা:</span>
+                                                    <span className="font-bold text-gray-900 flex-1 border-b border-dotted border-gray-400 pb-0.5 truncate">
+                                                        {card.district || "N/A"}
+                                                    </span>
+                                                </div>
+                                            </div>
 
-                                    {/* ২. অ্যাডমিট কার্ড টাইটেল ও সেশন */}
-                                    <div className="text-center mt-2 mb-4">
-                                        <h2 className="print-title text-2xl font-bold text-[#8B6B23] tracking-wide">
-                                            এডমিট কার্ড
-                                        </h2>
-                                        <p className="print-subtitle text-sm font-semibold text-gray-700 mt-1">
-                                            ({card.examName || "পরীক্ষা"} - {card.sessionYear || "২০২৬"})
-                                        </p>
-                                        <p className="print-class-info text-lg font-bold text-gray-900 mt-1">
-                                            শ্রেণি: {card.className || "N/A"}
-                                        </p>
-                                    </div>
-
-                                    {/* ৩. শিক্ষার্থীর তথ্যাবলী (২ কলামে গ্রিড লেআউট) */}
-                                    <div className="print-details-grid grid grid-cols-2 gap-x-8 gap-y-3 my-6 text-base font-semibold px-4">
-                                        {/* বাম কলাম */}
-                                        <div className="space-y-3">
-                                            <div className="flex items-baseline">
-                                                <span className="print-label w-32 text-gray-800">পরীক্ষার্থীর নাম:</span>
-                                                <span className="font-bold text-gray-900 flex-1 border-b border-dotted border-gray-400 pb-0.5">
-                                                    {card.studentNameBangla || card.studentNameEnglish || "N/A"}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-baseline">
-                                                <span className="print-label w-32 text-gray-800">পিতার নাম:</span>
-                                                <span className="font-bold text-gray-900 flex-1 border-b border-dotted border-gray-400 pb-0.5">
-                                                    {card.fatherNameBangla || card.fatherNameEnglish || "N/A"}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-baseline">
-                                                <span className="print-label w-32 text-gray-800">উপজেলা/থানা:</span>
-                                                <span className="font-bold text-gray-900 flex-1 border-b border-dotted border-gray-400 pb-0.5">
-                                                    {card.upazila || "N/A"}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-baseline">
-                                                <span className="print-label w-32 text-gray-800">জেলা:</span>
-                                                <span className="font-bold text-gray-900 flex-1 border-b border-dotted border-gray-400 pb-0.5">
-                                                    {card.district || "N/A"}
-                                                </span>
+                                            {/* ডান কলাম */}
+                                            <div className="space-y-1">
+                                                <div className="flex items-baseline">
+                                                    <span className="w-14 text-gray-800 flex-shrink-0">আইডি:</span>
+                                                    <span className="font-bold text-gray-900 flex-1 border-b border-dotted border-gray-400 pb-0.5 truncate">
+                                                        {card.studentId || "N/A"}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-baseline">
+                                                    <span className="w-14 text-gray-800 flex-shrink-0">রোল নং:</span>
+                                                    <span className="font-bold text-gray-900 flex-1 border-b border-dotted border-gray-400 pb-0.5 truncate">
+                                                        {card.roll || "N/A"}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-baseline">
+                                                    <span className="w-14 text-gray-800 flex-shrink-0">হল নং:</span>
+                                                    <span className="font-bold text-gray-900 flex-1 border-b border-dotted border-gray-400 pb-0.5 truncate">
+                                                        {card.hallNo || "N/A"}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-baseline">
+                                                    <span className="w-14 text-gray-800 flex-shrink-0">সিট নং:</span>
+                                                    <span className="font-bold text-gray-900 flex-1 border-b border-dotted border-gray-400 pb-0.5 truncate">
+                                                        {card.seatNo || "N/A"}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
 
-                                        {/* ডান কলাম */}
-                                        <div className="space-y-3">
-                                            <div className="flex items-baseline">
-                                                <span className="print-label-right w-24 text-gray-800">আইডি:</span>
-                                                <span className="font-bold text-gray-900 flex-1 border-b border-dotted border-gray-400 pb-0.5">
-                                                    {card.studentId || "N/A"}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-baseline">
-                                                <span className="print-label-right w-24 text-gray-800">রোল নং:</span>
-                                                <span className="font-bold text-gray-900 flex-1 border-b border-dotted border-gray-400 pb-0.5">
-                                                    {card.roll || "N/A"}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-baseline">
-                                                <span className="print-label-right w-24 text-gray-800">হল নং:</span>
-                                                <span className="font-bold text-gray-900 flex-1 border-b border-dotted border-gray-400 pb-0.5">
-                                                    {card.hallNo || "N/A"}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-baseline">
-                                                <span className="print-label-right w-24 text-gray-800">সিট নং:</span>
-                                                <span className="font-bold text-gray-900 flex-1 border-b border-dotted border-gray-400 pb-0.5">
-                                                    {card.seatNo || "N/A"}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
+                                        {/* ৫. পরীক্ষার রুটিন (Dynamic 1 or 2 Columns Table) */}
+                                        <div className="my-1 flex-shrink-0">
+                                            <h3 className="text-center text-[11px] font-bold text-gray-900 mb-0.5">
+                                                পরীক্ষার রুটিন
+                                            </h3>
 
-
-                                    {/* ৪. স্বাক্ষর সেকশন */}
-                                    <div className="print-signature-section flex justify-between items-end my-8 mt-14 px-8">
-                                        {/* পরীক্ষা নিয়ন্ত্রক এর স্বাক্ষর */}
-                                        <div className="print-signature-box text-center flex flex-col items-center">
-                                            <div className="relative w-48">
-                                                <Image
-                                                    src={card.signatures?.controller || "/principle's_signature.jpg"}
-                                                    alt="Controller Signature"
-                                                    width={150}
-                                                    height={60}
-                                                    unoptimized
-                                                    className="print-signature-img absolute -top-8 right-14 h-9 w-17 object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45"
-                                                />
+                                            <div className={`grid ${isMultiColumn ? 'grid-cols-2 gap-2' : 'grid-cols-1'} w-full`}>
+                                                {routineColumns.map((colRoutine, colIdx) => (
+                                                    <table key={colIdx} className="w-full border-collapse border border-[#C5A059] text-[10px] bg-[#FDFBF7]/60">
+                                                        <thead>
+                                                            <tr className="bg-[#C5A059]/10 text-gray-900">
+                                                                <th className="border border-[#C5A059] px-1 py-0.5 text-left font-bold w-1/3">তারিখ</th>
+                                                                <th className="border border-[#C5A059] px-1 py-0.5 text-left font-bold w-1/3">বার</th>
+                                                                <th className="border border-[#C5A059] px-1 py-0.5 text-left font-bold w-1/3">বিষয়</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {colRoutine.length === 0 ? (
+                                                                <tr>
+                                                                    <td colSpan="3" className="border border-[#c59f59c4] px-1 py-0.5 text-center text-gray-500 font-medium">
+                                                                        রুটিন পাওয়া যায়নি
+                                                                    </td>
+                                                                </tr>
+                                                            ) : (
+                                                                colRoutine.map((row, idx) => (
+                                                                    <tr key={idx} className="hover:bg-[#F5EEDC]/50">
+                                                                        <td className="border border-[#C5A059] px-1 py-0.5 text-gray-800">{row.date || "N/A"}</td>
+                                                                        <td className="border border-[#C5A059] px-1 py-0.5 text-gray-800">{row.day || "N/A"}</td>
+                                                                        <td className="border border-[#C5A059] px-1 py-0.5 text-gray-800 font-medium truncate max-w-[80px]">{row.subject || "N/A"}</td>
+                                                                    </tr>
+                                                                ))
+                                                            )}
+                                                        </tbody>
+                                                    </table>
+                                                ))}
                                             </div>
-                                            <div className="print-signature-line w-36 border-b border-gray-800 mb-1"></div>
-                                            <span className="print-signature-text text-xs font-bold text-gray-800">
-                                                পরীক্ষা নিয়ন্ত্রক এর স্বাক্ষর
-                                            </span>
+
+                                            <p className="text-center text-[10px] mt-0.5 font-medium">
+                                                বি: দ্র: <span className="text-red-500">{card.examTime || "N/A"}</span>
+                                            </p>
                                         </div>
 
-                                        {/* প্রিন্সিপাল এর স্বাক্ষর */}
-                                        <div className="print-signature-box text-center flex flex-col items-center">
-                                            <div className="relative w-48">
-                                                <Image
-                                                    src={card.signatures?.principal || "/principle's_signature.jpg"}
-                                                    alt="Principal Signature"
-                                                    width={150}
-                                                    height={60}
-                                                    unoptimized
-                                                    className="print-signature-img absolute -top-8 right-14 h-9 w-17 object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45"
-                                                />
-                                            </div>
-                                            <div className="print-signature-line w-36 border-b border-gray-800 mb-1"></div>
-                                            <span className="print-signature-text text-xs font-bold text-gray-800">
-                                                প্রিন্সিপাল এর স্বাক্ষর
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    {/* ৫. পরীক্ষার রুটিন (Table) */}
-                                    <div className="print-routine-section my-6 mt-8">
-                                        <h3 className="print-routine-title text-center text-lg font-bold text-gray-900 mb-2">
-                                            পরীক্ষার রুটিন
-                                        </h3>
-                                        <table className="print-routine-table w-full border-collapse border border-[#C5A059] text-sm bg-[#FDFBF7]">
-                                            <thead>
-                                                <tr className="bg-[#E6D7B8] text-gray-900">
-                                                    <th className="border border-[#C5A059] px-3 py-1.5 text-left font-bold w-1/3">তারিখ</th>
-                                                    <th className="border border-[#C5A059] px-3 py-1.5 text-left font-bold w-1/3">বার</th>
-                                                    <th className="border border-[#C5A059] px-3 py-1.5 text-left font-bold w-1/3">বিষয়</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {(!card.routine || card.routine.length === 0) ? (
-                                                    <tr>
-                                                        <td colSpan="3" className="border border-[#C5A059] px-3 py-2 text-center text-gray-500 font-medium">
-                                                            রুটিন পাওয়া যায়নি
-                                                        </td>
-                                                    </tr>
+                                        {/* ৬. দৃষ্টি আকর্ষণ ও বিশেষ নির্দেশাবলী */}
+                                        <div className="my-1 text-[9.5px] text-gray-800 space-y-0.5 flex-shrink-0">
+                                            <p className="font-bold text-[10.5px] text-gray-900">
+                                                দৃষ্টি আকর্ষণ:
+                                            </p>
+                                            <ul className="list-disc list-inside space-y-0.5 font-medium pl-1">
+                                                {(!card.instructions || card.instructions.length === 0) ? (
+                                                    <li className="text-gray-500">কোনো নির্দেশাবলী পাওয়া যায়নি</li>
                                                 ) : (
-                                                    card.routine.map((row, idx) => (
-                                                        <tr key={idx} className="hover:bg-[#F5EEDC]/50">
-                                                            <td className="border border-[#C5A059] px-3 py-1 text-gray-800">{row.date || "N/A"}</td>
-                                                            <td className="border border-[#C5A059] px-3 py-1 text-gray-800">{row.day || "N/A"}</td>
-                                                            <td className="border border-[#C5A059] px-3 py-1 text-gray-800 font-medium">{row.subject || "N/A"}</td>
-                                                        </tr>
+                                                    card.instructions.map((inst, index) => (
+                                                        <li key={index} className="leading-tight">{inst}</li>
                                                     ))
                                                 )}
-                                            </tbody>
-                                        </table>
+                                            </ul>
+                                        </div>
+
+                                        {/* ৪. স্বাক্ষর সেকশন */}
+                                        <div className="flex justify-between items-end my-1 px-4 flex-shrink-0">
+                                            {/* পরীক্ষা নিয়ন্ত্রক এর স্বাক্ষর */}
+                                            <div className="text-center flex flex-col items-center print:mt-auto relative">
+                                                <div className="relative w-28 h-5">
+                                                    <Image
+                                                        src={card.signatures?.controller || "/principle's_signature.jpg"}
+                                                        alt="Controller Signature"
+                                                        width={100}
+                                                        height={40}
+                                                        unoptimized
+                                                        className="absolute -top-2 right-6 h-6 w-12 object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45"
+                                                    />
+                                                </div>
+                                                <div className="w-28 border-b border-gray-800 mb-0.5"></div>
+                                                <span className="text-[9.5px] font-bold text-gray-800">
+                                                    পরীক্ষা নিয়ন্ত্রকের স্বাক্ষর
+                                                </span>
+                                            </div>
+
+                                            {/* প্রিন্সিপাল এর স্বাক্ষর */}
+                                            <div className="text-center flex flex-col items-center">
+                                                <div className="relative w-28 h-5 print:mt-auto relative">
+                                                    <Image
+                                                        src={card.signatures?.principal || "/principle's_signature.jpg"}
+                                                        alt="Principal Signature"
+                                                        width={100}
+                                                        height={40}
+                                                        unoptimized
+                                                        className="absolute -top-2 right-6 h-6 w-12 object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45"
+                                                    />
+                                                </div>
+                                                <div className="w-28 border-b border-gray-800 mb-0.5"></div>
+                                                <span className="text-[9.5px] font-bold text-gray-800">
+                                                    প্রিন্সিপালের স্বাক্ষর
+                                                </span>
+                                            </div>
+                                        </div>
+
                                     </div>
 
-                                    {/* ৬. দৃষ্টি আকর্ষণ ও বিশেষ নির্দেশাবলী */}
-                                    <div className="print-instructions-section my-4 text-xs text-gray-800 space-y-2 mt-8">
-                                        <p className="print-instructions-title font-bold text-sm text-gray-900">
-                                            দৃষ্টি আকর্ষণ: <span className="font-semibold">বি: দ্র: সকল বিভাগের পরীক্ষার সময় {card.examTime || "N/A"}</span>
-                                        </p>
-                                        <ul className="list-disc list-inside space-y-1 font-medium pl-1">
-                                            {(!card.instructions || card.instructions.length === 0) ? (
-                                                <li className="text-gray-500">কোনো নির্দেশাবলী পাওয়া যায়নি</li>
-                                            ) : (
-                                                card.instructions.map((inst, index) => (
-                                                    <li key={index}>{inst}</li>
-                                                ))
-                                            )}
-                                        </ul>
-                                    </div>
-                                </div>
-
-                                {/* ৭. ফুটারে কন্টাক্ট ইনফো ও সোর্স ক্রেডিট */}
-                                <div className="print-footer relative z-10 mt-auto pt-4 border-t border-gray-300">
-                                    <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-1 text-xs font-semibold text-gray-800">
-                                        <span>Contact: 01316-209201, 01748-886161</span>
-                                        <span>•</span>
-                                        <span>www.aimhabiganj.com</span>
-                                        <span>•</span>
-                                        <span>aimhabiganj@gmail.com</span>
+                                    {/* ৭. ফুটারে কন্টাক্ট ইনফো ও সোর্স ক্রেডিট */}
+                                    <div className="relative z-10 mt-auto pt-1 border-t border-gray-300 flex-shrink-0">
+                                        <div className="flex flex-wrap justify-center items-center gap-x-1 gap-y-0.5 text-[8.5px] font-semibold text-gray-800">
+                                            <span className="flex items-center gap-0.5">
+                                                <Phone className="w-2.5 h-2.5 text-gray-700" />
+                                                01316-209201
+                                            </span>
+                                            <span>•</span>
+                                            <span className="flex items-center gap-0.5">
+                                                <BsWhatsapp className="w-2.5 h-2.5 text-green-600" />
+                                                01748-886161
+                                            </span>
+                                            <span>•</span>
+                                            <span>www.aimhabiganj.com</span>
+                                            <span>•</span>
+                                            <span>aimhabiganj@gmail.com</span>
+                                            <span>•</span>
+                                            <span className="flex items-center gap-0.5">
+                                                <FaFacebook className="w-2.5 h-2.5 text-blue-600" />
+                                                aimhabiganj
+                                            </span>
+                                            <span>•</span>
+                                            <span className="flex items-center gap-0.5">
+                                                <BsYoutube className="w-2.5 h-2.5 text-red-600" />
+                                                aimhabiganj
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

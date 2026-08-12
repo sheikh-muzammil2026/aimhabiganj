@@ -28,18 +28,18 @@ export default function TopHeader() {
         <div className="flex-1 flex flex-col space-y-1 w-full text-center">
 
           {/* ১. আরবি নাম: ة এবং لا এর জন্য ফালব্যাক ফন্ট ব্যবহার করা হয়েছে */}
-          <p className="text-[25px] md:text-3xl md:scale-x-235  kufi-custom text-emerald-200/90 tracking-wide dark:text-slate-400" dir="rtl" lang="ar">
+          <p className="text-[18px] scale-x-130 md:text-3xl md:scale-x-235  kufi-custom text-emerald-200/90 tracking-wide dark:text-slate-400" dir="rtl" lang="ar">
             مدرس<span className="font-sans">ة</span> الس<span className="font-sans">لا</span>م النموذجي<span className="font-sans">ة</span>
           </p>
           {/* text-[25px] md:text-[90px] md:scale-x-125 origin-right kufi-custom text-emerald-200/90 tracking-wide dark:text-slate-400" dir="rtl" lang="ar" */}
 
           {/* ২. বাংলা নাম: ফন্ট সাইজ বড় করে রেগুলার এলাইনমেন্ট */}
-          <p className="text-[14px] md:text-4xl mt-2 font-bold text-emerald-50 tracking-normal dark:text-slate-200 leading-tight font-shalda">
+          <p className="text-[12px] md:text-4xl mt-2 font-bold text-emerald-50 tracking-normal dark:text-slate-200 leading-tight font-shalda">
             আস-সালাম আইডিয়াল মাদরাসা (এইম)
           </p>
 
           {/* ৩. ইংরেজি নাম */}
-          <h1 className="text-[16px] md:text-[46px] font-black tracking-wide text-amber-400 dark:text-emerald-400 capitalize  leading-none font-britanic">
+          <h1 className="text-[15px] md:text-[46px] font-black tracking-wide text-amber-400 dark:text-emerald-400 capitalize  leading-none font-britanic">
             As-Salam Ideal Madrasah  (AIM)
           </h1>
 

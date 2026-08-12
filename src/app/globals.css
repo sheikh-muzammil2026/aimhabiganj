@@ -29,10 +29,12 @@
 html {
   scroll-behavior: smooth;
 }
+
 @keyframes marquee {
   0% {
     transform: translateX(100%);
   }
+
   100% {
     transform: translateX(-100%);
   }
@@ -50,12 +52,63 @@ html {
 /* কাস্টম রিমি কুফিক ক্লাস */
 .kufi-custom {
   font-family: var(--font-reem-kufi), sans-serif;
-  
+
   /* ফন্টের সব অল্টারনেট/কাস্টম শেপ অফ করে ডিফল্ট স্ট্যান্ডার্ড আরবি শেপ চালু করা হলো */
   font-feature-settings: normal;
   font-variant-alternates: normal;
 }
+
 /* পুরো ওয়েবসাইটের ডিফল্ট ফন্ট আকর্ষণীয় করার জন্য */
 body {
   font-family: var(--font-hind-siliguri), sans-serif;
+}
+
+@media print {
+  @page {
+    size: A5 portrait;
+    margin: 0mm !important;
+    /* সম্পূর্ণ ব্রাউজার মার্জিন অফ */
+  }
+
+  html,
+  body {
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .print-area-container,
+  .print-area-container * {
+    visibility: visible;
+  }
+
+  .print-area-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  .page-break {
+    /* মিলিমিটারের বদলে পিক্সেল ও স্যাফটি পেজিং */
+    width: 148mm !important;
+    height: 209mm !important;
+    /* ২১ মেগামিটারের জায়গায় ১মিমি কমিয়ে দেওয়া হয়েছে ওভারফ্লো এড়াতে */
+    margin: 0 auto !important;
+    padding: 6mm !important;
+    box-sizing: border-box !important;
+    page-break-after: always !important;
+    break-after: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    overflow: hidden !important;
+  }
 }
