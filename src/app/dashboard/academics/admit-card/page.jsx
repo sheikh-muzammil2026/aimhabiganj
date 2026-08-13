@@ -1,7 +1,8 @@
 'use client';
 
-import { MessageCircle, Phone } from 'lucide-react';
+import { Globe, Mail, Phone } from 'lucide-react';
 import Image from 'next/image';
+import { QRCodeSVG } from 'qrcode.react';
 import React, { useState, useEffect } from 'react';
 import { BsWhatsapp, BsYoutube } from 'react-icons/bs';
 import { FaFacebook } from 'react-icons/fa';
@@ -275,7 +276,7 @@ export default function AdmitCardGenerator() {
                         fontSize="18"
                         fontWeight={fontWeight}
                         fill={fill}
-                        fontFamily="sans-serif"
+                        // fontFamily="sans-serif"
                         textLength="300"
                         lengthAdjust="spacingAndGlyphs"
                     >
@@ -643,20 +644,34 @@ export default function AdmitCardGenerator() {
                                             </div>
                                         </div>
 
-                                        <div className='flex justify-between items-center border-t-4 border-double border-[#C5A059]'>
-                                            {/* ২. অ্যাডমিট কার্ড টাইটেল ও সেশন */}
-                                            <div className="text-center my-0.5 flex-shrink-0 flex-1">
-                                                <h2 className="text-base font-bold text-[#8B6B23] tracking-wide leading-tight">
-                                                    এডমিট কার্ড
-                                                </h2>
+
+
+                                        <div className='flex justify-between items-center border-t-4 border-double border-[#C5A059] pt-1'>
+                                            {/* ১. বামে QR Code */}
+                                            <div className="w-16 h-20 border border-[#C5A059] rounded-lg bg-white p-1 shadow-sm flex-shrink-0 flex items-center justify-center mt-1">
+                                                <QRCodeSVG
+                                                    value={`${process.env.NEXT_PUBLIC_BASE_URI}/dashboard/academics/admit-card?id=${card._id || ''}`}
+                                                    size={56}
+                                                    level="L"
+                                                />
+                                            </div>
+
+                                            {/* ২. মাঝখানে টাইটেল ও তথ্য */}
+                                            <div className="text-center my-0.5 flex-1 px-2">
+                                                <div className="inline-block bg-emerald-800 text-white px-4 py-0.5 rounded-full border-2 border-emerald-600 shadow-sm mb-1">
+                                                    <h2 className="text-xs font-bold tracking-wider leading-tight uppercase">
+                                                        এডমিট কার্ড
+                                                    </h2>
+                                                </div>
                                                 <p className="text-[11px] font-semibold text-gray-700 leading-tight">
-                                                    {card.examName || "পরীক্ষা"} - {card.sessionYear || "২০২৬"}
+                                                    {card.examName || "পরীক্ষা"} - {card.sessionYear || "২০২৬"} শিক্ষাবর্ষ
                                                 </p>
                                                 <p className="text-[11px] font-bold text-gray-900 mt-0.5">
                                                     শ্রেণি: {card.className || "N/A"}
                                                 </p>
                                             </div>
-                                            {/* স্টুডেন্ট ফটো */}
+
+                                            {/* ৩. ডানে স্টুডেন্ট ফটো */}
                                             <div className="w-16 h-20 border border-[#C5A059] rounded-lg bg-white p-0.5 shadow-sm relative overflow-hidden flex-shrink-0 flex items-center justify-center mt-1">
                                                 {card.studentImage ? (
                                                     <Image
@@ -840,27 +855,34 @@ export default function AdmitCardGenerator() {
                                     </div>
 
                                     {/* ৭. ফুটারে কন্টাক্ট ইনফো ও সোর্স ক্রেডিট */}
+
                                     <div className="relative z-10 mt-auto pt-1 border-t border-gray-300 flex-shrink-0">
                                         <div className="flex flex-wrap justify-center items-center gap-x-1 gap-y-0.5 text-[8.5px] font-semibold text-gray-800">
                                             <span className="flex items-center gap-0.5">
                                                 <Phone className="w-2.5 h-2.5 text-gray-700" />
                                                 01316-209201
                                             </span>
-                                            <span>•</span>
+
                                             <span className="flex items-center gap-0.5">
                                                 <BsWhatsapp className="w-2.5 h-2.5 text-green-600" />
                                                 01748-886161
                                             </span>
-                                            <span>•</span>
-                                            <span>www.aimhabiganj.com</span>
-                                            <span>•</span>
-                                            <span>aimhabiganj@gmail.com</span>
-                                            <span>•</span>
+
+                                            <span className="flex items-center gap-0.5">
+                                                <Globe className="w-2.5 h-2.5 text-blue-500" />
+                                                www.aimhabiganj.com
+                                            </span>
+
+                                            <span className="flex items-center gap-0.5">
+                                                <Mail className="w-2.5 h-2.5 text-red-500" />
+                                                aimhabiganj@gmail.com
+                                            </span>
+
                                             <span className="flex items-center gap-0.5">
                                                 <FaFacebook className="w-2.5 h-2.5 text-blue-600" />
                                                 aimhabiganj
                                             </span>
-                                            <span>•</span>
+
                                             <span className="flex items-center gap-0.5">
                                                 <BsYoutube className="w-2.5 h-2.5 text-red-600" />
                                                 aimhabiganj
