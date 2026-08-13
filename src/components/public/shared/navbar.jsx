@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Navbar() {
+    const { t } = useLanguage();
     const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
     const [activeDropdown, setActiveDropdown] = useState(null);
@@ -65,81 +67,81 @@ export default function Navbar() {
     };
 
     const menuItems = [
-        { name: "হোম", href: "/" },
+        { name: t("menu.home"), href: "/" },
         {
-            name: "আমাদের সম্পর্কে",
+            name: t("menu.about"),
             dropdown: [
-                { name: "প্রতিষ্ঠান পরিচিতি", href: "/about#profile" },
-                { name: "প্রতিষ্ঠাতা পরিচিতি", href: "/about#founder" },
-                { name: "লক্ষ্য ও উদ্দেশ্য", href: "/about#vision" },
-                { name: "পরিচালনা পর্ষদ", href: "/about#committee" },
-                { name: "আমাদের বৈশিষ্ট্য", href: "/about#features" },
-                { name: "ভবিষ্যৎ পরিকল্পনা", href: "/about#roadmap" },
-                { name: "مতামত (শিক্ষার্থী ও উলামা)", href: "/about#testimonials" },
-                { name: "নীতিমালা", href: "/about#policies" },
-                { name: "শিক্ষকমণ্ডলী", href: "/about#faculty" },
-                { name: "কর্মকর্তা ও কর্মচারী", href: "/about#staff" },
-                { name: "কর্মক্ষেত্র ও দায়িত্ব", href: "/about#roster" },
+                { name: t("menu.profile"), href: "/about#profile" },
+                { name: t("menu.founder"), href: "/about#founder" },
+                { name: t("menu.vision"), href: "/about#vision" },
+                { name: t("menu.committee"), href: "/about#committee" },
+                { name: t("menu.features"), href: "/about#features" },
+                { name: t("menu.roadmap"), href: "/about#roadmap" },
+                { name: t("menu.testimonials"), href: "/about#testimonials" },
+                { name: t("menu.policies"), href: "/about#policies" },
+                { name: t("menu.faculty"), href: "/about#faculty" },
+                { name: t("menu.staff"), href: "/about#staff" },
+                { name: t("menu.roster"), href: "/about#roster" },
             ],
         },
         {
-            name: "শিক্ষা কার্যক্রম",
+            name: t("menu.academics"),
             dropdown: [
-                { name: "শ্রেণী শিক্ষকের তালিকা", href: "/academics#teachers" },
-                { name: "শিক্ষা স্তর", href: "/academics#levels" },
-                { name: "পাঠ্যক্রম (Syllabus)", href: "/academics#syllabus" },
-                { name: "সহ-পাঠ্যক্রম", href: "/academics#co-curricular" },
-                { name: "ক্লাস রুটিন", href: "/academics#class-routine" },
-                { name: "পরীক্ষা রুটিন", href: "/academics#exam-routine" },
+                { name: t("menu.teachers"), href: "/academics#teachers" },
+                { name: t("menu.levels"), href: "/academics#levels" },
+                { name: t("menu.syllabus"), href: "/academics#syllabus" },
+                { name: t("menu.co_curricular"), href: "/academics#co-curricular" },
+                { name: t("menu.class_routine"), href: "/academics#class-routine" },
+                { name: t("menu.exam_routine"), href: "/academics#exam-routine" },
             ],
         },
         {
-            name: "বিভাগসমূহ",
+            name: t("menu.departments"),
             dropdown: [
-                { name: "হিফজ বিভাগ", href: "/#hifz" },
-                { name: "একাডেমিক বিভাগ", href: "/#academic" },
+                { name: t("menu.hifz"), href: "/#hifz" },
+                { name: t("menu.academic_dept"), href: "/#academic" },
             ],
         },
         {
-            name: "ভর্তি",
+            name: t("menu.admission"),
             isAdmission: true,
             dropdown: [
-                { name: "ভর্তির সময়", href: "/admission#timeline" },
-                { name: "ভর্তি পরীক্ষা", href: "/admission#test" },
-                { name: "ভর্তি প্রক্রিয়া", href: "/admission#process" },
-                { name: "ভর্তি ফি", href: "/admission#fees" },
-                { name: "ভর্তির শর্তাবলী", href: "/admission#terms" },
-                { name: "অনলাইন ভর্তি ফরম", href: "/admission/form" },
+                { name: t("menu.timeline"), href: "/admission#timeline" },
+                { name: t("menu.test"), href: "/admission#test" },
+                { name: t("menu.process"), href: "/admission#process" },
+                { name: t("menu.fees"), href: "/admission#fees" },
+                { name: t("menu.terms"), href: "/admission#terms" },
+                { name: t("menu.online_form"), href: "/admission/form" },
             ],
         },
         {
-            name: "আবাসন",
+            name: t("menu.hostel"),
             dropdown: [
-                { name: "ছাত্রাবাস পরিচিতি", href: "/hostel#about" },
-                { name: "আবাসিক হলের পরিচালকবৃন্দ", href: "/hostel#directors" },
-                { name: "আবাসন প্রাপ্তির নিয়মাবলী", href: "/hostel#rules" },
-                { name: "আবাসন চার্ট", href: "/hostel#chart" },
-                { name: "দৈনিক আবাসিক কার্যসূচি", href: "/hostel#routine" },
+                { name: t("menu.hostel_about"), href: "/hostel#about" },
+                { name: t("menu.hostel_directors"), href: "/hostel#directors" },
+                { name: t("menu.hostel_rules"), href: "/hostel#rules" },
+                { name: t("menu.hostel_chart"), href: "/hostel#chart" },
+                { name: t("menu.hostel_routine"), href: "/hostel#routine" },
             ],
         },
         {
-            name: "স্মার্ট ক্লাসরুম",
+            name: t("menu.smart_classroom"),
             dropdown: [
-                { name: "লাইভ ক্লাস", href: "/smart-classroom/live" },
-                { name: "রেকর্ডেড ক্লাস", href: "/smart-classroom/recorded" },
-                { name: "ই-বুক / লেকচার শিট", href: "/smart-classroom/ebooks" },
-                { name: "অনলাইন এক্সাম", href: "/smart-classroom/exam" },
-                { name: "কুইজ প্রতিযোগিতা", href: "/smart-classroom/quiz" },
+                { name: t("menu.live_class"), href: "/smart-classroom/live" },
+                { name: t("menu.recorded_class"), href: "/smart-classroom/recorded" },
+                { name: t("menu.ebooks"), href: "/smart-classroom/ebooks" },
+                { name: t("menu.exam"), href: "/smart-classroom/exam" },
+                { name: t("menu.quiz"), href: "/smart-classroom/quiz" },
             ],
         },
-        { name: "নোটিশ বোর্ড", href: "/notices" },
-        { name: "গ্যালারি", href: "/gallery" },
-        { name: "ফলাফল", href: "/results" },
+        { name: t("menu.notices"), href: "/notices" },
+        { name: t("menu.gallery"), href: "/gallery" },
+        { name: t("menu.results"), href: "/results" },
         {
-            name: "যোগাযোগ",
+            name: t("menu.contact"),
             dropdown: [
-                { name: "যোগাযোগের তথ্য", href: "/contact" },
-                { name: "অভিযোগ ও পরামর্শ", href: "/contact#feedback" },
+                { name: t("menu.contact_info"), href: "/contact" },
+                { name: t("menu.feedback"), href: "/contact#feedback" },
             ],
         },
     ];
@@ -149,7 +151,7 @@ export default function Navbar() {
             {/* ডেস্কটপ নেভবার (মোবাইলে হাইড করার জন্য hidden lg:block যোগ করা হয়েছে) */}
             <nav className={`hidden lg:block left-0 w-full print:hidden text-white z-50 transition-all duration-300 ${isScrolled
                 ? "fixed top-0 bg-emerald-900/95 shadow-md border-b border-emerald-800 dark:bg-slate-900/95 dark:border-slate-800 backdrop-blur-sm bg-opacity-100 pointer-events-auto"
-                : "absolute top-65 bg-transparent lg:bg-transparent"
+                : "absolute top-57 bg-transparent lg:bg-transparent"
                 }`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-end h-20">
@@ -206,13 +208,13 @@ export default function Navbar() {
                                     <div className="w-7 h-7 rounded-full bg-amber-400 text-slate-900 font-bold flex items-center justify-center text-[11px] overflow-hidden border border-white shadow-inner">
                                         {userPhoto ? <img src={userPhoto} alt="Profile" className="w-full h-full object-cover" /> : userRole ? userRole[0].toUpperCase() : "U"}
                                     </div>
-                                    <Link href={getDashboardPath()} className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-md text-xs xl:text-sm shadow transition transform hover:-translate-y-0.5">ড্যাশবোর্ড</Link>
-                                    <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-1.5 rounded-md text-xs xl:text-sm shadow transition transform hover:-translate-y-0.5">লগআউট</button>
+                                    <Link href={getDashboardPath()} className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-md text-xs xl:text-sm shadow transition transform hover:-translate-y-0.5">{t("menu.dashboard")}</Link>
+                                    <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-1.5 rounded-md text-xs xl:text-sm shadow transition transform hover:-translate-y-0.5">{t("menu.logout")}</button>
                                 </div>
                             ) : (
                                 <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-white/20 flex-shrink-0">
-                                    <Link href="/login" className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-md text-xs xl:text-sm shadow transition transform hover:-translate-y-0.5">লগইন</Link>
-                                    <Link href="/register" className="bg-transparent border border-amber-400 text-amber-400 hover:bg-amber-400 hover:text-slate-950 font-bold px-3 py-1.5 rounded-md text-xs xl:text-sm shadow transition transform hover:-translate-y-0.5">নিবন্ধন</Link>
+                                    <Link href="/login" className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-md text-xs xl:text-sm shadow transition transform hover:-translate-y-0.5">{t("menu.login")}</Link>
+                                    <Link href="/register" className="bg-transparent border border-amber-400 text-amber-400 hover:bg-amber-400 hover:text-slate-950 font-bold px-3 py-1.5 rounded-md text-xs xl:text-sm shadow transition transform hover:-translate-y-0.5">{t("menu.register")}</Link>
                                 </div>
                             )}
                         </div>
@@ -225,7 +227,7 @@ export default function Navbar() {
                 <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-50 lg:hidden" onClick={closeMenu}>
                     <div className="absolute top-24 right-4 w-64 bg-emerald-950/95 border border-emerald-800 rounded-2xl shadow-2xl p-4 space-y-3 dark:bg-slate-950/95 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-150" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between pb-2 border-b border-emerald-800 dark:border-slate-800">
-                            <span className="text-xs font-bold text-emerald-300 uppercase tracking-wider">অ্যাকাউন্ট মেনু</span>
+                            <span className="text-xs font-bold text-emerald-300 uppercase tracking-wider">{t("menu.account_menu")}</span>
                             <button onClick={closeMenu} className="text-emerald-400 hover:text-white">&times;</button>
                         </div>
                         {isLoggedIn ? (
@@ -235,13 +237,13 @@ export default function Navbar() {
                                     onClick={closeMenu}
                                     className="block text-center bg-amber-500 text-slate-950 font-bold py-2.5 rounded-xl shadow text-sm"
                                 >
-                                    ড্যাশবোর্ড ({userRole})
+                                    {t("menu.dashboard")} ({userRole})
                                 </Link>
                                 <button
                                     onClick={handleLogout}
                                     className="w-full text-center bg-red-600 text-white font-bold py-2.5 rounded-xl shadow text-sm"
                                 >
-                                    লগআউট করুন
+                                    {t("menu.logout")}
                                 </button>
                             </div>
                         ) : (
@@ -251,14 +253,14 @@ export default function Navbar() {
                                     onClick={closeMenu}
                                     className="block text-center bg-amber-500 text-slate-950 font-bold py-2.5 rounded-xl shadow text-sm"
                                 >
-                                    লগইন
+                                    {t("menu.login")}
                                 </Link>
                                 <Link
                                     href="/register"
                                     onClick={closeMenu}
                                     className="block text-center bg-transparent border border-amber-400 text-amber-400 font-bold py-2.5 rounded-xl shadow text-sm"
                                 >
-                                    রেজিস্ট্রার
+                                    {t("menu.register")}
                                 </Link>
                             </div>
                         )}
@@ -280,4 +282,4 @@ function GlobalMobileNavTrigger({ isOpen, setIsOpen, darkMode, toggleDarkMode })
         }
     }, [isOpen, darkMode]);
     return null;
-                    }
+}

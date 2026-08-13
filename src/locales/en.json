@@ -1,0 +1,88 @@
+{
+  "header": {
+    "title_bn": "As-Salam Ideal Madrasah (AIM)",
+    "title_ar": "مدرسة السلام النموذجية",
+    "title_en": "As-Salam Ideal Madrasah (AIM), Habiganj",
+    "slogan": "\"Aim for Ultimate Success\"",
+    "phone": "+880 1234-567890",
+    "email": "info@assalam.edu.bd",
+    "location": "Habiganj, Bangladesh"
+  },
+  "menu": {
+    "home": "Home",
+    "about": "About Us",
+    "profile": "Institution Profile",
+    "founder": "Founder Profile",
+    "vision": "Vision & Mission",
+    "committee": "Governing Body",
+    "features": "Our Features",
+    "roadmap": "Future Plans",
+    "testimonials": "Testimonials",
+    "policies": "Policies",
+    "faculty": "Faculty Members",
+    "staff": "Officers & Staff",
+    "roster": "Roster & Duties",
+    "academics": "Academics",
+    "teachers": "Class Teachers List",
+    "levels": "Academic Levels",
+    "syllabus": "Syllabus",
+    "co_curricular": "Co-Curricular",
+    "class_routine": "Class Routine",
+    "exam_routine": "Exam Routine",
+    "departments": "Departments",
+    "hifz": "Hifz Department",
+    "academic_dept": "Academic Department",
+    "admission": "Admission",
+    "timeline": "Timeline",
+    "test": "Admission Test",
+    "process": "Admission Process",
+    "fees": "Admission Fees",
+    "terms": "Terms & Conditions",
+    "online_form": "Online Admission Form",
+    "hostel": "Hostel",
+    "hostel_about": "Hostel Profile",
+    "hostel_directors": "Hostel Directors",
+    "hostel_rules": "Accommodation Rules",
+    "hostel_chart": "Accommodation Chart",
+    "hostel_routine": "Daily Hostel Routine",
+    "smart_classroom": "Smart Classroom",
+    "live_class": "Live Class",
+    "recorded_class": "Recorded Class",
+    "ebooks": "E-Book / Lecture Sheet",
+    "exam": "Online Exam",
+    "quiz": "Quiz Competition",
+    "notices": "Notice Board",
+    "gallery": "Gallery",
+    "results": "Results",
+    "contact": "Contact",
+    "contact_info": "Contact Info",
+    "feedback": "Complaints & Suggestions",
+    "dashboard": "Dashboard",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register",
+    "more": "More",
+    "menu_title": "As-Salam Ideal Madrasah (AIM) Menu",
+    "account_menu": "Account Menu"
+  },
+  "hero": {
+    "notice_label": "Notice:",
+    "notice_text": "📢 Admissions are open for Hifz & Academic sections for the 2026 academic year at As-Salam Ideal Madrasah (AIM)! Limited seats available. 🌟 The second terminal examination will start on August 23. All students are instructed to be present on time.",
+    "slides": [
+      {
+        "title": "A Unique & Reliable Institution for Islamic Education",
+        "subtitle": "Enlightening the Future Generation with the Light of Knowledge"
+      },
+      {
+        "title": "Modern & Disciplined Accommodation Facility",
+        "subtitle": "We are committed to the intellectual and moral development of students"
+      },
+      {
+        "title": "Excellent Blend of Hifz & Academic Education",
+        "subtitle": "Managed by Experienced Ulama & Skilled Faculty Members"
+      }
+    ],
+    "btn_form": "Online Admission Form",
+    "btn_about": "Learn About Us"
+  }
+}

@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function HeroSection() {
+    const { t } = useLanguage();
     const [currentSlide, setCurrentSlide] = useState(0);
     const [menuOpen, setMenuOpen] = useState(false);
     const [isDark, setIsDark] = useState(false);
@@ -21,18 +23,18 @@ export default function HeroSection() {
     const carouselImages = [
         {
             url: "/deenishikka.png",
-            title: "দ্বীনি শিক্ষার এক অনন্য নির্ভরযোগ্য প্রতিষ্ঠান",
-            subtitle: "জ্ঞানের আলোয় আলোকিত হোক আগামী প্রজন্ম",
+            title: t("hero.slides.0.title"),
+            subtitle: t("hero.slides.0.subtitle"),
         },
         {
             url: "/hero2.png",
-            title: "আধুনিক ও সুশৃঙ্খল আবাসন ব্যবস্থা",
-            subtitle: "ছাত্রদের মননশীল ও নৈতিক বিকাশে আমরা অঙ্গীকারাবদ্ধ",
+            title: t("hero.slides.1.title"),
+            subtitle: t("hero.slides.1.subtitle"),
         },
         {
             url: "/hero3.png",
-            title: "হিফজ ও একাডেমিক শিক্ষার চমৎকার সমন্বয়",
-            subtitle: "অভিজ্ঞ উলামা ও দক্ষ শিক্ষক মণ্ডলী দ্বারা পরিচালিত",
+            title: t("hero.slides.2.title"),
+            subtitle: t("hero.slides.2.subtitle"),
         },
     ];
 
@@ -57,11 +59,11 @@ export default function HeroSection() {
 
             <div className="bg-amber-500 dark:bg-amber-400 text-slate-900 font-medium py-2 px-4 shadow-sm flex items-center overflow-hidden border-b border-amber-600 dark:border-amber-500 transition-colors duration-300 relative z-30">
                 <div className="bg-red-600 text-white px-3 py-1 text-xs font-bold rounded uppercase tracking-wider z-10 whitespace-nowrap mr-3 animate-pulse">
-                    জরুরী নোটিশ:
+                    {t("hero.notice_label")}
                 </div>
                 <div className="relative w-full overflow-hidden flex items-center">
                     <p className="animate-marquee whitespace-nowrap text-sm md:text-base font-semibold">
-                        📢 আস-সালাম আইডিয়াল মাদরাসা (এইম)-এ ২০২৬ শিক্ষাবর্ষে হিফজ ও একাডেমিক বিভাগে ভর্তি চলছে! আসন সংখ্যা সীমিত। 🌟 আগামী ২৩ আগস্ট থেকে দ্বিতীয় সাময়িক পরীক্ষা শুরু হতে যাচ্ছে। সকল ছাত্রদের যথাসময়ে উপস্থিত থাকার নির্দেশ দেওয়া হলো।
+                        {t("hero.notice_text")}
                     </p>
                 </div>
             </div>
@@ -111,13 +113,13 @@ export default function HeroSection() {
                                     href="/admission"
                                     className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white font-bold px-6 py-3 rounded-xl shadow-md transition transform hover:-translate-y-0.5 text-sm md:text-base"
                                 >
-                                    অনলাইন ভর্তি ফরম
+                                    {t("hero.btn_form")}
                                 </Link>
                                 <Link
                                     href="/about"
                                     className="bg-transparent hover:bg-white/10 text-white border-2 border-white font-semibold px-6 py-3 rounded-xl transition text-sm md:text-base"
                                 >
-                                    আমাদের সম্পর্কে জানুন
+                                    {t("hero.btn_about")}
                                 </Link>
                             </div>
                         </div>

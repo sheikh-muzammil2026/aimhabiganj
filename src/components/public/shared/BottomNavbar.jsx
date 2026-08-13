@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { useLanguage } from "@/context/LanguageContext";
 import {
     Home,
     FileText,
@@ -23,6 +24,7 @@ import {
 } from "lucide-react";
 
 export default function BottomNavbar() {
+    const { t } = useLanguage();
     const pathname = usePathname();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [activeDropdown, setActiveDropdown] = useState(null);
@@ -38,100 +40,100 @@ export default function BottomNavbar() {
     };
 
     const menuItems = [
-        { name: "হোম", href: "/", icon: <Home className="w-4 h-4" /> },
+        { name: t("menu.home"), href: "/", icon: <Home className="w-4 h-4" /> },
         {
-            name: "আমাদের সম্পর্কে",
+            name: t("menu.about"),
             icon: <Info className="w-4 h-4" />,
             dropdown: [
-                { name: "প্রতিষ্ঠান পরিচিতি", href: "/about#profile" },
-                { name: "প্রতিষ্ঠাতা পরিচিতি", href: "/about#founder" },
-                { name: "লক্ষ্য ও উদ্দেশ্য", href: "/about#vision" },
-                { name: "পরিচালনা পর্ষদ", href: "/about#committee" },
-                { name: "আমাদের বৈশিষ্ট্য", href: "/about#features" },
-                { name: "ভবিষ্যৎ পরিকল্পনা", href: "/about#roadmap" },
-                { name: "মতামত (শিক্ষার্থী ও উলামা)", href: "/about#testimonials" },
-                { name: "নীতিমালা", href: "/about#policies" },
-                { name: "শিক্ষকমণ্ডলী", href: "/about#faculty" },
-                { name: "কর্মকর্তা ও কর্মচারী", href: "/about#staff" },
-                { name: "কর্মক্ষেত্র ও দায়িত্ব", href: "/about#roster" },
+                { name: t("menu.profile"), href: "/about#profile" },
+                { name: t("menu.founder"), href: "/about#founder" },
+                { name: t("menu.vision"), href: "/about#vision" },
+                { name: t("menu.committee"), href: "/about#committee" },
+                { name: t("menu.features"), href: "/about#features" },
+                { name: t("menu.roadmap"), href: "/about#roadmap" },
+                { name: t("menu.testimonials"), href: "/about#testimonials" },
+                { name: t("menu.policies"), href: "/about#policies" },
+                { name: t("menu.faculty"), href: "/about#faculty" },
+                { name: t("menu.staff"), href: "/about#staff" },
+                { name: t("menu.roster"), href: "/about#roster" },
             ],
         },
         {
-            name: "শিক্ষা কার্যক্রম",
+            name: t("menu.academics"),
             icon: <BookOpen className="w-4 h-4" />,
             dropdown: [
-                { name: "শ্রেণী শিক্ষকের তালিকা", href: "/academics#teachers" },
-                { name: "শিক্ষা স্তর", href: "/academics#levels" },
-                { name: "পাঠ্যক্রম (Syllabus)", href: "/academics#syllabus" },
-                { name: "সহ-পাঠ্যক্রম", href: "/academics#co-curricular" },
-                { name: "ক্লাস রুটিন", href: "/academics#class-routine" },
-                { name: "পরীক্ষা রুটিন", href: "/academics#exam-routine" },
+                { name: t("menu.teachers"), href: "/academics#teachers" },
+                { name: t("menu.levels"), href: "/academics#levels" },
+                { name: t("menu.syllabus"), href: "/academics#syllabus" },
+                { name: t("menu.co_curricular"), href: "/academics#co-curricular" },
+                { name: t("menu.class_routine"), href: "/academics#class-routine" },
+                { name: t("menu.exam_routine"), href: "/academics#exam-routine" },
             ],
         },
         {
-            name: "বিভাগসমূহ",
+            name: t("menu.departments"),
             icon: <School className="w-4 h-4" />,
             dropdown: [
-                { name: "হিফজ বিভাগ", href: "/#hifz" },
-                { name: "একাডেমিক বিভাগ", href: "/#academic" },
+                { name: t("menu.hifz"), href: "/#hifz" },
+                { name: t("menu.academic_dept"), href: "/#academic" },
             ],
         },
         {
-            name: "ভর্তি",
+            name: t("menu.admission"),
             isAdmission: true,
             icon: <GraduationCap className="w-4 h-4" />,
             dropdown: [
-                { name: "ভর্তির সময়", href: "/admission#timeline" },
-                { name: "ভর্তি পরীক্ষা", href: "/admission#test" },
-                { name: "ভর্তি প্রক্রিয়া", href: "/admission#process" },
-                { name: "ভর্তি ফি", href: "/admission#fees" },
-                { name: "ভর্তির শর্তাবলী", href: "/admission#terms" },
-                { name: "অনলাইন ভর্তি ফরম", href: "/admission/form" },
+                { name: t("menu.timeline"), href: "/admission#timeline" },
+                { name: t("menu.test"), href: "/admission#test" },
+                { name: t("menu.process"), href: "/admission#process" },
+                { name: t("menu.fees"), href: "/admission#fees" },
+                { name: t("menu.terms"), href: "/admission#terms" },
+                { name: t("menu.online_form"), href: "/admission/form" },
             ],
         },
         {
-            name: "আবাসন",
+            name: t("menu.hostel"),
             icon: <Hotel className="w-4 h-4" />,
             dropdown: [
-                { name: "ছাত্রাবাস পরিচিতি", href: "/hostel#about" },
-                { name: "আবাসিক হলের পরিচালকবৃন্দ", href: "/hostel#directors" },
-                { name: "আবাসন প্রাপ্তির নিয়মাবলী", href: "/hostel#rules" },
-                { name: "আবাসন চার্ট", href: "/hostel#chart" },
-                { name: "দৈনিক আবাসিক কার্যসূচি", href: "/hostel#routine" },
+                { name: t("menu.hostel_about"), href: "/hostel#about" },
+                { name: t("menu.hostel_directors"), href: "/hostel#directors" },
+                { name: t("menu.hostel_rules"), href: "/hostel#rules" },
+                { name: t("menu.hostel_chart"), href: "/hostel#chart" },
+                { name: t("menu.hostel_routine"), href: "/hostel#routine" },
             ],
         },
         {
-            name: "স্মার্ট ক্লাসরুম",
+            name: t("menu.smart_classroom"),
             icon: <MonitorPlay className="w-4 h-4" />,
             dropdown: [
-                { name: "লাইভ ক্লাস", href: "/smart-classroom/live" },
-                { name: "রেকর্ডেড ক্লাস", href: "/smart-classroom/recorded" },
-                { name: "ই-বুক / লেকচার শিট", href: "/smart-classroom/ebooks" },
-                { name: "অনলাইন এক্সাম", href: "/smart-classroom/exam" },
-                { name: "কুইজ প্রতিযোগিতা", href: "/smart-classroom/quiz" },
+                { name: t("menu.live_class"), href: "/smart-classroom/live" },
+                { name: t("menu.recorded_class"), href: "/smart-classroom/recorded" },
+                { name: t("menu.ebooks"), href: "/smart-classroom/ebooks" },
+                { name: t("menu.exam"), href: "/smart-classroom/exam" },
+                { name: t("menu.quiz"), href: "/smart-classroom/quiz" },
             ],
         },
-        { name: "নোটিশ বোর্ড", href: "/notices", icon: <FileText className="w-4 h-4" /> },
-        { name: "গ্যালারি", href: "/gallery", icon: <Image className="w-4 h-4" /> },
-        { name: "ফলাফল", href: "/results", icon: <GraduationCap className="w-4 h-4" /> },
+        { name: t("menu.notices"), href: "/notices", icon: <FileText className="w-4 h-4" /> },
+        { name: t("menu.gallery"), href: "/gallery", icon: <Image className="w-4 h-4" /> },
+        { name: t("menu.results"), href: "/results", icon: <GraduationCap className="w-4 h-4" /> },
         {
-            name: "যোগাযোগ",
+            name: t("menu.contact"),
             icon: <PhoneCall className="w-4 h-4" />,
             dropdown: [
-                { name: "যোগাযোগের তথ্য", href: "/contact" },
-                { name: "অভিযোগ ও পরামর্শ", href: "/contact#feedback" },
+                { name: t("menu.contact_info"), href: "/contact" },
+                { name: t("menu.feedback"), href: "/contact#feedback" },
             ],
         },
     ];
 
     // মূল বারের আইটেমসমূহ (লগইন স্ট্যাটাস অনুযায়ী ড্যাশবোর্ড বা লগইন প্রদর্শন)
     const primaryItems = [
-        { name: "হোম", href: "/", icon: <Home className="w-[22px] h-[22px]" /> },
-        { name: "ফলাফল", href: "/results", icon: <GraduationCap className="w-[22px] h-[22px]" /> },
-        { name: "নোটিশ", href: "/notices", icon: <FileText className="w-[22px] h-[22px]" /> },
+        { name: t("menu.home"), href: "/", icon: <Home className="w-[22px] h-[22px]" /> },
+        { name: t("menu.results"), href: "/results", icon: <GraduationCap className="w-[22px] h-[22px]" /> },
+        { name: t("menu.notices"), href: "/notices", icon: <FileText className="w-[22px] h-[22px]" /> },
         isLoggedIn
-            ? { name: "ড্যাশবোর্ড", href: getDashboardPath(), icon: <UserCheck className="w-[22px] h-[22px]" /> }
-            : { name: "লগইন", href: "/login", icon: <LogIn className="w-[22px] h-[22px]" /> },
+            ? { name: t("menu.dashboard"), href: getDashboardPath(), icon: <UserCheck className="w-[22px] h-[22px]" /> }
+            : { name: t("menu.login"), href: "/login", icon: <LogIn className="w-[22px] h-[22px]" /> },
     ];
 
     const toggleDropdown = (index) => {
@@ -178,7 +180,7 @@ export default function BottomNavbar() {
                         <div className={`p-1.5 rounded-xl transition-all duration-300 ${isMenuOpen ? "bg-amber-50 text-amber-600 rotate-90" : "bg-emerald-50 text-emerald-700 group-hover:bg-emerald-100"}`}>
                             {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                         </div>
-                        <span className="text-[10.5px] mt-0.5 font-medium">অন্যান্য</span>
+                        <span className="text-[10.5px] mt-0.5 font-medium">{t("menu.more")}</span>
                     </button>
                 </div>
             </div>
@@ -194,7 +196,7 @@ export default function BottomNavbar() {
 
                         <div className="flex items-center justify-center gap-2 mb-4 border-b border-emerald-100 pb-3">
                             <School className="w-5 h-5 text-emerald-700" />
-                            <h3 className="text-center font-bold text-emerald-950 text-base font-serif">আস-সালাম আইডিয়াল মাদরাসা (এইম) মেনু</h3>
+                            <h3 className="text-center font-bold text-emerald-950 text-base font-serif">{t("menu.menu_title")}</h3>
                         </div>
 
                         <div className="space-y-2.5 pb-6">

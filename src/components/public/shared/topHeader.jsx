@@ -2,8 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import LanguageSwitcher from "./LanguageSwitcher";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function TopHeader() {
+  const { t } = useLanguage();
+
   return (
     <div className="w-full print:hidden bg-gradient-to-r from-emerald-900 via-emerald-850 to-emerald-900 text-white py-3 px-4 md:px-6 border-b border-amber-500/30 relative overflow-hidden transition-colors duration-300 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 dark:border-emerald-800">
 
@@ -46,10 +50,15 @@ export default function TopHeader() {
           {/* ৪. স্লোগান: সম্পূর্ণ নতুন লাইনে এবং রাইট সাইডে পুশ করা হয়েছে */}
           <div className="w-full flex justify-end pt-1 md:pt-1.5 border-t border-white/5">
             <p className="text-[10px] md:text-sm font-medium tracking-widest text-amber-300/85 italic uppercase dark:text-emerald-300/70">
-              AIM For Ultimate Success
+              {t('header.slogan')}
             </p>
           </div>
 
+        </div>
+
+        {/* ৫. ভাষা পরিবর্তনকারী (Language Switcher) */}
+        <div className="flex-shrink-0 z-50">
+          <LanguageSwitcher />
         </div>
 
       </div>
