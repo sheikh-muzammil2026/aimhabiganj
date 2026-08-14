@@ -49,7 +49,7 @@ export default function RegisterPage() {
             },
             onSuccess: () => {
                 setLoading(false);
-                router.push("/auth/login"); 
+                router.push("/login"); 
             },
             onError: (ctx) => {
                 setLoading(false);
@@ -157,7 +157,7 @@ export default function RegisterPage() {
                                     onClick={() => setShowPassword(!showPassword)}
                                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-emerald-600"
                                 >
-                                    {showPassword ? "লুকান" : "देखুন"}
+                                    {showPassword ? "লুকান" : "দেখুন"}
                                 </button>
                             </div>
                         </div>
@@ -182,7 +182,7 @@ export default function RegisterPage() {
                                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-emerald-600"
                                 >
-                                    {showConfirmPassword ? "লুকান" : "देखুন"}
+                                    {showConfirmPassword ? "লুকান" : "দেখুন"}
                                 </button>
                             </div>
                         </div>
