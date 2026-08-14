@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation"; // useRouter ইমপোর্ট করা হয়েছে
 import { authClient } from "@/lib/auth-client";
 import { useLanguage } from "@/context/LanguageContext";
 import {
@@ -20,12 +20,15 @@ import {
     Image,
     PhoneCall,
     UserCheck,
-    LogIn
+    LogIn,
+    LogOut, // LogOut আইকন ইমপোর্ট করা হলো
+    User
 } from "lucide-react";
 
 export default function BottomNavbar() {
     const { t } = useLanguage();
     const pathname = usePathname();
+    const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [activeDropdown, setActiveDropdown] = useState(null);
 
@@ -33,10 +36,23 @@ export default function BottomNavbar() {
     const { data: session } = authClient.useSession();
     const isLoggedIn = !!session?.user;
     const userRole = session?.user?.role;
+    const userName = session?.user?.name;
 
     const getDashboardPath = () => {
         if (!userRole) return "/";
         return `/dashboard/${userRole.toLowerCase()}`;
+    };
+
+    // Logout Handler
+    const handleLogout = async () => {
+        await authClient.signOut({
+            fetchOptions: {
+                onSuccess: () => {
+                    setIsMenuOpen(false);
+                    router.push("/login");
+                }
+            }
+        });
     };
 
     const menuItems = [
@@ -126,7 +142,6 @@ export default function BottomNavbar() {
         },
     ];
 
-    // মূল বারের আইটেমসমূহ (লগইন স্ট্যাটাস অনুযায়ী ড্যাশবোর্ড বা লগইন প্রদর্শন)
     const primaryItems = [
         { name: t("menu.home"), href: "/", icon: <Home className="w-[22px] h-[22px]" /> },
         { name: t("menu.results"), href: "/results", icon: <GraduationCap className="w-[22px] h-[22px]" /> },
@@ -142,7 +157,7 @@ export default function BottomNavbar() {
 
     return (
         <>
-            {/* ১. মূল বটম নেভিগেশন বার (শুধু মোবাইল ভিউ: md:hidden) */}
+            {/* ১. মূল বটম নেভিগেশন বার (মোবাইল ভিউ) */}
             <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-b from-[#ffffff] to-[#f4fbf7] border-t-2 border-emerald-600/30 shadow-[0_-8px_30px_rgb(6,95,70,0.08)] rounded-t-2xl md:hidden pb-safe print:hidden">
                 <div className="flex justify-around items-center h-16 px-2">
                     {primaryItems.map((item, idx) => {
@@ -168,7 +183,6 @@ export default function BottomNavbar() {
                         );
                     })}
 
-                    {/* অন্যান্য বাটন */}
                     <button
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
                         className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative group ${isMenuOpen ? "text-amber-600 font-bold" : "text-gray-500 hover:text-emerald-600"
@@ -185,14 +199,36 @@ export default function BottomNavbar() {
                 </div>
             </div>
 
-            {/* ২. "অন্যান্য" বটম শিট ড্রয়ার (বাকি সব মেনুর জন্য) */}
+            {/* ২. "অন্যান্য" বটম শিট ড্রয়ার */}
             {isMenuOpen && (
                 <div className="fixed inset-0 z-40 bg-emerald-950/40 backdrop-blur-xs md:hidden transition-all duration-300" onClick={() => setIsMenuOpen(false)}>
                     <div
                         className="fixed bottom-16 left-0 right-0 max-h-[75vh] bg-[#fafdfb] rounded-t-3xl overflow-y-auto p-4 shadow-[0_-15px_40px_rgba(6,95,70,0.15)] border-t border-emerald-600/10"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="w-16 h-1.5 bg-emerald-200/60 rounded-full mx-auto mb-5" />
+                        <div className="w-16 h-1.5 bg-emerald-200/60 rounded-full mx-auto mb-4" />
+
+                        {/* 🌟 লগইন থাকলে ইউজার ইনফো ও লগআউট বাটন (এখানে যুক্ত করা হয়েছে) */}
+                        {isLoggedIn && (
+                            <div className="bg-emerald-800 text-white p-3.5 rounded-2xl mb-4 flex items-center justify-between shadow-md">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-9 h-9 rounded-full bg-amber-400 text-emerald-950 font-bold flex items-center justify-center text-sm">
+                                        {userRole ? userRole[0].toUpperCase() : "U"}
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-emerald-200 capitalize font-medium">{userRole || "User"}</p>
+                                        <p className="text-sm font-semibold truncate max-w-[150px]">{userName || "Account"}</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex items-center gap-1.5 bg-red-500/20 hover:bg-red-500 text-red-100 px-3 py-1.5 rounded-xl text-xs font-semibold border border-red-400/30 transition-all active:scale-95"
+                                >
+                                    <LogOut className="w-3.5 h-3.5" />
+                                    <span>{t("menu.logout") || "Logout"}</span>
+                                </button>
+                            </div>
+                        )}
 
                         <div className="flex items-center justify-center gap-2 mb-4 border-b border-emerald-100 pb-3">
                             <School className="w-5 h-5 text-emerald-700" />
@@ -222,7 +258,6 @@ export default function BottomNavbar() {
                                                     <ChevronRight className={`w-4 h-4 text-emerald-600/60 transition-transform duration-300 ${isDropdownOpen ? "rotate-90 text-amber-500" : ""}`} />
                                                 </button>
 
-                                                {/* সাব-মেনু আইটেমসমূহ */}
                                                 {isDropdownOpen && (
                                                     <div className="bg-[#f7fdfa] border-t border-emerald-100 divide-y divide-emerald-100/40">
                                                         {item.dropdown.map((subItem, subIdx) => (
@@ -260,4 +295,4 @@ export default function BottomNavbar() {
             )}
         </>
     );
-                    }
+}
