@@ -19,43 +19,9 @@ export const auth = betterAuth({
     additionalFields: {
       role: {
         type: "string",
-        defaultValue: "parent"
+        defaultValue: "student"
       },
     },
   },
-  // socialProviders: {
-  //   google: {
-  //     clientId: process.env.GOOGLE_CLIENT_ID,
-  //     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  //   },
-  // },
 
-  // databaseHooks: {
-  //   user: {
-  //     create: {
-  //       before: async (user) => {
-
-  //         if (!user.password) {
-  //           return {
-  //             data: {
-  //               ...user,
-  //               role: "parent",
-  //             },
-  //           };
-  //         }
-  //         return { data: user };
-  //       },
-  //     },
-  //   },
-  // },
-  // session: {
-  //   cookieCache: {
-  //     enabled: true,
-  //     strategy: "jwt",
-  //     maxAge: 60 * 24 * 30,
-  //   }
-  // },
-  // plugins: [
-  //   jwt()
-  // ]
 });
