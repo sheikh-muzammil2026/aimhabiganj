@@ -3,7 +3,7 @@
 ![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen.svg)
 ![Tech Stack](https://img.shields.io/badge/Tech-Next.js%20%7C%20Node.js%20%7C%20MongoDB-blue)
 
-**Live Project:** [https://aibhabiganj.vercel.app](https://aibhabiganj.vercel.app)
+**Live Project:** [https://aimhabiganj.vercel.app](https://aibhabiganj.vercel.app)
 
 **AIM Habiganj** (As-Salam Ideal Madrasah) is a robust, full-stack educational management platform designed to digitize, streamline, and automate the day-to-day operations of modern schools and madrasahs. 
 
