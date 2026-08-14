@@ -1,4 +1,3 @@
-```markdown
 # 🏫 AIM Habiganj - Comprehensive Madrasah Management System
 
 ![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen.svg)
