@@ -81,12 +81,14 @@ npm install
 
 # Set up environment variables
 # Create a .env file in the root directory and add your MongoDB URI, API keys, etc.
-MONGODB_URI=your_mongodb_uri
-BETTER_AUTH_URL=your_client_uri
-GEMINI_API_KEY=your_gemini_key
-BETTER_AUTH_SECRET=your_better_auth_secret
-NEXT_PUBLIC_SERVER_API=your_server_api
-NEXT_PUBLIC_IMGBB_API_KEY=your_imagebb_key
+
+MONGODB_URI="your_mongodb_uri"
+BETTER_AUTH_URL="your_client_uri"
+GEMINI_API_KEY="your_gemini_key"
+BETTER_AUTH_SECRET="your_better_auth_secret"
+NEXT_PUBLIC_SERVER_API="your_server_api"
+NEXT_PUBLIC_IMGBB_API_KEY="your_imagebb_key"
 
 # Start the development server
 npm run dev
+```
