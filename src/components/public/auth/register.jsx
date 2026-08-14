@@ -40,9 +40,7 @@ export default function RegisterPage() {
             email: formData.email,
             password: formData.password,
             name: formData.name,
-            // এখানে আপনি চাইলে অতিরিক্ত ডেটা (যেমন role) পাঠাতে পারেন যদি আপনার ডাটাবেজ স্কিমাতে তা ডিফাইন করা থাকে
-            metadata: { role: formData.role }, 
-            // callbackURL: "/auth/login" 
+             role: formData.role         
         }, {
             onRequest: () => {
                 setLoading(true);
