@@ -5,12 +5,12 @@ export default function WhyChooseUs() {
         {
             icon: "🕌",
             title: "সহীহ আকিদা ও আমল",
-            description: "কুরআন ও সুন্নাহর সঠিক নির্দেশনায় শিক্ষার্থীদের আত্মশুদ্ধি এবং সুন্নতি জিন্দেগি গঠনে সার্বক্ষণিক তদারকি।",
+            description: "কুরআন ও সুন্নাহর সঠিক নির্দেশনায় শিক্ষার্থীদের আত্মশুদ্ধি এবং সুন্নতি জিন্দেগি গঠনে সার্বক্ষণিক তদারকি।",
         },
         {
             icon: "🖥️",
-            title: "স্মার্ট ক্লাসরুম ও মাল্টিমিডিয়া",
-            description: "আধুনিক প্রজেক্টর, লাইভ ক্লাস, ই-বুক এবং ডিজিটাল প্রযুক্তির মাধ্যমে পড়ালেখাকে সহজ ও আকর্ষণীয় করা।",
+            title: "স্মার্ট ক্লাসরুম ও মাল্টিমিডিয়া",
+            description: "আধুনিক প্রজেক্টর, লাইভ ক্লাস, ই-বুক এবং ডিজিটাল প্রযুক্তির মাধ্যমে পড়ালেখাকে সহজ ও আকর্ষণীয় করা।",
         },
         {
             icon: "🇬🇧",
@@ -20,12 +20,12 @@ export default function WhyChooseUs() {
         {
             icon: "🛌",
             title: "উন্নত আবাসিক ও নিরাপদ পরিবেশ",
-            description: "সিসিটিভি ক্যামেরায় নিয়ন্ত্রিত ক্যাম্পাস, পুষ্টিকর খাবার এবং অভিজ্ঞ শিক্ষকদের তত্ত্বাবধানে মনোরম হোস্টেল ব্যবস্থা।",
+            description: "সিসিটিভি ক্যামেরায় নিয়ন্ত্রিত ক্যাম্পাস, পুষ্টিকর খাবার এবং অভিজ্ঞ শিক্ষকদের তত্ত্বাবধানে মনোরম হোস্টেল ব্যবস্থা।",
         },
         {
             icon: "👨‍🏫",
-            title: "দক্ষ ও মায়াবিপন্ন উলামায়ে কেরাম",
-            description: "দেশ-বিদেশের স্বনামধন্য বিশ্ববিদ্যালয় ও বড় মাদ্রাসা থেকে পাস করা একঝাঁক আন্তরিক ও অভিজ্ঞ শিক্ষক মণ্ডলী।",
+            title: "দক্ষ ও মায়াবিপন্ন উলামায়ে কেরাম",
+            description: "দেশ-বিদেশের স্বনামধন্য বিশ্ববিদ্যালয় ও বড় মাদ্রাসা থেকে পাস করা একঝাঁক আন্তরিক ও অভিজ্ঞ শিক্ষক মণ্ডলী।",
         },
         {
             icon: "📈",
@@ -36,16 +36,18 @@ export default function WhyChooseUs() {
 
     return (
         <section className="py-16 md:py-24 bg-slate-50 dark:bg-slate-950 transition-colors duration-300" id="features">
-            {/* CSS Animation Keyframes Injecting */}
-            <style jsx>{`
-                @keyframes spinGradient {
+            {/* Global Keyframes definition using standard style tag so it never drops */}
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                @keyframes spinBorder {
                     0% { transform: rotate(0deg); }
                     100% { transform: rotate(360deg); }
                 }
-                .animate-border-spin {
-                    animation: spinGradient 4s linear infinite;
+                .custom-border-spin {
+                    animation: spinBorder 4s linear infinite;
+                    will-change: transform;
                 }
-            `}</style>
+            `}} />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -67,9 +69,9 @@ export default function WhyChooseUs() {
                             key={index}
                             className="relative p-[2px] rounded-2xl overflow-hidden group hover:-translate-y-1 transition-all duration-300 shadow-sm hover:shadow-xl"
                         >
-                            {/* ১. এনিমেটেড ঘূর্ণায়মান বর্ডার লেয়ার (Conic Gradient) */}
-                            <div 
-                                className="absolute inset-[-100%] animate-border-spin opacity-80 group-hover:opacity-100 transition-opacity duration-300"
+                            {/* ১. এনিমেটেড ঘূর্ণায়মান বর্ডার লেয়ার (Conic Gradient) */}
+                            <div
+                                className="absolute inset-[-100%] custom-border-spin opacity-80 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
                                 style={{
                                     background: `conic-gradient(from 0deg, transparent 70%, #059669 85%, #f59e0b 100%)`
                                 }}

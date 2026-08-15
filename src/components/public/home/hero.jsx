@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
+import LanguageSwitcher from "../shared/LanguageSwitcher";
 
 export default function HeroSection() {
     const { t } = useLanguage();
@@ -45,7 +46,7 @@ export default function HeroSection() {
         return () => clearInterval(timer);
     }, [carouselImages.length]);
 
-    
+
     const handleMobileThemeClick = () => {
         if (typeof window !== "undefined" && window.__toggleMobileDarkMode) {
             window.__toggleMobileDarkMode();
@@ -73,6 +74,12 @@ export default function HeroSection() {
 
                 {/* মোবাইল কন্ট্রোল বাটনসমূহ: নোটিসের নিচে এবং ইমেজের টপ রাইট অংশে প্লেস করা হয়েছে */}
                 <div className="absolute top-4 right-4 z-40 flex lg:hidden items-center gap-2 bg-slate-950/30 backdrop-blur-md p-1.5 rounded-full border border-white/10">
+
+                    {/* ৫. ভাষা পরিবর্তনকারী (Language Switcher) */}
+                    <div className="flex-shrink-0 z-50">
+                        <LanguageSwitcher />
+                    </div>
+
                     {/* থিম টগল বাটন */}
                     <button
                         onClick={handleMobileThemeClick}
@@ -81,7 +88,9 @@ export default function HeroSection() {
                         <span className="text-base">{isDark ? "☀️" : "🌙"}</span>
                     </button>
 
-                    
+
+
+
                 </div>
 
                 {carouselImages.map((slide, index) => (

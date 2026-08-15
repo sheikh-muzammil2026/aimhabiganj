@@ -6,7 +6,7 @@ export default function Footer() {
       {/* প্রধান ফুটার কন্টেইনার - py-16 ব্যালেন্সড স্পেসিং */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          
+
           {/* ১. মাদরাসা পরিচিতি ও লোগো সেকশন */}
           <div className="space-y-5">
             <div className="flex items-center gap-3">
@@ -14,7 +14,7 @@ export default function Footer() {
                 AS
               </div>
               <div className="flex flex-col">
-                <span className="font-extrabold text-base text-amber-400 tracking-wide leading-none capitalize">
+                <span className="font-extrabold text-[10px] text-amber-400 tracking-wide leading-none capitalize">
                   As-Salam Ideal Madrasah  (AIM)
                 </span>
                 <span className="text-xs font-semibold text-emerald-100 mt-1 dark:text-emerald-400">
@@ -25,31 +25,31 @@ export default function Footer() {
             <p className="text-sm text-gray-400 leading-relaxed font-normal dark:text-slate-400">
               দ্বীনি ও আধুনিক শিক্ষার এক অপূর্ব সমন্বয়। অভিজ্ঞ উলামায়ে কেরাম ও দক্ষ শিক্ষকমণ্ডলী দ্বারা পরিচালিত হবিগঞ্জের একটি নির্ভরযোগ্য দ্বীনি শিক্ষা প্রতিষ্ঠান।
             </p>
-            
+
             {/* সোশ্যাল মিডিয়া ও ওয়েবসাইট আইকন লিংক */}
             <div className="flex space-x-3 pt-2">
-              <a 
+              <a
                 href="https://facebook.com" // আপনার মাদরাসার অরিজিনাল ফেসবুক লিংক এখানে বসবে
-                target="_blank" 
-                rel="noopener noreferrer" 
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full bg-emerald-900/50 text-emerald-200 hover:bg-amber-500 hover:text-slate-950 flex items-center justify-center transition-all duration-200 dark:bg-slate-900 dark:hover:bg-emerald-600 dark:hover:text-white font-bold text-xs"
                 title="ফেসবুক পেজ"
               >
                 FB
               </a>
-              <a 
+              <a
                 href="https://youtube.com" // আপনার মাদরাসার অরিজিনাল ইউটিউব লিংক এখানে বসবে
-                target="_blank" 
-                rel="noopener noreferrer" 
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full bg-emerald-900/50 text-emerald-200 hover:bg-amber-500 hover:text-slate-950 flex items-center justify-center transition-all duration-200 dark:bg-slate-900 dark:hover:bg-emerald-600 dark:hover:text-white font-bold text-xs"
                 title="ইউটিউব চ্যানেল"
               >
                 YT
               </a>
-              <a 
+              <a
                 href="https://example.com" // মাদরাসার অন্য ওয়েবসাইটের লিংকটি এখানে বসবে
-                target="_blank" 
-                rel="noopener noreferrer" 
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full bg-emerald-900/50 text-emerald-200 hover:bg-amber-500 hover:text-slate-950 flex items-center justify-center transition-all duration-200 dark:bg-slate-900 dark:hover:bg-emerald-600 dark:hover:text-white font-bold text-xs"
                 title="অন্যান্য ওয়েবসাইট"
               >

@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import LanguageSwitcher from "./LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
 
 export default function TopHeader() {
@@ -17,13 +16,13 @@ export default function TopHeader() {
       <div className="max-w-7xl mx-auto flex flex-row items-center relative z-10 gap-4 md:gap-6">
 
         {/* লোগো সেকশন:  */}
-        <div className="flex-shrink-0 w-[80px] h-[80px] md:w-[128px] md:h-[128px] relative rounded-full overflow-hidden p-[2px] bg-transparent">
+        <div className="flex-shrink-0 w-[82px] h-[82px] md:w-[130px] md:h-[130px] relative rounded-full overflow-hidden p-[2px] bg-transparent">
           <Link href={'/'}> <Image
             src="/aimlogo1.png"
             alt="As-Salam Ideal Madrasah  (AIM) Logo"
             fill
-            sizes="(max-width: 768px) 60px, 85px"
-            className="object-cover scale-[1.06] rounded-full"
+            sizes="(max-width: 768px) 65px, 90px"
+            className="object-cover scale-[1.05] rounded-full"
             priority
           /></Link>
         </div>
@@ -35,10 +34,9 @@ export default function TopHeader() {
           <p className="text-[18px] scale-x-130 md:text-3xl md:scale-x-235  kufi-custom text-emerald-200/90 tracking-wide dark:text-slate-400" dir="rtl" lang="ar">
             مدرس<span className="font-sans">ة</span> الس<span className="font-sans">لا</span>م النموذجي<span className="font-sans">ة</span>
           </p>
-          {/* text-[25px] md:text-[90px] md:scale-x-125 origin-right kufi-custom text-emerald-200/90 tracking-wide dark:text-slate-400" dir="rtl" lang="ar" */}
 
           {/* ২. বাংলা নাম: ফন্ট সাইজ বড় করে রেগুলার এলাইনমেন্ট */}
-          <p className="text-[13px] md:text-[39px] lg:[39px] font-bold text-emerald-50 tracking-normal dark:text-slate-200 leading-tight font-shalda">
+          <p className="text-[13px] md:text-[37px] font-bold text-emerald-50 tracking-normal dark:text-slate-200 leading-tight font-shalda">
             আস-সালাম আইডিয়াল মাদরাসা (এইম)
           </p>
 
@@ -54,11 +52,6 @@ export default function TopHeader() {
             </p>
           </div>
 
-        </div>
-
-        {/* ৫. ভাষা পরিবর্তনকারী (Language Switcher) */}
-        <div className="hidden lg:flex-shrink-0 lg:z-50">
-          <LanguageSwitcher />
         </div>
 
       </div>

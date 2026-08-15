@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { useLanguage } from "@/context/LanguageContext";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 export default function Navbar() {
     const { t } = useLanguage();
@@ -193,14 +194,27 @@ export default function Navbar() {
                                 </div>
                             ))}
 
-                            {/* থিম টগল */}
-                            <button onClick={toggleDarkMode} className="p-1.5 ml-1 rounded-full hover:bg-emerald-800/80 dark:hover:bg-slate-800/80 transition-colors text-amber-300 focus:outline-none flex-shrink-0">
-                                {darkMode ? (
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M16.243 17.657l.707.707M6.343 6.343l.707-.707M12 12a9 9 0 110 18v-1z" /></svg>
-                                ) : (
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
-                                )}
-                            </button>
+
+                            <div className="flex items-center gap-2 bg-emerald-950/40 dark:bg-slate-950/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 ml-4">
+
+                                {/* ৫. ভাষা পরিবর্তনকারী (Language Switcher) */}
+                                <div className="flex-shrink-0 z-50">
+                                    <LanguageSwitcher />
+                                </div>
+
+                                {/* থিম টগল */}
+                                <button onClick={toggleDarkMode} className="p-1.5 ml-1 rounded-full hover:bg-emerald-800/80 dark:hover:bg-slate-800/80 transition-colors text-amber-300 focus:outline-none flex-shrink-0">
+                                    {darkMode ? (
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M16.243 17.657l.707.707M6.343 6.343l.707-.707M12 12a9 9 0 110 18v-1z" /></svg>
+                                    ) : (
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                                    )}
+                                </button>
+
+
+
+
+                            </div>
 
                             {/* লগইন/লগআউট অ্যাকশন */}
                             {isLoggedIn ? (
