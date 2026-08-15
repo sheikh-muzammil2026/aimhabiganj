@@ -38,7 +38,7 @@ export default function TopHeader() {
           {/* text-[25px] md:text-[90px] md:scale-x-125 origin-right kufi-custom text-emerald-200/90 tracking-wide dark:text-slate-400" dir="rtl" lang="ar" */}
 
           {/* ২. বাংলা নাম: ফন্ট সাইজ বড় করে রেগুলার এলাইনমেন্ট */}
-          <p className="text-[13px] md:text-[41px] font-bold text-emerald-50 tracking-normal dark:text-slate-200 leading-tight font-shalda">
+          <p className="text-[13px] md:text-[40px] font-bold text-emerald-50 tracking-normal dark:text-slate-200 leading-tight font-shalda">
             আস-সালাম আইডিয়াল মাদরাসা (এইম)
           </p>
 
