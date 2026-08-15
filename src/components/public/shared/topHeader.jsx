@@ -57,7 +57,7 @@ export default function TopHeader() {
         </div>
 
         {/* ৫. ভাষা পরিবর্তনকারী (Language Switcher) */}
-        <div className="hidden md:flex-shrink-0 md:z-50">
+        <div className="hidden lg:flex-shrink-0 lg:z-50">
           <LanguageSwitcher />
         </div>
 
