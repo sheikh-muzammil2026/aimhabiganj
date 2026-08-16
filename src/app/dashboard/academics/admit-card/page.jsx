@@ -529,7 +529,7 @@ export default function AdmitCardGenerator() {
                                                 </td>
                                                 <td className="p-3">
                                                     <img
-                                                        src={student.photoUrl || '/placeholder-student.jpg'}
+                                                        src={student.studentImage}
                                                         alt={student.studentNameEnglish || 'Student'}
                                                         className="w-8 h-8 rounded-full object-cover border"
                                                     />
