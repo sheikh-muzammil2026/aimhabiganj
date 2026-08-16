@@ -14,24 +14,7 @@ export default function RoutinePreview({ routine }) {
         window.print();
     };
 
-    // সরাসরি PDF ডাউনলোড করার ফাংশন
-    const handleDownloadPDF = async () => {
-        const element = document.getElementById("printable");
-        if (!element) return;
 
-        // html2pdf ডাইনামিকালি ইমপোর্ট করা (Next.js SSR সমস্যা এড়াতে)
-        const html2pdf = (await import("html2pdf.js")).default;
-
-        const options = {
-            margin: 5,
-            filename: `Routine_${routine.examTitle || "Exam"}.pdf`,
-            image: { type: "jpeg", quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: "mm", format: "a4", orientation: "landscape" }
-        };
-
-        html2pdf().set(options).from(element).save();
-    };
 
     const dateCount = routine.dates?.length || 1;
 
@@ -56,16 +39,11 @@ export default function RoutinePreview({ routine }) {
                 </div>
                 {/* Print and Download Buttons */}
                 <div className="flex items-center gap-3">
-                    <button
-                        onClick={handleDownloadPDF}
-                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2.5 rounded-md shadow-sm transition-all text-sm active:scale-95"
-                    >
-                        <span>📥</span> Download PDF
-                    </button>
+
 
                     <button
                         onClick={handlePrint}
-                        className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5 py-2.5 rounded-md shadow-sm transition-all text-sm active:scale-95"
+                        className="flex items-center gap-2 cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5 py-2.5 rounded-md shadow-sm transition-all text-sm active:scale-95"
                     >
                         <span>🖨️</span> Print
                     </button>
@@ -76,8 +54,8 @@ export default function RoutinePreview({ routine }) {
             <div id="printable" className="p-2 print:p-0 w-full mx-auto flex flex-col justify-between min-h-[90vh] print:min-h-[190mm]">
                 <div>
                     {/* Header with separate Logo and Banner */}
-                    <div className="flex items-center justify-center mb-2 border-b-4 border-double border-gray-800 pb-1">
-                        <div className="w-20 h-20 md:w-28 md:h-28 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center">
+                    <div className="flex items-center justify-center  gap-0 mb-2 border-b-4 border-double border-gray-800 pb-1 pl-2">
+                        <div className="w-20 h-20 md:w-28 md:h-28 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-3">
                             <Image
                                 src={"/aimlogo1.png"}
                                 alt="Institution Logo"
@@ -88,7 +66,7 @@ export default function RoutinePreview({ routine }) {
                                 className="w-full h-full object-cover scale-[1.05] transform-gpu"
                             />
                         </div>
-                        <div className="flex-grow text-center ">
+                        <div className="flex-grow text-center">
                             <Image
                                 src={"/banner_routine.png"}
                                 alt="Institution Banner"

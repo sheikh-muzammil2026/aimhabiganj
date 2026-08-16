@@ -269,6 +269,56 @@ export default function AdmitCardGenerator() {
     const AutoScaledText = ({ text, className = "", fontWeight = "bold", fill = "#000" }) => {
         return (
             <div className={`w-full h-4 flex items-center overflow-hidden ${className}`}>
+                {/* প্রিন্ট CSS - শুধুমাত্র এই পেজেই কাজ করবে */}
+                <style jsx global>{`
+                @media print {
+                    @page {
+                        size: A5 portrait;
+                        margin: 0mm !important;
+                    }
+
+                    html,
+                    body {
+                        width: 100% !important;
+                        height: 100% !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        background: #fff !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+
+                    body * {
+                        visibility: hidden;
+                    }
+
+                    .print-area-container,
+                    .print-area-container * {
+                        visibility: visible;
+                    }
+
+                    .print-area-container {
+                        position: absolute;
+                        left: 0;
+                        top: 0;
+                        width: 100%;
+                    }
+
+                    .page-break {
+                        width: 148mm !important;
+                        height: 209mm !important;
+                        margin: 0 auto !important;
+                        padding: 6mm !important;
+                        box-sizing: border-box !important;
+                        page-break-after: always !important;
+                        break-after: page !important;
+                        page-break-inside: avoid !important;
+                        break-inside: avoid !important;
+                        overflow: hidden !important;
+                    }
+                }
+            `}</style>
+
                 <svg className="w-full h-full" viewBox="0 0 300 24" preserveAspectRatio="none">
                     <text
                         x="0"
@@ -428,39 +478,7 @@ export default function AdmitCardGenerator() {
                         </select>
                     </div>
 
-                    {/* <div>
-                        <label className="block text-xs font-semibold text-gray-600 mb-1">
-                            আবাসিক স্ট্যাটাস
-                        </label>
-                        <select
-                            value={selectedType}
-                            onChange={(e) => setSelectedType(e.target.value)}
-                            className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500"
-                        >
-                            <option value="all">সকল টাইপ</option>
-                            <option value="আবাসিক">আবাসিক</option>
-                            <option value="অনাবাসিক">অনাবাসিক</option>
-                            <option value="ডে-কেয়ার">ডে-কেয়ার</option>
-                        </select>
-                    </div> */}
 
-                    {/* <div>
-                        <label className="block text-xs font-semibold text-gray-600 mb-1">
-                            ফি ক্যাটাগরি
-                        </label>
-                        <select
-                            value={selectedFeeCategory}
-                            onChange={(e) => setSelectedFeeCategory(e.target.value)}
-                            className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500"
-                        >
-                            <option value="all">সকল ফি ক্যাটাগরি</option>
-                            {uniqueFeeCategories.map((cat) => (
-                                <option key={cat} value={cat}>
-                                    {cat}
-                                </option>
-                            ))}
-                        </select>
-                    </div> */}
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t pt-4 mb-4">
@@ -516,7 +534,7 @@ export default function AdmitCardGenerator() {
                                         </td>
                                     </tr>
                                 ) : (
-                                    filteredStudents.map((student) => {
+                                    filteredStudents?.map((student) => {
                                         const details = getStudentClassDetails(student);
                                         return (
                                             <tr key={student._id} className="border-b hover:bg-gray-50">
@@ -529,7 +547,7 @@ export default function AdmitCardGenerator() {
                                                 </td>
                                                 <td className="p-3">
                                                     <img
-                                                        src={student.studentImage}
+                                                        src={student?.studentImage}
                                                         alt={student.studentNameEnglish || 'Student'}
                                                         className="w-8 h-8 rounded-full object-cover border"
                                                     />
@@ -675,7 +693,7 @@ export default function AdmitCardGenerator() {
                                             <div className="w-16 h-20 border border-[#C5A059] rounded-lg bg-white p-0.5 shadow-sm relative overflow-hidden flex-shrink-0 flex items-center justify-center mt-1">
                                                 {card.studentImage ? (
                                                     <Image
-                                                        src={card.studentImage}
+                                                        src={card?.studentImage}
                                                         alt={card.studentNameEnglish || "Student Photo"}
                                                         fill
                                                         className="object-cover rounded"
