@@ -157,8 +157,8 @@ export default function RoutinePreview({ routine }) {
 
                     {/* Note Footer */}
                     <div className="mt-3 p-1.5 border-l-4 text-center border-gray-800 bg-gray-50 text-[11px] print:text-[10px] font-semibold text-gray-900 leading-snug print:bg-transparent print:p-0 print:border-none space-y-0.5">
-                        <p>বিশেষ দ্রষ্টব্য: ১. সকল বিভাগের পরীক্ষার সময় <span className="text-amber-600">সকাল ৯:০০ থেকে ১১:৩০ মিনিট </span> পর্যন্ত।</p>
-                        <p className="">২. ১২ই রবিউল আওয়াল উপলক্ষে ২৬ আগস্ট রোজ বুধবার মাদ্রাসাহ বন্ধ থাকবে।</p>
+                        <p>বিশেষ দ্রষ্টব্য: সকল বিভাগের পরীক্ষার সময় <span className="text-amber-600">সকাল ৯:০০ থেকে ১১:৩০ মিনিট </span> পর্যন্ত।</p>
+                        <p className="">১২ই রবিউল আওয়াল উপলক্ষে ২৬ আগস্ট রোজ বুধবার শিক্ষা কার্যক্রম বন্ধ থাকবে।</p>
                     </div>
                 </div>
 
