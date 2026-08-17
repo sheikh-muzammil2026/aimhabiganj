@@ -561,6 +561,7 @@ export default function AllStudentsPage() {
                           </button>
                         </div>
                       </div>
+                    </div>
 
                     {/* বিস্তারিত তথ্য বিবরণী */}
                     <div className="grid grid-cols-2 gap-2 text-xs">
