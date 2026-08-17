@@ -93,7 +93,7 @@ export default function Navbar() {
                 { name: t("menu.syllabus"), href: "/academics#syllabus" },
                 { name: t("menu.co_curricular"), href: "/academics#co-curricular" },
                 { name: t("menu.class_routine"), href: "/academics#class-routine" },
-                { name: t("menu.exam_routine"), href: "/academics#exam-routine" },
+                { name: t("menu.exam_routine"), href: "/academics/routine/class-wise" },
             ],
         },
         {

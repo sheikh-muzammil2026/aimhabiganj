@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { authClient } from "@/lib/auth-client";
 
 export default function TeacherProfileDashboard() {
-  const teacherEmail = "yousuf.hasani@madrasah.edu";
+  const { data: session, isPending: sessionPending } = authClient.useSession();
+  const teacherEmail = session?.user?.email || "yousuf.hasani@madrasah.edu";
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -55,20 +57,26 @@ export default function TeacherProfileDashboard() {
   });
 
   useEffect(() => {
-    fetchTeacherProfile();
-  }, []);
+    if (!sessionPending) {
+      setProfile((prev) => ({ ...prev, email: teacherEmail }));
+      fetchTeacherProfile(teacherEmail);
+    }
+  }, [sessionPending, teacherEmail]);
 
-  const fetchTeacherProfile = async () => {
+  const fetchTeacherProfile = async (email) => {
+    if (!email) return;
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/teacher/profile/${teacherEmail}`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/teacher/profile/${email}`);
       const result = await res.json();
 
       if (result.success && result.data) {
         setProfile((prev) => ({
           ...prev,
           ...result.data,
+          email: email,
+          socialLinks: { ...prev.socialLinks, ...result.data.socialLinks },
           // অ্যারে ভ্যালুগুলো না থাকলে ডিফল্ট বজায় রাখা
           academic: result.data.academic?.length ? result.data.academic : prev.academic,
           experience: result.data.experience?.length ? result.data.experience : prev.experience,

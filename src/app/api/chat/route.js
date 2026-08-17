@@ -4,35 +4,83 @@ import { NextResponse } from "next/server";
 export async function POST(req) {
   try {
     const { messages } = await req.json();
-    const userMessage = messages[messages.length - 1].content;
 
     const madrasahContext = `
-      তুমি হলে "আস-সালাম আইডিয়াল মাদরাসা (এইম), হবিগঞ্জ" এর কৃত্রিম বুদ্ধিমত্তা সহকারী।
-      ভিজিটরদের মাদরাসা সম্পর্কিত প্রশ্নের সঠিক তথ্য দেওয়াই তোমার কাজ।
-      সবসময় অত্যন্ত নম্র ও ইসলামিক অভিবাদন (আস-সালামু আলাইকুম) দিয়ে কথা বলবে।
-      উত্তর সংক্ষিপ্ত ও বাংলায় দেবে। মাদরাসার বাইরে কোনো ফালতু বা রাজনৈতিক প্রশ্নের উত্তর দেবে না।
+তুমি হলে "আস-সালাম আইডিয়াল মাদরাসা (এইম), হবিগঞ্জ" এর কৃত্রিম বুদ্ধিমত্তা সহকারী। ভিজিটরদের মাদরাসা সম্পর্কিত প্রশ্নের সঠিক ও বিস্তারিত তথ্য দেওয়াই তোমার কাজ।
+
+মাদরাসার তথ্য ভাণ্ডার (Knowledge Base):
+১. প্রতিষ্ঠান পরিচিতি:
+- নাম: আস-সালাম আইডিয়াল মাদরাসা (এইম)
+- স্লোগান: "Aim for Ultimate Success"
+- ঠিকানা: হবিগঞ্জ, বাংলাদেশ
+- মোবাইল: +৮৮০১২৩৪৫৬৭৮৯০
+- ইমেইল: info@assalam.edu.bd
+- বৈশিষ্ট্য: ইসলামিক শিক্ষা ও সাধারণ শিক্ষার এক অপূর্ব সমন্বয়। শীতাতপ নিয়ন্ত্রিত ও সিসিটিভি ক্যামেরা সমৃদ্ধ ক্লাসরুম, ওয়ান-ক্লিক আইডি কার্ড জেনারেটর, ডিজিটাল এডমিট কার্ড, অনলাইন রেজাল্ট সার্চ ও সীট প্ল্যান।
+
+২. শিক্ষা কার্যক্রম ও বিভাগসমূহ:
+- প্রি-হিফজ বিভাগ: কায়দা/আমপারা, নাজেরা।
+- হিফজ বিভাগ: সবক, শুনানি।
+- একাডেমিক বিভাগ: 
+  * প্রাক-প্রাথমিক (প্লে, নার্সারি)
+  * প্রাথমিক (১ম থেকে ৫ম শ্রেণি)
+  * মাধ্যমিক (৬ষ্ঠ থেকে ১০ম শ্রেণি)
+  * উচ্চমাধ্যমিক (১১শ ও ১২শ শ্রেণি)
+- ডিজিটাল এডটেক (EdTech) সুবিধা: লাইভ ক্লাস, রেকর্ডেড ক্লাস, অনলাইন এক্সাম ও কুইজ, ই-বুক ও লেকচার শিট।
+- সহ-পাঠ্যক্রম: ক্বিরাত, হামদ-নাত, বক্তৃতা ও বিতর্ক প্রশিক্ষণ, শারীরিক ব্যায়াম ও খেলাধুলা।
+
+৩. ভর্তি তথ্য (Admission):
+- ভর্তির সময়কাল: ২০২৬ শিক্ষাবর্ষে হিফজ ও একাডেমিক বিভাগে ভর্তি চলছে। আসন সংখ্যা অত্যন্ত সীমিত।
+- ভর্তি প্রক্রিয়া: ভর্তি পরীক্ষার মাধ্যমে মেধা মূল্যায়ন করে ভর্তি নেওয়া হয়। অনলাইন ভর্তি ফরম সাইট থেকেই পূরণ করা যায়।
+- ফি ক্যাটাগরি: সাধারণ (General), এতিম ফান্ড (Orphan), গরিব ফান্ড (Poor Fund), স্কলারশিপ (Scholarship), শিক্ষক/স্টাফ সন্তান (Staff Child)।
+
+৪. আবাসন ব্যবস্থা (Hostel):
+- ছাত্রদের মননশীল ও নৈতিক বিকাশে আধুনিক ও সুশৃঙ্খল ছাত্রাবাস ব্যবস্থা রয়েছে।
+- আবাসিক হলের যোগ্য পরিচালকবৃন্দ, পুষ্টিকর খাবার এবং সার্বক্ষণিক নিরাপত্তা নিশ্চিত করা হয়।
+
+৫. পরীক্ষা ও রুটিন:
+- দ্বিতীয় সাময়িক পরীক্ষা আগামী ২৩ আগস্ট থেকে শুরু হতে যাচ্ছে।
+- শ্রেণি-ভিত্তিক পরীক্ষার রুটিন পোর্টালে (বিশেষত /academics/routine/class-wise লিঙ্কে) পাওয়া যায় এবং প্রিন্ট করা যায়।
+
+নির্দেশনা:
+- সবসময় অত্যন্ত নম্র ও ইসলামিক অভিবাদন (আস-সালামু আলাইকুম) দিয়ে কথা বলা শুরু করবে।
+- উত্তর বাংলায় দেবে। তথ্যপূর্ণ কিন্তু স্পষ্ট ও প্রাসঙ্গিক কথা বলবে।
+- যদি কোনো তথ্যের উত্তর জানা না থাকে তবে বানিয়ে বলবে না, বরং মাদরাসার যোগাযোগের নম্বরে (+৮৮০১২৩৪৫৬৭৮৯০) বা ইমেইলে যোগাযোগ করতে বলবে।
+- রাজনৈতিক বা মাদরাসার বহির্ভূত কোনো অপ্রাসঙ্গিক প্রশ্নের উত্তর দেবে না।
     `;
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.KIMI_API_KEY || process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ role: "assistant", content: "দুঃখিত, এপিআই কি (API Key) কনফিগার করা হয়নি।" });
     }
 
+    const apiMessages = messages.map(msg => ({
+      role: msg.role === "assistant" ? "assistant" : "user",
+      content: msg.content
+    }));
+
+    const finalMessages = [
+      { role: "system", content: madrasahContext },
+      ...apiMessages
+    ];
+
     let response;
     let data;
     let retries = 3; // সর্বোচ্চ ৩ বার চেষ্টা করবে
-    let delay = 2000; // প্রতিবার ব্যর্থ হওয়ার পর ২ সেকেন্ড (২০০০ মিলিসেকেন্ড) অপেক্ষা করবে
+    let delay = 2000; // প্রতিবার ব্যর্থ হওয়ার পর ২ সেকেন্ড অপেক্ষা করবে
 
     while (retries > 0) {
       response = await fetch(
-        `https://generativelanguage.googleapis.com/v1/models/gemini-3.5-flash:generateContent?key=${apiKey}`,
+        `https://api.moonshot.cn/v1/chat/completions`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKey}`
+          },
           body: JSON.stringify({
-            contents: [
-              { role: "user", parts: [{ text: `${madrasahContext}\n\nUser Question: ${userMessage}` }] }
-            ]
+            model: process.env.KIMI_MODEL || "moonshot-v1-8k",
+            messages: finalMessages,
+            temperature: 0.3
           })
         }
       );
@@ -43,32 +91,31 @@ export async function POST(req) {
       if (response.status === 429 || response.status === 503 || data.error?.code === 429) {
         retries--;
         if (retries > 0) {
-          console.warn(`গুগল সার্ভারে চাপ বেশি। ${delay / 1000} সেকেন্ড পর আবার চেষ্টা করা হচ্ছে... বাকি চেষ্টা: ${retries}`);
+          console.warn(`কীমি সার্ভারে চাপ বেশি। ${delay / 1000} সেকেন্ড পর আবার চেষ্টা করা হচ্ছে... বাকি চেষ্টা: ${retries}`);
           await new Promise((resolve) => setTimeout(resolve, delay));
           continue; // পরের লুপে চলে যাবে এবং আবার চেষ্টা করবে
         }
       }
 
-      // যদি নরমাল কোনো রেসপন্স বা অন্য কোনো এরর আসে, তবে লুপ ভেঙে বের হয়ে যাবে
       break;
     }
 
-    // ৩ বার চেষ্টার পরও যদি গুগল থেকে কোনো এরর অবজেক্ট ব্যাক আসে
+    // ৩ বার চেষ্টার পরও যদি গুগল/কীমি থেকে কোনো এরর অবজেক্ট ব্যাক আসে
     if (data && data.error) {
-      console.error("Gemini API Error after retries:", data.error);
+      console.error("Kimi API Error after retries:", data.error);
       return NextResponse.json({ 
         role: "assistant", 
-        content: "গুগল সার্ভারে এই মুহূর্তে অতিরিক্ত ট্রাফিক রয়েছে। অনুগ্রহ করে কয়েক সেকেন্ড পর আবার মেসেজ দিন।" 
+        content: "সার্ভারে এই মুহূর্তে অতিরিক্ত ট্রাফিক রয়েছে। অনুগ্রহ করে কয়েক সেকেন্ড পর আবার চেষ্টা করুন।" 
       });
     }
 
     // রেসপন্স সঠিকভাবে চেক করার লজিক
-    if (data && data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-      const aiResponse = data.candidates[0].content.parts[0].text;
+    if (data && data.choices && data.choices[0]?.message?.content) {
+      const aiResponse = data.choices[0].message.content;
       return NextResponse.json({ role: "assistant", content: aiResponse });
     } else {
-      console.error("Gemini API unexpected structure:", data);
-      return NextResponse.json({ role: "assistant", content: "আমি আপনার প্রশ্নটি বুঝতে পেরেছি, তবে রেসপন্স পেতে কিছুটা সমস্যা হচ্ছে।" });
+      console.error("Kimi API unexpected structure:", data);
+      return NextResponse.json({ role: "assistant", content: "আমি আপনার প্রশ্নটি বুঝতে পেরেছি, তবে উত্তর প্রস্তুত করতে কিছুটা সমস্যা হচ্ছে।" });
     }
 
   } catch (error) {

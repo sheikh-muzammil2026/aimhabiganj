@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 /* --- কাস্টম ফন্ট ডিক্লেয়ারেশন --- */
 @font-face {
