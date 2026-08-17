@@ -538,6 +538,29 @@ export default function AllStudentsPage() {
                         <Link href={`/dashboard/students/edit/${id}`} className="p-1.5 text-slate-600 hover:bg-amber-100 rounded-md">✏️</Link>
                       </div>
                     </div>
+                    {/* মোবাইল ভিউতে রোল ইনপুট ও বিস্তারিত তথ্য */}
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="col-span-2 bg-slate-50 p-2 rounded-lg border border-slate-200 flex items-center justify-between">
+                        <span className="font-bold text-slate-700 text-xs">রোল নম্বর:</span>
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="text"
+                            placeholder="রোল"
+                            value={rollInputs[id] !== undefined ? rollInputs[id] : ""}
+                            onChange={(e) =>
+                              setRollInputs({ ...rollInputs, [id]: e.target.value })
+                            }
+                            className="w-20 px-2 py-1 text-xs border border-slate-300 rounded-md focus:outline-none focus:border-emerald-600 bg-white font-bold text-slate-800"
+                          />
+                          <button
+                            onClick={() => handleSaveRoll(id)}
+                            disabled={savingRollId === id}
+                            className="px-2.5 py-1 bg-emerald-600 text-white text-xs font-bold rounded-md hover:bg-emerald-700 transition-all disabled:opacity-50"
+                          >
+                            {savingRollId === id ? "..." : "সেভ"}
+                          </button>
+                        </div>
+                      </div>
 
                     {/* বিস্তারিত তথ্য বিবরণী */}
                     <div className="grid grid-cols-2 gap-2 text-xs">
