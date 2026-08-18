@@ -145,10 +145,7 @@ export default function TeacherProfileDashboard() {
       if (data.success) {
         setProfile((prev) => ({ ...prev, profileImage: data.data.display_url }));
         setSuccessMsg("ছবি সফলভাবে আপলোড করা হয়েছে!");
-      } else {
-        setError("ছবি আপলোড ব্যর্থ হয়েছে।");
-      }
-      else {
+      }else {
   // আসল ইরর মেসেজটি দেখতে error response প্রিন্ট করুন
   console.error("ImgBB Error Details:", data.error);
   setError(data.error?.message || "ছবি আপলোড ব্যর্থ হয়েছে।");
