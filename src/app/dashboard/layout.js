@@ -69,7 +69,7 @@ const DashboardLayout = ({ children }) => {
                 </header>
 
                 {/* ৪. ড্যাশবোর্ড পেজের স্ক্রলযোগ্য কন্টেন্ট বডি */}
-                <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-[#f8faf8] scroll-smooth">
+                <main className="flex-1 overflow-y-auto p-4 pb-28 sm:p-6 sm:pb-24 lg:p-8 bg-[#f8faf8] scroll-smooth">
                     <div className="max-w-7xl mx-auto space-y-6">
                         {children}
                     </div>
