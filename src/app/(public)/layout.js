@@ -29,7 +29,7 @@ const layout = ({ children }) => {
       <TopHeader />
 
 
-      <main className="min-h-screen pb-16 md:pb-0">
+      <main className="min-h-screen pb-24 md:pb-28">
         {children}
       </main>
 
