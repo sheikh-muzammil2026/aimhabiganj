@@ -148,6 +148,11 @@ export default function TeacherProfileDashboard() {
       } else {
         setError("ছবি আপলোড ব্যর্থ হয়েছে।");
       }
+      else {
+  // আসল ইরর মেসেজটি দেখতে error response প্রিন্ট করুন
+  console.error("ImgBB Error Details:", data.error);
+  setError(data.error?.message || "ছবি আপলোড ব্যর্থ হয়েছে।");
+      }
     } catch (err) {
       console.error("Image upload error:", err);
       setError("ছবি আপলোড করতে সমস্যা হয়েছে।");
