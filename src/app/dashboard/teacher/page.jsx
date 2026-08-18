@@ -125,7 +125,7 @@ export default function TeacherProfileDashboard() {
     setProfile((prev) => ({ ...prev, [arrayName]: list }));
   };
 
-  // ইমেজ আপলোড
+// ইমেজ আপলোড
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -142,13 +142,15 @@ export default function TeacherProfileDashboard() {
       });
 
       const data = await response.json();
+      console.log("ImgBB Full Response:", data); // ব্রাউজার কনসোলে রেসপন্স দেখতে
+
       if (data.success) {
         setProfile((prev) => ({ ...prev, profileImage: data.data.display_url }));
         setSuccessMsg("ছবি সফলভাবে আপলোড করা হয়েছে!");
-      }else {
-  // আসল ইরর মেসেজটি দেখতে error response প্রিন্ট করুন
-  console.error("ImgBB Error Details:", data.error);
-  setError(data.error?.message || "ছবি আপলোড ব্যর্থ হয়েছে।");
+      } else {
+        // ImgBB থেকে আসা আসল ইরর কনসোলে প্রিন্ট হবে
+        console.error("ImgBB Error Details:", data.error);
+        setError(data.error?.message || "ছবি আপলোড ব্যর্থ হয়েছে।");
       }
     } catch (err) {
       console.error("Image upload error:", err);
@@ -157,7 +159,6 @@ export default function TeacherProfileDashboard() {
       setUploadingImage(false);
     }
   };
-
   // প্রোফাইল সেভ
   const handleSaveProfile = async (e) => {
     e.preventDefault();
