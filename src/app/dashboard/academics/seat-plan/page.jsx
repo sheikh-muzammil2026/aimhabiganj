@@ -364,82 +364,141 @@ export default function AllStudentsPage() {
                         <p className="text-xs text-slate-400">আপনার নির্বাচন করা ফিল্টার পরিবর্তন করে দেখতে পারেন।</p>
                     </div>
                 ) : viewMode === "seatPlan" ? (
+{/* ========================================================
+   মোড ১: সিট প্ল্যান টেবিল (এডিটেবল ইনপুট সহ) - ১০০% রেসপন্সিভ
+   ======================================================== */}
+<div className="w-full p-2 sm:p-4">
+    {/* ১. ছোট স্ক্রিনের জন্য কার্ড ভিউ (মোবাইল) */}
+    <div className="block sm:hidden space-y-3">
+        {filteredStudents.map((student, idx) => {
+            const id = student._id?.$oid || student._id;
+            const rollNo = student.officeUse?.rollNumber || student.studentId || (idx + 1);
 
-                    /* ========================================================
-                       মোড ১: সিট প্ল্যান টেবিল (এডিটেবল ইনপুট সহ)
-                       ======================================================== */
-                    <div className="w-full overflow-x-auto p-2">
-                        <table className="w-full text-left border-collapse min-w-[600px]">
-                            <thead>
-                                <tr className="bg-[#043e30] text-emerald-100 text-xs uppercase tracking-wider font-bold">
-                                    <th className="py-3.5 px-4 w-1/6">Roll Number (রোল নম্বর)</th>
-                                    <th className="py-3.5 px-4 w-2/6">Name (শিক্ষার্থীর নাম)</th>
-                                    <th className="py-3.5 px-4 w-1/6">Hall No (হল নম্বর)</th>
-                                    <th className="py-3.5 px-4 w-1/6">Seat No (সিট নম্বর)</th>
-                                    <th className="py-3.5 px-4 text-center w-1/6">অ্যাকশন</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 text-sm font-medium text-slate-700">
-                                {filteredStudents.map((student, idx) => {
-                                    const id = student._id?.$oid || student._id;
-                                    const rollNo = student.officeUse?.rollNumber || student.studentId || (idx + 1);
-
-                                    return (
-                                        <tr key={id} className="hover:bg-emerald-50/40 transition-colors">
-                                            {/* ১. রোল নম্বর */}
-                                            <td className="py-3 px-4 font-bold text-slate-900">
-                                                <span className="bg-slate-100 text-slate-800 px-2.5 py-1 rounded-md border border-slate-200 text-xs font-mono">
-                                                    {rollNo}
-                                                </span>
-                                            </td>
-
-                                            {/* ২. শিক্ষার্থীর নাম ও তথ্য */}
-                                            <td className="py-3 px-4">
-                                                <div className="font-bold text-slate-900">{student.studentNameBangla || "নাম বিহীন"}</div>
-                                                <div className="text-[11px] text-slate-500">
-                                                    {getStudentClassDetails(student).className}
-                                                </div>
-                                            </td>
-
-                                            {/* ৩. হল নম্বর (ইনপুট বক্স) */}
-                                            <td className="py-3 px-4">
-                                                <input
-                                                    type="text"
-                                                    placeholder="যেমন: হল-১"
-                                                    value={seatData[id]?.hallNo || ""}
-                                                    onChange={(e) => handleSeatInputChange(id, "hallNo", e.target.value)}
-                                                    className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 bg-white font-medium"
-                                                />
-                                            </td>
-
-                                            {/* ৪. সিট নম্বর (ইনপুট বক্স) */}
-                                            <td className="py-3 px-4">
-                                                <input
-                                                    type="text"
-                                                    placeholder="যেমন: B-12"
-                                                    value={seatData[id]?.seatNo || ""}
-                                                    onChange={(e) => handleSeatInputChange(id, "seatNo", e.target.value)}
-                                                    className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 bg-white font-medium"
-                                                />
-                                            </td>
-
-                                            {/* সেভ বাটন */}
-                                            <td className="py-3 px-4 text-center">
-                                                <button
-                                                    onClick={() => handleSaveSeatPlan(id)}
-                                                    disabled={savingId === id}
-                                                    className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-lg shadow-xs transition-all disabled:opacity-50 cursor-pointer"
-                                                >
-                                                    {savingId === id ? "সেভ হচ্ছে..." : "সেভ করুন"}
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
+            return (
+                <div key={id} className="bg-white border border-slate-200 p-4 rounded-xl shadow-xs space-y-3">
+                    <div className="flex justify-between items-start gap-2 border-b border-slate-100 pb-2">
+                        <div>
+                            <div className="font-bold text-slate-900 text-sm">{student.studentNameBangla || "নাম বিহীন"}</div>
+                            <div className="text-[11px] text-slate-500">
+                                {getStudentClassDetails(student).className}
+                            </div>
+                        </div>
+                        <span className="bg-slate-100 text-slate-800 px-2.5 py-1 rounded-md border border-slate-200 text-xs font-mono font-bold shrink-0">
+                            রোল: {rollNo}
+                        </span>
                     </div>
 
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                            <label className="block text-slate-500 mb-1 font-semibold">Hall No (হল নম্বর)</label>
+                            <input
+                                type="text"
+                                placeholder="যেমন: হল-১"
+                                value={seatData[id]?.hallNo || ""}
+                                onChange={(e) => handleSeatInputChange(id, "hallNo", e.target.value)}
+                                className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 bg-white font-medium"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-slate-500 mb-1 font-semibold">Seat No (সিট নম্বর)</label>
+                            <input
+                                type="text"
+                                placeholder="যেমন: B-12"
+                                value={seatData[id]?.seatNo || ""}
+                                onChange={(e) => handleSeatInputChange(id, "seatNo", e.target.value)}
+                                className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 bg-white font-medium"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="pt-1">
+                        <button
+                            onClick={() => handleSaveSeatPlan(id)}
+                            disabled={savingId === id}
+                            className="w-full py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-lg shadow-xs transition-all disabled:opacity-50 cursor-pointer text-center"
+                        >
+                            {savingId === id ? "সেভ হচ্ছে..." : "সেভ করুন"}
+                        </button>
+                    </div>
+                </div>
+            );
+        })}
+    </div>
+
+    {/* ২. বড় স্ক্রিনের জন্য প্রথাগত টেবিল ভিউ (ট্যাবলেট ও ডেস্কটপ) */}
+    <div className="hidden sm:block w-full overflow-x-auto rounded-xl border border-slate-200 shadow-xs">
+        <table className="w-full text-left border-collapse min-w-[650px]">
+            <thead>
+                <tr className="bg-[#043e30] text-emerald-100 text-xs uppercase tracking-wider font-bold">
+                    <th className="py-3.5 px-4 w-1/6">Roll Number (রোল নম্বর)</th>
+                    <th className="py-3.5 px-4 w-2/6">Name (শিক্ষার্থীর নাম)</th>
+                    <th className="py-3.5 px-4 w-1/6">Hall No (হল নম্বর)</th>
+                    <th className="py-3.5 px-4 w-1/6">Seat No (সিট নম্বর)</th>
+                    <th className="py-3.5 px-4 text-center w-1/6">অ্যাকশন</th>
+                </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 text-sm font-medium text-slate-700 bg-white">
+                {filteredStudents.map((student, idx) => {
+                    const id = student._id?.$oid || student._id;
+            const rollNo = student.roll || student.studentId || (idx + 1);
+
+                    return (
+                        <tr key={id} className="hover:bg-emerald-50/40 transition-colors">
+                            {/* ১. রোল নম্বর */}
+                            <td className="py-3 px-4 font-bold text-slate-900">
+                                <span className="bg-slate-100 text-slate-800 px-2.5 py-1 rounded-md border border-slate-200 text-xs font-mono">
+                                    {rollNo}
+                                </span>
+                            </td>
+
+                            {/* ২. শিক্ষার্থীর নাম ও তথ্য */}
+                            <td className="py-3 px-4">
+                                <div className="font-bold text-slate-900">{student.studentNameBangla || "নাম বিহীন"}</div>
+                                <div className="text-[11px] text-slate-500">
+                                    {getStudentClassDetails(student).className}
+                                </div>
+                            </td>
+
+                            {/* ৩. হল নম্বর (ইনপুট বক্স) */}
+                            <td className="py-3 px-4">
+                                <input
+                                    type="text"
+                                    placeholder="যেমন: হল-১"
+                                    value={seatData[id]?.hallNo || ""}
+                                    onChange={(e) => handleSeatInputChange(id, "hallNo", e.target.value)}
+                                    className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 bg-white font-medium"
+                                />
+                            </td>
+
+                            {/* ৪. সিট নম্বর (ইনপুট বক্স) */}
+                            <td className="py-3 px-4">
+                                <input
+                                    type="text"
+                                    placeholder="যেমন: B-12"
+                                    value={seatData[id]?.seatNo || ""}
+                                    onChange={(e) => handleSeatInputChange(id, "seatNo", e.target.value)}
+                                    className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 bg-white font-medium"
+                                />
+                            </td>
+
+                            {/* সেভ বাটন */}
+                            <td className="py-3 px-4 text-center">
+                                <button
+                                    onClick={() => handleSaveSeatPlan(id)}
+                                    disabled={savingId === id}
+                                    className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-lg shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+                                >
+                                    {savingId === id ? "সেভ হচ্ছে..." : "সেভ করুন"}
+                                </button>
+                            </td>
+                        </tr>
+                    );
+                })}
+            </tbody>
+        </table>
+    </div>
+</div>
                 ) : (
 
                     /* ========================================================
@@ -498,7 +557,7 @@ export default function AllStudentsPage() {
                             <tbody className="divide-y divide-slate-200 text-sm font-medium text-slate-800">
                                 {filteredStudents.map((student, idx) => {
                                     const id = student._id?.$oid || student._id;
-                                    const rollNo = student.officeUse?.rollNumber || student.studentId || (idx + 1);
+                                    const rollNo = student.roll || student.studentId || (idx + 1);
                                     const details = getStudentClassDetails(student);
 
                                     return (
