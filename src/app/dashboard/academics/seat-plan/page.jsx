@@ -54,7 +54,7 @@ export default function AllStudentsPage() {
         } catch (err) {
             console.error("Error fetching students:", err);
             setError("সার্ভারের সাথে সংযোগ স্থাপন করা সম্ভব হয়নি।");
-        } fontally {
+        } finally {
             setLoading(false);
         }
     };
