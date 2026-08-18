@@ -837,12 +837,12 @@ export default function AdmitCardGenerator() {
                                             <div className="text-center flex flex-col items-center print:mt-auto relative">
                                                 <div className="relative w-28 h-5">
                                                     <Image
-                                                        src={card.signatures?.controller || "/principle's_signature.jpg"}
+                                                        src={"/anarul.png"}
                                                         alt="Controller Signature"
                                                         width={100}
                                                         height={40}
                                                         unoptimized
-                                                        className="absolute -top-2 right-6 h-6 w-12 object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45"
+                                                        className="absolute -top-1 right-6 h-6 w-12 object-contain mix-blend-multiply contrast-[800%] brightness-[60%] grayscale -rotate-90"
                                                     />
                                                 </div>
                                                 <div className="w-28 border-b border-gray-800 mb-0.5"></div>
@@ -855,12 +855,12 @@ export default function AdmitCardGenerator() {
                                             <div className="text-center flex flex-col items-center">
                                                 <div className="relative w-28 h-5 print:mt-auto relative">
                                                     <Image
-                                                        src={card.signatures?.principal || "/principle's_signature.jpg"}
+                                                        src={"/principle's_signature.jpg"}
                                                         alt="Principal Signature"
                                                         width={100}
                                                         height={40}
                                                         unoptimized
-                                                        className="absolute -top-2 right-6 h-6 w-12 object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45"
+                                                        className="absolute -top-1 right-6 h-6 w-12 object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45"
                                                     />
                                                 </div>
                                                 <div className="w-28 border-b border-gray-800 mb-0.5"></div>

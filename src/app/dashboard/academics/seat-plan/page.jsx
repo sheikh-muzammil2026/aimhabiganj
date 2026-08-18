@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { toast } from "react-toastify";
 
 export default function AllStudentsPage() {
     const [students, setStudents] = useState([]);
@@ -90,13 +91,13 @@ export default function AllStudentsPage() {
             const result = await response.json();
 
             if (response.ok && result.success) {
-                alert("সিট প্ল্যান সফলভাবে আপডেট করা হয়েছে!");
+                toast.success("সিট প্ল্যান সফলভাবে আপডেট করা হয়েছে!");
             } else {
-                alert(result.message || "সিট প্ল্যান সেভ করতে সমস্যা হয়েছে।");
+                toast.error(result.message || "সিট প্ল্যান সেভ করতে সমস্যা হয়েছে।");
             }
         } catch (err) {
             console.error("Error saving seat plan:", err);
-            alert("সার্ভার এরর! সিট প্ল্যান সেভ করা যায়নি।");
+            toast.error("সার্ভার এরর! সিট প্ল্যান সেভ করা যায়নি।");
         } finally {
             setSavingId(null);
         }
