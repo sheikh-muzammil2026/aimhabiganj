@@ -21,6 +21,7 @@ import {
 export default function Sidebar({ isOpen, setIsOpen }) {
     const pathname = usePathname();
     const [openDropdown, setOpenDropdown] = useState(null);
+    const [openSubmenu, setOpenSubmenu] = useState(null);
     
     // বটম মেনুর ড্রয়ার স্টেট ট্র্যাকিং
     const [activeMobileDrawer, setActiveMobileDrawer] = useState(null); // 'full' (অন্যান্য) অথবা নির্দিষ্ট item object
@@ -52,8 +53,14 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 { title: "পরীক্ষা ফি", href: "/dashboard/exam-fee" },
                 { title: "পরীক্ষা রুটিন", href: "/dashboard/academics/routine" },
                 { title: "এডমিট কার্ড", href: "/dashboard/academics/admit-card" },
-                { title: "সীট প্লান", href: "/dashboard/academics/seat-plan" },
-                { title: "সাক্ষরপত্র", href: "/dashboard/academics?attendance-sheet" },
+                {
+                    title: "সীট প্ল্যান",
+                    submenu: [
+                        { title: "সীট প্ল্যান এন্ট্রি", href: "/dashboard/academics/seat-plan" },
+                        { title: "সীট প্ল্যান সামারি", href: "/dashboard/academics/seat-plan-summary" },
+                        { title: "উপস্থিতি স্বাক্ষরপত্র", href: "/dashboard/academics/exam-attendance-sheet" }
+                    ]
+                },
                 { title: "নম্বর ইনপুট", href: "/dashboard/academics/results/input" },
                 { title: "ক্লাসভিত্তিক ফলাফল", href: "/dashboard/academics/results/class-wise-result" },
                 { title: "ব্যক্তিগত ফলাফল", href: "/dashboard/academics/results/individual-result" },
@@ -163,7 +170,19 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         if (!isPending) {
             allowedMenuItems.forEach((item) => {
                 if (item.dropdown) {
-                    const hasActiveChild = item.dropdown.some(sub => pathname.startsWith(sub.href.split('?')[0]));
+                    const hasActiveChild = item.dropdown.some(sub => {
+                        if (sub.href && pathname.startsWith(sub.href.split('?')[0])) {
+                            return true;
+                        }
+                        if (sub.submenu) {
+                            const hasActiveSubChild = sub.submenu.some(child => child.href && pathname.startsWith(child.href.split('?')[0]));
+                            if (hasActiveSubChild) {
+                                setOpenSubmenu(sub.title);
+                                return true;
+                            }
+                        }
+                        return false;
+                    });
                     if (hasActiveChild) {
                         setOpenDropdown(item.id);
                     }
@@ -261,13 +280,56 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
                                     {/* ড্রপডাউন মেনু */}
                                     {hasDropdown && (
-                                        <div className={`pl-4 space-y-1 border-l-2 border-emerald-800/50 ml-5 overflow-hidden transition-all duration-300 ${isDropdownOpen ? "max-h-[500px] opacity-100 py-1" : "max-h-0 opacity-0"}`}>
+                                        <div className={`pl-4 space-y-1 border-l-2 border-emerald-800/50 ml-5 overflow-hidden transition-all duration-300 ${isDropdownOpen ? "max-h-[800px] opacity-100 py-1" : "max-h-0 opacity-0"}`}>
                                             {item.dropdown.map((sub, subIdx) => {
+                                                if (sub.submenu) {
+                                                    const isSubmenuOpen = openSubmenu === sub.title;
+                                                    const isAnySubmenuChildActive = sub.submenu.some(child => pathname === child.href);
+
+                                                    return (
+                                                        <div key={subIdx} className="space-y-1">
+                                                            <button
+                                                                onClick={() => setOpenSubmenu(isSubmenuOpen ? null : sub.title)}
+                                                                className={`w-full flex items-center justify-between py-2 px-3 text-[11px] sm:text-xs rounded-lg transition-all duration-200 font-semibold ${
+                                                                    isSubmenuOpen || isAnySubmenuChildActive
+                                                                        ? "text-amber-350 bg-emerald-900/40 text-amber-300"
+                                                                        : "text-emerald-200/80 hover:text-white hover:bg-emerald-800/20"
+                                                                }`}
+                                                            >
+                                                                <span>📂 {sub.title}</span>
+                                                                <span className={`text-[8px] transition-transform duration-200 ${isSubmenuOpen ? "rotate-180" : ""}`}>
+                                                                    ▼
+                                                                </span>
+                                                            </button>
+
+                                                            {/* সাবমেনু আইটেমসমূহ */}
+                                                            <div className={`pl-3 space-y-1 ml-2 overflow-hidden transition-all duration-200 border-l border-emerald-700/50 ${isSubmenuOpen ? "max-h-[300px] opacity-100" : "max-h-0 opacity-0"}`}>
+                                                                {sub.submenu.map((subChild, childIdx) => {
+                                                                    const isChildActive = pathname === subChild.href;
+                                                                    return (
+                                                                        <Link
+                                                                            key={childIdx}
+                                                                            href={subChild.href}
+                                                                            className={`block py-1.5 px-3 text-[10px] sm:text-[11px] rounded-md transition-all duration-200 font-medium ${
+                                                                                isChildActive
+                                                                                    ? "text-amber-400 font-bold bg-emerald-900/60 border-l-2 border-amber-400 pl-2"
+                                                                                    : "text-emerald-300/70 hover:text-white hover:bg-emerald-800/10 hover:pl-4"
+                                                                            }`}
+                                                                        >
+                                                                            ✦ {subChild.title}
+                                                                        </Link>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                }
+
                                                 const isSubActive = pathname === sub.href;
                                                 return (
                                                     <Link
                                                         key={subIdx}
-                                                        href={sub.href}
+                                                        href={sub.href || "#"}
                                                         className={`block py-2 px-3 text-[11px] sm:text-xs rounded-lg transition-all duration-200 font-medium ${
                                                             isSubActive
                                                                 ? "text-amber-400 font-bold bg-emerald-900/60 border-l-2 border-amber-400 pl-2"
@@ -315,7 +377,17 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                     {mobileBottomNavItems.map((item) => {
                         const hasDropdown = item.dropdown && item.dropdown.length > 0;
                         const isDrawerActive = activeMobileDrawer?.id === item.id;
-                        const isRouteActive = item.href ? pathname === item.href : item.dropdown?.some(sub => pathname.startsWith(sub.href.split('?')[0]));
+                        const isRouteActive = item.href 
+                            ? pathname === item.href 
+                            : item.dropdown?.some(sub => {
+                                if (sub.href) {
+                                    return pathname.startsWith(sub.href.split('?')[0]);
+                                }
+                                if (sub.submenu) {
+                                    return sub.submenu.some(child => child.href && pathname.startsWith(child.href.split('?')[0]));
+                                }
+                                return false;
+                            });
 
                         const Content = (
                             <>
@@ -409,6 +481,53 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
                                 <div className="grid grid-cols-1 gap-2 pb-4">
                                     {activeMobileDrawer.dropdown.map((subItem, idx) => {
+                                        if (subItem.submenu) {
+                                            const isSubmenuOpen = openSubmenu === subItem.title;
+                                            const isAnyChildActive = subItem.submenu.some(child => pathname === child.href);
+                                            return (
+                                                <div key={idx} className="space-y-1">
+                                                    <button
+                                                        onClick={() => setOpenSubmenu(isSubmenuOpen ? null : subItem.title)}
+                                                        className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs font-bold transition-all ${
+                                                            isSubmenuOpen || isAnyChildActive
+                                                                ? "bg-emerald-900 text-amber-300 border-amber-400"
+                                                                : "bg-emerald-950/50 text-emerald-100 border-emerald-800/40"
+                                                        }`}
+                                                    >
+                                                        <div className="flex items-center gap-3">
+                                                            <Sparkles className="w-3.5 h-3.5 text-amber-300 flex-shrink-0" />
+                                                            <span>📂 {subItem.title}</span>
+                                                        </div>
+                                                        <span className={`text-[8px] transition-transform duration-200 ${isSubmenuOpen ? "rotate-180" : ""}`}>
+                                                            ▼
+                                                        </span>
+                                                    </button>
+                                                    
+                                                    {isSubmenuOpen && (
+                                                        <div className="pl-4 space-y-2 py-1">
+                                                            {subItem.submenu.map((subChild, childIdx) => {
+                                                                const isChildActive = pathname === subChild.href;
+                                                                return (
+                                                                    <Link
+                                                                        key={childIdx}
+                                                                        href={subChild.href}
+                                                                        onClick={() => setActiveMobileDrawer(null)}
+                                                                        className={`flex items-center gap-3 p-2.5 rounded-lg border text-[11px] font-semibold transition-all ${
+                                                                            isChildActive
+                                                                                ? "bg-amber-400 text-[#043e30] border-amber-400"
+                                                                                : "bg-emerald-950/30 text-emerald-200 border-emerald-800/30"
+                                                                        }`}
+                                                                    >
+                                                                        <span>✦ {subChild.title}</span>
+                                                                    </Link>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        }
+
                                         const isSubActive = pathname === subItem.href;
                                         return (
                                             <Link
@@ -477,11 +596,55 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                                         {isDropdownOpen && (
                                                             <div className="bg-emerald-950/90 border-t border-emerald-800/40 divide-y divide-emerald-900/40">
                                                                 {item.dropdown.map((subItem, subIdx) => {
+                                                                    if (subItem.submenu) {
+                                                                        const isSubmenuOpen = openSubmenu === subItem.title;
+                                                                        const isAnyChildActive = subItem.submenu.some(child => pathname === child.href);
+
+                                                                        return (
+                                                                            <div key={subIdx} className="space-y-1 pl-4 pr-2 py-1 bg-emerald-950/40">
+                                                                                <button
+                                                                                    onClick={() => setOpenSubmenu(isSubmenuOpen ? null : subItem.title)}
+                                                                                    className={`w-full flex items-center justify-between p-2 text-xs font-bold transition-colors ${
+                                                                                        isSubmenuOpen || isAnyChildActive ? "text-amber-300" : "text-emerald-200"
+                                                                                    }`}
+                                                                                >
+                                                                                    <div className="flex items-center gap-2">
+                                                                                        <span>📂 {subItem.title}</span>
+                                                                                    </div>
+                                                                                    <span className={`text-[8px] transition-transform duration-200 ${isSubmenuOpen ? "rotate-180" : ""}`}>
+                                                                                        ▼
+                                                                                    </span>
+                                                                                </button>
+
+                                                                                {isSubmenuOpen && (
+                                                                                    <div className="pl-4 space-y-1 pb-1">
+                                                                                        {subItem.submenu.map((subChild, childIdx) => {
+                                                                                            const isChildActive = pathname === subChild.href;
+                                                                                            return (
+                                                                                                <Link
+                                                                                                    key={childIdx}
+                                                                                                    href={subChild.href}
+                                                                                                    onClick={() => setActiveMobileDrawer(null)}
+                                                                                                    className={`flex items-center gap-2 p-2 text-[11px] font-medium transition-colors ${
+                                                                                                        isChildActive ? "text-amber-400 font-bold bg-emerald-900/30" : "text-emerald-300/80 hover:text-white"
+                                                                                                    }`}
+                                                                                                >
+                                                                                                    <Sparkles className="w-2.5 h-2.5 text-amber-400" />
+                                                                                                    {subChild.title}
+                                                                                                </Link>
+                                                                                            );
+                                                                                        })}
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                        );
+                                                                    }
+
                                                                     const isSubActive = pathname === subItem.href;
                                                                     return (
                                                                         <Link
                                                                             key={subIdx}
-                                                                            href={subItem.href}
+                                                                            href={subItem.href || "#"}
                                                                             onClick={() => setActiveMobileDrawer(null)}
                                                                             className={`flex items-center gap-2 p-3 pl-8 text-xs font-medium transition-colors ${
                                                                                 isSubActive ? "text-amber-400 font-bold bg-emerald-900/50" : "text-emerald-200/80 hover:text-white"
