@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 export default function ExamAttendanceSheet() {
     // নির্বাচন করার জন্য স্টেটসমূহ
@@ -8,7 +8,7 @@ export default function ExamAttendanceSheet() {
         'প্লে',
         'নার্সারি',
         'প্রথম',
-        'দ্বিতীয়',
+        'দ্বিতীয়',
         'তৃতীয়',
         'চতুর্থ',
         'পঞ্চম',
@@ -30,13 +30,13 @@ export default function ExamAttendanceSheet() {
     const [metaData, setMetaData] = useState({
         className: '',
         examName: '',
-        englishYear: '২০২৬-২০২৬',
+        englishYear: '২০২৬',
         hijriYear: '১৪৪৭ - ১৪৪৮',
     });
     const [subjects, setSubjects] = useState([]);
     const [students, setStudents] = useState([]);
 
-    // প্রথমে পরীক্ষার তালিকা নিয়ে আসা
+    // প্রথমে পরীক্ষার তালিকা নিয়ে আসা
     useEffect(() => {
         const fetchExams = async () => {
             try {
@@ -44,7 +44,6 @@ export default function ExamAttendanceSheet() {
                 const result = await response.json();
                 if (result.success && Array.isArray(result.data) && result.data.length > 0) {
                     setExams(result.data);
-                    // ডিফল্টভাবে প্রথম পরীক্ষা সিলেক্ট করা
                     setSelectedExam(result.data[0]);
                 } else {
                     setExams(['প্রথম সাময়িক পরীক্ষা', 'দ্বিতীয় সাময়িক পরীক্ষা', 'বার্ষিক পরীক্ষা']);
@@ -59,14 +58,7 @@ export default function ExamAttendanceSheet() {
         fetchExams();
     }, []);
 
-    // ক্লাস বা পরীক্ষা পরিবর্তন হলে ডাটা লোড করা
-    useEffect(() => {
-        if (selectedExam && selectedClass) {
-            fetchAttendanceData();
-        }
-    }, [selectedExam, selectedClass]);
-
-    const fetchAttendanceData = async () => {
+    const fetchAttendanceData = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -93,37 +85,120 @@ export default function ExamAttendanceSheet() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [selectedClass, selectedExam]);
 
-    // প্রিন্ট ফাংশন
+    useEffect(() => {
+        if (selectedExam && selectedClass) {
+            fetchAttendanceData();
+        }
+    }, [selectedExam, selectedClass, fetchAttendanceData]);
+
     const handlePrint = () => {
         window.print();
     };
 
-    return (
-        <div className="bg-slate-100 min-h-screen p-2 sm:p-6 flex flex-col items-center">
+    const getSubjectStyles = (count) => {
+        if (count > 10) {
+            return {
+                fontSizeClass: 'text-[9px] sm:text-[10px] leading-tight',
+                subTitleSizeClass: 'text-[8px] sm:text-[9px]',
+                paddingClass: 'p-0.5',
+            };
+        } else if (count > 7) {
+            return {
+                fontSizeClass: 'text-[11px] sm:text-[12px] leading-tight',
+                subTitleSizeClass: 'text-[9px] sm:text-[10px]',
+                paddingClass: 'p-1',
+            };
+        } else {
+            return {
+                fontSizeClass: 'text-[13px] sm:text-[14px]',
+                subTitleSizeClass: 'text-[11px] sm:text-[12px]',
+                paddingClass: 'p-1.5',
+            };
+        }
+    };
 
-            {/* Landscape Print Style Injector */}
+    const getStudentNameFontSize = (name, isCompact) => {
+        if (!name) return isCompact ? 'text-[10px]' : 'text-xs sm:text-sm';
+        const length = name.length;
+        if (isCompact) {
+            if (length > 25) return 'text-[8px] leading-tight';
+            if (length > 18) return 'text-[9px] leading-tight';
+            return 'text-[10px] leading-tight';
+        } else {
+            if (length > 30) return 'text-[9px] leading-tight';
+            if (length > 22) return 'text-[10px] leading-tight';
+            if (length > 16) return 'text-[11px] leading-tight';
+            return 'text-xs sm:text-sm';
+        }
+    };
+
+    const { fontSizeClass, subTitleSizeClass, paddingClass } = getSubjectStyles(subjects.length);
+
+    // লজিক: ১৪ বা তার বেশি স্টুডেন্ট থাকলে আলাদা পেজ হবে না, সব ১ পেজে ফিট করবে
+    const isSinglePageMode = students.length >= 14;
+
+    const chunkArray = (arr, size) => {
+        const chunks = [];
+        for (let i = 0; i < arr.length; i += size) {
+            chunks.push(arr.slice(i, i + size));
+        }
+        return chunks;
+    };
+
+    // ১৪ জনের কম হলে প্রতি পেজে ১০ জন করে থাকবে
+    const studentChunks = isSinglePageMode ? [students] : chunkArray(students, 10);
+
+    return (
+        <div className="bg-slate-100 min-h-screen p-2 sm:p-6 flex flex-col items-center print:bg-white print:p-0 print:m-0 print:block print:min-h-0 print:w-full">
+
+            {/* A4 Landscape Print Style Injector */}
             <style jsx global>{`
                 @media print {
                     @page {
-                        size: landscape;
-                        margin: 10mm;
+                        size: A4 landscape;
+                        margin: ${isSinglePageMode ? '5mm' : '8mm'};
                     }
-                    body {
+                    html, body {
                         background: white !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        height: auto !important;
+                        overflow: visible !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                    .print-page {
+                        page-break-before: always !important;
+                        break-before: page !important;
+                        page-break-after: always !important;
+                        break-after: page !important;
+                        page-break-inside: avoid !important;
+                        break-inside: avoid !important;
+                        box-sizing: border-box !important;
+                        width: 100% !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                    }
+                    .print-page:first-child {
+                        page-break-before: auto !important;
+                        break-before: auto !important;
+                    }
+                    .print-page:last-child {
+                        page-break-after: auto !important;
+                        break-after: auto !important;
                     }
                 }
             `}</style>
 
-            {/* Action Buttons Bar (প্রিন্ট করার সময় এটি আসবে না) */}
+            {/* Action Buttons Bar */}
             <div className="print:hidden w-full max-w-[1150px] mb-4 bg-white p-4 rounded-xl shadow-md flex flex-wrap justify-between items-center gap-4">
                 <div className="flex flex-wrap items-center gap-4">
                     <div className="text-sm font-semibold text-slate-700">
                         উপস্থিতি স্বাক্ষরপত্র শিট
                     </div>
-                    
-                    {/* শ্রেণি ড্রপডাউন */}
+
                     <div>
                         <label className="text-xs text-slate-500 block">শ্রেণি:</label>
                         <select
@@ -137,7 +212,6 @@ export default function ExamAttendanceSheet() {
                         </select>
                     </div>
 
-                    {/* পরীক্ষা ড্রপডাউন */}
                     <div>
                         <label className="text-xs text-slate-500 block">পরীক্ষা:</label>
                         <select
@@ -156,9 +230,8 @@ export default function ExamAttendanceSheet() {
                     <button
                         onClick={handlePrint}
                         disabled={students.length === 0}
-                        className={`text-white px-5 py-2 rounded-lg text-sm font-medium transition shadow flex items-center gap-2 cursor-pointer ${
-                            students.length === 0 ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
-                        }`}
+                        className={`text-white px-5 py-2 rounded-lg text-sm font-medium transition shadow flex items-center gap-2 cursor-pointer ${students.length === 0 ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+                            }`}
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
@@ -168,108 +241,106 @@ export default function ExamAttendanceSheet() {
                 </div>
             </div>
 
-            {/* Main Printable Container */}
-            <div className="bg-white text-black p-6 rounded-sm shadow-xl w-full max-w-[1150px] border border-gray-300 print:shadow-none print:border-none print:p-0 print:m-0 print:w-full">
-                
-                {/* loading & error view within printable area wrapper to avoid blank print */}
-                {loading ? (
-                    <div className="flex justify-center items-center py-20">
-                        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-slate-900"></div>
-                        <span className="ml-3 text-slate-700 font-semibold">তথ্য লোড হচ্ছে...</span>
-                    </div>
-                ) : error ? (
-                    <div className="text-center py-20 text-red-500 font-semibold">
-                        ⚠️ {error}
-                    </div>
-                ) : students.length === 0 ? (
-                    <div className="text-center py-20 text-slate-500 font-semibold">
-                        📭 এই শ্রেণিতে কোনো শিক্ষার্থীর তথ্য পাওয়া যায়নি।
-                    </div>
-                ) : (
-                    <>
-                        {/* Header Section (Logo + Banner) */}
-                        <div className="flex justify-between items-center border-b-2 border-black pb-2 mb-3">
-                            {/* Logo on Left */}
-                            <div className="w-[130px] h-[100px] relative flex-shrink-0">
-                                <img
-                                    src="/aimlogo1.png"
-                                    alt="Logo"
-                                    className="w-full h-full object-contain"
-                                />
-                            </div>
+            {loading ? (
+                <div className="bg-white p-6 rounded-xl shadow-md w-full max-w-[1150px] border border-gray-200 flex justify-center items-center py-20 print:hidden">
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-slate-900"></div>
+                    <span className="ml-3 text-slate-700 font-semibold">তথ্য লোড হচ্ছে...</span>
+                </div>
+            ) : error ? (
+                <div className="bg-white p-6 rounded-xl shadow-md w-full max-w-[1150px] border border-gray-200 text-center py-20 text-red-500 font-semibold print:hidden">
+                    ⚠️ {error}
+                </div>
+            ) : students.length === 0 ? (
+                <div className="bg-white p-6 rounded-xl shadow-md w-full max-w-[1150px] border border-gray-200 text-center py-20 text-slate-500 font-semibold print:hidden">
+                    📭 এই শ্রেণিতে কোনো শিক্ষার্থীর তথ্য পাওয়া যায়নি।
+                </div>
+            ) : (
+                studentChunks.map((chunk, chunkIdx) => (
+                    <div
+                        key={chunkIdx}
+                        className={`print-page bg-white text-black rounded-sm shadow-xl w-full max-w-[1150px] border border-gray-300 print:shadow-none print:border-none print:p-0 print:m-0 print:w-full mb-6 ${isSinglePageMode ? 'p-2' : 'p-6'
+                            }`}
+                    >
+                        {/* ১৪ বা তার বেশি স্টুডেন্ট থাকলে Header ও Logo সম্পূর্ণ হাইড থাকবে */}
+                        {!isSinglePageMode && (
+                            <div className="flex justify-between items-center border-b-2 border-black pb-2 mb-3">
+                                <div className="w-[130px] h-[100px] relative flex-shrink-0">
+                                    <img
+                                        src="/aimlogo1.png"
+                                        alt="Logo"
+                                        className="w-full h-full object-contain"
+                                    />
+                                </div>
 
-                            {/* Banner / Institution Info on Right */}
-                            <div className="flex-grow flex justify-end items-center">
-                                <img
-                                    src="/banner.png"
-                                    alt="Institution Banner"
-                                    className="max-h-[100px] object-contain"
-                                />
+                                <div className="flex-grow flex justify-end items-center">
+                                    <img
+                                        src="/banner.png"
+                                        alt="Institution Banner"
+                                        className="max-h-[100px] object-contain"
+                                    />
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         {/* Sub Header Meta Info */}
-                        <div className="text-center mb-2 font-semibold text-[15px] sm:text-[16px] tracking-wide text-gray-900">
+                        <div className={`text-center font-semibold text-gray-900 ${isSinglePageMode ? 'text-xs mb-1' : 'text-[15px] sm:text-[16px] mb-2'
+                            }`}>
                             শ্রেণি: <span className="font-bold">{metaData.className}</span> - {metaData.examName} {metaData.englishYear} ইং / {metaData.hijriYear} হি শিক্ষাবর্ষ
                         </div>
 
                         {/* Title */}
-                        <h2 className="text-center font-bold text-xl sm:text-2xl mb-4 text-black underline underline-offset-4 decoration-1">
+                        <h2 className={`text-center font-bold text-black underline underline-offset-4 decoration-1 ${isSinglePageMode ? 'text-lg mb-2' : 'text-xl sm:text-2xl mb-4'
+                            }`}>
                             উপস্থিতি স্বাক্ষরপত্র
                         </h2>
 
                         {/* Attendance Grid Table */}
-                        <div className="overflow-x-auto">
-                            <table className="w-full border-collapse border border-black text-xs sm:text-sm text-black">
+                        <div className="overflow-x-auto w-full">
+                            <table className="w-full border-collapse border border-black text-xs text-black table-fixed">
                                 <thead>
                                     <tr className="bg-gray-200 print:bg-gray-200">
-                                        <th className="border border-black p-1.5 w-10 text-center font-bold">রোল</th>
-                                        <th className="border border-black p-1.5 w-16 text-center font-bold">আইডি</th>
-                                        <th className="border border-black p-1.5 min-w-[180px] text-center font-bold">পরীক্ষার্থীর নাম</th>
+                                        <th className="border border-black p-1 w-10 text-center font-bold">রোল</th>
+                                        <th className="border border-black p-1 w-12 sm:w-14 text-center font-bold">আইডি</th>
+                                        <th className="border border-black p-1 w-32 sm:w-40 text-center font-bold">পরীক্ষার্থীর নাম</th>
 
-                                        {/* Dynamic Subject Headers */}
                                         {subjects.length > 0 ? (
                                             subjects.map((sub) => (
-                                                <th key={sub.id} className="border border-black p-1.5 text-center font-normal min-w-[140px]">
-                                                    <div className="font-bold text-[13px]">{sub.name}</div>
-                                                    <div className="text-[11px] text-gray-800">{sub.date}</div>
+                                                <th key={sub.id} className={`border border-black ${paddingClass} text-center font-normal break-words`}>
+                                                    <div className={`font-bold ${fontSizeClass}`}>{sub.name}</div>
+                                                    <div className={`${subTitleSizeClass} text-gray-800`}>{sub.date}</div>
                                                 </th>
                                             ))
                                         ) : (
-                                            // Fallback header columns if no subjects found in routine
-                                            <th className="border border-black p-1.5 text-center font-bold min-w-[200px]">
-                                                বিষয় ও তারিখ (রুটিন পাওয়া যায়নি)
+                                            <th className="border border-black p-1 text-center font-bold">
+                                                বিষয় ও তারিখ
                                             </th>
                                         )}
                                     </tr>
                                 </thead>
 
                                 <tbody>
-                                    {students.map((student, idx) => (
-                                        <tr key={idx} className="h-10">
-                                            {/* Roll */}
+                                    {chunk.map((student, idx) => (
+                                        <tr key={idx} className={isSinglePageMode ? 'h-6 sm:h-7' : 'h-9'}>
                                             <td className="border border-black px-1 text-center font-medium">
                                                 {student.roll}
                                             </td>
 
-                                            {/* ID */}
                                             <td className="border border-black px-1 text-center font-medium">
                                                 {student.studentId}
                                             </td>
 
-                                            {/* Student Name */}
-                                            <td className="border border-black px-2 font-semibold text-left">
-                                                {student.studentName}
+                                            <td className="border border-black px-1 font-semibold text-left align-middle">
+                                                <div className={`${getStudentNameFontSize(student.studentName, isSinglePageMode)} break-words leading-tight`}>
+                                                    {student.studentName}
+                                                </div>
                                             </td>
 
-                                            {/* Blank signature boxes for students to sign manually */}
                                             {subjects.length > 0 ? (
                                                 subjects.map((sub) => (
                                                     <td
                                                         key={sub.id}
                                                         className="border border-black text-center bg-white"
                                                     >
-                                                        {/* Blank Area for Signature */}
                                                     </td>
                                                 ))
                                             ) : (
@@ -280,10 +351,9 @@ export default function ExamAttendanceSheet() {
                                 </tbody>
                             </table>
                         </div>
-                    </>
-                )}
-
-            </div>
+                    </div>
+                ))
+            )}
         </div>
     );
 }
