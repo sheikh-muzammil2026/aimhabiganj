@@ -22,10 +22,7 @@ export default function SeatPlanSummary() {
         'অষ্টম',
         'প্লে',
         'নার্সারি',
-        'কায়দা/আমপারা',
-        'নাজেরা',
-        'সবক',
-        'শুনানি'
+
     ];
 
     // প্রিন্ট ডেট ফরম্যাট করার হেলপার
@@ -58,11 +55,16 @@ export default function SeatPlanSummary() {
     // বানানের তারতম্য সত্ত্বেও শ্রেণির সংখ্যা ম্যাচ করার হেলপার
     const getCountForClass = (classCounts, className) => {
         if (!classCounts) return 0;
-        if (classCounts[className] !== undefined) {
-            return classCounts[className];
-        }
-        // বানান নরমালাইজ করা (যেমন: দ্বিতীয় বনাম দ্বিতীয়)
-        const normalize = (str) => str.replace(/ী/g, 'ি').replace(/তৃ/g, 'তৃ');
+        
+        // normalizer supporting NFC normal form, and spelling/character fixes
+        const normalize = (str) => {
+            if (!str) return '';
+            return String(str)
+                .normalize('NFC')
+                .replace(/ী/g, 'ি')
+                .replace(/তৃ/g, 'তৃ');
+        };
+
         const normalizedName = normalize(className);
         for (const key of Object.keys(classCounts)) {
             if (normalize(key) === normalizedName) {
