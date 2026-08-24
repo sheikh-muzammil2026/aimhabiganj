@@ -98,7 +98,7 @@ export default function ExamAttendanceSheet() {
     };
 
     const getSubjectStyles = (count) => {
-        if (count > 10) {
+        if (count > 12) {
             return {
                 fontSizeClass: 'text-[9px] sm:text-[10px] leading-tight',
                 subTitleSizeClass: 'text-[8px] sm:text-[9px]',
