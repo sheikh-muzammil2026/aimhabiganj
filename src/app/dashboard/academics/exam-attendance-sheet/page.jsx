@@ -98,7 +98,7 @@ export default function ExamAttendanceSheet() {
     };
 
     const getSubjectStyles = (count) => {
-        if (count > 12) {
+        if (count > 10) {
             return {
                 fontSizeClass: 'text-[9px] sm:text-[10px] leading-tight',
                 subTitleSizeClass: 'text-[8px] sm:text-[9px]',
@@ -137,7 +137,7 @@ export default function ExamAttendanceSheet() {
     const { fontSizeClass, subTitleSizeClass, paddingClass } = getSubjectStyles(subjects.length);
 
     // লজিক: ১৪ বা তার বেশি স্টুডেন্ট থাকলে আলাদা পেজ হবে না, সব ১ পেজে ফিট করবে
-    const isSinglePageMode = students.length >= 14;
+    const isSinglePageMode = students.length >= 9;
 
     const chunkArray = (arr, size) => {
         const chunks = [];
@@ -148,7 +148,7 @@ export default function ExamAttendanceSheet() {
     };
 
     // ১৪ জনের কম হলে প্রতি পেজে ১০ জন করে থাকবে
-    const studentChunks = isSinglePageMode ? [students] : chunkArray(students, 10);
+    const studentChunks = isSinglePageMode ? [students] : chunkArray(students, 13);
 
     return (
         <div className="bg-slate-100 min-h-screen p-2 sm:p-6 flex flex-col items-center print:bg-white print:p-0 print:m-0 print:block print:min-h-0 print:w-full">
