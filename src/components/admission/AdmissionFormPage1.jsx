@@ -600,8 +600,7 @@ export default function AdmissionFormPage1({ formData, handleChange, handleNeste
                       <option value="">বাছাই করুন</option>
                       <option value="সবক">সবক</option>
                       <option value="শুনানি">শুনানি</option>
-                      <option value="কায়দা/আমপারা">কায়দা/আমপারা</option>
-                      <option value="নাজেরা">নাজেরা</option>
+                      
                     </select>
                   </td>
                   <td className="p-1.5 print:p-1">
@@ -721,8 +720,7 @@ export default function AdmissionFormPage1({ formData, handleChange, handleNeste
                     <option value="">শ্রেণি বাছাই</option>
                     <option value="সবক">সবক</option>
                     <option value="শুনানি">শুনানি</option>
-                    <option value="কায়দা/আমপারা">কায়দা/আমপারা</option>
-                    <option value="নাজেরা">নাজেরা</option>
+                
                   </select>
                   <select name="divisionHifz.type" value={formData.divisionHifz?.type || ""} onChange={handleChange} className="border border-gray-300 rounded p-1 text-xs bg-white w-full">
                     <option value="">ধরণ বাছাই</option>
