@@ -14,6 +14,7 @@ import Overview from './components/Overview';
 import IncomeEntry from './components/IncomeEntry';
 import ExpenseEntry from './components/ExpenseEntry';
 import MonthlyReport from './components/MonthlyReport';
+import { MdEmail, MdInstallMobile } from 'react-icons/md';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL || process.env.NEXT_PUBLIC_SERVER_API || 'http://localhost:8000';
 
@@ -578,8 +579,8 @@ export default function FinanceDashboard() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`py-2.5 sm:py-3 px-3 sm:px-5 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-all duration-200 rounded-t-lg shrink-0 ${activeTab === tab.id
-                  ? 'border-emerald-750 text-emerald-950 bg-emerald-50/50'
-                  : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50'
+                ? 'border-emerald-750 text-emerald-950 bg-emerald-50/50'
+                : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50'
                 }`}
             >
               {tab.label}
@@ -816,9 +817,25 @@ function VoucherPrintLayout({ tx, formatBanglaNumber, parsePayerName }) {
     <div className="space-y-4 text-black bg-white w-full max-w-full font-sans leading-relaxed text-xs">
       {/* Organisation Header */}
       <div className="text-center border-b-2 border-slate-400 pb-2">
-        <h2 className="text-lg sm:text-xl font-black text-emerald-955">আস-সালাম আইডিয়াল মাদরাসা (এইম)</h2>
-        <p className="text-[10px] text-slate-500 font-bold mt-0.5">হবিগঞ্জ সদর, হবিগঞ্জ</p>
-        <p className="text-[9px] text-slate-400 font-medium">মোবাইল: ০১৭১২-৩৪৫৬৭৮ | ইমেইল: info@aim.com</p>
+        <h2 className="text-lg sm:text-xl font-black text-emerald-900">
+          আস-সালাম আইডিয়াল মাদরাসা (এইম)
+        </h2>
+        <p className="text-[10px] text-slate-500 font-bold mt-0.5">
+          হবিগঞ্জ সদর, হবিগঞ্জ
+        </p>
+
+        {/* ফোন ও ইমেইল সেকশন */}
+        <div className="flex items-center justify-center gap-3 text-[10px] text-slate-500 font-medium mt-1">
+          <span className="flex items-center gap-1">
+            <MdInstallMobile className="text-emerald-700 text-xs shrink-0" />
+            ০১৭১২-৩৪৫৬৭৮
+          </span>
+          <span className="text-slate-300">|</span>
+          <span className="flex items-center gap-1">
+            <MdEmail className="text-emerald-700 text-xs shrink-0" />
+            aimhabiganj@gmail.com
+          </span>
+        </div>
 
         <div className="inline-block border border-emerald-950 font-black text-[10px] uppercase px-4 py-1 rounded-md mt-2 tracking-wider bg-slate-50">
           {title}
@@ -832,7 +849,7 @@ function VoucherPrintLayout({ tx, formatBanglaNumber, parsePayerName }) {
           <span className="font-mono font-black text-emerald-955">{idValue}</span>
         </div>
         <div className="text-right">
-          <span className="font-bold text-slate-500">তারিখ (Date): </span>
+          <span className="font-bold text-slate-500">তারিখ: </span>
           <span className="font-bold">{formatBanglaNumber(dateValue)}</span>
         </div>
 
@@ -921,18 +938,18 @@ function VoucherPrintLayout({ tx, formatBanglaNumber, parsePayerName }) {
           ))}
           {isIncome && tx.discount > 0 && (
             <>
-              <tr className="bg-slate-50/50 font-bold">
-                <td colSpan="2" className="p-1.5 border border-slate-300 text-right">আসল মোট (Subtotal):</td>
+              <tr className="bg-slate-50/50 font-bold print:hidden">
+                <td colSpan="2" className="p-1.5 border border-slate-300 text-right">আসল মোট:</td>
                 <td className="p-1.5 border border-slate-300 text-right">৳ {formatBanglaNumber((tx.totalIncome + tx.discount).toLocaleString('bn-BD'))}</td>
               </tr>
-              <tr className="bg-slate-50/50 text-rose-800 font-bold">
-                <td colSpan="2" className="p-1.5 border border-slate-300 text-right font-bold">ছাড় (Discount):</td>
+              <tr className="bg-slate-50/50 text-rose-800 font-bold print:hidden">
+                <td colSpan="2" className="p-1.5 border border-slate-300 text-right font-bold">ছাড়:</td>
                 <td className="p-1.5 border border-slate-300 text-right font-bold">- ৳ {formatBanglaNumber(tx.discount.toLocaleString('bn-BD'))}</td>
               </tr>
             </>
           )}
           <tr className="bg-slate-50/50 font-black">
-            <td colSpan="2" className="p-1.5 border border-slate-300 text-right">সর্বমোট (Total Amount):</td>
+            <td colSpan="2" className="p-1.5 border border-slate-300 text-right">সর্বমোট:</td>
             <td className="p-1.5 border border-slate-300 text-right text-xs">৳ {formatBanglaNumber(totalAmount.toLocaleString('bn-BD'))}</td>
           </tr>
         </tbody>
@@ -954,11 +971,11 @@ function VoucherPrintLayout({ tx, formatBanglaNumber, parsePayerName }) {
         </div>
         <div className="border-t border-slate-400 pt-1.5">
           <p>হিসাবরক্ষক</p>
-          <span className="text-[7px] text-slate-400 block font-normal mt-0.5">ক্যাশিয়ার / মুহাসিব</span>
+          <span className="text-[7px] text-slate-400 block font-normal mt-0.5">ক্যাশিয়ার</span>
         </div>
         <div className="border-t border-slate-400 pt-1.5">
           <p>অনুমোদনকারী</p>
-          <span className="text-[7px] text-slate-400 block font-normal mt-0.5">মুহতামিম / অধ্যক্ষ</span>
+          <span className="text-[7px] text-slate-400 block font-normal mt-0.5">প্রিন্সিপাল</span>
         </div>
       </div>
     </div>
@@ -986,7 +1003,7 @@ function ReportPrintLayout({ title, period, data, formatBanglaNumber, getMonthLa
         {/* Income Column */}
         <div className="bg-white p-4 space-y-4">
           <h4 className="text-xs font-extrabold text-emerald-900 uppercase tracking-widest border-b border-slate-200 pb-2 flex justify-between">
-            <span>📥 আয়ের খাতসমূহ (Income Sector)</span>
+            <span>📥 আয়ের খাতসমূহ</span>
             <span className="text-[9px] text-slate-400">টাকা (৳)</span>
           </h4>
 
@@ -1007,7 +1024,7 @@ function ReportPrintLayout({ title, period, data, formatBanglaNumber, getMonthLa
         {/* Expense Column */}
         <div className="bg-white p-4 space-y-4">
           <h4 className="text-xs font-extrabold text-rose-900 uppercase tracking-widest border-b border-slate-200 pb-2 flex justify-between">
-            <span>📤 ব্যয়ের খাতসমূহ (Expense Sector)</span>
+            <span>📤 ব্যয়ের খাতসমূহ</span>
             <span className="text-[9px] text-slate-400">টাকা (৳)</span>
           </h4>
 
@@ -1046,7 +1063,7 @@ function ReportPrintLayout({ title, period, data, formatBanglaNumber, getMonthLa
       <div className="grid grid-cols-3 gap-6 pt-16 text-center text-[10px] font-bold text-slate-500">
         <div className="border-t border-slate-300 pt-2">
           <p>হিসাবরক্ষক</p>
-          <span className="text-[8px] text-slate-400 block font-normal mt-0.5">ক্যাশিয়ার / মুহাসিব</span>
+          <span className="text-[8px] text-slate-400 block font-normal mt-0.5">ক্যাশিয়ার</span>
         </div>
         <div className="border-t border-slate-300 pt-2">
           <p>যাচাইকারী</p>
@@ -1054,7 +1071,7 @@ function ReportPrintLayout({ title, period, data, formatBanglaNumber, getMonthLa
         </div>
         <div className="border-t border-slate-300 pt-2">
           <p>অনুমোদনকারী</p>
-          <span className="text-[8px] text-slate-400 block font-normal mt-0.5">মুহতামিম / অধ্যক্ষ</span>
+          <span className="text-[8px] text-slate-400 block font-normal mt-0.5">প্রিন্সিপাল</span>
         </div>
       </div>
     </div>

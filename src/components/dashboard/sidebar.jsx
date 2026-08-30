@@ -218,7 +218,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             {/* ========================================================= */}
             {/* 1. DESKTOP SIDEBAR (বড় স্ক্রিনে দেখাবে: lg:flex)          */}
             {/* ========================================================= */}
-            <aside className="hidden lg:flex sticky top-0 left-0 w-66 bg-[#043e30] text-gray-100 h-screen flex-col border-r border-emerald-800/40 z-50">
+            <aside className="hidden lg:flex sticky top-0 left-0 w-66 bg-[#043e30] text-gray-100 h-screen flex-col border-r border-emerald-800/40 z-50 print:hidden">
                 {/* ব্র্যান্ড লোগো */}
                 <div className="p-4 border-b border-emerald-800/40 flex items-center justify-between bg-emerald-950/30">
                     <Link href="/" className="group flex items-center gap-2.5 focus:outline-none">
@@ -252,8 +252,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                         <button
                                             onClick={() => setOpenDropdown(isDropdownOpen ? null : item.id)}
                                             className={`w-full flex items-center justify-between px-3 py-2.5 text-xs sm:text-sm rounded-xl transition-all duration-300 group/btn ${isDropdownOpen
-                                                    ? "bg-emerald-900/80 text-amber-300 shadow-inner border-l-4 border-amber-400 pl-2"
-                                                    : "text-emerald-100/90 hover:bg-emerald-800/40 hover:text-white hover:translate-x-1"
+                                                ? "bg-emerald-900/80 text-amber-300 shadow-inner border-l-4 border-amber-400 pl-2"
+                                                : "text-emerald-100/90 hover:bg-emerald-800/40 hover:text-white hover:translate-x-1"
                                                 }`}
                                         >
                                             <div className="flex items-center gap-3">
@@ -268,8 +268,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                         <Link
                                             href={item.href || "#"}
                                             className={`flex items-center gap-3 px-3 py-2.5 text-xs sm:text-sm rounded-xl transition-all duration-300 group/link ${isActive
-                                                    ? "bg-amber-400 text-[#043e30] font-black shadow-md border-r-4 border-emerald-900 scale-[1.02]"
-                                                    : "text-emerald-100/90 hover:bg-emerald-800/40 hover:text-white hover:translate-x-1"
+                                                ? "bg-amber-400 text-[#043e30] font-black shadow-md border-r-4 border-emerald-900 scale-[1.02]"
+                                                : "text-emerald-100/90 hover:bg-emerald-800/40 hover:text-white hover:translate-x-1"
                                                 }`}
                                         >
                                             <span className="text-base transform group-hover/link:scale-110 transition-transform">{item.icon}</span>
@@ -290,8 +290,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                                             <button
                                                                 onClick={() => setOpenSubmenu(isSubmenuOpen ? null : sub.title)}
                                                                 className={`w-full flex items-center justify-between py-2 px-3 text-[11px] sm:text-xs rounded-lg transition-all duration-200 font-semibold ${isSubmenuOpen || isAnySubmenuChildActive
-                                                                        ? "text-amber-350 bg-emerald-900/40 text-amber-300"
-                                                                        : "text-emerald-200/80 hover:text-white hover:bg-emerald-800/20"
+                                                                    ? "text-amber-350 bg-emerald-900/40 text-amber-300"
+                                                                    : "text-emerald-200/80 hover:text-white hover:bg-emerald-800/20"
                                                                     }`}
                                                             >
                                                                 <span>📂 {sub.title}</span>
@@ -309,8 +309,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                                                             key={childIdx}
                                                                             href={subChild.href}
                                                                             className={`block py-1.5 px-3 text-[10px] sm:text-[11px] rounded-md transition-all duration-200 font-medium ${isChildActive
-                                                                                    ? "text-amber-400 font-bold bg-emerald-900/60 border-l-2 border-amber-400 pl-2"
-                                                                                    : "text-emerald-300/70 hover:text-white hover:bg-emerald-800/10 hover:pl-4"
+                                                                                ? "text-amber-400 font-bold bg-emerald-900/60 border-l-2 border-amber-400 pl-2"
+                                                                                : "text-emerald-300/70 hover:text-white hover:bg-emerald-800/10 hover:pl-4"
                                                                                 }`}
                                                                         >
                                                                             ✦ {subChild.title}
@@ -328,8 +328,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                                         key={subIdx}
                                                         href={sub.href || "#"}
                                                         className={`block py-2 px-3 text-[11px] sm:text-xs rounded-lg transition-all duration-200 font-medium ${isSubActive
-                                                                ? "text-amber-400 font-bold bg-emerald-900/60 border-l-2 border-amber-400 pl-2"
-                                                                : "text-emerald-200/80 hover:text-white hover:bg-emerald-800/30 hover:pl-4"
+                                                            ? "text-amber-400 font-bold bg-emerald-900/60 border-l-2 border-amber-400 pl-2"
+                                                            : "text-emerald-200/80 hover:text-white hover:bg-emerald-800/30 hover:pl-4"
                                                             }`}
                                                     >
                                                         ✨ {sub.title}
@@ -482,8 +482,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                                     <button
                                                         onClick={() => setOpenSubmenu(isSubmenuOpen ? null : subItem.title)}
                                                         className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs font-bold transition-all ${isSubmenuOpen || isAnyChildActive
-                                                                ? "bg-emerald-900 text-amber-300 border-amber-400"
-                                                                : "bg-emerald-950/50 text-emerald-100 border-emerald-800/40"
+                                                            ? "bg-emerald-900 text-amber-300 border-amber-400"
+                                                            : "bg-emerald-950/50 text-emerald-100 border-emerald-800/40"
                                                             }`}
                                                     >
                                                         <div className="flex items-center gap-3">
@@ -505,8 +505,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                                                         href={subChild.href}
                                                                         onClick={() => setActiveMobileDrawer(null)}
                                                                         className={`flex items-center gap-3 p-2.5 rounded-lg border text-[11px] font-semibold transition-all ${isChildActive
-                                                                                ? "bg-amber-400 text-[#043e30] border-amber-400"
-                                                                                : "bg-emerald-950/30 text-emerald-200 border-emerald-800/30"
+                                                                            ? "bg-amber-400 text-[#043e30] border-amber-400"
+                                                                            : "bg-emerald-950/30 text-emerald-200 border-emerald-800/30"
                                                                             }`}
                                                                     >
                                                                         <span>✦ {subChild.title}</span>
@@ -526,8 +526,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                                 href={subItem.href}
                                                 onClick={() => setActiveMobileDrawer(null)}
                                                 className={`flex items-center gap-3 p-3 rounded-xl border text-xs font-semibold transition-all ${isSubActive
-                                                        ? "bg-amber-400 text-[#043e30] border-amber-400 font-bold shadow-md"
-                                                        : "bg-emerald-950/50 text-emerald-100 border-emerald-800/40 hover:bg-emerald-900/60"
+                                                    ? "bg-amber-400 text-[#043e30] border-amber-400 font-bold shadow-md"
+                                                    : "bg-emerald-950/50 text-emerald-100 border-emerald-800/40 hover:bg-emerald-900/60"
                                                     }`}
                                             >
                                                 <Sparkles className="w-3.5 h-3.5 text-amber-300 flex-shrink-0" />
