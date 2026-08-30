@@ -70,7 +70,7 @@ export default function HeroSection() {
             </div>
 
             {/* ২. ব্যানার ক্যারোসল (Hero Banner Carousel) */}
-            <div className="relative h-[450px] md:min-h-[640px] w-full overflow-hidden bg-slate-900">
+            <div className="relative  h-screen min-h-[640px] w-full overflow-hidden bg-slate-900">
 
                 {/* মোবাইল কন্ট্রোল বাটনসমূহ: নোটিসের নিচে এবং ইমেজের টপ রাইট অংশে প্লেস করা হয়েছে */}
                 <div className="absolute top-4 right-4 z-40 flex lg:hidden items-center gap-2 bg-slate-950/30 backdrop-blur-md p-1.5 rounded-full border border-white/10">
