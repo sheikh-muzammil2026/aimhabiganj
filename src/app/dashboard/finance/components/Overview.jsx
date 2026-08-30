@@ -8,7 +8,8 @@ import {
   Calendar, 
   RefreshCw, 
   ChevronLeft, 
-  ChevronRight
+  ChevronRight,
+  Edit
 } from 'lucide-react';
 
 export default function Overview({
@@ -31,7 +32,8 @@ export default function Overview({
   setTxStartDate,
   txEndDate,
   setTxEndDate,
-  onPrint
+  onPrint,
+  onEdit
 }) {
   return (
     <div className="space-y-6 print:hidden">
@@ -224,7 +226,7 @@ export default function Overview({
                       <td className={`p-3 sm:p-4 text-right font-black text-sm whitespace-nowrap ${tx.type === 'income' ? 'text-emerald-800' : 'text-rose-800'}`}>
                         ৳ {formatBanglaNumber((tx.totalIncome || tx.totalExpense || 0).toLocaleString('bn-BD'))}
                       </td>
-                      <td className="p-3 sm:p-4 text-center whitespace-nowrap">
+                      <td className="p-3 sm:p-4 text-center whitespace-nowrap flex items-center justify-center gap-1.5">
                         <button
                           onClick={() => onPrint(tx)}
                           className="p-1 hover:bg-slate-100 rounded-lg text-emerald-800 transition-colors"
@@ -232,6 +234,15 @@ export default function Overview({
                         >
                           <Printer className="w-4.5 h-4.5" />
                         </button>
+                        {tx.status !== 'approved' && onEdit && (
+                          <button
+                            onClick={() => onEdit(tx)}
+                            className="p-1 hover:bg-slate-105 rounded-lg text-blue-800 transition-colors"
+                            title="সম্পাদনা করুন"
+                          >
+                            <Edit className="w-4.5 h-4.5" />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))

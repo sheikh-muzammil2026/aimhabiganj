@@ -22,7 +22,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     const pathname = usePathname();
     const [openDropdown, setOpenDropdown] = useState(null);
     const [openSubmenu, setOpenSubmenu] = useState(null);
-    
+
     // বটম মেনুর ড্রয়ার স্টেট ট্র্যাকিং
     const [activeMobileDrawer, setActiveMobileDrawer] = useState(null); // 'full' (অন্যান্য) অথবা নির্দিষ্ট item object
 
@@ -105,13 +105,13 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 { title: "একাডেমিক ক্যালেন্ডার", href: "/dashboard/calendar" },
             ]
         },
-        { 
-            id: "attendance", 
-            title: "ডিজিটাল হাজিরা", 
-            icon: "📅", 
-            lucideIcon: <CalendarCheck className="w-5 h-5" />, 
-            href: "/dashboard/attendance", 
-            roles: ["admin", "teacher"] 
+        {
+            id: "attendance",
+            title: "ডিজিটাল হাজিরা",
+            icon: "📅",
+            lucideIcon: <CalendarCheck className="w-5 h-5" />,
+            href: "/dashboard/attendance",
+            roles: ["admin", "teacher"]
         },
         {
             id: "students",
@@ -141,6 +141,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             roles: ["admin", "accountant"],
             dropdown: [
                 { title: "অ্যাকাউন্টিং রিপোর্টস", href: "/dashboard/finance" },
+                { title: "খাত তৈরি", href: "/dashboard/finance/category-management" },
             ]
         },
         {
@@ -250,11 +251,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                     {hasDropdown ? (
                                         <button
                                             onClick={() => setOpenDropdown(isDropdownOpen ? null : item.id)}
-                                            className={`w-full flex items-center justify-between px-3 py-2.5 text-xs sm:text-sm rounded-xl transition-all duration-300 group/btn ${
-                                                isDropdownOpen
+                                            className={`w-full flex items-center justify-between px-3 py-2.5 text-xs sm:text-sm rounded-xl transition-all duration-300 group/btn ${isDropdownOpen
                                                     ? "bg-emerald-900/80 text-amber-300 shadow-inner border-l-4 border-amber-400 pl-2"
                                                     : "text-emerald-100/90 hover:bg-emerald-800/40 hover:text-white hover:translate-x-1"
-                                            }`}
+                                                }`}
                                         >
                                             <div className="flex items-center gap-3">
                                                 <span className="text-base group-hover/btn:scale-110 transition-transform">{item.icon}</span>
@@ -267,11 +267,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                     ) : (
                                         <Link
                                             href={item.href || "#"}
-                                            className={`flex items-center gap-3 px-3 py-2.5 text-xs sm:text-sm rounded-xl transition-all duration-300 group/link ${
-                                                isActive
+                                            className={`flex items-center gap-3 px-3 py-2.5 text-xs sm:text-sm rounded-xl transition-all duration-300 group/link ${isActive
                                                     ? "bg-amber-400 text-[#043e30] font-black shadow-md border-r-4 border-emerald-900 scale-[1.02]"
                                                     : "text-emerald-100/90 hover:bg-emerald-800/40 hover:text-white hover:translate-x-1"
-                                            }`}
+                                                }`}
                                         >
                                             <span className="text-base transform group-hover/link:scale-110 transition-transform">{item.icon}</span>
                                             <span className="font-semibold tracking-wide">{item.title}</span>
@@ -290,11 +289,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                                         <div key={subIdx} className="space-y-1">
                                                             <button
                                                                 onClick={() => setOpenSubmenu(isSubmenuOpen ? null : sub.title)}
-                                                                className={`w-full flex items-center justify-between py-2 px-3 text-[11px] sm:text-xs rounded-lg transition-all duration-200 font-semibold ${
-                                                                    isSubmenuOpen || isAnySubmenuChildActive
+                                                                className={`w-full flex items-center justify-between py-2 px-3 text-[11px] sm:text-xs rounded-lg transition-all duration-200 font-semibold ${isSubmenuOpen || isAnySubmenuChildActive
                                                                         ? "text-amber-350 bg-emerald-900/40 text-amber-300"
                                                                         : "text-emerald-200/80 hover:text-white hover:bg-emerald-800/20"
-                                                                }`}
+                                                                    }`}
                                                             >
                                                                 <span>📂 {sub.title}</span>
                                                                 <span className={`text-[8px] transition-transform duration-200 ${isSubmenuOpen ? "rotate-180" : ""}`}>
@@ -310,11 +308,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                                                         <Link
                                                                             key={childIdx}
                                                                             href={subChild.href}
-                                                                            className={`block py-1.5 px-3 text-[10px] sm:text-[11px] rounded-md transition-all duration-200 font-medium ${
-                                                                                isChildActive
+                                                                            className={`block py-1.5 px-3 text-[10px] sm:text-[11px] rounded-md transition-all duration-200 font-medium ${isChildActive
                                                                                     ? "text-amber-400 font-bold bg-emerald-900/60 border-l-2 border-amber-400 pl-2"
                                                                                     : "text-emerald-300/70 hover:text-white hover:bg-emerald-800/10 hover:pl-4"
-                                                                            }`}
+                                                                                }`}
                                                                         >
                                                                             ✦ {subChild.title}
                                                                         </Link>
@@ -330,11 +327,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                                     <Link
                                                         key={subIdx}
                                                         href={sub.href || "#"}
-                                                        className={`block py-2 px-3 text-[11px] sm:text-xs rounded-lg transition-all duration-200 font-medium ${
-                                                            isSubActive
+                                                        className={`block py-2 px-3 text-[11px] sm:text-xs rounded-lg transition-all duration-200 font-medium ${isSubActive
                                                                 ? "text-amber-400 font-bold bg-emerald-900/60 border-l-2 border-amber-400 pl-2"
                                                                 : "text-emerald-200/80 hover:text-white hover:bg-emerald-800/30 hover:pl-4"
-                                                        }`}
+                                                            }`}
                                                     >
                                                         ✨ {sub.title}
                                                     </Link>
@@ -370,15 +366,15 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             {/* ========================================================= */}
             {/* 2. MOBILE BOTTOM NAVBAR (ছোট স্ক্রিনে দেখাবে: lg:hidden)      */}
             {/* ========================================================= */}
-            
+
             <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#043e30] border-t-2 border-amber-400/40 shadow-2xl lg:hidden pb-safe print:hidden">
                 <div className="flex justify-around items-center h-16 px-1">
                     {/* রোল ভিত্তিক ৪টি স্পেসিফিক ডাইনামিক মেনু */}
                     {mobileBottomNavItems.map((item) => {
                         const hasDropdown = item.dropdown && item.dropdown.length > 0;
                         const isDrawerActive = activeMobileDrawer?.id === item.id;
-                        const isRouteActive = item.href 
-                            ? pathname === item.href 
+                        const isRouteActive = item.href
+                            ? pathname === item.href
                             : item.dropdown?.some(sub => {
                                 if (sub.href) {
                                     return pathname.startsWith(sub.href.split('?')[0]);
@@ -408,9 +404,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                 <button
                                     key={item.id}
                                     onClick={() => handleBottomNavItemClick(item)}
-                                    className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative ${
-                                        (isDrawerActive || isRouteActive) ? "text-amber-400 font-bold" : "text-emerald-200/70 hover:text-white"
-                                    }`}
+                                    className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative ${(isDrawerActive || isRouteActive) ? "text-amber-400 font-bold" : "text-emerald-200/70 hover:text-white"
+                                        }`}
                                 >
                                     {Content}
                                 </button>
@@ -422,9 +417,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                 key={item.id}
                                 href={item.href || "#"}
                                 onClick={() => setActiveMobileDrawer(null)}
-                                className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative ${
-                                    isRouteActive ? "text-amber-400 font-bold" : "text-emerald-200/70 hover:text-white"
-                                }`}
+                                className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative ${isRouteActive ? "text-amber-400 font-bold" : "text-emerald-200/70 hover:text-white"
+                                    }`}
                             >
                                 {Content}
                             </Link>
@@ -434,9 +428,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                     {/* 'অন্যান্য' মেনু বাটন (সব মেনুর সমন্বিত ড্রয়ার খুলবে) */}
                     <button
                         onClick={() => setActiveMobileDrawer(activeMobileDrawer === 'full' ? null : 'full')}
-                        className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative ${
-                            activeMobileDrawer === 'full' ? "text-amber-400 font-bold" : "text-emerald-200/70 hover:text-white"
-                        }`}
+                        className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative ${activeMobileDrawer === 'full' ? "text-amber-400 font-bold" : "text-emerald-200/70 hover:text-white"
+                            }`}
                     >
                         {activeMobileDrawer === 'full' && (
                             <span className="absolute top-0 w-8 h-1 bg-amber-400 rounded-full" />
@@ -453,10 +446,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             {/* ========================================================= */}
             {/* 3. DYNAMIC BOTTOM SHEET DRAWERS                           */}
             {/* ========================================================= */}
-            
+
             {activeMobileDrawer && (
-                <div 
-                    className="fixed inset-0 z-40 bg-emerald-950/60 backdrop-blur-xs lg:hidden transition-all duration-300" 
+                <div
+                    className="fixed inset-0 z-40 bg-emerald-950/60 backdrop-blur-xs lg:hidden transition-all duration-300"
                     onClick={() => setActiveMobileDrawer(null)}
                 >
                     <div
@@ -488,11 +481,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                                 <div key={idx} className="space-y-1">
                                                     <button
                                                         onClick={() => setOpenSubmenu(isSubmenuOpen ? null : subItem.title)}
-                                                        className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs font-bold transition-all ${
-                                                            isSubmenuOpen || isAnyChildActive
+                                                        className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs font-bold transition-all ${isSubmenuOpen || isAnyChildActive
                                                                 ? "bg-emerald-900 text-amber-300 border-amber-400"
                                                                 : "bg-emerald-950/50 text-emerald-100 border-emerald-800/40"
-                                                        }`}
+                                                            }`}
                                                     >
                                                         <div className="flex items-center gap-3">
                                                             <Sparkles className="w-3.5 h-3.5 text-amber-300 flex-shrink-0" />
@@ -502,7 +494,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                                             ▼
                                                         </span>
                                                     </button>
-                                                    
+
                                                     {isSubmenuOpen && (
                                                         <div className="pl-4 space-y-2 py-1">
                                                             {subItem.submenu.map((subChild, childIdx) => {
@@ -512,11 +504,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                                                         key={childIdx}
                                                                         href={subChild.href}
                                                                         onClick={() => setActiveMobileDrawer(null)}
-                                                                        className={`flex items-center gap-3 p-2.5 rounded-lg border text-[11px] font-semibold transition-all ${
-                                                                            isChildActive
+                                                                        className={`flex items-center gap-3 p-2.5 rounded-lg border text-[11px] font-semibold transition-all ${isChildActive
                                                                                 ? "bg-amber-400 text-[#043e30] border-amber-400"
                                                                                 : "bg-emerald-950/30 text-emerald-200 border-emerald-800/30"
-                                                                        }`}
+                                                                            }`}
                                                                     >
                                                                         <span>✦ {subChild.title}</span>
                                                                     </Link>
@@ -534,11 +525,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                                 key={idx}
                                                 href={subItem.href}
                                                 onClick={() => setActiveMobileDrawer(null)}
-                                                className={`flex items-center gap-3 p-3 rounded-xl border text-xs font-semibold transition-all ${
-                                                    isSubActive
+                                                className={`flex items-center gap-3 p-3 rounded-xl border text-xs font-semibold transition-all ${isSubActive
                                                         ? "bg-amber-400 text-[#043e30] border-amber-400 font-bold shadow-md"
                                                         : "bg-emerald-950/50 text-emerald-100 border-emerald-800/40 hover:bg-emerald-900/60"
-                                                }`}
+                                                    }`}
                                             >
                                                 <Sparkles className="w-3.5 h-3.5 text-amber-300 flex-shrink-0" />
                                                 <span>{subItem.title}</span>
@@ -582,9 +572,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                                     <div>
                                                         <button
                                                             onClick={() => setOpenDropdown(isDropdownOpen ? null : item.id)}
-                                                            className={`w-full flex justify-between items-center p-3 text-left font-medium transition-colors ${
-                                                                isDropdownOpen ? "bg-emerald-900/60 text-amber-300" : "text-emerald-100"
-                                                            }`}
+                                                            className={`w-full flex justify-between items-center p-3 text-left font-medium transition-colors ${isDropdownOpen ? "bg-emerald-900/60 text-amber-300" : "text-emerald-100"
+                                                                }`}
                                                         >
                                                             <div className="flex items-center gap-3">
                                                                 <span className="text-base">{item.icon}</span>
@@ -604,9 +593,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                                                             <div key={subIdx} className="space-y-1 pl-4 pr-2 py-1 bg-emerald-950/40">
                                                                                 <button
                                                                                     onClick={() => setOpenSubmenu(isSubmenuOpen ? null : subItem.title)}
-                                                                                    className={`w-full flex items-center justify-between p-2 text-xs font-bold transition-colors ${
-                                                                                        isSubmenuOpen || isAnyChildActive ? "text-amber-300" : "text-emerald-200"
-                                                                                    }`}
+                                                                                    className={`w-full flex items-center justify-between p-2 text-xs font-bold transition-colors ${isSubmenuOpen || isAnyChildActive ? "text-amber-300" : "text-emerald-200"
+                                                                                        }`}
                                                                                 >
                                                                                     <div className="flex items-center gap-2">
                                                                                         <span>📂 {subItem.title}</span>
@@ -625,9 +613,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                                                                                     key={childIdx}
                                                                                                     href={subChild.href}
                                                                                                     onClick={() => setActiveMobileDrawer(null)}
-                                                                                                    className={`flex items-center gap-2 p-2 text-[11px] font-medium transition-colors ${
-                                                                                                        isChildActive ? "text-amber-400 font-bold bg-emerald-900/30" : "text-emerald-300/80 hover:text-white"
-                                                                                                    }`}
+                                                                                                    className={`flex items-center gap-2 p-2 text-[11px] font-medium transition-colors ${isChildActive ? "text-amber-400 font-bold bg-emerald-900/30" : "text-emerald-300/80 hover:text-white"
+                                                                                                        }`}
                                                                                                 >
                                                                                                     <Sparkles className="w-2.5 h-2.5 text-amber-400" />
                                                                                                     {subChild.title}
@@ -646,9 +633,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                                                             key={subIdx}
                                                                             href={subItem.href || "#"}
                                                                             onClick={() => setActiveMobileDrawer(null)}
-                                                                            className={`flex items-center gap-2 p-3 pl-8 text-xs font-medium transition-colors ${
-                                                                                isSubActive ? "text-amber-400 font-bold bg-emerald-900/50" : "text-emerald-200/80 hover:text-white"
-                                                                            }`}
+                                                                            className={`flex items-center gap-2 p-3 pl-8 text-xs font-medium transition-colors ${isSubActive ? "text-amber-400 font-bold bg-emerald-900/50" : "text-emerald-200/80 hover:text-white"
+                                                                                }`}
                                                                         >
                                                                             <Sparkles className="w-3 h-3 text-amber-400" />
                                                                             {subItem.title}
@@ -662,9 +648,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                                     <Link
                                                         href={item.href || "#"}
                                                         onClick={() => setActiveMobileDrawer(null)}
-                                                        className={`flex items-center gap-3 p-3 text-xs font-semibold transition-colors ${
-                                                            isActive ? "text-amber-400 bg-emerald-900/60" : "text-emerald-100 hover:text-white"
-                                                        }`}
+                                                        className={`flex items-center gap-3 p-3 text-xs font-semibold transition-colors ${isActive ? "text-amber-400 bg-emerald-900/60" : "text-emerald-100 hover:text-white"
+                                                            }`}
                                                     >
                                                         <span className="text-base">{item.icon}</span>
                                                         {item.title}
@@ -681,4 +666,4 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             )}
         </>
     );
-                 }
+}

@@ -49,9 +49,18 @@ export default function AllStudentsPage() {
       const result = await response.json();
 
       if (result.success) {
-        setStudents(result.data || []);
+        const fetchedStudents = result.data || [];
+        setStudents(fetchedStudents);
         setTotalPages(result.totalPages || 1);
-        setTotalStudents(result.total || 0);
+        setTotalStudents(result.total || result.totalCount || 0);
+
+        // Initialize rollInputs with existing rolls
+        const initialRolls = {};
+        fetchedStudents.forEach(s => {
+          const id = s._id?.$oid || s._id;
+          initialRolls[id] = s.roll || s.officeUse?.rollNumber || "";
+        });
+        setRollInputs(initialRolls);
       } else {
         setError(result.message || "শিক্ষার্থীদের তথ্য লোড করা যায়নি।");
       }
@@ -193,20 +202,20 @@ export default function AllStudentsPage() {
   const uniqueFeeCategories = ["General", "Orphan", "Poor Fund", "Scholarship", "Staff Child"];
 
   return (
-    <div className="p-3 sm:p-5 lg:p-8 bg-slate-50 min-h-screen space-y-5">
+    <div className="p-3 sm:p-5 lg:p-8 bg-slate-50 dark:bg-[#09101d] min-h-screen space-y-5">
 
       {/* ১. পেজ হেডার */}
-      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-emerald-900/10 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-white dark:bg-[#0f172a] p-4 sm:p-6 rounded-2xl border border-emerald-900/10 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#043e30] tracking-tight">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#043e30] dark:text-emerald-400 tracking-tight">
             সকল শিক্ষার্থী তালিকা
           </h1>
-          <p className="text-xs sm:text-sm text-emerald-700/80 mt-0.5 font-medium">
+          <p className="text-xs sm:text-sm text-emerald-700/80 dark:text-emerald-350/80 mt-0.5 font-medium">
             মাদ্রাসার সকল শিক্ষার্থীর তথ্য ও ফিল্টারিং ব্যবস্থা
           </p>
         </div>
         <div>
-          <span className="inline-block px-3 py-1.5 bg-emerald-100 text-[#043e30] font-bold text-xs rounded-xl border border-emerald-200">
+          <span className="inline-block px-3 py-1.5 bg-emerald-100 dark:bg-emerald-950/40 text-[#043e30] dark:text-emerald-300 font-bold text-xs rounded-xl border border-emerald-200 dark:border-emerald-900/30">
             মোট শিক্ষার্থী: {totalStudents} জন
           </span>
         </div>
@@ -214,35 +223,35 @@ export default function AllStudentsPage() {
 
       {/* ২. সংক্ষিপ্ত স্ট্যাটস/পরিসংখ্যান */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-        <div className="bg-white p-4 rounded-2xl border border-emerald-900/10 shadow-xs flex items-center gap-3.5">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center text-lg sm:text-xl shrink-0">
+        <div className="bg-white dark:bg-[#0f172a] p-4 rounded-2xl border border-emerald-900/10 dark:border-slate-800 shadow-xs flex items-center gap-3.5">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-100 dark:bg-amber-950/30 text-amber-800 dark:text-amber-300 flex items-center justify-center text-lg sm:text-xl shrink-0">
             🔍
           </div>
           <div>
-            <p className="text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider">ফিল্টারকৃত সংখ্যা</p>
-            <p className="text-xl sm:text-2xl font-black text-amber-600">{totalStudents} জন</p>
+            <p className="text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">ফিল্টারকৃত সংখ্যা</p>
+            <p className="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-500">{totalStudents} জন</p>
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-emerald-900/10 shadow-xs flex items-center gap-3.5">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center text-lg sm:text-xl shrink-0">
+        <div className="bg-white dark:bg-[#0f172a] p-4 rounded-2xl border border-emerald-900/10 dark:border-slate-800 shadow-xs flex items-center gap-3.5">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-100 dark:bg-blue-950/30 text-blue-800 dark:text-blue-350 flex items-center justify-center text-lg sm:text-xl shrink-0">
             📖
           </div>
           <div>
-            <p className="text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider">প্রি-হিফজ / হিফজ</p>
-            <p className="text-xl sm:text-2xl font-black text-blue-900">
+            <p className="text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">প্রি-হিফজ / হিফজ</p>
+            <p className="text-xl sm:text-2xl font-black text-blue-900 dark:text-blue-400">
               {students.filter(s => s.divisionPreHifz?.active || s.divisionHifz?.active).length} জন
             </p>
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-emerald-900/10 shadow-xs flex items-center gap-3.5">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-purple-100 text-purple-800 flex items-center justify-center text-lg sm:text-xl shrink-0">
+        <div className="bg-white dark:bg-[#0f172a] p-4 rounded-2xl border border-emerald-900/10 dark:border-slate-800 shadow-xs flex items-center gap-3.5">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-purple-100 dark:bg-purple-950/30 text-purple-800 dark:text-purple-300 flex items-center justify-center text-lg sm:text-xl shrink-0">
             🏫
           </div>
           <div>
-            <p className="text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider">একাডেমিক বিভাগ</p>
-            <p className="text-xl sm:text-2xl font-black text-purple-900">
+            <p className="text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">একাডেমিক বিভাগ</p>
+            <p className="text-xl sm:text-2xl font-black text-purple-900 dark:text-purple-400">
               {students.filter(s => s.divisionAcademy?.active).length} জন
             </p>
           </div>
@@ -250,14 +259,14 @@ export default function AllStudentsPage() {
       </div>
 
       {/* ৩. এডভান্সড ফিল্টারিং সেকশন */}
-      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-emerald-900/10 shadow-xs space-y-3">
-        <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">খুঁজুন এবং ফিল্টার করুন:</h3>
+      <div className="bg-white dark:bg-[#0f172a] p-4 sm:p-5 rounded-2xl border border-emerald-900/10 dark:border-slate-800 shadow-xs space-y-3">
+        <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">খুঁজুন এবং ফিল্টার করুন:</h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
 
           {/* নাম / আইডি / পিতা / জেলা সার্চ */}
           <div className="sm:col-span-2 lg:col-span-2 relative">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 text-sm">🔍</span>
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 dark:text-slate-500 text-sm">🔍</span>
             <input
               type="text"
               placeholder="নাম, আইডি, পিতার নাম, মোবাইল বা জেলা..."
@@ -266,7 +275,7 @@ export default function AllStudentsPage() {
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white transition-all"
+              className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-650 focus:bg-white dark:focus:bg-[#0f172a] text-slate-800 dark:text-slate-200 transition-all"
             />
           </div>
 
@@ -278,7 +287,7 @@ export default function AllStudentsPage() {
                 setSelectedSession(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white font-medium text-slate-700"
+              className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white text-slate-700 dark:text-slate-200 font-medium"
             >
               <option value="all">সকল শিক্ষাবর্ষ (২০১৮ - ২০২৬)</option>
               {sessionYears.map((year, idx) => (
@@ -297,7 +306,7 @@ export default function AllStudentsPage() {
                 setSelectedAcademyType("all");
                 setCurrentPage(1);
               }}
-              className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white font-medium text-slate-700"
+              className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white text-slate-700 dark:text-slate-200 font-medium"
             >
               <option value="all">সকল বিভাগ</option>
               <option value="preHifz">প্রি-হিফজ</option>
@@ -316,7 +325,7 @@ export default function AllStudentsPage() {
                   setSelectedClass("all");
                   setCurrentPage(1);
                 }}
-                className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white font-medium text-slate-700"
+                className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white text-slate-700 dark:text-slate-200 font-medium"
               >
                 <option value="all">সকল একাডেমি লেভেল</option>
                 <option value="প্রাক-প্রাথমিক">প্রাক-প্রাথমিক</option>
@@ -336,7 +345,7 @@ export default function AllStudentsPage() {
                 setCurrentPage(1);
               }}
               disabled={selectedDivision === "all"}
-              className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white font-medium text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white text-slate-700 dark:text-slate-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="all">
                 {selectedDivision === "all" ? "প্রথমে বিভাগ নির্বাচন করুন" : "সকল শ্রেণি"}
@@ -355,7 +364,7 @@ export default function AllStudentsPage() {
                 setSelectedType(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white font-medium text-slate-700"
+              className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white text-slate-700 dark:text-slate-200 font-medium"
             >
               <option value="all">সকল টাইপ (আবাসিক/অনাবাসিক)</option>
               <option value="আবাসিক">আবাসিক</option>
@@ -372,7 +381,7 @@ export default function AllStudentsPage() {
                 setSelectedFeeCategory(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white font-medium text-slate-700"
+              className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white text-slate-700 dark:text-slate-200 font-medium"
             >
               <option value="all">সকল ফি ক্যাটাগরি</option>
               {uniqueFeeCategories.map((cat, idx) => (
@@ -385,11 +394,11 @@ export default function AllStudentsPage() {
       </div>
 
       {/* ৪. মেইন ডাটা টেবিল */}
-      <div className="bg-white rounded-2xl border border-emerald-900/10 shadow-xs overflow-hidden">
+      <div className="bg-white dark:bg-[#0f172a] rounded-2xl border border-emerald-900/10 dark:border-slate-800 shadow-xs overflow-hidden">
         {loading ? (
           <div className="p-10 text-center space-y-3">
             <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="text-xs sm:text-sm font-semibold text-slate-600">শিক্ষার্থীদের তথ্য লোড হচ্ছে...</p>
+            <p className="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400">শিক্ষার্থীদের তথ্য লোড হচ্ছে...</p>
           </div>
         ) : error ? (
           <div className="p-8 text-center text-red-500 font-medium space-y-3">
@@ -402,18 +411,18 @@ export default function AllStudentsPage() {
             </button>
           </div>
         ) : filteredStudents.length === 0 ? (
-          <div className="p-10 text-center text-slate-500 space-y-2">
+          <div className="p-10 text-center text-slate-500 dark:text-slate-400 space-y-2">
             <p className="text-3xl">📂</p>
             <p className="text-sm sm:text-base font-semibold">কোনো শিক্ষার্থীর তথ্য পাওয়া যায়নি!</p>
-            <p className="text-xs text-slate-400">আপনার নির্বাচন করা ফিল্টার পরিবর্তন করে দেখতে পারেন।</p>
+            <p className="text-xs text-slate-450">আপনার নির্বাচন করা ফিল্টার পরিবর্তন করে দেখতে পারেন।</p>
           </div>
         ) : (
           <div className="w-full">
             {/* ১. ডেস্কটপ ও ট্যাবলেট ভিউ (md:block) */}
-            <div className="hidden md:block overflow-x-auto rounded-lg border border-slate-200">
+            <div className="hidden md:block overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-850">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-[#043e30] text-emerald-100 text-xs uppercase tracking-wider font-bold">
+                  <tr className="bg-[#043e30] dark:bg-emerald-950 text-emerald-100 text-xs uppercase tracking-wider font-bold">
                     <th className="py-3.5 px-4">শিক্ষার্থী ও আইডি</th>
                     <th className="py-3.5 px-4">রোল নম্বর</th>
                     <th className="py-3.5 px-4">বিভাগ, শ্রেণি ও টাইপ</th>
@@ -424,7 +433,7 @@ export default function AllStudentsPage() {
                     <th className="py-3.5 px-4 text-center">অ্যাকশন</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-sm font-medium text-slate-700">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-sm font-medium text-slate-700 dark:text-slate-350">
                   {filteredStudents.map((student) => {
                     const details = getStudentClassDetails(student);
                     const id = student._id?.$oid || student._id;
@@ -435,10 +444,10 @@ export default function AllStudentsPage() {
                     if (primaryMethod === "অভিভাবক" && student.guardianMobile) contactNumber = student.guardianMobile;
 
                     return (
-                      <tr key={id} className="hover:bg-emerald-50/40 transition-colors duration-150">
+                      <tr key={id} className="hover:bg-emerald-50/40 dark:hover:bg-emerald-950/10 transition-colors duration-150">
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center overflow-hidden shrink-0 border border-emerald-200 text-xs">
+                            <div className="w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-350 font-bold flex items-center justify-center overflow-hidden shrink-0 border border-emerald-200 dark:border-emerald-900/30 text-xs">
                               {student.studentImage ? (
                                 <img src={student.studentImage} alt={student.studentNameBangla} className="w-full h-full object-cover" />
                               ) : (
@@ -446,8 +455,8 @@ export default function AllStudentsPage() {
                               )}
                             </div>
                             <div>
-                              <p className="font-bold text-slate-900 leading-tight">{student.studentNameBangla || "নাম বিহীন"}</p>
-                              <span className="text-[10px] text-emerald-800 font-extrabold bg-amber-400/20 px-1.5 py-0.5 rounded-md mt-0.5 inline-block">
+                              <p className="font-bold text-slate-900 dark:text-slate-200 leading-tight">{student.studentNameBangla || "নাম বিহীন"}</p>
+                              <span className="text-[10px] text-emerald-800 dark:text-emerald-300 font-extrabold bg-amber-400/20 dark:bg-amber-400/10 px-1.5 py-0.5 rounded-md mt-0.5 inline-block">
                                 ID: {student.studentId || "N/A"}
                               </span>
                             </div>
@@ -463,7 +472,7 @@ export default function AllStudentsPage() {
                               onChange={(e) =>
                                 setRollInputs({ ...rollInputs, [id]: e.target.value })
                               }
-                              className="w-16 px-2 py-1 text-xs border border-slate-300 rounded-md focus:outline-none focus:border-emerald-600 bg-white font-bold text-slate-800"
+                              className="w-16 px-2 py-1 text-xs border border-slate-300 dark:border-slate-700 rounded-md focus:outline-none focus:border-emerald-600 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-200"
                             />
                             <button
                               onClick={() => handleSaveRoll(id)}
@@ -477,24 +486,24 @@ export default function AllStudentsPage() {
                         </td>
 
                         <td className="py-3 px-4">
-                          <div className="font-bold text-slate-800">{details.className}</div>
-                          <div className="text-[11px] text-slate-500">{details.divisionName} {details.type !== "N/A" && `(${details.type})`}</div>
+                          <div className="font-bold text-slate-855 text-slate-800 dark:text-slate-200">{details.className}</div>
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400">{details.divisionName} {details.type !== "N/A" && `(${details.type})`}</div>
                         </td>
-                        <td className="py-3 px-4 font-semibold text-slate-800">{student.fatherNameBangla || "N/A"}</td>
+                        <td className="py-3 px-4 font-semibold text-slate-800 dark:text-slate-200">{student.fatherNameBangla || "N/A"}</td>
                         <td className="py-3 px-4">
-                          <div className="font-semibold text-slate-800">📞 {contactNumber !== "0" ? contactNumber : "N/A"}</div>
-                          <div className="text-[10px] text-slate-400">মাধ্যম: {primaryMethod}</div>
+                          <div className="font-semibold text-slate-800 dark:text-slate-200">📞 {contactNumber !== "0" ? contactNumber : "N/A"}</div>
+                          <div className="text-[10px] text-slate-400 dark:text-slate-500">মাধ্যম: {primaryMethod}</div>
                         </td>
-                        <td className="py-3 px-4 text-slate-600">{student.currentAddress?.district || student.permanentAddress?.district || "N/A"}</td>
+                        <td className="py-3 px-4 text-slate-600 dark:text-slate-400">{student.currentAddress?.district || student.permanentAddress?.district || "N/A"}</td>
                         <td className="py-3 px-4">
-                          <span className="inline-block text-[11px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-lg border border-slate-200">
+                          <span className="inline-block text-[11px] font-bold bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-lg border border-slate-200 dark:border-slate-800">
                             {student.sessionYear || "N/A"}
                           </span>
                         </td>
                         <td className="py-3 px-4 text-center">
                           <div className="flex items-center justify-center gap-1.5">
-                            <Link href={`/dashboard/students/studentProfile/${id}`} title="বিস্তারিত প্রোফাইল" className="p-1.5 text-slate-600 hover:text-emerald-700 hover:bg-emerald-100 rounded-lg transition-all">👁️</Link>
-                            <Link href={`/dashboard/students/edit/${id}`} title="এডিট করুন" className="p-1.5 text-slate-600 hover:text-amber-700 hover:bg-amber-100 rounded-lg transition-all">✏️</Link>
+                            <Link href={`/dashboard/students/studentProfile/${id}`} title="বিস্তারিত প্রোফাইল" className="p-1.5 text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-350 hover:bg-emerald-100 dark:hover:bg-emerald-950/30 rounded-lg transition-all">👁️</Link>
+                            <Link href={`/dashboard/students/edit/${id}`} title="এডিট করুন" className="p-1.5 text-slate-600 dark:text-slate-400 hover:text-amber-700 dark:hover:text-amber-350 hover:bg-amber-100 dark:hover:bg-amber-950/30 rounded-lg transition-all">✏️</Link>
                           </div>
                         </td>
                       </tr>
@@ -516,11 +525,11 @@ export default function AllStudentsPage() {
                 if (primaryMethod === "অভিভাবক" && student.guardianMobile) contactNumber = student.guardianMobile;
 
                 return (
-                  <div key={id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                  <div key={id} className="bg-white dark:bg-[#0f172a] p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
                     {/* প্রোফাইল হেডার */}
-                    <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center overflow-hidden shrink-0 border border-emerald-200 text-sm">
+                        <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-350 font-bold flex items-center justify-center overflow-hidden shrink-0 border border-emerald-200 dark:border-emerald-900/30 text-sm">
                           {student.studentImage ? (
                             <img src={student.studentImage} alt={student.studentNameBangla} className="w-full h-full object-cover" />
                           ) : (
@@ -528,22 +537,22 @@ export default function AllStudentsPage() {
                           )}
                         </div>
                         <div>
-                          <p className="font-bold text-slate-900 text-sm">{student.studentNameBangla || "নাম বিহীন"}</p>
-                          <span className="text-[10px] text-emerald-800 font-extrabold bg-amber-400/20 px-1.5 py-0.5 rounded-md inline-block">
+                          <p className="font-bold text-slate-900 dark:text-slate-200 text-sm">{student.studentNameBangla || "নাম বিহীন"}</p>
+                          <span className="text-[10px] text-emerald-800 dark:text-emerald-300 font-extrabold bg-amber-400/20 dark:bg-amber-400/10 px-1.5 py-0.5 rounded-md inline-block">
                             ID: {student.studentId || "N/A"}
                           </span>
                         </div>
                       </div>
                       {/* অ্যাকশন বাটন */}
-                      <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-lg border border-slate-200">
-                        <Link href={`/dashboard/students/edit/${id}`} className="p-1.5 text-slate-600 hover:bg-emerald-100 rounded-md">👁️</Link>
-                        <Link href={`/dashboard/students/edit/${id}`} className="p-1.5 text-slate-600 hover:bg-amber-100 rounded-md">✏️</Link>
+                      <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-900/60 p-1 rounded-lg border border-slate-200 dark:border-slate-850">
+                        <Link href={`/dashboard/students/studentProfile/${id}`} className="p-1.5 text-slate-600 dark:text-slate-400 hover:bg-emerald-100 dark:hover:bg-emerald-950/30 rounded-md">👁️</Link>
+                        <Link href={`/dashboard/students/edit/${id}`} className="p-1.5 text-slate-600 dark:text-slate-400 hover:bg-amber-100 dark:hover:bg-amber-950/30 rounded-md">✏️</Link>
                       </div>
                     </div>
                     {/* মোবাইল ভিউতে রোল ইনপুট ও বিস্তারিত তথ্য */}
                     <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="col-span-2 bg-slate-50 p-2 rounded-lg border border-slate-200 flex items-center justify-between">
-                        <span className="font-bold text-slate-700 text-xs">রোল নম্বর:</span>
+                      <div className="col-span-2 bg-slate-50 dark:bg-slate-900/60 p-2 rounded-lg border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                        <span className="font-bold text-slate-700 dark:text-slate-300 text-xs">রোল নম্বর:</span>
                         <div className="flex items-center gap-1.5">
                           <input
                             type="text"
@@ -552,7 +561,7 @@ export default function AllStudentsPage() {
                             onChange={(e) =>
                               setRollInputs({ ...rollInputs, [id]: e.target.value })
                             }
-                            className="w-20 px-2 py-1 text-xs border border-slate-300 rounded-md focus:outline-none focus:border-emerald-600 bg-white font-bold text-slate-800"
+                            className="w-20 px-2 py-1 text-xs border border-slate-300 dark:border-slate-750 rounded-md focus:outline-none focus:border-emerald-600 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-200"
                           />
                           <button
                             onClick={() => handleSaveRoll(id)}
@@ -568,22 +577,22 @@ export default function AllStudentsPage() {
                     {/* বিস্তারিত তথ্য বিবরণী */}
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       <div>
-                        <span className="text-slate-400 block text-[10px]">শ্রেণি ও বিভাগ:</span>
-                        <span className="font-bold text-slate-800">{details.className}</span>
-                        <span className="text-[10px] text-slate-500 block">{details.divisionName} {details.type !== "N/A" && `(${details.type})`}</span>
+                        <span className="text-slate-400 dark:text-slate-500 block text-[10px]">শ্রেণি ও বিভাগ:</span>
+                        <span className="font-bold text-slate-800 dark:text-slate-200">{details.className}</span>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-450 block">{details.divisionName} {details.type !== "N/A" && `(${details.type})`}</span>
                       </div>
                       <div>
-                        <span className="text-slate-400 block text-[10px]">পিতার নাম:</span>
-                        <span className="font-semibold text-slate-800">{student.fatherNameBangla || "N/A"}</span>
+                        <span className="text-slate-400 dark:text-slate-500 block text-[10px]">পিতার নাম:</span>
+                        <span className="font-semibold text-slate-800 dark:text-slate-200">{student.fatherNameBangla || "N/A"}</span>
                       </div>
                       <div>
-                        <span className="text-slate-400 block text-[10px]">যোগাযোগ ({primaryMethod}):</span>
-                        <span className="font-semibold text-slate-800">📞 {contactNumber !== "0" ? contactNumber : "N/A"}</span>
+                        <span className="text-slate-400 dark:text-slate-500 block text-[10px]">যোগাযোগ ({primaryMethod}):</span>
+                        <span className="font-semibold text-slate-800 dark:text-slate-200">📞 {contactNumber !== "0" ? contactNumber : "N/A"}</span>
                       </div>
                       <div>
-                        <span className="text-slate-400 block text-[10px]">জেলা ও সেশন:</span>
-                        <span className="text-slate-700 font-medium">{student.currentAddress?.district || student.permanentAddress?.district || "N/A"}</span>
-                        <span className="ml-1.5 inline-block text-[10px] font-bold bg-slate-100 text-slate-700 px-1.5 py-0.2 rounded border border-slate-200">
+                        <span className="text-slate-400 dark:text-slate-500 block text-[10px]">জেলা ও সেশন:</span>
+                        <span className="text-slate-700 dark:text-slate-300 font-medium">{student.currentAddress?.district || student.permanentAddress?.district || "N/A"}</span>
+                        <span className="ml-1.5 inline-block text-[10px] font-bold bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 px-1.5 py-0.2 rounded border border-slate-200 dark:border-slate-800">
                           {student.sessionYear || "N/A"}
                         </span>
                       </div>
@@ -594,8 +603,8 @@ export default function AllStudentsPage() {
             </div>
 
             {/* ৫. পেজিনেশন কন্ট্রোলস */}
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 border-t border-slate-100 mt-4 rounded-b-2xl">
-              <span className="text-xs font-semibold text-slate-500">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white dark:bg-[#0f172a] p-4 border-t border-slate-100 dark:border-slate-800/80 mt-4 rounded-b-2xl">
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
                 পেজ {currentPage} এর {totalPages} (মোট {totalStudents} জন শিক্ষার্থী)
               </span>
               <div className="flex gap-2">
@@ -603,7 +612,7 @@ export default function AllStudentsPage() {
                   type="button"
                   disabled={currentPage <= 1}
                   onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   ◀ পূর্ববর্তী (Previous)
                 </button>
@@ -618,7 +627,6 @@ export default function AllStudentsPage() {
               </div>
             </div>
 
-          </div>
         )}
       </div>
     </div>

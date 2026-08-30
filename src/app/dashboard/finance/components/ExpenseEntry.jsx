@@ -60,7 +60,7 @@ export default function ExpenseEntry({
   const handleAddRow = () => {
     setExpenseForm({
       ...expenseForm,
-      items: [...expenseForm.items, { head: EXPENSE_HEADS[0], amount: '' }]
+      items: [...expenseForm.items, { head: EXPENSE_HEADS[0], amount: '', institutionName: '', shopName: '', shopVoucher: '' }]
     });
   };
 
@@ -173,55 +173,137 @@ export default function ExpenseEntry({
           </div>
 
           {expenseForm.items.map((item, idx) => (
-            <div key={idx} className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
-              <div className="flex-1">
-                <select
-                  value={item.head}
-                  onChange={(e) => handleRowChange(idx, 'head', e.target.value)}
-                  className="px-3 py-2 border border-slate-200 rounded-xl text-xs w-full focus:outline-none focus:border-emerald-700"
-                >
-                  {EXPENSE_HEADS.map(head => (
-                    <option key={head} value={head}>{head}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div className="flex items-center gap-2 w-full sm:w-36 md:w-48">
-                <input
-                  type="number"
-                  placeholder="টাকা (৳)"
-                  min="0"
-                  value={item.amount}
-                  onChange={(e) => handleRowChange(idx, 'amount', e.target.value)}
-                  className="px-3 py-2 border border-slate-200 rounded-xl text-xs w-full focus:outline-none focus:border-emerald-700 text-right"
-                  required
-                />
-
-                {expenseForm.items.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveRow(idx)}
-                    className="p-2 text-rose-600 hover:bg-rose-50 rounded-xl transition-colors shrink-0 sm:hidden"
-                    title="মুছে ফেলুন"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-
+            <div key={idx} className="p-4 border border-slate-200 rounded-xl space-y-3 bg-slate-50/30 relative">
               {expenseForm.items.length > 1 && (
                 <button
                   type="button"
                   onClick={() => handleRemoveRow(idx)}
-                  className="p-2 text-rose-600 hover:bg-rose-50 rounded-xl transition-colors shrink-0 hidden sm:block"
+                  className="absolute top-2 right-2 p-1 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
                   title="মুছে ফেলুন"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
               )}
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-505 block mb-1">ব্যয়ের খাত</label>
+                  <select
+                    value={item.head}
+                    onChange={(e) => handleRowChange(idx, 'head', e.target.value)}
+                    className="px-2 py-1.5 border border-slate-200 rounded-lg text-xs w-full focus:outline-none focus:border-emerald-700 bg-white"
+                  >
+                    {EXPENSE_HEADS.map(head => (
+                      <option key={head} value={head}>{head}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="text-[10px] font-bold text-slate-505 block mb-1">সরবরাহকারী প্রতিষ্ঠান</label>
+                  <input
+                    type="text"
+                    placeholder="সরবরাহকারী প্রতিষ্ঠান"
+                    value={item.institutionName || ''}
+                    onChange={(e) => handleRowChange(idx, 'institutionName', e.target.value)}
+                    className="px-2 py-1.5 border border-slate-200 rounded-lg text-xs w-full focus:outline-none focus:border-emerald-700 bg-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-slate-505 block mb-1">মেমো নং</label>
+                  <input
+                    type="text"
+                    placeholder="মেমো নং"
+                    value={item.shopVoucher || ''}
+                    onChange={(e) => handleRowChange(idx, 'shopVoucher', e.target.value)}
+                    className="px-2 py-1.5 border border-slate-200 rounded-lg text-xs w-full focus:outline-none focus:border-emerald-700 bg-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-slate-505 block mb-1">টাকার পরিমাণ (৳)</label>
+                  <input
+                    type="number"
+                    placeholder="টাকা (৳)"
+                    min="0"
+                    value={item.amount}
+                    onChange={(e) => handleRowChange(idx, 'amount', e.target.value)}
+                    className="px-2 py-1.5 border border-slate-200 rounded-lg text-xs w-full focus:outline-none focus:border-emerald-700 text-right bg-white"
+                    required
+                  />
+                </div>
+              </div>
             </div>
           ))}
         </div>
+
+        {/* Deficit / Reimbursement Section */}
+        {currentExpenseBalance < 0 && expenseForm.reimbursement?.status !== 'paid' && (
+          <div className="border-t border-dashed border-slate-200 pt-4 space-y-3 bg-rose-50/30 p-4 rounded-xl">
+            <h4 className="text-xs font-black text-rose-900 flex items-center gap-1">
+              <span>⚠️</span> ঘাটতি বা ঋণ পরিশোধের বিবরণী (Reimbursement Details)
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="text-[10px] font-bold text-slate-600 block mb-1">পরিশোধের মাধ্যম</label>
+                <select
+                  value={expenseForm.reimbursement?.method || 'Cash'}
+                  onChange={(e) => setExpenseForm({
+                    ...expenseForm,
+                    reimbursement: {
+                      ...(expenseForm.reimbursement || {}),
+                      method: e.target.value
+                    }
+                  })}
+                  className="px-3 py-2 border border-slate-200 rounded-xl text-xs w-full focus:outline-none focus:border-emerald-700 bg-white"
+                >
+                  <option value="Cash">নগদ</option>
+                  <option value="Bank">ব্যাংক</option>
+                  <option value="bKash">বিকাশ</option>
+                  <option value="Nagad">নগদ মোবাইল ব্যাংকিং</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-slate-600 block mb-1">পরিশোধের তারিখ</label>
+                <input
+                  type="date"
+                  value={expenseForm.reimbursement?.date || ''}
+                  onChange={(e) => setExpenseForm({
+                    ...expenseForm,
+                    reimbursement: {
+                      ...(expenseForm.reimbursement || {}),
+                      date: e.target.value
+                    }
+                  })}
+                  className="px-3 py-2 border border-slate-200 rounded-xl text-xs w-full focus:outline-none focus:border-emerald-700 bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-slate-600 block mb-1">পরিশোধের অবস্থা / Status</label>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <input
+                    type="checkbox"
+                    id="reimbursementStatusCheckbox"
+                    checked={expenseForm.reimbursement?.status === 'paid'}
+                    onChange={(e) => setExpenseForm({
+                      ...expenseForm,
+                      reimbursement: {
+                        ...(expenseForm.reimbursement || {}),
+                        status: e.target.checked ? 'paid' : 'unpaid'
+                      }
+                    })}
+                    className="w-4 h-4 text-emerald-800 focus:ring-emerald-700 border-slate-300 rounded"
+                  />
+                  <label htmlFor="reimbursementStatusCheckbox" className="text-xs font-bold text-slate-700 cursor-pointer">
+                    পরিশোধিত (Paid)
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Calculations Banner */}
         <div className="border-t border-slate-100 pt-4 grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50/50 p-4 rounded-xl">
@@ -243,9 +325,10 @@ export default function ExpenseEntry({
             {expenseForm.advanceAmount && (
               <div className="flex justify-between gap-2">
                 <span className="text-slate-500">উদ্বৃত্ত/ঋণ:</span>
-                <span className={`font-black ${currentExpenseBalance >= 0 ? 'text-emerald-800' : 'text-rose-850'}`}>
+                <span className={`font-black ${currentExpenseBalance >= 0 ? 'text-emerald-800' : (expenseForm.reimbursement?.status === 'paid' ? 'text-emerald-600' : 'text-rose-850')}`}>
                   {currentExpenseBalance >= 0 ? 'উদ্বৃত্ত: ' : 'ঘাটতি/ঋণ: '} 
                   ৳ {formatBanglaNumber(Math.abs(currentExpenseBalance).toLocaleString('bn-BD'))}
+                  {currentExpenseBalance < 0 && expenseForm.reimbursement?.status === 'paid' && ' (paid)'}
                 </span>
               </div>
             )}
@@ -257,7 +340,7 @@ export default function ExpenseEntry({
           <button
             type="button"
             onClick={() => setActiveTab('overview')}
-            className="w-full sm:w-auto px-5 py-2.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors order-2 sm:order-1"
+            className="w-full sm:w-auto px-5 py-2.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-650 hover:bg-slate-100 transition-colors order-2 sm:order-1"
           >
             বাতিল করুন
           </button>
