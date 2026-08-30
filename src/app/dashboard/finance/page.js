@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Printer, 
-  Calendar, 
+import {
+  Printer,
+  Calendar,
   RefreshCw,
   CheckCircle,
   AlertCircle,
@@ -505,7 +505,7 @@ export default function FinanceDashboard() {
 
       {/* 1. Main Dashboard Area (Hidden when printing) */}
       <div className="space-y-6 w-full max-w-full overflow-x-hidden print:hidden bg-transparent">
-        
+
         {/* Messages Alerts */}
         {successMsg && (
           <div className="fixed top-4 right-4 z-50 flex items-center gap-2 bg-emerald-500 text-white px-4 py-3 rounded-xl shadow-lg border border-emerald-400 animate-slide-in max-w-[calc(100vw-2rem)]">
@@ -524,11 +524,11 @@ export default function FinanceDashboard() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-emerald-900/10 pb-5">
           <div>
             <h1 className="text-xl sm:text-2xl font-black text-emerald-950 flex items-center gap-2 flex-wrap">
-              <span>🕌</span> <span>আর্থিক ব্যবস্থাপনা মডিউল (Income & Expense)</span>
+              <span>🕌</span> <span>আর্থিক ব্যবস্থাপনা মডিউল</span>
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">মাদরাসার দৈনন্দিন আয় এবং ব্যয় ভাউচার এন্ট্রি, ট্র্যাকিং ও হিসাব নিকাশ</p>
           </div>
-          
+
           {/* Month/Year Selection for Overview */}
           {activeTab === 'overview' && (
             <div className="flex items-center justify-between sm:justify-start gap-2 bg-white p-2 rounded-xl border border-emerald-900/10 shadow-xs shrink-0 w-full sm:w-auto">
@@ -554,7 +554,7 @@ export default function FinanceDashboard() {
                   })}
                 </select>
               </div>
-              <button 
+              <button
                 onClick={fetchSummary}
                 className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors shrink-0"
                 title="রিফ্রেশ"
@@ -577,11 +577,10 @@ export default function FinanceDashboard() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`py-2.5 sm:py-3 px-3 sm:px-5 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-all duration-200 rounded-t-lg shrink-0 ${
-                activeTab === tab.id
+              className={`py-2.5 sm:py-3 px-3 sm:px-5 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-all duration-200 rounded-t-lg shrink-0 ${activeTab === tab.id
                   ? 'border-emerald-750 text-emerald-950 bg-emerald-50/50'
                   : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50'
-              }`}
+                }`}
             >
               {tab.label}
             </button>
@@ -754,7 +753,7 @@ export default function FinanceDashboard() {
                 &times;
               </button>
             </div>
-            
+
             {/* Modal Body (Scrollable preview) */}
             <div className="p-6 overflow-y-auto flex-1 bg-slate-100/50">
               <div className="bg-white border border-slate-250 p-8 shadow-sm rounded-xl max-w-xl mx-auto">
@@ -765,7 +764,7 @@ export default function FinanceDashboard() {
                 )}
               </div>
             </div>
-            
+
             {/* Modal Footer */}
             <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-2 bg-slate-50">
               <button
@@ -803,9 +802,9 @@ export default function FinanceDashboard() {
 function VoucherPrintLayout({ tx, formatBanglaNumber, parsePayerName }) {
   const isIncome = tx.type === 'income';
   const parsed = parsePayerName(tx.payerName);
-  
-  const title = isIncome ? 'আয় আদায় রসিদ (Income Receipt)' : 'ব্যয় পরিশোধ ভাউচার (Expense Voucher)';
-  const idLabel = isIncome ? 'রসিদ নম্বর (Receipt ID)' : 'ভাউচার নম্বর (Voucher ID)';
+
+  const title = isIncome ? 'আয় আদায় রসিদ' : 'ব্যয় পরিশোধ ভাউচার';
+  const idLabel = isIncome ? 'রসিদ নম্বর ' : 'ভাউচার নম্বর';
   const idValue = isIncome ? tx.receiptNo : tx.voucherNo;
   const dateValue = tx.date;
   const totalAmount = isIncome ? tx.totalIncome : tx.totalExpense;
@@ -983,14 +982,14 @@ function ReportPrintLayout({ title, period, data, formatBanglaNumber, getMonthLa
 
       {/* Dual Column Sheet (Income vs Expense) */}
       <div className="grid grid-cols-2 gap-px bg-slate-200 border border-slate-300 mt-6 w-full">
-        
+
         {/* Income Column */}
         <div className="bg-white p-4 space-y-4">
           <h4 className="text-xs font-extrabold text-emerald-900 uppercase tracking-widest border-b border-slate-200 pb-2 flex justify-between">
             <span>📥 আয়ের খাতসমূহ (Income Sector)</span>
             <span className="text-[9px] text-slate-400">টাকা (৳)</span>
           </h4>
-          
+
           {!data.incomeBreakdown || data.incomeBreakdown.length === 0 ? (
             <p className="text-xs text-slate-400 py-6 text-center">কোনো আয়ের এন্ট্রি নেই</p>
           ) : (
