@@ -14,7 +14,7 @@ export default function AllStudentsPage() {
     const [viewMode, setViewMode] = useState("seatPlan");
 
     // সিট প্ল্যান এডিটিং এর জন্য লোকাল স্টেট
-    const [seatData, setSeatData] = useState({}); // { studentId: { hallNo: '', seatNo: '' } }
+    const [seatData, setSeatData] = useState({}); // { studentId: { hallNo: '', benchNo: '', seatNo: '' } }
     const [savingId, setSavingId] = useState(null);
 
     // ফিল্টারিং স্টেটসমূহ
@@ -39,12 +39,13 @@ export default function AllStudentsPage() {
                 const studentList = result.data || [];
                 setStudents(studentList);
 
-                // সিট প্ল্যানের প্রাথমিক ডাটা সেটআপ (যদি ডাটাবেজে আগে থেকে hallNo & seatNo থাকে)
+                // সিট প্ল্যানের প্রাথমিক ডাটা সেটআপ (যদি ডাটাবেজে আগে থেকে hallNo, benchNo & seatNo থাকে)
                 const initialSeatMap = {};
                 studentList.forEach((s) => {
                     const id = s._id?.$oid || s._id;
                     initialSeatMap[id] = {
                         hallNo: s.seatPlan?.hallNo || s.hallNo || "",
+                        benchNo: s.seatPlan?.benchNo || s.benchNo || "",
                         seatNo: s.seatPlan?.seatNo || s.seatNo || ""
                     };
                 });
@@ -60,7 +61,7 @@ export default function AllStudentsPage() {
         }
     };
 
-    // সিট বা হলের ইনপুট চ্যাঞ্জ হ্যান্ডলার
+    // সিট, বেঞ্চ বা হলের ইনপুট চ্যাঞ্জ হ্যান্ডলার
     const handleSeatInputChange = (id, field, value) => {
         setSeatData((prev) => ({
             ...prev,
@@ -77,6 +78,7 @@ export default function AllStudentsPage() {
             setSavingId(studentId);
             const payload = {
                 hallNo: seatData[studentId]?.hallNo || "",
+                benchNo: seatData[studentId]?.benchNo || "",
                 seatNo: seatData[studentId]?.seatNo || ""
             };
 
@@ -108,7 +110,7 @@ export default function AllStudentsPage() {
         if (academyType === "প্রাক-প্রাথমিক") return ["প্লে", "নার্সারি"];
         if (academyType === "প্রাথমিক") return ["প্রথম", "দ্বিতীয়", "তৃতীয়", "চতুর্থ", "পঞ্চম"];
         if (academyType === "মাধ্যমিক") return ["ষষ্ঠ", "সপ্তম", "অষ্টম", "নবম", "দশম"];
-        if (academyType === "উচ্চমাধ্যমিক") return ["১১শ শ্রেণি", "১২শ শ্রেণি"];
+
         return [];
     };
 
@@ -124,7 +126,6 @@ export default function AllStudentsPage() {
                 "প্লে", "নার্সারি",
                 "প্রথম", "দ্বিতীয়", "তৃতীয়", "চতুর্থ", "পঞ্চম",
                 "ষষ্ঠ", "সপ্তম", "অষ্টম", "নবম", "দশম",
-                "১১শ শ্রেণি", "১২শ শ্রেণি"
             ];
         }
         return [];
@@ -218,8 +219,8 @@ export default function AllStudentsPage() {
                     </h1>
                     <p className="text-xs sm:text-sm text-emerald-700/80 mt-0.5 font-medium">
                         {viewMode === "seatPlanPreview"
-                            ? "প্রিন্ট এবং চূড়ান্ত পরীক্ষার সিট প্ল্যান প্রিভিউ"
-                            : "শিক্ষার্থীদের রোল নম্বর অনুযায়ী হল এবং সিট বরাদ্দকরণ"}
+                            ? "প্রিন্ট এবং চূড়ান্ত পরীক্ষার সিট প্ল্যান প্রিভিউ"
+                            : "শিক্ষার্থীদের রোল নম্বর অনুযায়ী হল, বেঞ্চ এবং সিট বরাদ্দকরণ"}
                     </p>
                 </div>
 
@@ -372,9 +373,9 @@ export default function AllStudentsPage() {
                     <div className="w-full p-2 sm:p-4">
                         {/* ১. ছোট স্ক্রিনের জন্য কার্ড ভিউ (মোবাইল) */}
                         <div className="block sm:hidden space-y-3">
-                            {filteredStudents.map((student, idx) => {
+                            {filteredStudents?.map((student, idx) => {
                                 const id = student._id?.$oid || student._id;
-                                const rollNo = student.officeUse?.rollNumber || student.studentId || (idx + 1);
+                                const rollNo = student?.roll;
 
                                 return (
                                     <div key={id} className="bg-white border border-slate-200 p-4 rounded-xl shadow-xs space-y-3">
@@ -390,26 +391,37 @@ export default function AllStudentsPage() {
                                             </span>
                                         </div>
 
-                                        <div className="grid grid-cols-2 gap-2 text-xs">
+                                        <div className="grid grid-cols-3 gap-2 text-xs">
                                             <div>
-                                                <label className="block text-slate-500 mb-1 font-semibold">Hall No (হল নম্বর)</label>
+                                                <label className="block text-slate-500 mb-1 font-semibold">Hall (হল)</label>
                                                 <input
                                                     type="text"
                                                     placeholder="যেমন: হল-১"
                                                     value={seatData[id]?.hallNo || ""}
                                                     onChange={(e) => handleSeatInputChange(id, "hallNo", e.target.value)}
-                                                    className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 bg-white font-medium"
+                                                    className="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 bg-white font-medium"
                                                 />
                                             </div>
 
                                             <div>
-                                                <label className="block text-slate-500 mb-1 font-semibold">Seat No (সিট নম্বর)</label>
+                                                <label className="block text-slate-500 mb-1 font-semibold">Bench (বেঞ্চ)</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="যেমন: ১"
+                                                    value={seatData[id]?.benchNo || ""}
+                                                    onChange={(e) => handleSeatInputChange(id, "benchNo", e.target.value)}
+                                                    className="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 bg-white font-medium"
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-slate-500 mb-1 font-semibold">Seat (সিট)</label>
                                                 <input
                                                     type="text"
                                                     placeholder="যেমন: B-12"
                                                     value={seatData[id]?.seatNo || ""}
                                                     onChange={(e) => handleSeatInputChange(id, "seatNo", e.target.value)}
-                                                    className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 bg-white font-medium"
+                                                    className="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 bg-white font-medium"
                                                 />
                                             </div>
                                         </div>
@@ -428,22 +440,23 @@ export default function AllStudentsPage() {
                             })}
                         </div>
 
-                        {/* ২. বড় স্ক্রিনের জন্য প্রথাগত টেবিল ভিউ (ট্যাবলেট ও ডেস্কটপ) */}
+                        {/* ২. বড় স্ক্রিনের জন্য প্রথাগত টেবিল ভিউ (ট্যাবলেট ও ডেস্কটপ) */}
                         <div className="hidden sm:block w-full overflow-x-auto rounded-xl border border-slate-200 shadow-xs">
-                            <table className="w-full text-left border-collapse min-w-[650px]">
+                            <table className="w-full text-left border-collapse min-w-[750px]">
                                 <thead>
                                     <tr className="bg-[#043e30] text-emerald-100 text-xs uppercase tracking-wider font-bold">
-                                        <th className="py-3.5 px-4 w-1/6">Roll Number (রোল নম্বর)</th>
-                                        <th className="py-3.5 px-4 w-2/6">Name (শিক্ষার্থীর নাম)</th>
-                                        <th className="py-3.5 px-4 w-1/6">Hall No (হল নম্বর)</th>
-                                        <th className="py-3.5 px-4 w-1/6">Seat No (সিট নম্বর)</th>
-                                        <th className="py-3.5 px-4 text-center w-1/6">অ্যাকশন</th>
+                                        <th className="py-3.5 px-4 w-2/12">রোল নম্বর</th>
+                                        <th className="py-3.5 px-4 w-3/12">শিক্ষার্থীর নাম</th>
+                                        <th className="py-3.5 px-4 w-2/12">হল নম্বর</th>
+                                        <th className="py-3.5 px-4 w-2/12">বেঞ্চ নম্বর</th>
+                                        <th className="py-3.5 px-4 w-2/12">সিট নম্বর</th>
+                                        <th className="py-3.5 px-4 text-center w-1/12">অ্যাকশন</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 text-sm font-medium text-slate-700 bg-white">
                                     {filteredStudents.map((student, idx) => {
                                         const id = student._id?.$oid || student._id;
-                                        const rollNo = student.officeUse?.rollNumber || student.studentId || (idx + 1);
+                                        const rollNo = student.roll;
 
                                         return (
                                             <tr key={id} className="hover:bg-emerald-50/40 transition-colors">
@@ -473,7 +486,18 @@ export default function AllStudentsPage() {
                                                     />
                                                 </td>
 
-                                                {/* ৪. সিট নম্বর (ইনপুট বক্স) */}
+                                                {/* ৪. বেঞ্চ নম্বর (ইনপুট বক্স) */}
+                                                <td className="py-3 px-4">
+                                                    <input
+                                                        type="text"
+                                                        placeholder="যেমন: ১"
+                                                        value={seatData[id]?.benchNo || ""}
+                                                        onChange={(e) => handleSeatInputChange(id, "benchNo", e.target.value)}
+                                                        className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 bg-white font-medium"
+                                                    />
+                                                </td>
+
+                                                {/* ৫. সিট নম্বর (ইনপুট বক্স) */}
                                                 <td className="py-3 px-4">
                                                     <input
                                                         type="text"
@@ -491,7 +515,7 @@ export default function AllStudentsPage() {
                                                         disabled={savingId === id}
                                                         className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-lg shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                                                     >
-                                                        {savingId === id ? "সেভ হচ্ছে..." : "সেভ করুন"}
+                                                        {savingId === id ? "..." : "সেভ"}
                                                     </button>
                                                 </td>
                                             </tr>
@@ -502,103 +526,58 @@ export default function AllStudentsPage() {
                         </div>
                     </div>
                 ) : (
-
                     /* ========================================================
-                       মোড ২: সিট প্ল্যান প্রিভিউ (প্রিন্ট ফ্রেন্ডলি ভিউ)
+                       মোড ২: সিট প্ল্যান প্রিভিউ এবং প্রিন্ট ভিউ
                        ======================================================== */
-                    <div className="w-full overflow-x-auto p-4 print:p-0">
+                    <div className="p-4 sm:p-6 print:p-0">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 print:grid-cols-2 print:gap-3">
+                            {filteredStudents.map((student) => {
+                                const id = student._id?.$oid || student._id;
+                                const details = getStudentClassDetails(student);
+                                const currentSeat = seatData[id] || {};
 
-                        {/* Header with separate Logo and Banner */}
-                        <div className="flex items-center justify-center mb-4 border-b-4 border-double border-gray-800 pb-2">
-                            <div className="w-20 h-20 md:w-28 md:h-28 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center">
-                                <Image
-                                    src={"/aimlogo1.png"}
-                                    alt="Institution Logo"
-                                    width={200}
-                                    height={200}
-                                    quality={100}
-                                    priority
-                                    className="w-full h-full object-cover scale-[1.05] transform-gpu"
-                                />
-                            </div>
-                            <div className="flex-grow text-center">
-                                <Image
-                                    src={"/banner_routine.png"}
-                                    alt="Institution Banner"
-                                    width={2000}
-                                    height={400}
-                                    quality={100}
-                                    priority
-                                    className="w-full h-auto max-h-45 object-fill mx-auto print:max-h-45"
-                                />
-                            </div>
+                                return (
+                                    <div
+                                        key={id}
+                                        className="bg-white border-2 border-emerald-900/20 rounded-xl p-4 shadow-sm flex flex-col justify-between relative overflow-hidden print:border-slate-800 print:break-inside-avoid"
+                                    >
+                                        <div className="flex items-center justify-between border-b border-emerald-100 pb-2 mb-2">
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 text-sm">{student.studentNameBangla || "নাম নেই"}</h4>
+                                                <p className="text-xs text-slate-500 font-medium">{details.className}</p>
+                                            </div>
+                                            <span className="bg-emerald-50 text-emerald-800 px-2 py-1 rounded text-xs font-bold border border-emerald-200">
+                                                রোল: {student.roll || "N/A"}
+                                            </span>
+                                        </div>
+
+                                        <div className="grid grid-cols-3 gap-2 bg-slate-50 p-2.5 rounded-lg border border-slate-100 text-center my-1">
+                                            <div>
+                                                <span className="block text-[10px] text-slate-400 uppercase font-semibold">হল</span>
+                                                <span className="font-bold text-slate-800 text-xs sm:text-sm">
+                                                    {currentSeat.hallNo || "—"}
+                                                </span>
+                                            </div>
+                                            <div className="border-x border-slate-200">
+                                                <span className="block text-[10px] text-slate-400 uppercase font-semibold">বেঞ্চ</span>
+                                                <span className="font-bold text-emerald-700 text-xs sm:text-sm">
+                                                    {currentSeat.benchNo || "—"}
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <span className="block text-[10px] text-slate-400 uppercase font-semibold">সিট</span>
+                                                <span className="font-bold text-slate-800 text-xs sm:text-sm">
+                                                    {currentSeat.seatNo || "—"}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
-
-                        {/* পরীক্ষার শিরোনাম ও তথ্য সেকশন */}
-                        <div className="text-center mb-5">
-                            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-                                পরীক্ষার সিট প্ল্যান
-                            </h2>
-                            <p className="text-xs sm:text-sm text-slate-600 font-semibold mt-1">
-                                মোট শিক্ষার্থী: {filteredStudents.length} জন
-                            </p>
-                        </div>
-
-                        {/* প্রিভিউ টেবিল */}
-                        <table className="w-full text-left border-collapse border border-slate-300 print:border-black">
-                            <thead>
-                                <tr className="bg-[#043e30] text-emerald-100 text-xs uppercase tracking-wider font-bold print:bg-slate-200 print:text-black">
-                                    <th className="py-3 px-4 border border-slate-300 print:border-black">রোল নম্বর</th>
-                                    <th className="py-3 px-4 border border-slate-300 print:border-black">আইডি</th>
-                                    <th className="py-3 px-4 border border-slate-300 print:border-black">শিক্ষার্থীর নাম</th>
-                                    <th className="py-3 px-4 border border-slate-300 print:border-black">শ্রেণি</th>
-                                    <th className="py-3 px-4 border border-slate-300 print:border-black">হল নম্বর</th>
-                                    <th className="py-3 px-4 border border-slate-300 print:border-black">সিট নম্বর</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-200 text-sm font-medium text-slate-800">
-                                {filteredStudents.map((student, idx) => {
-                                    const id = student._id?.$oid || student._id;
-                                    const rollNo = student.officeUse?.rollNumber || student.studentId || (idx + 1);
-                                    const details = getStudentClassDetails(student);
-
-                                    return (
-                                        <tr key={id} className="hover:bg-slate-50 transition-colors print:hover:bg-transparent">
-                                            <td className="py-2.5 px-4 font-mono font-bold border border-slate-300 print:border-black">
-                                                {rollNo}
-                                            </td>
-                                            <td className="py-2.5 px-4 font-mono font-bold border border-slate-300 print:border-black">
-                                                {student.studentId}
-                                            </td>
-                                            <td className="py-2.5 px-4 font-bold border border-slate-300 print:border-black">
-                                                {student.studentNameBangla || "নাম বিহীন"}
-                                            </td>
-                                            <td className="py-2.5 px-4 text-xs border border-slate-300 print:border-black">
-                                                {details.className}
-                                            </td>
-                                            <td className="py-2.5 px-4 font-semibold border border-slate-300 print:border-black">
-                                                {seatData[id]?.hallNo || "N/A"}
-                                            </td>
-                                            <td className="py-2.5 px-4 font-semibold border border-slate-300 print:border-black">
-                                                {seatData[id]?.seatNo || "N/A"}
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
                     </div>
                 )}
             </div>
         </div>
     );
 }
-
-/**
- * 1) seat_plan theke info ene table er sticker bananu . 
- * 2) seat_plan er moddhe ager bochorer sokol info bosanu
- * 3) seat_plan er moddhe hall 5 ta bananu. 
- * 4) hifj er sokol students er seat plane niye asa.
- * 5) ager bochorer result database e rakha
- * 6) admit-card bosanu.
- * */

@@ -50,18 +50,20 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             lucideIcon: <GraduationCap className="w-5 h-5" />,
             roles: ["admin", "teacher"],
             dropdown: [
-                { title: "পরীক্ষা ফি", href: "/dashboard/exam-fee" },
-                { title: "পরীক্ষা রুটিন", href: "/dashboard/academics/routine" },
-                { title: "এডমিট কার্ড", href: "/dashboard/academics/admit-card" },
+                { title: "পরীক্ষা ফি", href: "/dashboard/academics/exam/exam-fee" },
+                { title: "পরীক্ষা রুটিন", href: "/dashboard/academics/exam/routine" },
+                { title: "উপস্থিতি স্বাক্ষরপত্র", href: "/dashboard/academics/exam/attendance-sheet" },
+                { title: "এডমিট কার্ড", href: "/dashboard/academics/exam/admit-card" },
                 {
                     title: "সীট প্ল্যান",
                     submenu: [
-                        { title: "সীট প্ল্যান এন্ট্রি", href: "/dashboard/academics/seat-plan" },
-                        { title: "সীট প্ল্যান সামারি", href: "/dashboard/academics/seat-plan-summary" },
-                        { title: "উপস্থিতি স্বাক্ষরপত্র", href: "/dashboard/academics/exam-attendance-sheet" }
+                        { title: "সীট প্ল্যান এন্ট্রি", href: "/dashboard/academics/exam/seat-plan/seat-plan-entry" },
+                        { title: "হল ও ক্লাস ভিত্তিক সামারি", href: "/dashboard/academics/exam/seat-plan/Hall&Class-wise-summary" },
+                        { title: "হল ভিত্তিক ম্যাপ", href: "/dashboard/academics/exam/seat-plan/hall-wise-map" },
+
                     ]
                 },
-                { title: "নম্বর ইনপুট", href: "/dashboard/academics/results/input" },
+                { title: "রিজাল্ট ইনপুট", href: "/dashboard/academics/results/input" },
                 { title: "ক্লাসভিত্তিক ফলাফল", href: "/dashboard/academics/results/class-wise-result" },
                 { title: "ব্যক্তিগত ফলাফল", href: "/dashboard/academics/results/individual-result" },
             ]

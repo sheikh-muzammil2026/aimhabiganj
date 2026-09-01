@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import RoutinePreview from "../../../../components/dashboard/academics/RoutinePreview";
+import RoutinePreview from "../../../../../components/dashboard/academics/RoutinePreview";
 import { toast } from "react-toastify";
 
 export default function AdminRoutineForm() {
