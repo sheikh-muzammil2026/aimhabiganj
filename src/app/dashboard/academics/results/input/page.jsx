@@ -336,7 +336,7 @@ export default function TeacherMarkInput() {
 
                                             <td className="p-1 sm:p-2 border-none sm:border sm:border-slate-100 dark:sm:border-slate-850 text-center flex justify-between items-center sm:table-cell before:content-['সিটি:'] before:font-bold before:text-slate-500 sm:before:content-none mt-2 sm:mt-0">
                                                 <input
-                                                    type="number"
+                                                    type="text"
                                                     step="any"
                                                     min="0"
                                                     value={student.ctMark}
@@ -348,7 +348,7 @@ export default function TeacherMarkInput() {
 
                                             <td className="p-1 sm:p-2 border-none sm:border sm:border-slate-100 dark:sm:border-slate-850 text-center flex justify-between items-center sm:table-cell before:content-['প্রধান_পরীক্ষা:'] before:font-bold before:text-slate-500 sm:before:content-none mt-2 sm:mt-0">
                                                 <input
-                                                    type="number"
+                                                    type="text"
                                                     step="any"
                                                     min="0"
                                                     value={student.examMark}
@@ -365,27 +365,27 @@ export default function TeacherMarkInput() {
 
                         {/* ৫. পেজিনেশন কন্ট্রোলস */}
                         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white dark:bg-[#0f172a] p-4 border border-slate-200 dark:border-slate-850 mt-2 mb-6 rounded-xl">
-                          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                            পেজ {currentPage} এর {totalPages} (মোট {totalStudents} জন শিক্ষার্থী)
-                          </span>
-                          <div className="flex gap-2">
-                            <button
-                              type="button"
-                              disabled={currentPage <= 1}
-                              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                              className="px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              ◀ পূর্ববর্তী (Previous)
-                            </button>
-                            <button
-                              type="button"
-                              disabled={currentPage >= totalPages}
-                              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                              className="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              পরবর্তী (Next) ▶
-                            </button>
-                          </div>
+                            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                পেজ {currentPage} এর {totalPages} (মোট {totalStudents} জন শিক্ষার্থী)
+                            </span>
+                            <div className="flex gap-2">
+                                <button
+                                    type="button"
+                                    disabled={currentPage <= 1}
+                                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                    className="px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    ◀ পূর্ববর্তী (Previous)
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={currentPage >= totalPages}
+                                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                                    className="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    পরবর্তী (Next) ▶
+                                </button>
+                            </div>
                         </div>
 
                         <div className="flex justify-end">
