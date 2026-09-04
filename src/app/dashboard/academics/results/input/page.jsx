@@ -88,7 +88,7 @@ export default function TeacherMarkInput() {
                     const initialList = rawStudents.map(student => ({
                         studentId: student.studentId || '',
                         studentName: student.studentNameBangla || student.studentNameEnglish || 'N/A',
-                        rollNumber: student.officeUse?.rollNumber || 'N/A',
+                        roll: student.roll || 'N/A',
                         ctMark: '',
                         examMark: ''
                     }));
@@ -127,7 +127,7 @@ export default function TeacherMarkInput() {
                     return {
                         studentId: id,
                         studentName: student.studentNameBangla || student.studentNameEnglish || 'N/A',
-                        rollNumber: student.officeUse?.rollNumber || 'N/A',
+                        roll: student.roll || 'N/A',
                         ctMark: existing ? existing.ctMark : '',
                         examMark: existing ? existing.examMark : ''
                     };
@@ -323,7 +323,7 @@ export default function TeacherMarkInput() {
                                             className="flex flex-col p-4 border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors sm:table-row sm:p-0 sm:border-none"
                                         >
                                             <td className="p-1 sm:p-3 border-none sm:border sm:border-slate-100 dark:sm:border-slate-850 font-bold text-slate-600 dark:text-slate-350 text-left sm:text-center flex justify-between items-center sm:table-cell before:content-['রোল:'] before:font-bold before:text-slate-500 sm:before:content-none">
-                                                <span>{student.rollNumber}</span>
+                                                <span>{student.roll}</span>
                                             </td>
 
                                             <td className="p-1 sm:p-3 border-none sm:border sm:border-slate-100 dark:sm:border-slate-850 font-mono font-bold text-emerald-800 dark:text-emerald-350 flex justify-between items-center sm:table-cell before:content-['আইডি:'] before:font-bold before:text-slate-500 sm:before:content-none">
