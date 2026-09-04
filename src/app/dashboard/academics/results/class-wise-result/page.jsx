@@ -38,7 +38,7 @@ export default function ClassResultView() {
       }
     } catch (error) {
       console.error("Fetch Class Results Error:", error);
-      reactToast.error("ফলাফলের তথ্য লোড করতে সমস্যা হয়েছে!");
+      toast.error("ফলাফলের তথ্য লোড করতে সমস্যা হয়েছে!");
     } finally {
       setLoading(false);
     }
@@ -99,8 +99,30 @@ export default function ClassResultView() {
 
   return (
     <>
-      {/* প্রিন্ট এর জন্য CSS স্টাইল */}
+      {/* প্রিন্ট ও ওয়াটারমার্কের জন্য উন্নত CSS স্টাইল */}
       <style jsx global>{`
+        /* সাধারণ ওয়াটারমার্ক ফিক্স */
+        .watermark-wrapper {
+          position: absolute !important;
+          top: 50% !important;
+          left: 50% !important;
+          transform: translate(-50%, -50%) !important;
+          z-index: 10 !important;
+          pointer-events: none !important;
+          display: flex !important;
+          justify-content: center !important;
+          align-items: center !important;
+          width: 100% !important;
+          height: 100% !important;
+          opacity: 0.12 !important;
+        }
+
+        .watermark-wrapper img {
+          width: 320px !important;
+          height: auto !important;
+          object-fit: contain !important;
+        }
+
         @media print {
           @page {
             size: A4 landscape;
@@ -125,20 +147,44 @@ export default function ClassResultView() {
             border: none !important;
             max-width: 100% !important;
             width: 100% !important;
+            position: relative !important;
           }
-          .watermark {
-            position: absolute !important;
+
+          *::-webkit-scrollbar {
+            display: none !important; /* Chrome, Safari and Opera */
+            width: 0 !important;
+            height: 0 !important;
+          }
+
+          /* প্রিন্ট মোডে ওয়াটারমার্ক সেন্টার ও দৃশ্যমান রাখার জন্য ফিক্স */
+          .watermark-wrapper {
+            overflow: visible !important;
+            -ms-overflow-style: none !important; /* IE and Edge */
+            scrollbar-width: none !important; /* Firefox */
+            position: fixed !important;
             top: 50% !important;
             left: 50% !important;
             transform: translate(-50%, -50%) !important;
-            width: 350px !important;
-            opacity: 0.08 !important;
-            z-index: 0 !important;
-            pointer-events: none !important;
+            z-index: 1 mportant;
+            opacity: 0.12 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
+
+          // .watermark-wrapper img {
+          //   width: 350px !important;
+          //   height: auto !important;
+          //   -webkit-print-color-adjust: exact !important;
+          //   print-color-adjust: exact !important;
+          // }
+
+          /* টেবিল ব্যাকগ্রাউন্ড ট্রান্সপারেন্ট করা হয়েছে যেন ওয়াটারমার্ক ঢাকা না পড়ে */
           table {
             font-size: 11px !important;
             border-collapse: collapse !important;
+            background: transparent !important;
+            position: relative !important;
+            z-index: 2 !important;
           }
           th,
           td {
@@ -151,34 +197,17 @@ export default function ClassResultView() {
           }
           /* সমান মার্কস রো (সবুজ) */
           tr.same-mark-row {
-            background-color: #d1fae5 !important;
+            background-color: rgba(209, 250, 229, 0.7) !important;
           }
           /* ফেল করা রো (লাল/গোলাপি) */
           tr.fail-row {
-            background-color: #fecdd3 !important;
+            background-color: rgba(254, 205, 211, 0.7) !important;
           }
-        }
-        .watermark-web {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: 320px;
-          opacity: 0.05;
-          pointer-events: none;
-          z-index: 0;
         }
       `}</style>
 
       <div className="p-4 sm:p-6 bg-slate-50 min-h-screen">
         <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-7 relative print-container">
-          {/* ব্যাকগ্রাউন্ড জলছাপ */}
-          <img
-            src="/aimlogo1.png"
-            alt="Watermark Logo"
-            className="watermark watermark-web"
-          />
-
           {/* হেডার (ওয়েব ভিউ) */}
           <div className="border-b border-slate-100 pb-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
             <div>
@@ -228,7 +257,7 @@ export default function ClassResultView() {
             </div>
 
             <h2 className="text-base font-bold text-slate-800">
-              শ্রেণি: {selectedClass} -
+              শ্রেণি: {selectedClass} -{" "}
               {examType === "term1"
                 ? "১ম সাময়িক"
                 : examType === "term2"
@@ -302,9 +331,20 @@ export default function ClassResultView() {
               এই শ্রেণিতে কোনো ফলাফলের রেকর্ড পাওয়া যায়নি।
             </div>
           ) : (
-            <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm relative z-10">
+            <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm relative">
+              {/* ওয়াটারমার্ক (Watermark) */}
+              <div className="watermark-wrapper">
+                <Image
+                  src="/aimlogo1.png"
+                  alt="Watermark Logo"
+                  width={300}
+                  height={300}
+                  className="object-contain"
+                />
+              </div>
+
               {/* মোবাইল ভিউ */}
-              <div className="block sm:hidden divide-y divide-slate-200 bg-white/90 no-print">
+              <div className="block sm:hidden divide-y divide-slate-200 bg-white/80 no-print relative z-10">
                 {results.map((student) => {
                   const total = calculateTotalMark(student.allSubjects);
                   const hasFailed = checkIfFailed(student.allSubjects);
@@ -413,7 +453,7 @@ export default function ClassResultView() {
               </div>
 
               {/* ডেস্কটপ ও প্রিন্ট ভিউ */}
-              <div className="hidden sm:block print-only overflow-x-auto">
+              <div className="hidden sm:block print-only overflow-x-auto relative z-10">
                 <table className="w-full text-left border-collapse text-xs sm:text-sm">
                   <thead>
                     <tr className="bg-[#043e30] text-amber-300">
@@ -441,17 +481,17 @@ export default function ClassResultView() {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 bg-white/90">
+                  <tbody className="divide-y divide-slate-100 bg-white/80">
                     {results.map((student) => {
                       const total = calculateTotalMark(student.allSubjects);
                       const hasFailed = checkIfFailed(student.allSubjects);
                       const isDuplicateMark = marksCount[total] > 1;
 
                       // ফেল করলে লাল, মার্কস সমান হলে সবুজ, বাকিগুলো সাধারণ
-                      let rowStyleClass = "hover:bg-slate-50";
+                      let rowStyleClass = "hover:bg-slate-50/80";
                       if (hasFailed) {
                         rowStyleClass =
-                          "fail-row bg-rose-100 hover:bg-rose-200/80";
+                          "fail-row bg-rose-100/90 hover:bg-rose-200/80";
                       } else if (isDuplicateMark) {
                         rowStyleClass =
                           "same-mark-row bg-emerald-100/80 hover:bg-emerald-200/80";
