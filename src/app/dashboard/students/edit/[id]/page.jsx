@@ -35,7 +35,7 @@ export default function EditStudentPage() {
   const [isSaving, setIsSaving] = useState(false);
 
   const [formData, setFormData] = useState({
-    sessionYear: "২০২৬-২০২৭",
+    sessionYear: "২০২৬",
     status: "",
     studentId: "",
     studentImage: "",
@@ -153,6 +153,9 @@ export default function EditStudentPage() {
 
           setFormData({
             ...s,
+            sessionYear: s.sessionYear
+              ? String(s.sessionYear).split(/[-–/]/)[0].trim()
+              : "২০২৬",
             dateOfBirth: s.dateOfBirth
               ? String(s.dateOfBirth).split("T")[0]
               : "",

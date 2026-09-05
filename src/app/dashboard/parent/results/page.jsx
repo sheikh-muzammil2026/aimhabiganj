@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 export default function StudentResultSearch() {
     const [searchId, setSearchId] = useState('');
-    const [year, setYear] = useState('২০২৬-২০২৭');
+    const [year, setYear] = useState('২০২৬');
     const [result, setResult] = useState(null);
     const [loading, setLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
@@ -88,7 +88,7 @@ export default function StudentResultSearch() {
                                 </div>
                             </div>
                             <span className="inline-block bg-amber-400 text-[#043e30] font-black px-4 py-1 rounded-full text-xs uppercase tracking-widest mt-1">
-                                একাডেমিক মার্কশিট - {result.year}
+                                একাডেমিক মার্কশিট - {result.year ? String(result.year).split(/[-–/]/)[0].trim() : ''}
                             </span>
                         </div>
 

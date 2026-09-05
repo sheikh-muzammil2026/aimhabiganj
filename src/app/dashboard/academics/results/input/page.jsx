@@ -25,7 +25,7 @@ export default function TeacherMarkInput() {
     const [selectedClass, setSelectedClass] = useState('প্রথম');
     const [selectedSubject, setSelectedSubject] = useState('');
     const [examType, setExamType] = useState('term1');
-    const [year, setYear] = useState('২০২৬-২০২৭');
+    const [year, setYear] = useState('২০২৬');
 
     const [availableSubjects, setAvailableSubjects] = useState([]);
     const [studentsMarksList, setStudentsMarksList] = useState([]);

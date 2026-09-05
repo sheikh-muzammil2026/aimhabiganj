@@ -9,7 +9,7 @@ import AdmissionFormPage3 from "@/components/admission/AdmissionFormPage3";
 
 export default function AdmissionFormPage() {
   const [formData, setFormData] = useState({
-    sessionYear: "২০২৬-২০২৭",
+    sessionYear: "২০২৬",
     status: "",
     studentId: "",
     // 1st page

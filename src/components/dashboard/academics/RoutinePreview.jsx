@@ -82,8 +82,8 @@ export default function RoutinePreview({ routine }) {
                     {/* Title Header */}
                     <div className="text-center mb-3 space-y-0.5">
                         <h3 className="text-xs md:text-sm font-bold text-gray-800">
-                            <span>{routine.examTitle}</span> - {routine.gregorianYear} ঈসায়ী /{" "}
-                            {routine.hijriYear} হি
+                            <span>{routine.examTitle}</span> - {(routine.gregorianYear || '').split(/[-–/]/)[0].trim()} ঈসায়ী /{" "}
+                            {(routine.hijriYear || '').split(/[-–/]/)[0].trim()} হি
                         </h3>
                         <h2 className="text-xl md:text-2xl font-black text-gray-900 leading-tight">
                             পরীক্ষার রুটিন

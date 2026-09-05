@@ -19,17 +19,17 @@ export default function ResultSheetGenerator() {
   const [resultsError, setResultsError] = useState(null);
 
   // ফিল্টারিং স্টেট: Year, Exam Type, Student ID (Search)
-  const [targetYear, setTargetYear] = useState("২০২৬-২০২৭");
+  const [targetYear, setTargetYear] = useState("২০২৬");
   const [examType, setExamType] = useState("বার্ষিক পরীক্ষা");
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState(""); // সার্চ বাটন প্রেসের পর কাজের জন্য স্টেট
 
   const sessionYears = [
-    "২০২৬-২০২৭",
-    "২০২৫-২০২৬",
-    "২০২৪-২০২৫",
-    "২০২৩-২০২৪",
-    "২০২২-২০২৩",
+    "২০২৬",
+    "২০২৫",
+    "২০২৪",
+    "২০২৩",
+    "২০২২",
   ];
 
   // ১. Backend থেকে স্টুডেন্ট ফেচ (Student ID সার্চ ভিত্তিক)
@@ -261,7 +261,7 @@ export default function ResultSheetGenerator() {
             >
               {sessionYears.map((year) => (
                 <option key={year} value={year}>
-                  {year.split("-")[0]}
+                  {year}
                 </option>
               ))}
             </select>
@@ -464,7 +464,7 @@ export default function ResultSheetGenerator() {
                               মার্কসীট
                             </div>
                             <p className="text-[11px] font-bold text-gray-800 mt-1">
-                              {examType} - {resData.year?.split("-")[0]}
+                              {examType} - {(resData.year || "").split(/[-–/]/)[0].trim()}
                             </p>
                             <p className="text-[11px] font-bold text-gray-800">
                               শ্রেণি: {student.class || "N/A"}

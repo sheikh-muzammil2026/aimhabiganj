@@ -196,8 +196,8 @@ export default function ClassWiseRoutinePage() {
                   <p>🏫 <span className="font-semibold text-slate-500 dark:text-slate-400">শ্রেণি:</span> {clsData.class}</p>
                 </div>
                 <div className="space-y-1.5 sm:text-right">
-                  <p>🌙 <span className="font-semibold text-slate-500 dark:text-slate-400">হিজরী বর্ষ:</span> {routine.hijriYear || "N/A"}</p>
-                  <p>📅 <span className="font-semibold text-slate-500 dark:text-slate-400">ঈসায়ী বর্ষ:</span> {routine.gregorianYear || "N/A"}</p>
+                  <p>🌙 <span className="font-semibold text-slate-500 dark:text-slate-400">হিজরী বর্ষ:</span> {routine.hijriYear ? String(routine.hijriYear).split(/[-–/]/)[0].trim() : "N/A"}</p>
+                  <p>📅 <span className="font-semibold text-slate-500 dark:text-slate-400">ঈসায়ী বর্ষ:</span> {routine.gregorianYear ? String(routine.gregorianYear).split(/[-–/]/)[0].trim() : "N/A"}</p>
                 </div>
                 {routine.note && (
                   <div className="col-span-1 sm:col-span-2 bg-amber-50 dark:bg-slate-900/60 p-2.5 rounded-lg border border-amber-200/50 dark:border-slate-800 text-[11px] sm:text-xs text-amber-900 dark:text-amber-300 mt-2 font-medium">

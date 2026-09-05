@@ -183,7 +183,8 @@ export default function AllStudentsPage() {
             (student.currentAddress?.district && student.currentAddress.district.toLowerCase().includes(searchTerm.toLowerCase())) ||
             (student.permanentAddress?.district && student.permanentAddress.district.toLowerCase().includes(searchTerm.toLowerCase()));
 
-        const matchesSession = selectedSession === "all" || student.sessionYear === selectedSession;
+        const studentYear = (student.sessionYear || "").split(/[-–/]/)[0].trim();
+        const matchesSession = selectedSession === "all" || studentYear === selectedSession;
         const matchesDivision = selectedDivision === "all" || details.divisionKey === selectedDivision;
         const matchesAcademyType = selectedAcademyType === "all" || details.academyType === selectedAcademyType;
         const matchesClass = selectedClass === "all" || details.className === selectedClass;

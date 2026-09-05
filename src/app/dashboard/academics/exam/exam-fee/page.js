@@ -211,7 +211,7 @@ export default function ExamFeePage() {
                                 </div>
                                 <div className="flex justify-between items-center text-sm py-2 border-b border-slate-100">
                                     <span className="text-slate-500 font-medium">শিক্ষাবর্ষ</span>
-                                    <span className="text-slate-950 font-bold font-mono">২০২৬-২০২৭</span>
+                                    <span className="text-slate-950 font-bold font-mono">২০২৬</span>
                                 </div>
                                 <div className="flex justify-between items-center text-sm py-2 border-b border-slate-100">
                                     <span className="text-slate-500 font-medium">নির্ধারিত শেষ তারিখ</span>

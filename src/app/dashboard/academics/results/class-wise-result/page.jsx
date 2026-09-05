@@ -9,7 +9,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_API;
 export default function ClassResultView() {
   const [selectedClass, setSelectedClass] = useState("প্রথম");
   const [examType, setExamType] = useState("term1");
-  const [year, setYear] = useState("২০২৬-২০২৭");
+  const [year, setYear] = useState("২০২৬");
 
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -263,7 +263,7 @@ export default function ClassResultView() {
                 : examType === "term2"
                   ? "২য় সাময়িক"
                   : "বার্ষিক পরীক্ষা"}{" "}
-              পরীক্ষা - {year.split("-")[0]}
+              পরীক্ষা - {(year || "").split(/[-–/]/)[0].trim()}
             </h2>
           </div>
 

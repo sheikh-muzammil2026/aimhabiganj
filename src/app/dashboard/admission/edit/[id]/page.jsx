@@ -35,7 +35,7 @@ export default function EditAdmissionPage() {
   const [isSaving, setIsSaving] = useState(false);
 
   const [formData, setFormData] = useState({
-    sessionYear: "২০২৬-২০২৭",
+    sessionYear: "২০২৬",
     status: "",
     studentId: "",
     // 1st page
@@ -156,6 +156,9 @@ export default function EditAdmissionPage() {
           const s = result.data;
           setFormData({
             ...s,
+            sessionYear: s.sessionYear
+              ? String(s.sessionYear).split(/[-–/]/)[0].trim()
+              : "২০২৬",
             dateOfBirth: s.dateOfBirth
               ? String(s.dateOfBirth).split("T")[0]
               : "",

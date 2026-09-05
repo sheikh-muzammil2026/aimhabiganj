@@ -152,15 +152,15 @@ export default function IdCardGenerator() {
   const filteredStudents = students;
 
   const sessionYears = [
-    '২০২৬-২০২৭',
-    '২০২৫-২০২৬',
-    '২০২৪-২০২৫',
-    '২০২৩-২০২৪',
-    '২০২২-২০২৩',
-    '২০২১-২০২২',
-    '২০২০-২০২১',
-    '২০১৯-২০২০',
-    '২০১৮-২০১৯',
+    '২০২৬',
+    '২০২৫',
+    '২০২৪',
+    '২০২৩',
+    '২০২২',
+    '২০২১',
+    '২০২০',
+    '২০১৯',
+    '২০১৮',
   ];
 
   const uniqueFeeCategories = ["General", "Orphan", "Poor Fund", "Scholarship", "Staff Child"];
@@ -620,7 +620,7 @@ export default function IdCardGenerator() {
               const details = getStudentClassDetails(student);
 
               // ১) সেশন থেকে শুধুমাত্র প্রথম ৪ ডিজিট (যেমন: ২০২৬) নেওয়া
-              const sessionOnlyYear = student.sessionYear ? student.sessionYear.split('-')[0] : 'N/A';
+              const sessionOnlyYear = (student.sessionYear || '').split(/[-–/]/)[0].trim() || 'N/A';
 
               // ২) বারকোডের জন্য সমস্ত ডাইনামিক ডাটা স্ট্রিং আকারে প্যাক করা
               const barcodePayload = String(student.studentId || student.roll || '');

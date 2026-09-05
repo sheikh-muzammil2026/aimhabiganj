@@ -184,9 +184,9 @@ export default function AllStudentsPage() {
 
   // ২০১৮ থেকে ২০২৬ পর্যন্ত সেশন বছরের লিস্ট
   const sessionYears = [
-    "২০২৬-২০২৭", "২০২৫-২০২৬", "২০২৪-২০২৫",
-    "২০২৩-২০২৪", "২০২২-২০২৩", "২০২১-২০২২",
-    "২০২০-২০২১", "২০১৯-২০২০", "২০১৮-২০১৯"
+    "২০২৬", "২০২৫", "২০২৪",
+    "২০২৩", "২০২২", "২০২১",
+    "২০২০", "২০১৯", "২০১৮"
   ];
 
   // ইউনিক ফি ক্যাটাগরি লিস্ট
@@ -488,7 +488,7 @@ export default function AllStudentsPage() {
                         <td className="py-3 px-4 text-slate-600">{student.currentAddress?.district || student.permanentAddress?.district || "N/A"}</td>
                         <td className="py-3 px-4">
                           <span className="inline-block text-[11px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-lg border border-slate-200">
-                            {student.sessionYear || "N/A"}
+                            {(student.sessionYear || "").split(/[-–/]/)[0].trim() || "N/A"}
                           </span>
                         </td>
                         <td className="py-3 px-4 text-center">
@@ -584,7 +584,7 @@ export default function AllStudentsPage() {
                         <span className="text-slate-400 block text-[10px]">জেলা ও সেশন:</span>
                         <span className="text-slate-700 font-medium">{student.currentAddress?.district || student.permanentAddress?.district || "N/A"}</span>
                         <span className="ml-1.5 inline-block text-[10px] font-bold bg-slate-100 text-slate-700 px-1.5 py-0.2 rounded border border-slate-200">
-                          {student.sessionYear || "N/A"}
+                          {(student.sessionYear || "").split(/[-–/]/)[0].trim() || "N/A"}
                         </span>
                       </div>
                     </div>

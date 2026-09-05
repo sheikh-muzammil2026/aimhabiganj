@@ -8,7 +8,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL || process.env.NEXT_PUBL
 export default function ClassResultView() {
     const [selectedClass, setSelectedClass] = useState('প্রথম');
     const [examType, setExamType] = useState('term1');
-    const [year, setYear] = useState('২০২৬-২০২৭');
+    const [year, setYear] = useState('২০২৬');
 
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);

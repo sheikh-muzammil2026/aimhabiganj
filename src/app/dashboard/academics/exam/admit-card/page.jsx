@@ -225,12 +225,12 @@ export default function AdmitCardGenerator() {
   const filteredStudents = students;
 
   const sessionYears = [
-    "২০২৬-২০২৭",
-    "২০২৫-২০২৬",
-    "২০২৪-২০২৫",
-    "২০২৩-২০২৪",
-    "২০২২-২০২৩",
-    "২০২১-২০২২",
+    "২০২৬",
+    "২০২৫",
+    "২০২৪",
+    "২০২৩",
+    "২০২২",
+    "২০২১",
   ];
 
   const uniqueFeeCategories = [
@@ -766,7 +766,7 @@ export default function AdmitCardGenerator() {
                         </div>
                         <p className="text-[11px] font-semibold text-gray-700 leading-tight">
                           {card.examName || "পরীক্ষা"} -{" "}
-                          {card.sessionYear || "২০২৬"} শিক্ষাবর্ষ
+                          {(card.sessionYear || "২০২৬").split(/[-–/]/)[0].trim()} শিক্ষাবর্ষ
                         </p>
                         <p className="text-[11px] font-bold text-gray-900 mt-0.5">
                           শ্রেণি: {card.className || "N/A"}

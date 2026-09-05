@@ -31,7 +31,7 @@ export default function ExamAttendanceSheet() {
         className: '',
         examName: '',
         englishYear: '২০২৬',
-        hijriYear: '১৪৪৭ - ১৪৪৮',
+        hijriYear: '১৪৪৭',
     });
     const [subjects, setSubjects] = useState([]);
     const [students, setStudents] = useState([]);
@@ -71,8 +71,8 @@ export default function ExamAttendanceSheet() {
                 setMetaData(result.metaData || {
                     className: selectedClass,
                     examName: selectedExam,
-                    englishYear: '২০২৬-২০২৬',
-                    hijriYear: '১৪৪৭ - ১৪৪৮'
+                    englishYear: '২০২৬',
+                    hijriYear: '১৪৪৭'
                 });
                 setSubjects(result.subjects || []);
                 setStudents(result.students || []);
@@ -285,7 +285,7 @@ export default function ExamAttendanceSheet() {
                         {/* Sub Header Meta Info */}
                         <div className={`text-center font-semibold text-gray-900 ${isSinglePageMode ? 'text-xs mb-1' : 'text-[15px] sm:text-[16px] mb-2'
                             }`}>
-                            শ্রেণি: <span className="font-bold">{metaData.className}</span> - {metaData.examName} {metaData.englishYear} ইং / {metaData.hijriYear} হি শিক্ষাবর্ষ
+                            শ্রেণি: <span className="font-bold">{metaData.className}</span> - {metaData.examName} {(metaData.englishYear || '').split(/[-–/]/)[0].trim()} ইং / {(metaData.hijriYear || '').split(/[-–/]/)[0].trim()} হি শিক্ষাবর্ষ
                         </div>
 
                         {/* Title */}
