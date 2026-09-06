@@ -114,7 +114,7 @@ export default function ResultSheetGenerator() {
     fetchStudentResults();
   }, [selectedIds, targetYear]);
 
-  // বিষয়ভিত্তিক গ্রেড এবং গ্রেড পয়েন্ট নির্ধারণ (International Grading System)
+  // বিষয়ভিত্তিক গ্রেড এবং গ্রেড পয়েন্ট নির্ধারণ (International Grading System)
   const calculateSubjectGrade = (mark) => {
     if (mark === "ABS" || mark === "A" || mark === "Abs") {
       return { grade: "ABS", gpa: "0.00", point: 0.0 };
@@ -130,9 +130,9 @@ export default function ResultSheetGenerator() {
     return { grade: "F", gpa: "0.00", point: 0.0 };
   };
 
-  // সামগ্রিক জিপিএ থেকে আন্তর্জাতিক গ্রেড বাউন্ডারি নির্ধারণ
-  const getOverallGradeFromGPA = (gpaVal) => {
-    const num = parseFloat(gpaVal) || 0;
+  // GPA পয়েন্ট অনুযায়ী লেটার গ্রেড বের করার নিয়ম
+  const getGradeFromPoint = (point) => {
+    const num = parseFloat(point) || 0;
     if (num >= 5.0) return "A+";
     if (num >= 4.0) return "A";
     if (num >= 3.5) return "A-";
@@ -140,6 +140,11 @@ export default function ResultSheetGenerator() {
     if (num >= 2.0) return "C";
     if (num >= 1.0) return "D";
     return "F";
+  };
+
+  // সামগ্রিক জিপিএ থেকে আন্তর্জাতিক গ্রেড বাউন্ডারি নির্ধারণ
+  const getOverallGradeFromGPA = (gpaVal) => {
+    return getGradeFromPoint(gpaVal);
   };
 
   // অবজেক্টের CT ও Exam যোগ করে মোট নম্বর বের করার হেলপার
@@ -199,7 +204,44 @@ export default function ResultSheetGenerator() {
     return "-";
   };
 
-  // বার্ষিক পরীক্ষায় শতকারা বা ১০০-এর স্কেলে মার্ক নরমালাইজেশন
+  // বার্ষিক পরীক্ষায় প্রতিটি বিষয়ের ৩টি টার্মের গ্রেড পয়েন্টের গড় হিসাব করে ফাইনাল গ্রেড ও জিপি বের করা
+  const getFinalSubjectGradeForAnnual = (item) => {
+    const term1Data = item.term1 || item["১ম সাময়িক পরীক্ষা"] || {};
+    const term2Data = item.term2 || item["২য় সাময়িক পরীক্ষা"] || {};
+    const annualData = item.annual || item["বার্ষিক পরীক্ষা"] || {};
+
+    const t1 = parseExamData(term1Data);
+    const t2 = parseExamData(term2Data);
+    const ann = parseExamData(annualData);
+
+    if (t1 === "ABS" || t2 === "ABS" || ann === "ABS") {
+      return { grade: "ABS", gpa: "0.00", point: 0.0 };
+    }
+    if (t1 === "-" && t2 === "-" && ann === "-") {
+      return { grade: "-", gpa: "0.00", point: 0.0 };
+    }
+
+    const g1 = calculateSubjectGrade(t1);
+    const g2 = calculateSubjectGrade(t2);
+    const gAnn = calculateSubjectGrade(ann);
+
+    // কোনো একটি টার্মে F থাকলে বা পয়েন্ট ০ হলে বিষয়ে ফেল
+    if (g1.point === 0 || g2.point === 0 || gAnn.point === 0) {
+      return { grade: "F", gpa: "0.00", point: 0.0 };
+    }
+
+    // ৩টি টার্মের গ্রেড পয়েন্টের গড়
+    const avgPoint = (g1.point + g2.point + gAnn.point) / 3;
+    const finalGrade = getGradeFromPoint(avgPoint);
+
+    return {
+      grade: finalGrade,
+      gpa: avgPoint.toFixed(2),
+      point: avgPoint,
+    };
+  };
+
+  // বার্ষিক পরীক্ষায় শতকরা বা ১০০-এর স্কেলে মার্ক নরমালাইজেশন
   const getNormalizedMarkForGrade = (item, currentExamType) => {
     const mark = getMarkForExamType(item, currentExamType);
     if (mark === "ABS" || mark === "-") return mark;
@@ -276,6 +318,7 @@ export default function ResultSheetGenerator() {
     let validCount = 0;
     let hasFailedCompulsory = false;
     let totalGradePoints = 0;
+    let totalNormalizedMarks = 0;
 
     resultsList.forEach((item) => {
       const isAbsent = isSubjectAbsent(item, currentExamType);
@@ -287,11 +330,22 @@ export default function ResultSheetGenerator() {
           totalObtained += mark;
           validCount++;
         }
-        const normalizedMark = getNormalizedMarkForGrade(
-          item,
-          currentExamType,
-        );
-        const subGrade = calculateSubjectGrade(normalizedMark);
+
+        let subGrade;
+        if (currentExamType === "বার্ষিক পরীক্ষা") {
+          subGrade = getFinalSubjectGradeForAnnual(item);
+          const normMark = getNormalizedMarkForGrade(item, currentExamType);
+          if (typeof normMark === "number") {
+            totalNormalizedMarks += normMark;
+          }
+        } else {
+          const normalizedMark = getNormalizedMarkForGrade(
+            item,
+            currentExamType,
+          );
+          subGrade = calculateSubjectGrade(normalizedMark);
+        }
+
         if (subGrade.grade === "F" || subGrade.point === 0) {
           hasFailedCompulsory = true;
         }
@@ -299,7 +353,7 @@ export default function ResultSheetGenerator() {
       }
     });
 
-    // ১. সকল বিষয়ে অনুপস্থিত থাকলে -> Status = "Absent" (Do NOT mark as incomplete)
+    // ১. সকল বিষয়ে অনুপস্থিত থাকলে -> Status = "Absent"
     if (absentCount === totalSubjects) {
       return {
         totalObtained: 0,
@@ -315,7 +369,13 @@ export default function ResultSheetGenerator() {
       return {
         totalObtained,
         average:
-          validCount > 0 ? (totalObtained / validCount).toFixed(2) : "0.00",
+          validCount > 0
+            ? (
+              (currentExamType === "বার্ষিক পরীক্ষা"
+                ? totalNormalizedMarks
+                : totalObtained) / validCount
+            ).toFixed(2)
+            : "0.00",
         grade: "INC",
         gpa: "0.00",
         status: "Incomplete",
@@ -324,7 +384,13 @@ export default function ResultSheetGenerator() {
 
     // ৩. সকল বিষয়ে উপস্থিত থাকলে -> গ্রেড ও জিপিএ সাধারণ নিয়মে হিসাব করা হবে
     const avgMarks =
-      validCount > 0 ? (totalObtained / validCount).toFixed(2) : "0.00";
+      validCount > 0
+        ? (
+          (currentExamType === "বার্ষিক পরীক্ষা"
+            ? totalNormalizedMarks
+            : totalObtained) / validCount
+        ).toFixed(2)
+        : "0.00";
 
     // কোনো আবশ্যিক বিষয়ে ফেল থাকলে সামগ্রিক গ্রেড বাধ্যতামূলকভাবে 'F' এবং জিপিএ 0.00
     if (hasFailedCompulsory) {
@@ -380,7 +446,7 @@ export default function ResultSheetGenerator() {
             <div className="flex items-center gap-2">
               <input
                 type="text"
-                placeholder="Student ID দিয়ে খুঁজুন..."
+                placeholder="Student ID দিয়ে খুঁজুন..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 className="w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 rounded-md py-2 pl-3 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"
@@ -438,11 +504,10 @@ export default function ResultSheetGenerator() {
           <button
             onClick={handlePrint}
             disabled={selectedIds.length === 0}
-            className={`w-full sm:w-auto px-6 py-2.5 rounded-md font-bold text-white transition ${
-              selectedIds.length === 0
+            className={`w-full sm:w-auto px-6 py-2.5 rounded-md font-bold text-white transition ${selectedIds.length === 0
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-teal-600 hover:bg-teal-700 shadow-lg"
-            }`}
+              }`}
           >
             🖨️ রেজাল্ট শিট প্রিন্ট করুন ({selectedIds.length})
           </button>
@@ -763,10 +828,16 @@ export default function ResultSheetGenerator() {
                                   item,
                                   examType,
                                 );
-                                const normalizedMark =
-                                  getNormalizedMarkForGrade(item, examType);
-                                const gradeInfo =
-                                  calculateSubjectGrade(normalizedMark);
+
+                                let gradeInfo;
+                                if (examType === "বার্ষিক পরীক্ষা") {
+                                  gradeInfo = getFinalSubjectGradeForAnnual(item);
+                                } else {
+                                  const normalizedMark =
+                                    getNormalizedMarkForGrade(item, examType);
+                                  gradeInfo =
+                                    calculateSubjectGrade(normalizedMark);
+                                }
 
                                 return (
                                   <tr
@@ -776,18 +847,6 @@ export default function ResultSheetGenerator() {
                                     <td className="border border-[#C5A059] p-1.5 text-left px-2.5 font-semibold">
                                       {item.subject}
                                     </td>
-
-                                    {examType === "১ম সাময়িক পরীক্ষা" && (
-                                      <td className="border border-[#C5A059] p-1.5">
-                                        {t1}
-                                      </td>
-                                    )}
-
-                                    {examType === "২য় সাময়িক পরীক্ষা" && (
-                                      <td className="border border-[#C5A059] p-1.5">
-                                        {t2}
-                                      </td>
-                                    )}
 
                                     {examType === "বার্ষিক পরীক্ষা" && (
                                       <>
@@ -800,30 +859,17 @@ export default function ResultSheetGenerator() {
                                         <td className="border border-[#C5A059] p-1.5">
                                           {ann}
                                         </td>
-                                        <td className="border border-[#C5A059] p-1.5 font-bold">
-                                          {finalMark}
-                                        </td>
                                       </>
                                     )}
 
-                                    <td
-                                      className={`border border-[#C5A059] p-1.5 font-bold ${
-                                        gradeInfo.grade === "ABS"
-                                          ? "text-gray-600"
-                                          : gradeInfo.grade === "INC"
-                                            ? "text-amber-600"
-                                            : gradeInfo.grade === "F"
-                                              ? "text-red-600"
-                                              : "text-emerald-800"
-                                      }`}
-                                    >
+                                    <td className="border border-[#C5A059] p-1.5 font-bold">
+                                      {finalMark}
+                                    </td>
+                                    <td className="border border-[#C5A059] p-1.5 font-bold">
                                       {gradeInfo.grade}
                                     </td>
-                                    <td className="border border-[#C5A059] p-1.5 font-mono text-slate-700 font-semibold">
-                                      {gradeInfo.grade === "ABS" ||
-                                      gradeInfo.grade === "INC"
-                                        ? "-"
-                                        : gradeInfo.gpa}
+                                    <td className="border border-[#C5A059] p-1.5">
+                                      {gradeInfo.gpa}
                                     </td>
                                   </tr>
                                 );
@@ -831,128 +877,53 @@ export default function ResultSheetGenerator() {
                             )}
                           </tbody>
                         </table>
-
-                        {/* ফলাফল সামারি লাইন */}
-                        <div className="flex justify-between items-center text-xs font-bold mt-2.5 bg-amber-50/90 p-2 border border-[#C5A059] rounded">
-                          <span>মোট নম্বর: {summary.totalObtained}</span>
-                          <span>গড়: {summary.average}</span>
-                          <span>
-                            গ্রেড: {summary.grade} ({summary.gpa})
-                          </span>
-                          <span
-                            className={
-                              summary.status === "Incomplete"
-                                ? "text-amber-600"
-                                : summary.status === "Failed"
-                                  ? "text-red-600"
-                                  : summary.status === "Absent"
-                                    ? "text-gray-600"
-                                    : "text-emerald-800"
-                            }
-                          >
-                            ফলাফল:{" "}
-                            {summary.status === "Passed"
-                              ? "উত্তীর্ণ (Passed)"
-                              : summary.status === "Failed"
-                                ? "অকৃতকার্য (Failed)"
-                                : summary.status === "Incomplete"
-                                  ? "অসম্পূর্ণ (Incomplete)"
-                                  : summary.status === "Absent"
-                                    ? "অনুপস্থিত (Absent)"
-                                    : summary.status}
-                          </span>
-                        </div>
                       </div>
 
-                      {/* দৃষ্টি আকর্ষণ / বিশেষ নির্দেশনা */}
-                      <div className="my-2 text-[10px] text-gray-800">
-                        <p className="font-bold text-xs mb-0.5">
-                          দৃষ্টি আকর্ষণ:
-                        </p>
-                        <ul className="list-disc list-inside space-y-0.5 text-[9.5px]">
-                          <li>
-                            ফলাফলে কোনো অসঙ্গতি পরিলক্ষিত হলে তা অফিস চলাকালীন
-                            সময়ে সংশোধনযোগ্য।
-                          </li>
-                          <li>
-                            প্রিন্টেড মার্কশিট সংরক্ষণে অবহেলা করা যাবে না।
-                          </li>
-                        </ul>
-                      </div>
-
-                      {/* সিগনেচার সেকশন */}
-                      <div className="flex justify-between items-end text-[10px] mt-4 pt-2 ">
-                        <div className="text-center">
-                          <div className="text-center flex flex-col items-center print:mt-auto relative">
-                            <div className="relative w-28 h-5">
-                              <Image
-                                src={"/anarul.png"}
-                                alt="Controller Signature"
-                                width={100}
-                                height={40}
-                                unoptimized
-                                className="absolute -top-1 right-6 h-6 w-12 object-contain mix-blend-multiply contrast-[800%] brightness-[60%] grayscale -rotate-90"
-                              />
-                            </div>
-                            <div className="w-28 border-b border-gray-800 mb-0.5"></div>
-                            <span className="text-[9.5px] font-bold text-gray-800">
-                              শ্রেণি শিক্ষকের স্বাক্ষর
+                      {/* সামারি সেকশন */}
+                      <div className="mt-2 border border-[#C5A059] bg-[#fcf8ed] p-2 rounded-sm">
+                        <div className="grid grid-cols-4 gap-2 text-center text-xs font-bold text-gray-800">
+                          <div>
+                            <span className="block text-[10px] text-gray-600 font-normal">
+                              মোট নম্বর
                             </span>
+                            {summary.totalObtained}
                           </div>
-                        </div>
-
-                        <div className="text-center">
-                          {/* প্রিন্সিপাল এর স্বাক্ষর */}
-                          <div className="text-center flex flex-col items-center">
-                            <div className="relative w-28 h-5 print:mt-auto relative">
-                              <Image
-                                src={"/principle's_signature.jpg"}
-                                alt="Principal Signature"
-                                width={100}
-                                height={40}
-                                unoptimized
-                                className="absolute -top-1 right-6 h-6 w-12 object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45"
-                              />
-                            </div>
-
-                            <div className="w-28 border-b border-gray-800 mb-0.5"></div>
-                            <span className="text-[9.5px] font-bold text-gray-800">
-                              প্রিন্সিপালের স্বাক্ষর
+                          <div>
+                            <span className="block text-[10px] text-gray-600 font-normal">
+                              গড় নম্বর
                             </span>
+                            {summary.average}
+                          </div>
+                          <div>
+                            <span className="block text-[10px] text-gray-600 font-normal">
+                              ফাইনাল গ্রেড
+                            </span>
+                            {summary.grade}
+                          </div>
+                          <div>
+                            <span className="block text-[10px] text-gray-600 font-normal">
+                              ফাইনাল জিপিএ
+                            </span>
+                            {summary.gpa}
                           </div>
                         </div>
                       </div>
-                      <div className="relative z-10 mt-auto pt-1 border-t border-gray-300 flex-shrink-0">
-                        <div className="flex flex-wrap justify-center items-center gap-x-1 gap-y-0.5 text-[8.5px] font-semibold text-gray-800">
-                          <span className="flex items-center gap-0.5">
-                            <Phone className="w-2.5 h-2.5 text-gray-700" />
-                            01316-209201
-                          </span>
 
-                          <span className="flex items-center gap-0.5">
-                            <BsWhatsapp className="w-2.5 h-2.5 text-green-600" />
-                            01748-886161
-                          </span>
-
-                          <span className="flex items-center gap-0.5">
-                            <Globe className="w-2.5 h-2.5 text-blue-500" />
-                            www.aimhabiganj.com
-                          </span>
-
-                          <span className="flex items-center gap-0.5">
-                            <Mail className="w-2.5 h-2.5 text-red-500" />
-                            aimhabiganj@gmail.com
-                          </span>
-
-                          <span className="flex items-center gap-0.5">
-                            <FaFacebook className="w-2.5 h-2.5 text-blue-600" />
-                            aimhabiganj
-                          </span>
-
-                          <span className="flex items-center gap-0.5">
-                            <BsYoutube className="w-2.5 h-2.5 text-red-600" />
-                            aimhabiganj
-                          </span>
+                      {/* ফুটার এবং সিগনেচার */}
+                      <div className="mt-8 pt-4">
+                        <div className="flex justify-between items-end px-4 text-xs font-bold text-gray-800">
+                          <div className="text-center">
+                            <div className="border-t border-dashed border-gray-400 w-32 mb-1"></div>
+                            শ্রেণি শিক্ষকের স্বাক্ষর
+                          </div>
+                          <div className="text-center">
+                            <div className="border-t border-dashed border-gray-400 w-32 mb-1"></div>
+                            অভিভাবকের স্বাক্ষর
+                          </div>
+                          <div className="text-center">
+                            <div className="border-t border-dashed border-gray-400 w-32 mb-1"></div>
+                            অধ্যক্ষ / পরিচালকের স্বাক্ষর
+                          </div>
                         </div>
                       </div>
                     </div>
