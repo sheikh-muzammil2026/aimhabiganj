@@ -14,6 +14,13 @@ export default function ClassResultView() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // সিগনেচার ইমেজ সোর্স (ডাইনামিক ভ্যারিয়েবল ও ফলব্যাক)
+  const [principalSignatureSrc, setPrincipalSignatureSrc] = useState(
+    "/principle's_signature.jpg",
+  );
+  const [controllerSignatureSrc, setControllerSignatureSrc] =
+    useState("/anarul.png");
+
   // ক্লাসের ফলাফল ডাটা ফেচ করা
   const fetchClassResults = async () => {
     if (!selectedClass) return;
@@ -48,32 +55,68 @@ export default function ClassResultView() {
     fetchClassResults();
   }, [selectedClass, examType, year]);
 
+  // বিষয়ের প্রাপ্ত মার্কস ও অনুপস্থিতি তথ্য
+  const getSubjectData = (sub) => {
+    const termData = sub[examType] || {};
+    const isAbsent =
+      termData.isAbsent ||
+      termData.exam === "A" ||
+      termData.exam === "Abs" ||
+      termData.ct === "A" ||
+      termData.ct === "Abs";
+    const ct = parseFloat(termData.ct) || 0;
+    const exam = parseFloat(termData.exam) || 0;
+    const total = ct + exam;
+    return { isAbsent, total };
+  };
+
+  // বিষয়ভিত্তিক গ্রেড পয়েন্ট (আন্তর্জাতিক গ্রেডিং সিস্টেম)
+  const getSubjectPoint = (mark) => {
+    const num = typeof mark === "number" ? mark : parseFloat(mark) || 0;
+    if (num >= 80) return 5.0;
+    if (num >= 70) return 4.0;
+    if (num >= 60) return 3.5;
+    if (num >= 50) return 3.0;
+    if (num >= 40) return 2.0;
+    if (num >= 33) return 1.0;
+    return 0.0;
+  };
+
+  // সামগ্রিক জিপিএ থেকে আন্তর্জাতিক গ্রেড বাউন্ডারি
+  const getOverallGradeFromGPA = (gpaVal) => {
+    const num = parseFloat(gpaVal) || 0;
+    if (num >= 5.0) return "A+";
+    if (num >= 4.0) return "A";
+    if (num >= 3.5) return "A-";
+    if (num >= 3.0) return "B";
+    if (num >= 2.0) return "C";
+    if (num >= 1.0) return "D";
+    return "F";
+  };
+
+  // শিক্ষার্থী সব বিষয়ে অনুপস্থিত কি না যাচাই
+  const checkIfAbsentInAll = (subjects) => {
+    if (!Array.isArray(subjects) || subjects.length === 0) return true;
+    return subjects.every((sub) => getSubjectData(sub).isAbsent);
+  };
+
+  // শিক্ষার্থী কোনো বিষয়ে ফেল করেছে কি না (৩৩-এর নিচে পেলে অথবা অনুপস্থিত থাকলে ফেল)
+  const checkIfFailed = (subjects) => {
+    if (!Array.isArray(subjects) || subjects.length === 0) return false;
+    return subjects.some((sub) => {
+      const { isAbsent, total } = getSubjectData(sub);
+      return isAbsent || total < 33;
+    });
+  };
+
   // মোট নম্বর গণনার হেল্পার ফাংশন
   const calculateTotalMark = (subjects) => {
     if (!Array.isArray(subjects)) return 0;
     return subjects.reduce((sum, item) => {
-      const termData = item[examType] || {};
-      // অনুপস্থিত বা 'A' / 'Abs' থাকলে ০ নম্বর হিসাব করা হবে
-      if (termData.isAbsent || termData.exam === "A" || termData.exam === "Abs")
-        return sum;
-      const ct = parseFloat(termData.ct) || 0;
-      const exam = parseFloat(termData.exam) || 0;
-      return sum + ct + exam;
+      const { isAbsent, total } = getSubjectData(item);
+      if (isAbsent) return sum;
+      return sum + total;
     }, 0);
-  };
-
-  // শিক্ষার্থী কোনো বিষয়ে ফেল করেছে কি না (৩৯ বা তার নিচে পেলে অথবা 'A'/'Abs' পেলে ফেল)
-  const checkIfFailed = (subjects) => {
-    if (!Array.isArray(subjects)) return false;
-    return subjects.some((sub) => {
-      const termData = sub[examType] || {};
-      if (termData.isAbsent || termData.exam === "A" || termData.exam === "Abs")
-        return true; // 'A' বা অনুপস্থিত থাকলেও ফেল
-      const ct = parseFloat(termData.ct) || 0;
-      const exam = parseFloat(termData.exam) || 0;
-      const subTotal = ct + exam;
-      return subTotal <= 39; // ৩৯ বা তার নিচে পেলে ফেল
-    });
   };
 
   // ডুপ্লিকেট/সমান মার্কস চিহ্নিত করার জন্য মার্ক ফ্রিকোয়েন্সি গণনা
@@ -82,6 +125,65 @@ export default function ClassResultView() {
     const total = calculateTotalMark(student.allSubjects);
     marksCount[total] = (marksCount[total] || 0) + 1;
   });
+
+  // শ্রেণিভিত্তিক সামগ্রিক ফলাফল পরিসংখ্যান গণনা
+  const totalStudents = results.length;
+  let absentCount = 0;
+  let failedCount = 0;
+  let passedCount = 0;
+  const gradeCounts = {
+    "A+": 0,
+    A: 0,
+    "A-": 0,
+    B: 0,
+    C: 0,
+    D: 0,
+    F: 0,
+  };
+
+  results.forEach((student) => {
+    const subjects = student.allSubjects || [];
+    const totalSubs = subjects.length;
+    if (totalSubs === 0) return;
+
+    let absentSubCount = 0;
+    let hasFailedSub = false;
+    let totalPoints = 0;
+
+    subjects.forEach((sub) => {
+      const { isAbsent, total } = getSubjectData(sub);
+      if (isAbsent) {
+        absentSubCount++;
+        hasFailedSub = true;
+      } else if (total < 33) {
+        hasFailedSub = true;
+      } else {
+        totalPoints += getSubjectPoint(total);
+      }
+    });
+
+    if (absentSubCount === totalSubs) {
+      absentCount++;
+    } else if (hasFailedSub) {
+      failedCount++;
+      gradeCounts["F"]++;
+    } else {
+      passedCount++;
+      const gpa = (totalPoints / totalSubs).toFixed(2);
+      const grade = getOverallGradeFromGPA(gpa);
+      if (gradeCounts[grade] !== undefined) {
+        gradeCounts[grade]++;
+      } else {
+        gradeCounts["F"]++;
+      }
+    }
+  });
+
+  const presentStudents = totalStudents - absentCount;
+  const passRate =
+    presentStudents > 0
+      ? ((passedCount / presentStudents) * 100).toFixed(2)
+      : "0.00";
 
   // সকল ডাইনামিক সাবজেক্টের ইউনিক লিস্ট
   const allSubjectsList = Array.from(
@@ -99,9 +201,9 @@ export default function ClassResultView() {
 
   return (
     <>
-      {/* প্রিন্ট ও ওয়াটারমার্কের জন্য উন্নত CSS স্টাইল */}
+      {/* প্রিন্ট ও ওয়াটারমার্কের জন্য উন্নত CSS স্টাইল */}
       <style jsx global>{`
-        /* সাধারণ ওয়াটারমার্ক ফিক্স */
+        /* সাধারণ ওয়াটারমার্ক ফিক্স */
         .watermark-wrapper {
           position: absolute !important;
           top: 50% !important;
@@ -126,7 +228,7 @@ export default function ClassResultView() {
         @media print {
           @page {
             size: A4 landscape;
-            margin: 12mm;
+           margin: 0mm 1mm 1mm 1mm;
           }
           body {
             background: white !important;
@@ -156,7 +258,7 @@ export default function ClassResultView() {
             height: 0 !important;
           }
 
-          /* প্রিন্ট মোডে ওয়াটারমার্ক সেন্টার ও দৃশ্যমান রাখার জন্য ফিক্স */
+          /* প্রিন্ট মোডে ওয়াটারমার্ক সেন্টার ও দৃশ্যমান রাখার জন্য ফিক্স */
           .watermark-wrapper {
             overflow: visible !important;
             -ms-overflow-style: none !important; /* IE and Edge */
@@ -165,20 +267,13 @@ export default function ClassResultView() {
             top: 50% !important;
             left: 50% !important;
             transform: translate(-50%, -50%) !important;
-            z-index: 1 mportant;
+            z-index: 1 !important;
             opacity: 0.12 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
 
-          // .watermark-wrapper img {
-          //   width: 350px !important;
-          //   height: auto !important;
-          //   -webkit-print-color-adjust: exact !important;
-          //   print-color-adjust: exact !important;
-          // }
-
-          /* টেবিল ব্যাকগ্রাউন্ড ট্রান্সপারেন্ট করা হয়েছে যেন ওয়াটারমার্ক ঢাকা না পড়ে */
+          /* টেবিল ব্যাকগ্রাউন্ড ট্রান্সপারেন্ট করা হয়েছে যেন ওয়াটারমার্ক ঢাকা না পড়ে */
           table {
             font-size: 11px !important;
             border-collapse: collapse !important;
@@ -206,7 +301,7 @@ export default function ClassResultView() {
         }
       `}</style>
 
-      <div className="p-4 sm:p-6 bg-slate-50 min-h-screen">
+      <div className="p-1 sm:p-6 bg-slate-50 min-h-screen">
         <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-7 relative print-container">
           {/* হেডার (ওয়েব ভিউ) */}
           <div className="border-b border-slate-100 pb-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
@@ -230,9 +325,9 @@ export default function ClassResultView() {
           </div>
 
           {/* প্রিন্ট হেডার */}
-          <div className="hidden print-only text-center mb-6 border-b-2 border-[#043e30] pb-3">
-            <div className="flex items-center justify-center gap-0 mb-2 border-b-4 border-double border-gray-800 pb-1 pl-2">
-              <div className="w-35 h-35 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-3">
+          <div className="hidden print-only text-center mb-0 pb-0">
+            <div className="flex items-center justify-center gap-0 mb-1 border-b-4 border-double border-gray-800 pb-1 pl-2">
+              <div className="w-20 h-20 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-3">
                 <Image
                   src={"/aimlogo1.png"}
                   alt="Institution Logo"
@@ -251,7 +346,7 @@ export default function ClassResultView() {
                   height={400}
                   quality={100}
                   priority
-                  className="w-full h-auto max-h-45 object-fill mx-auto print:max-h-45"
+                  className="w-full h-auto max-h-25 object-fill mx-auto print:max-h-25"
                 />
               </div>
             </div>
@@ -332,13 +427,13 @@ export default function ClassResultView() {
             </div>
           ) : (
             <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm relative">
-              {/* ওয়াটারমার্ক (Watermark) */}
+              {/* ওয়াটারমার্ক (Watermark) */}
               <div className="watermark-wrapper">
                 <Image
                   src="/aimlogo1.png"
                   alt="Watermark Logo"
-                  width={300}
-                  height={300}
+                  width={500}
+                  height={500}
                   className="object-contain"
                 />
               </div>
@@ -348,18 +443,20 @@ export default function ClassResultView() {
                 {results.map((student) => {
                   const total = calculateTotalMark(student.allSubjects);
                   const hasFailed = checkIfFailed(student.allSubjects);
+                  const isAbsentAll = checkIfAbsentInAll(student.allSubjects);
                   const isDuplicateMark = marksCount[total] > 1;
 
                   return (
                     <div
                       key={student.studentId}
-                      className={`p-4 space-y-3 transition-colors ${
-                        hasFailed
+                      className={`p-4 space-y-3 transition-colors ${isAbsentAll
+                        ? "bg-slate-100/90 text-slate-500"
+                        : hasFailed
                           ? "bg-rose-100/90"
                           : isDuplicateMark
                             ? "bg-emerald-100/80"
                             : ""
-                      }`}
+                        }`}
                     >
                       <div className="flex justify-between items-center bg-emerald-50/60 p-2.5 rounded-lg border border-emerald-100">
                         <div className="flex items-center gap-2">
@@ -375,7 +472,7 @@ export default function ClassResultView() {
                             মোট নম্বর
                           </span>
                           <span className="font-extrabold text-emerald-900 text-sm">
-                            {total}
+                            {isAbsentAll ? "ABS" : total}
                           </span>
                         </div>
                       </div>
@@ -397,7 +494,6 @@ export default function ClassResultView() {
                           {student.allSubjects?.map((sub, idx) => {
                             const termData = sub[examType] || {};
 
-                            // অনুপস্থিত বা 'A' / 'Abs' থাকলে
                             if (
                               termData.isAbsent ||
                               termData.exam === "A" ||
@@ -427,16 +523,15 @@ export default function ClassResultView() {
                             const ct = parseFloat(termData.ct) || 0;
                             const exam = parseFloat(termData.exam) || 0;
                             const subTotal = ct + exam;
-                            const isSubFail = subTotal <= 39;
+                            const isSubFail = subTotal < 33;
 
                             return (
                               <span
                                 key={idx}
-                                className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs border ${
-                                  isSubFail
-                                    ? "bg-red-100 text-red-800 border-red-200 font-bold"
-                                    : "bg-slate-100 text-slate-700 border-slate-200/60"
-                                }`}
+                                className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs border ${isSubFail
+                                  ? "bg-red-100 text-red-800 border-red-200 font-bold"
+                                  : "bg-slate-100 text-slate-700 border-slate-200/60"
+                                  }`}
                               >
                                 <span className="font-semibold">
                                   {sub.subject}:
@@ -485,11 +580,16 @@ export default function ClassResultView() {
                     {results.map((student) => {
                       const total = calculateTotalMark(student.allSubjects);
                       const hasFailed = checkIfFailed(student.allSubjects);
+                      const isAbsentAll = checkIfAbsentInAll(
+                        student.allSubjects,
+                      );
                       const isDuplicateMark = marksCount[total] > 1;
 
-                      // ফেল করলে লাল, মার্কস সমান হলে সবুজ, বাকিগুলো সাধারণ
                       let rowStyleClass = "hover:bg-slate-50/80";
-                      if (hasFailed) {
+                      if (isAbsentAll) {
+                        rowStyleClass =
+                          "bg-slate-100/90 text-slate-500 hover:bg-slate-200/80";
+                      } else if (hasFailed) {
                         rowStyleClass =
                           "fail-row bg-rose-100/90 hover:bg-rose-200/80";
                       } else if (isDuplicateMark) {
@@ -520,7 +620,6 @@ export default function ClassResultView() {
                             if (matchedSub) {
                               const termData = matchedSub[examType] || {};
 
-                              // 'A' বা 'Abs' বা অনুপস্থিত থাকলে লাল রঙে 'A'/'Abs' দেখাবে
                               if (
                                 termData.isAbsent ||
                                 termData.exam === "A" ||
@@ -545,7 +644,7 @@ export default function ClassResultView() {
                               const ct = parseFloat(termData.ct) || 0;
                               const exam = parseFloat(termData.exam) || 0;
                               const subTotal = ct + exam;
-                              const isSubFail = subTotal <= 39;
+                              const isSubFail = subTotal < 33;
 
                               return (
                                 <td
@@ -567,13 +666,89 @@ export default function ClassResultView() {
                           })}
 
                           <td className="p-3 border border-slate-200 font-extrabold text-center text-emerald-900 bg-emerald-50/30">
-                            {total}
+                            {isAbsentAll ? "ABS" : total}
                           </td>
                         </tr>
                       );
                     })}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          )}
+
+          {/* এক নজরে সকল তথ্য */}
+          {results.length > 0 && (
+            <div >
+
+
+              {/* ১ লাইনে তথ্য */}
+              <div className="text-xs sm:text-sm font-bold text-slate-800 bg-white/90 rounded-xl mt-1  flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
+                <span>
+                  মোট পরীক্ষার্থী:{" "}
+                  <strong className="text-slate-900">{totalStudents}</strong>{" "}
+                  জন,
+                </span>
+                <span>
+                  পাশ করেছে:{" "}
+                  <strong className="text-emerald-700">{passedCount}</strong>{" "}
+                  জন,
+                </span>
+                <span>
+                  পাসের হার:{" "}
+                  <strong className="text-[#043e30]">{passRate}%</strong>,
+                </span>
+                <span>
+                  অকৃতকার্য:{" "}
+                  <strong className="text-rose-600">{failedCount}</strong> জন,
+                </span>
+                <span>
+                  অনুপস্থিত:{" "}
+                  <strong className="text-amber-600">{absentCount}</strong> জন।
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Signatures Section (Bottom of Page / Print Footer) */}
+          {results.length > 0 && (
+            <div className="flex justify-between items-end sm:px-16 print:break-inside-avoid">
+              {/* পরীক্ষা নিয়ন্ত্রক */}
+              <div className="text-center flex flex-col items-center">
+                <div className="relative w-36 h-12 flex items-end justify-center mb-1">
+                  <Image
+                    src={controllerSignatureSrc || "/anarul.png"}
+                    alt="Exam Controller Signature"
+                    width={140}
+                    height={50}
+                    priority
+                    className="max-h-12 w-auto object-contain mix-blend-multiply contrast-[800%] brightness-[60%] grayscale -rotate-90 mx-auto"
+                  />
+                </div>
+                <div className="w-36 sm:w-44 border-b-2 border-slate-800 mb-1"></div>
+                <span className="text-xs sm:text-sm font-bold text-slate-800 block">
+                  পরীক্ষা নিয়ন্ত্রক
+                </span>
+
+              </div>
+
+              {/* অধ্যক্ষ / প্রতিষ্ঠান প্রধান */}
+              <div className="text-center flex flex-col items-center">
+                <div className="relative w-36 h-12 flex items-end justify-center mb-1">
+                  <Image
+                    src={principalSignatureSrc || "/principle's_signature.jpg"}
+                    alt="Principal Signature"
+                    width={140}
+                    height={50}
+                    priority
+                    className="max-h-12 w-auto object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45 mx-auto"
+                  />
+                </div>
+                <div className="w-36 sm:w-44 border-b-2 border-slate-800 mb-1"></div>
+                <span className="text-xs sm:text-sm font-bold text-slate-800 block">
+                  প্রিন্সিপাল
+                </span>
+
               </div>
             </div>
           )}

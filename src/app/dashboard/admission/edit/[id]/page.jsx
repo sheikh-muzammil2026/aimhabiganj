@@ -22,7 +22,7 @@ const normalizeClassName = (clsName) => {
 const normalizeAcademyType = (type) => {
   if (!type) return "";
   const t = type.trim();
-  if (t === "মাধ্যমিক (মুতাওয়াসসিতা)" || t === "মাধ্যমিক") return "মাধ্যমিক";
+  if (t === "মাধ্যমিক" || t === "মাধ্যমিক") return "মাধ্যমিক";
   return t;
 };
 
@@ -303,7 +303,7 @@ export default function EditAdmissionPage() {
 
       if (data.success) {
         toast.success("🎉 শিক্ষার্থীর তথ্য সফলভাবে আপডেট করা হয়েছে!");
-        router.push("/dashboard/admin/admission?section=requests");
+        router.push("/dashboard/admission?section=requests");
       } else {
         toast.error(data.message || "আপডেট করা সম্ভব হয়নি।");
       }

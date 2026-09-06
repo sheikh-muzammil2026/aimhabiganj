@@ -114,33 +114,60 @@ export default function ResultSheetGenerator() {
     fetchStudentResults();
   }, [selectedIds, targetYear]);
 
-  // গ্রেড ক্যালকুলেশন ফাংশন (Incomplete/ABS সাপোর্টসহ)
-  const calculateGrade = (mark) => {
-    if (mark === "ABS") return { grade: "INC", gpa: "0.00" };
-    const num = Number(mark) || 0;
-    if (num >= 80) return { grade: "A+", gpa: "5.00" };
-    if (num >= 70) return { grade: "A", gpa: "4.00" };
-    if (num >= 60) return { grade: "A-", gpa: "3.50" };
-    if (num >= 50) return { grade: "B", gpa: "3.00" };
-    if (num >= 40) return { grade: "C", gpa: "2.00" };
-    if (num >= 33) return { grade: "D", gpa: "1.00" };
-    return { grade: "F", gpa: "0.00" };
+  // বিষয়ভিত্তিক গ্রেড এবং গ্রেড পয়েন্ট নির্ধারণ (International Grading System)
+  const calculateSubjectGrade = (mark) => {
+    if (mark === "ABS" || mark === "A" || mark === "Abs") {
+      return { grade: "ABS", gpa: "0.00", point: 0.0 };
+    }
+    const num = typeof mark === "number" ? mark : parseFloat(mark);
+    if (isNaN(num)) return { grade: "-", gpa: "0.00", point: 0.0 };
+    if (num >= 80) return { grade: "A+", gpa: "5.00", point: 5.0 };
+    if (num >= 70) return { grade: "A", gpa: "4.00", point: 4.0 };
+    if (num >= 60) return { grade: "A-", gpa: "3.50", point: 3.5 };
+    if (num >= 50) return { grade: "B", gpa: "3.00", point: 3.0 };
+    if (num >= 40) return { grade: "C", gpa: "2.00", point: 2.0 };
+    if (num >= 33) return { grade: "D", gpa: "1.00", point: 1.0 };
+    return { grade: "F", gpa: "0.00", point: 0.0 };
+  };
+
+  // সামগ্রিক জিপিএ থেকে আন্তর্জাতিক গ্রেড বাউন্ডারি নির্ধারণ
+  const getOverallGradeFromGPA = (gpaVal) => {
+    const num = parseFloat(gpaVal) || 0;
+    if (num >= 5.0) return "A+";
+    if (num >= 4.0) return "A";
+    if (num >= 3.5) return "A-";
+    if (num >= 3.0) return "B";
+    if (num >= 2.0) return "C";
+    if (num >= 1.0) return "D";
+    return "F";
   };
 
   // অবজেক্টের CT ও Exam যোগ করে মোট নম্বর বের করার হেলপার
   const parseExamData = (examObj) => {
     if (!examObj || Object.keys(examObj).length === 0) return "-";
 
-    const { ct, exam } = examObj;
+    const { ct, exam, isAbsent } = examObj;
 
-    if (ct === "A" || exam === "A" || ct === "ABS" || exam === "ABS") {
+    if (
+      isAbsent ||
+      ct === "A" ||
+      exam === "A" ||
+      ct === "ABS" ||
+      exam === "ABS" ||
+      ct === "Abs" ||
+      exam === "Abs"
+    ) {
       return "ABS";
     }
 
+    const hasCt = ct !== undefined && ct !== null && String(ct).trim() !== "";
+    const hasExam =
+      exam !== undefined && exam !== null && String(exam).trim() !== "";
+
+    if (!hasCt && !hasExam) return "-";
+
     const ctNum = typeof ct === "number" ? ct : parseFloat(ct) || 0;
     const examNum = typeof exam === "number" ? exam : parseFloat(exam) || 0;
-
-    if (ct === undefined && exam === undefined) return "-";
 
     return ctNum + examNum;
   };
@@ -160,7 +187,7 @@ export default function ResultSheetGenerator() {
     } else if (currentExamType === "২য় সাময়িক পরীক্ষা") {
       return t2;
     } else if (currentExamType === "বার্ষিক পরীক্ষা") {
-      if (t1 === "ABS" || t2 === "ABS" || ann === "ABS") return "ABS";
+      if (ann === "ABS" || t1 === "ABS" || t2 === "ABS") return "ABS";
 
       const num1 = typeof t1 === "number" ? t1 : 0;
       const num2 = typeof t2 === "number" ? t2 : 0;
@@ -172,42 +199,154 @@ export default function ResultSheetGenerator() {
     return "-";
   };
 
-  // ওভারঅল সামারি ক্যালকুলেশন (INC ও অসম্পূর্ণ স্টেটাসসহ)
+  // বার্ষিক পরীক্ষায় শতকারা বা ১০০-এর স্কেলে মার্ক নরমালাইজেশন
+  const getNormalizedMarkForGrade = (item, currentExamType) => {
+    const mark = getMarkForExamType(item, currentExamType);
+    if (mark === "ABS" || mark === "-") return mark;
+    if (currentExamType === "বার্ষিক পরীক্ষা") {
+      const term1Data = item.term1 || item["১ম সাময়িক পরীক্ষা"] || {};
+      const term2Data = item.term2 || item["২য় সাময়িক পরীক্ষা"] || {};
+      const annualData = item.annual || item["বার্ষিক পরীক্ষা"] || {};
+      const t1 = parseExamData(term1Data);
+      const t2 = parseExamData(term2Data);
+      const ann = parseExamData(annualData);
+      let count = 0;
+      if (typeof t1 === "number") count++;
+      if (typeof t2 === "number") count++;
+      if (typeof ann === "number") count++;
+      count = count || 1;
+      return mark / count;
+    }
+    return mark;
+  };
+
+  // নির্দিষ্ট বিষয়ে শিক্ষার্থী অনুপস্থিত কি না যাচাই
+  const isSubjectAbsent = (item, currentExamType) => {
+    let termData = {};
+    if (currentExamType === "১ম সাময়িক পরীক্ষা") {
+      termData = item.term1 || item["১ম সাময়িক পরীক্ষা"] || {};
+    } else if (currentExamType === "২য় সাময়িক পরীক্ষা") {
+      termData = item.term2 || item["২য় সাময়িক পরীক্ষা"] || {};
+    } else if (currentExamType === "বার্ষিক পরীক্ষা") {
+      termData = item.annual || item["বার্ষিক পরীক্ষা"] || {};
+    }
+
+    if (!termData || Object.keys(termData).length === 0) return true;
+    if (termData.isAbsent) return true;
+
+    const ctStr = String(termData.ct || "").trim().toUpperCase();
+    const examStr = String(termData.exam || "").trim().toUpperCase();
+    if (
+      ctStr === "A" ||
+      ctStr === "ABS" ||
+      examStr === "A" ||
+      examStr === "ABS"
+    ) {
+      return true;
+    }
+
+    const hasCt =
+      termData.ct !== undefined &&
+      termData.ct !== null &&
+      String(termData.ct).trim() !== "";
+    const hasExam =
+      termData.exam !== undefined &&
+      termData.exam !== null &&
+      String(termData.exam).trim() !== "";
+    if (!hasCt && !hasExam) return true;
+
+    return false;
+  };
+
+  // আন্তর্জাতিক গ্রেডিং সিস্টেম ও উপস্থিতি ভিত্তিক সামারি ক্যালকুলেশন
   const calculateSummary = (resultsList = [], currentExamType) => {
-    let totalObtained = 0;
-    let validCount = 0;
-    let hasABS = false;
-
-    resultsList.forEach((item) => {
-      const mark = getMarkForExamType(item, currentExamType);
-      if (mark === "ABS") {
-        hasABS = true;
-      } else if (typeof mark === "number") {
-        totalObtained += mark;
-        validCount++;
-      }
-    });
-
-    if (hasABS) {
+    if (!resultsList || resultsList.length === 0) {
       return {
-        totalObtained,
+        totalObtained: 0,
         average: "0.00",
-        grade: "INC",
+        grade: "-",
         gpa: "0.00",
-        status: "অসম্পূর্ণ",
+        status: "Absent",
       };
     }
 
-    const avg =
+    const totalSubjects = resultsList.length;
+    let absentCount = 0;
+    let totalObtained = 0;
+    let validCount = 0;
+    let hasFailedCompulsory = false;
+    let totalGradePoints = 0;
+
+    resultsList.forEach((item) => {
+      const isAbsent = isSubjectAbsent(item, currentExamType);
+      if (isAbsent) {
+        absentCount++;
+      } else {
+        const mark = getMarkForExamType(item, currentExamType);
+        if (typeof mark === "number") {
+          totalObtained += mark;
+          validCount++;
+        }
+        const normalizedMark = getNormalizedMarkForGrade(
+          item,
+          currentExamType,
+        );
+        const subGrade = calculateSubjectGrade(normalizedMark);
+        if (subGrade.grade === "F" || subGrade.point === 0) {
+          hasFailedCompulsory = true;
+        }
+        totalGradePoints += subGrade.point;
+      }
+    });
+
+    // ১. সকল বিষয়ে অনুপস্থিত থাকলে -> Status = "Absent" (Do NOT mark as incomplete)
+    if (absentCount === totalSubjects) {
+      return {
+        totalObtained: 0,
+        average: "0.00",
+        grade: "ABS",
+        gpa: "0.00",
+        status: "Absent",
+      };
+    }
+
+    // ২. কিছু বিষয়ে অনুপস্থিত থাকলে (সবগুলোতে নয়) -> Status = "Incomplete"
+    if (absentCount > 0) {
+      return {
+        totalObtained,
+        average:
+          validCount > 0 ? (totalObtained / validCount).toFixed(2) : "0.00",
+        grade: "INC",
+        gpa: "0.00",
+        status: "Incomplete",
+      };
+    }
+
+    // ৩. সকল বিষয়ে উপস্থিত থাকলে -> গ্রেড ও জিপিএ সাধারণ নিয়মে হিসাব করা হবে
+    const avgMarks =
       validCount > 0 ? (totalObtained / validCount).toFixed(2) : "0.00";
-    const overallGrade = calculateGrade(avg);
+
+    // কোনো আবশ্যিক বিষয়ে ফেল থাকলে সামগ্রিক গ্রেড বাধ্যতামূলকভাবে 'F' এবং জিপিএ 0.00
+    if (hasFailedCompulsory) {
+      return {
+        totalObtained,
+        average: avgMarks,
+        grade: "F",
+        gpa: "0.00",
+        status: "Failed",
+      };
+    }
+
+    // সকল বিষয়ে পাস করলে জিপিএ ও গ্রেড নির্ধারণ
+    const calculatedGPA = (totalGradePoints / totalSubjects).toFixed(2);
+    const overallGrade = getOverallGradeFromGPA(calculatedGPA);
 
     return {
       totalObtained,
-      average: avg,
-      grade: overallGrade.grade,
-      gpa: overallGrade.gpa,
-      status: overallGrade.grade === "F" ? "অকৃতকার্য" : "উত্তীর্ণ",
+      average: avgMarks,
+      grade: overallGrade,
+      gpa: calculatedGPA,
+      status: "Passed",
     };
   };
 
@@ -314,14 +453,14 @@ export default function ResultSheetGenerator() {
       <style jsx global>{`
         @media print {
           @page {
-            size: A5 portrait;
+            size: A4 portrait;
             margin: 0mm !important;
           }
 
           html,
           body {
-            width: 100% !important;
-            height: 100% !important;
+            width: 210mm !important;
+            height: 297mm !important;
             margin: 0 !important;
             padding: 0 !important;
             background: #fff !important;
@@ -342,14 +481,18 @@ export default function ResultSheetGenerator() {
             position: absolute;
             left: 0;
             top: 0;
-            width: 100%;
+            width: 210mm !important;
+            margin: 0 !important;
+            padding: 0 !important;
           }
 
           .page-break {
-            width: 148mm !important;
-            height: 209mm !important;
+            width: 210mm !important;
+            min-height: 297mm !important;
+            height: 297mm !important;
+            max-height: 297mm !important;
             margin: 0 auto !important;
-            padding: 5mm !important;
+            padding: 7mm 9mm !important;
             box-sizing: border-box !important;
             page-break-after: always !important;
             break-after: page !important;
@@ -393,7 +536,7 @@ export default function ResultSheetGenerator() {
             return (
               <div
                 key={student.studentId || index}
-                className="page-break relative bg-white box-border flex flex-col justify-between text-black"
+                className="page-break relative bg-white box-border flex flex-col justify-between text-black w-full max-w-[210mm] min-h-[297mm] shadow-xl rounded-sm my-4"
               >
                 {/* কার্ডের গোল্ডেন ট্রিপল আউটার বর্ডার */}
                 <div className="w-full h-full border-[3px] border-[#C5A059] p-1 box-border relative">
@@ -558,34 +701,37 @@ export default function ResultSheetGenerator() {
 
                       {/* নম্বর টেবিল */}
                       <div className="my-1 flex-1">
-                        <table className="w-full border-collapse border border-[#C5A059] text-center text-[10px]">
+                        <table className="w-full border-collapse border border-[#C5A059] text-center text-xs">
                           <thead>
-                            <tr className="bg-[#fcf8ed] font-bold text-gray-800">
-                              <th className="border border-[#C5A059] p-1 text-left px-2">
+                            <tr className="bg-[#fcf8ed] font-bold text-gray-800 text-xs">
+                              <th className="border border-[#C5A059] p-1.5 text-left px-2.5">
                                 বিষয়
                               </th>
 
                               {examType === "বার্ষিক পরীক্ষা" && (
                                 <>
-                                  <th className="border border-[#C5A059] p-1 w-14">
+                                  <th className="border border-[#C5A059] p-1.5 w-16">
                                     ১ম সাময়িক
                                   </th>
-                                  <th className="border border-[#C5A059] p-1 w-14">
+                                  <th className="border border-[#C5A059] p-1.5 w-16">
                                     ২য় সাময়িক
                                   </th>
-                                  <th className="border border-[#C5A059] p-1 w-14">
+                                  <th className="border border-[#C5A059] p-1.5 w-16">
                                     বার্ষিক
                                   </th>
                                 </>
                               )}
 
-                              <th className="border border-[#C5A059] p-1 w-16 font-bold">
+                              <th className="border border-[#C5A059] p-1.5 w-20 font-bold">
                                 {examType === "বার্ষিক পরীক্ষা"
                                   ? "মোট মার্কস"
                                   : "প্রাপ্ত মার্কস"}
                               </th>
-                              <th className="border border-[#C5A059] p-1 w-12">
+                              <th className="border border-[#C5A059] p-1.5 w-16">
                                 গ্রেড
+                              </th>
+                              <th className="border border-[#C5A059] p-1.5 w-14">
+                                জিপি (GP)
                               </th>
                             </tr>
                           </thead>
@@ -594,7 +740,7 @@ export default function ResultSheetGenerator() {
                               <tr>
                                 <td
                                   colSpan={
-                                    examType === "বার্ষিক পরীক্ষা" ? 6 : 4
+                                    examType === "বার্ষিক পরীক্ষা" ? 7 : 4
                                   }
                                   className="p-3 text-center border border-[#C5A059]"
                                 >
@@ -617,56 +763,67 @@ export default function ResultSheetGenerator() {
                                   item,
                                   examType,
                                 );
-                                const gradeInfo = calculateGrade(finalMark);
+                                const normalizedMark =
+                                  getNormalizedMarkForGrade(item, examType);
+                                const gradeInfo =
+                                  calculateSubjectGrade(normalizedMark);
 
                                 return (
                                   <tr
                                     key={idx}
                                     className="border-b border-[#C5A059]"
                                   >
-                                    <td className="border border-[#C5A059] p-1 text-left px-2 font-semibold">
+                                    <td className="border border-[#C5A059] p-1.5 text-left px-2.5 font-semibold">
                                       {item.subject}
                                     </td>
 
                                     {examType === "১ম সাময়িক পরীক্ষা" && (
-                                      <td className="border border-[#C5A059] p-1">
+                                      <td className="border border-[#C5A059] p-1.5">
                                         {t1}
                                       </td>
                                     )}
 
                                     {examType === "২য় সাময়িক পরীক্ষা" && (
-                                      <td className="border border-[#C5A059] p-1">
+                                      <td className="border border-[#C5A059] p-1.5">
                                         {t2}
                                       </td>
                                     )}
 
                                     {examType === "বার্ষিক পরীক্ষা" && (
                                       <>
-                                        <td className="border border-[#C5A059] p-1">
+                                        <td className="border border-[#C5A059] p-1.5">
                                           {t1}
                                         </td>
-                                        <td className="border border-[#C5A059] p-1">
+                                        <td className="border border-[#C5A059] p-1.5">
                                           {t2}
                                         </td>
-                                        <td className="border border-[#C5A059] p-1">
+                                        <td className="border border-[#C5A059] p-1.5">
                                           {ann}
                                         </td>
-                                        <td className="border border-[#C5A059] p-1 font-bold">
+                                        <td className="border border-[#C5A059] p-1.5 font-bold">
                                           {finalMark}
                                         </td>
                                       </>
                                     )}
 
                                     <td
-                                      className={`border border-[#C5A059] p-1 font-bold ${
-                                        gradeInfo.grade === "INC"
-                                          ? "text-amber-600"
-                                          : gradeInfo.grade === "F"
-                                            ? "text-red-600"
-                                            : "text-emerald-800"
+                                      className={`border border-[#C5A059] p-1.5 font-bold ${
+                                        gradeInfo.grade === "ABS"
+                                          ? "text-gray-600"
+                                          : gradeInfo.grade === "INC"
+                                            ? "text-amber-600"
+                                            : gradeInfo.grade === "F"
+                                              ? "text-red-600"
+                                              : "text-emerald-800"
                                       }`}
                                     >
                                       {gradeInfo.grade}
+                                    </td>
+                                    <td className="border border-[#C5A059] p-1.5 font-mono text-slate-700 font-semibold">
+                                      {gradeInfo.grade === "ABS" ||
+                                      gradeInfo.grade === "INC"
+                                        ? "-"
+                                        : gradeInfo.gpa}
                                     </td>
                                   </tr>
                                 );
@@ -676,7 +833,7 @@ export default function ResultSheetGenerator() {
                         </table>
 
                         {/* ফলাফল সামারি লাইন */}
-                        <div className="flex justify-between items-center text-[10px] font-bold mt-2 bg-amber-50 p-1.5 border border-[#C5A059] rounded">
+                        <div className="flex justify-between items-center text-xs font-bold mt-2.5 bg-amber-50/90 p-2 border border-[#C5A059] rounded">
                           <span>মোট নম্বর: {summary.totalObtained}</span>
                           <span>গড়: {summary.average}</span>
                           <span>
@@ -684,14 +841,25 @@ export default function ResultSheetGenerator() {
                           </span>
                           <span
                             className={
-                              summary.status === "অসম্পূর্ণ"
+                              summary.status === "Incomplete"
                                 ? "text-amber-600"
-                                : summary.status === "অকৃতকার্য"
+                                : summary.status === "Failed"
                                   ? "text-red-600"
-                                  : "text-emerald-800"
+                                  : summary.status === "Absent"
+                                    ? "text-gray-600"
+                                    : "text-emerald-800"
                             }
                           >
-                            ফলাফল: {summary.status}
+                            ফলাফল:{" "}
+                            {summary.status === "Passed"
+                              ? "উত্তীর্ণ (Passed)"
+                              : summary.status === "Failed"
+                                ? "অকৃতকার্য (Failed)"
+                                : summary.status === "Incomplete"
+                                  ? "অসম্পূর্ণ (Incomplete)"
+                                  : summary.status === "Absent"
+                                    ? "অনুপস্থিত (Absent)"
+                                    : summary.status}
                           </span>
                         </div>
                       </div>
