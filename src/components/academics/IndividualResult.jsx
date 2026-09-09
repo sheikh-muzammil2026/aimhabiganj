@@ -6,8 +6,12 @@ import { QRCodeSVG } from "qrcode.react";
 import React, { useState, useEffect } from "react";
 import { BsWhatsapp, BsYoutube } from "react-icons/bs";
 import { FaFacebook } from "react-icons/fa";
+import { authClient } from "@/lib/auth-client";
 
 export default function ResultSheetGenerator() {
+  const { data: session } = authClient.useSession();
+  const user = session?.user;
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
@@ -33,10 +37,6 @@ export default function ResultSheetGenerator() {
   ];
 
   // ১. Backend থেকে স্টুডেন্ট ফেচ (Student ID সার্চ ভিত্তিক)
-  useEffect(() => {
-    fetchStudents();
-  }, [searchTerm]);
-
   const fetchStudents = async () => {
     if (!searchTerm) return;
     try {
@@ -73,6 +73,13 @@ export default function ResultSheetGenerator() {
     }
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchStudents();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   // সার্চ হ্যান্ডলার
   const handleSearch = (e) => {
     e.preventDefault();
@@ -91,18 +98,39 @@ export default function ResultSheetGenerator() {
         setLoadingResults(true);
         setResultsError(null);
 
+        let unpublishedMsg = null;
+
         const fetchPromises = selectedIds.map(async (studentId) => {
           const res = await fetch(
             `${process.env.NEXT_PUBLIC_SERVER_API}/api/results/student/${studentId}?year=${encodeURIComponent(
               targetYear,
             )}`,
+            {
+              headers: {
+                "x-user-email": user?.email || "",
+                "x-user-role": user?.role || "",
+              },
+            },
           );
           const data = await res.json();
+
+          if (res.status === 403 || data.isPublished === false) {
+            if (!data.success) {
+              unpublishedMsg =
+                data.message || "এই শিক্ষাবর্ষের ফলাফল এখনো প্রকাশিত হয়নি।";
+            }
+          }
+
           return data.success ? data : null;
         });
 
         const fetchedResults = await Promise.all(fetchPromises);
-        setResultSheets(fetchedResults.filter((item) => item !== null));
+        const validResults = fetchedResults.filter((item) => item !== null);
+        setResultSheets(validResults);
+
+        if (validResults.length === 0 && unpublishedMsg) {
+          setResultsError(unpublishedMsg);
+        }
       } catch (err) {
         console.error("Error fetching result sheets:", err);
         setResultsError("রেজাল্ট লোড করতে সমস্যা হয়েছে।");
@@ -111,8 +139,11 @@ export default function ResultSheetGenerator() {
       }
     };
 
-    fetchStudentResults();
-  }, [selectedIds, targetYear]);
+    const timer = setTimeout(() => {
+      fetchStudentResults();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [selectedIds, targetYear, user?.email, user?.role]);
 
   // বিষয়ভিত্তিক গ্রেড এবং গ্রেড পয়েন্ট নির্ধারণ (International Grading System)
   const calculateSubjectGrade = (mark) => {

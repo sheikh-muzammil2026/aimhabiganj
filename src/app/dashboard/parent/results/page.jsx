@@ -1,8 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { authClient } from '@/lib/auth-client';
 
 export default function StudentResultSearch() {
+    const { data: session } = authClient.useSession();
+    const user = session?.user;
+
     const [searchId, setSearchId] = useState('');
     const [year, setYear] = useState('২০২৬');
     const [result, setResult] = useState(null);
@@ -16,7 +20,12 @@ export default function StudentResultSearch() {
         setLoading(true);
         setErrorMsg('');
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/results/student/${searchId.trim()}?year=${encodeURIComponent(year)}`);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/results/student/${searchId.trim()}?year=${encodeURIComponent(year)}`, {
+                headers: {
+                    'x-user-email': user?.email || '',
+                    'x-user-role': user?.role || '',
+                }
+            });
             const data = await res.json();
 
             if (data.success) {

@@ -1,7 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { toast } from 'react-toastify';
+import { authClient } from '@/lib/auth-client';
+import Pagination from '@/components/dashboard/Pagination';
 
 const CLASS_SUBJECTS = {
     "প্লে": ["আরবি-০১", "ইংরেজি", "বাংলা", "গণিত"],
@@ -20,134 +23,169 @@ const CLASS_SUBJECTS = {
     "শুনানি": ["কুরআন", "তাজভীদ ও দোয়া"],
 };
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_API
-export default function TeacherMarkInput() {
+const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_API;
+
+function TeacherMarkInputContent() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const pathname = usePathname();
+
+    // URL search params থেকে page এবং limit সিঙ্ক (ডিফল্ট limit: 20)
+    const pageParam = parseInt(searchParams.get("page"), 10);
+    const limitParam = parseInt(searchParams.get("limit"), 10);
+
+    const currentPage = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
+    const currentLimit = [10, 20, 50, 100].includes(limitParam) ? limitParam : 20;
+
+    const { data: session } = authClient.useSession();
+    const user = session?.user;
+    const isAdmin =
+        user?.role?.toLowerCase() === 'admin' ||
+        user?.role?.toLowerCase() === 'superadmin';
+
     const [selectedClass, setSelectedClass] = useState('প্রথম');
-    const [selectedSubject, setSelectedSubject] = useState('');
+    const [selectedSubject, setSelectedSubject] = useState('কুরআন ও তাজভীদ-০১');
     const [examType, setExamType] = useState('term1');
     const [year, setYear] = useState('২০২৬');
 
-    const [availableSubjects, setAvailableSubjects] = useState([]);
+    const availableSubjects = (selectedClass && CLASS_SUBJECTS[selectedClass])
+        ? CLASS_SUBJECTS[selectedClass]
+        : [];
     const [studentsMarksList, setStudentsMarksList] = useState([]);
 
+    const [isPublished, setIsPublished] = useState(false);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
 
     // পেজিনেশন স্টেটসমূহ
-    const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalStudents, setTotalStudents] = useState(0);
-    const [limit] = useState(10);
 
-    // ফিল্টার চেঞ্জ হলে কারেন্ট পেজ ১ এ রি-সেট করা
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [selectedClass, selectedSubject, examType, year]);
+    // ফলাফল প্রকাশিত হলে নন-অ্যাডমিনদের জন্য লক স্টেট
+    const isLocked = isPublished && !isAdmin;
 
-    // ১. শ্রেণি পরিবর্তন হলে বিষয় ড্রপডাউন ডাইনামিকালি আপডেট
-    useEffect(() => {
-        if (selectedClass && CLASS_SUBJECTS[selectedClass]) {
-            const subjects = CLASS_SUBJECTS[selectedClass];
-            setAvailableSubjects(subjects);
-            setSelectedSubject(subjects[0] || '');
-        } else {
-            setAvailableSubjects([]);
-            setSelectedSubject('');
+    // URL query params আপডেট করার হেলপার ফাংশন
+    const updatePaginationParams = useCallback(
+        (newPage, newLimit) => {
+            const params = new URLSearchParams(searchParams.toString());
+            params.set("page", String(newPage));
+            params.set("limit", String(newLimit || currentLimit));
+            router.push(`${pathname}?${params.toString()}`, { scroll: false });
+        },
+        [searchParams, currentLimit, pathname, router]
+    );
+
+    // ফিল্টার পরিবর্তন হলে পেজ নম্বর ১-এ রিসেট করার হেলপার
+    const resetPageToFirst = useCallback(() => {
+        if (currentPage !== 1) {
+            updatePaginationParams(1, currentLimit);
         }
-    }, [selectedClass]);
+    }, [currentPage, currentLimit, updatePaginationParams]);
 
     // ২. শ্রেণি, বিষয়, পরীক্ষা ও বছর পরিবর্তন হলে শিক্ষার্থীদের তথ্য ও পূর্বের নম্বর ফেচ করা (পেজিনেটেড)
-    useEffect(() => {
-        const fetchClassData = async () => {
-            if (!selectedClass) return;
+    const fetchClassData = useCallback(async () => {
+        if (!selectedClass) return;
 
-            setLoading(true);
-            try {
-                // ১ম ধাপ: ব্যাকএন্ড থেকে Approved শিক্ষার্থীদের তালিকা নিয়ে আসা (পেজিনেটেড)
-                const params = new URLSearchParams({
-                    class: selectedClass,
-                    status: 'approved',
-                    page: currentPage,
-                    limit: limit
-                });
-                const studentRes = await fetch(`${API_BASE_URL}/api/students?${params.toString()}`);
-                const studentData = await studentRes.json();
+        setLoading(true);
+        try {
+            // ১ম ধাপ: ব্যাকএন্ড থেকে Approved শিক্ষার্থীদের তালিকা নিয়ে আসা (পেজিনেটেড)
+            const params = new URLSearchParams({
+                class: selectedClass,
+                status: 'approved',
+                page: String(currentPage),
+                limit: String(currentLimit)
+            });
+            const studentRes = await fetch(`${API_BASE_URL}/api/students?${params.toString()}`);
+            const studentData = await studentRes.json();
 
-                let rawStudents = [];
-                if (studentData.success && Array.isArray(studentData.data)) {
-                    rawStudents = studentData.data;
-                    setTotalPages(studentData.totalPages || 1);
-                    setTotalStudents(studentData.total || studentData.totalCount || 0);
-                } else {
-                    setTotalPages(1);
-                    setTotalStudents(0);
+            let rawStudents = [];
+            if (studentData.success && Array.isArray(studentData.data)) {
+                rawStudents = studentData.data;
+                setTotalPages(studentData.totalPages || 1);
+                setTotalStudents(studentData.total || studentData.totalCount || 0);
+            } else {
+                setTotalPages(1);
+                setTotalStudents(0);
+            }
+
+            // যদি কোনো বিষয় সিলেক্ট করা না থাকে
+            if (!selectedSubject) {
+                const initialList = rawStudents.map(student => ({
+                    studentId: student.studentId || '',
+                    studentName: student.studentNameBangla || student.studentNameEnglish || 'N/A',
+                    roll: student.roll || 'N/A',
+                    ctMark: '',
+                    examMark: ''
+                }));
+                setStudentsMarksList(initialList);
+                setLoading(false);
+                return;
+            }
+
+            // ২য় ধাপ: /api/marks/get থেকে সরাসরি ওই বিষয় ও ক্লাসের মার্কস ও পাবলিশ স্ট্যাটাস আনা
+            const markQueryParams = new URLSearchParams({
+                class: selectedClass,
+                subject: selectedSubject,
+                year: year,
+                examType: examType
+            });
+
+            const marksRes = await fetch(`${API_BASE_URL}/api/marks/get?${markQueryParams.toString()}`, {
+                headers: {
+                    'x-user-email': user?.email || '',
+                    'x-user-role': user?.role || '',
                 }
+            });
+            const marksResult = await marksRes.json();
 
-                // যদি কোনো বিষয় সিলেক্ট করা না থাকে
-                if (!selectedSubject) {
-                    const initialList = rawStudents.map(student => ({
-                        studentId: student.studentId || '',
-                        studentName: student.studentNameBangla || student.studentNameEnglish || 'N/A',
-                        roll: student.roll || 'N/A',
-                        ctMark: '',
-                        examMark: ''
-                    }));
-                    setStudentsMarksList(initialList);
-                    setLoading(false);
-                    return;
-                }
+            setIsPublished(Boolean(marksResult.isPublished));
 
-                // ২য় ধাপ: /api/marks/get থেকে সরাসরি ওই বিষয় ও ক্লাসের মার্কস আনা
-                const markQueryParams = new URLSearchParams({
-                    class: selectedClass,
-                    subject: selectedSubject,
-                    year: year
-                });
+            let existingMarksMap = {};
 
-                const marksRes = await fetch(`${API_BASE_URL}/api/marks/get?${markQueryParams}`);
-                const marksResult = await marksRes.json();
-
-                let existingMarksMap = {};
-
-                if (marksResult.success && Array.isArray(marksResult.data)) {
-                    marksResult.data.forEach(item => {
-                        const termData = item[examType] || {};
-                        existingMarksMap[item.studentId] = {
-                            ctMark: termData.ct !== undefined && termData.ct !== null ? termData.ct : '',
-                            examMark: termData.exam !== undefined && termData.exam !== null ? termData.exam : ''
-                        };
-                    });
-                }
-
-                // ৩য় ধাপ: শিক্ষার্থীদের লিস্ট এবং মার্কস মার্জ করা
-                const mergedList = rawStudents.map(student => {
-                    const id = student.studentId;
-                    const existing = existingMarksMap[id];
-
-                    return {
-                        studentId: id,
-                        studentName: student.studentNameBangla || student.studentNameEnglish || 'N/A',
-                        roll: student.roll || 'N/A',
-                        ctMark: existing ? existing.ctMark : '',
-                        examMark: existing ? existing.examMark : ''
+            if (marksResult.success && Array.isArray(marksResult.data)) {
+                marksResult.data.forEach(item => {
+                    const termData = item[examType] || {};
+                    existingMarksMap[item.studentId] = {
+                        ctMark: termData.ct !== undefined && termData.ct !== null ? termData.ct : '',
+                        examMark: termData.exam !== undefined && termData.exam !== null ? termData.exam : ''
                     };
                 });
-
-                setStudentsMarksList(mergedList);
-
-            } catch (error) {
-                console.error("Data fetch error:", error);
-                toast.error("শিক্ষার্থীদের তথ্য পেতে সমস্যা হয়েছে!");
-            } finally {
-                setLoading(false);
             }
-        };
 
-        fetchClassData();
-    }, [selectedClass, selectedSubject, examType, year, currentPage, limit]);
+            // ৩য় ধাপ: শিক্ষার্থীদের লিস্ট এবং মার্কস মার্জ করা
+            const mergedList = rawStudents.map(student => {
+                const id = student.studentId;
+                const existing = existingMarksMap[id];
+
+                return {
+                    studentId: id,
+                    studentName: student.studentNameBangla || student.studentNameEnglish || 'N/A',
+                    roll: student.roll || 'N/A',
+                    ctMark: existing ? existing.ctMark : '',
+                    examMark: existing ? existing.examMark : ''
+                };
+            });
+
+            setStudentsMarksList(mergedList);
+
+        } catch (error) {
+            console.error("Data fetch error:", error);
+            toast.error("শিক্ষার্থীদের তথ্য পেতে সমস্যা হয়েছে!");
+        } finally {
+            setLoading(false);
+        }
+    }, [selectedClass, selectedSubject, examType, year, currentPage, currentLimit, user]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchClassData();
+        }, 0);
+        return () => clearTimeout(timer);
+    }, [fetchClassData]);
 
     // ইনপুট টাইপ পরিবর্তন হ্যান্ডেল করা
     const handleMarkChange = (index, field, value) => {
+        if (isLocked) return;
         setStudentsMarksList(prevList => {
             const updated = [...prevList];
             updated[index] = {
@@ -163,6 +201,11 @@ export default function TeacherMarkInput() {
         e.preventDefault();
         if (studentsMarksList.length === 0) return;
 
+        if (isLocked) {
+            toast.error("ফলাফল প্রকাশিত থাকায় আপনি নম্বর পরিবর্তন করতে পারবেন না।");
+            return;
+        }
+
         setSaving(true);
         try {
             const payload = {
@@ -170,12 +213,19 @@ export default function TeacherMarkInput() {
                 subject: selectedSubject,
                 examType: examType,
                 year: year,
-                marksData: studentsMarksList
+                marksData: studentsMarksList,
+                teacher: user?.email || '',
+                teacherEmail: user?.email || '',
+                userRole: user?.role || '',
             };
 
             const response = await fetch(`${API_BASE_URL}/api/marks/input`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-user-email': user?.email || '',
+                    'x-user-role': user?.role || '',
+                },
                 body: JSON.stringify(payload)
             });
 
@@ -199,14 +249,64 @@ export default function TeacherMarkInput() {
             <div className="max-w-6xl mx-auto bg-white dark:bg-[#0f172a] rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 p-5 sm:p-7">
 
                 {/* হেডার */}
-                <div className="border-b border-slate-100 dark:border-slate-800 pb-4 mb-6">
-                    <h1 className="text-xl sm:text-2xl font-black text-[#043e30] dark:text-emerald-450">
-                        শ্রেণিভিত্তিক মার্কস ইনপুট ও আপডেট
-                    </h1>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                        শ্রেণি ও বিষয় নির্বাচন করুন। পূর্বে ইনপুট করা নম্বর থাকলে তা দেখা যাবে, অন্যথায় খালি থাকবে।
-                    </p>
+                <div className="border-b border-slate-100 dark:border-slate-800 pb-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <div className="flex items-center gap-3 flex-wrap">
+                            <h1 className="text-xl sm:text-2xl font-black text-[#043e30] dark:text-emerald-450">
+                                শ্রেণিভিত্তিক মার্কস ইনপুট ও আপডেট
+                            </h1>
+                            <span
+                                className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${
+                                    isPublished
+                                        ? "bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800"
+                                        : "bg-slate-100 text-slate-600 border-slate-300 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700"
+                                }`}
+                            >
+                                <span
+                                    className={`w-2 h-2 rounded-full ${
+                                        isPublished ? "bg-emerald-500" : "bg-slate-400"
+                                    }`}
+                                ></span>
+                                {isPublished ? "ফলাফল প্রকাশিত" : "অপ্রকাশিত (ড্রাফট)"}
+                            </span>
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                            শ্রেণি ও বিষয় নির্বাচন করুন। পূর্বে ইনপুট করা নম্বর থাকলে তা দেখা যাবে, অন্যথায় খালি থাকবে।
+                        </p>
+                    </div>
+
+                    {user?.email && (
+                        <div className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/60 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-750 self-start sm:self-auto">
+                            শিক্ষক/ব্যবহারকারী: <span className="font-bold text-slate-700 dark:text-slate-200">{user.email}</span>
+                        </div>
+                    )}
                 </div>
+
+                {/* লক স্ট্যাটাস সতর্কতা নোটিশ (নন-অ্যাডমিনের জন্য) */}
+                {isLocked && (
+                    <div className="mb-6 p-4 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900 rounded-xl flex items-start sm:items-center gap-3 text-rose-800 dark:text-rose-300 text-xs sm:text-sm font-semibold shadow-sm">
+                        <span className="text-2xl">🔒</span>
+                        <div>
+                            <p className="font-bold text-rose-900 dark:text-rose-200">ফলাফল ইতোমধ্যে প্রকাশিত হয়েছে</p>
+                            <p className="text-xs text-rose-700 dark:text-rose-400 mt-0.5">
+                                এই শ্রেণি ও পরীক্ষার ফলাফল আনুষ্ঠানিকভাবে প্রকাশিত হয়েছে। তথ্যের নিরাপত্তা নিশ্চিত করতে ইনপুট ফিল্ড ও সংরক্ষণ বাটন লক করা হয়েছে। শুধুমাত্র অ্যাডমিন এটি সম্পাদনা করতে পারবেন।
+                            </p>
+                        </div>
+                    </div>
+                )}
+
+                {/* অ্যাডমিন ওভাররাইড নোটিশ (ফলাফল প্রকাশিত হলে অ্যাডমিনদের জন্য) */}
+                {isPublished && isAdmin && (
+                    <div className="mb-6 p-4 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 rounded-xl flex items-start sm:items-center gap-3 text-emerald-800 dark:text-emerald-300 text-xs sm:text-sm font-semibold shadow-sm">
+                        <span className="text-2xl">🛡️</span>
+                        <div>
+                            <p className="font-bold text-emerald-900 dark:text-emerald-200">অ্যাডমিন এডিট মোড সক্রিয়</p>
+                            <p className="text-xs text-emerald-700 dark:text-emerald-400 mt-0.5">
+                                ফলাফল ইতোমধ্যে প্রকাশিত হওয়া সত্ত্বেও অ্যাডমিন প্রিভিলেজ থাকায় আপনি শিক্ষার্থীদের মার্কস সংশোধন ও আপডেট করতে পারবেন।
+                            </p>
+                        </div>
+                    </div>
+                )}
 
                 {/* ফিল্টার বক্স */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 bg-emerald-50/50 dark:bg-emerald-950/20 p-4 rounded-xl border border-emerald-100 dark:border-emerald-900/30 mb-6">
@@ -216,7 +316,13 @@ export default function TeacherMarkInput() {
                         <label className="block text-xs font-bold text-slate-700 dark:text-slate-350 mb-1.5">শ্রেণি নির্বাচন করুন *</label>
                         <select
                             value={selectedClass}
-                            onChange={(e) => setSelectedClass(e.target.value)}
+                            onChange={(e) => {
+                                const newClass = e.target.value;
+                                setSelectedClass(newClass);
+                                const subs = CLASS_SUBJECTS[newClass] || [];
+                                setSelectedSubject(subs[0] || '');
+                                resetPageToFirst();
+                            }}
                             className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-750 text-slate-800 dark:text-slate-200 text-xs sm:text-sm rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-600 focus:outline-none"
                         >
                             <optgroup label="-- প্রি-হিফজ --" className="dark:bg-slate-900">
@@ -253,7 +359,10 @@ export default function TeacherMarkInput() {
                         <label className="block text-xs font-bold text-slate-700 dark:text-slate-350 mb-1.5">বিষয় নির্বাচন করুন *</label>
                         <select
                             value={selectedSubject}
-                            onChange={(e) => setSelectedSubject(e.target.value)}
+                            onChange={(e) => {
+                                setSelectedSubject(e.target.value);
+                                resetPageToFirst();
+                            }}
                             disabled={!availableSubjects.length}
                             className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-750 text-slate-800 dark:text-slate-200 text-xs sm:text-sm rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-600 focus:outline-none disabled:bg-slate-100 dark:disabled:bg-slate-800/40"
                         >
@@ -272,7 +381,10 @@ export default function TeacherMarkInput() {
                         <label className="block text-xs font-bold text-slate-700 dark:text-slate-350 mb-1.5">পরীক্ষার ধরন *</label>
                         <select
                             value={examType}
-                            onChange={(e) => setExamType(e.target.value)}
+                            onChange={(e) => {
+                                setExamType(e.target.value);
+                                resetPageToFirst();
+                            }}
                             className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-750 text-slate-800 dark:text-slate-200 text-xs sm:text-sm rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-600 focus:outline-none"
                         >
                             <option value="term1">প্রথম সাময়িক পরীক্ষা</option>
@@ -287,7 +399,10 @@ export default function TeacherMarkInput() {
                         <input
                             type="text"
                             value={year}
-                            onChange={(e) => setYear(e.target.value)}
+                            onChange={(e) => {
+                                setYear(e.target.value);
+                                resetPageToFirst();
+                            }}
                             className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-750 text-slate-800 dark:text-slate-200 text-xs sm:text-sm rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-600 focus:outline-none"
                         />
                     </div>
@@ -342,7 +457,8 @@ export default function TeacherMarkInput() {
                                                     value={student.ctMark}
                                                     onChange={(e) => handleMarkChange(idx, 'ctMark', e.target.value)}
                                                     placeholder="ফাঁকা"
-                                                    className="w-28 sm:w-full p-2 text-center bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-750 text-slate-800 dark:text-slate-200 rounded-md focus:ring-2 focus:ring-emerald-600 focus:outline-none"
+                                                    disabled={isLocked}
+                                                    className="w-28 sm:w-full p-2 text-center bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-750 text-slate-800 dark:text-slate-200 rounded-md focus:ring-2 focus:ring-emerald-600 focus:outline-none disabled:bg-slate-100 dark:disabled:bg-slate-800/60 disabled:cursor-not-allowed"
                                                 />
                                             </td>
 
@@ -354,7 +470,8 @@ export default function TeacherMarkInput() {
                                                     value={student.examMark}
                                                     onChange={(e) => handleMarkChange(idx, 'examMark', e.target.value)}
                                                     placeholder="ফাঁকা"
-                                                    className="w-28 sm:w-full p-2 text-center bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-750 text-slate-800 dark:text-slate-200 rounded-md focus:ring-2 focus:ring-emerald-600 focus:outline-none"
+                                                    disabled={isLocked}
+                                                    className="w-28 sm:w-full p-2 text-center bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-750 text-slate-800 dark:text-slate-200 rounded-md focus:ring-2 focus:ring-emerald-600 focus:outline-none disabled:bg-slate-100 dark:disabled:bg-slate-800/60 disabled:cursor-not-allowed"
                                                 />
                                             </td>
                                         </tr>
@@ -364,42 +481,43 @@ export default function TeacherMarkInput() {
                         </div>
 
                         {/* ৫. পেজিনেশন কন্ট্রোলস */}
-                        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white dark:bg-[#0f172a] p-4 border border-slate-200 dark:border-slate-850 mt-2 mb-6 rounded-xl">
-                            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                                পেজ {currentPage} এর {totalPages} (মোট {totalStudents} জন শিক্ষার্থী)
-                            </span>
-                            <div className="flex gap-2">
-                                <button
-                                    type="button"
-                                    disabled={currentPage <= 1}
-                                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                                    className="px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    ◀ পূর্ববর্তী (Previous)
-                                </button>
-                                <button
-                                    type="button"
-                                    disabled={currentPage >= totalPages}
-                                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                                    className="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    পরবর্তী (Next) ▶
-                                </button>
-                            </div>
+                        <div className="mt-2 mb-6">
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                totalItems={totalStudents}
+                                limit={currentLimit}
+                                limitOptions={[10, 20, 50, 100]}
+                                onPageChange={(newPage) => updatePaginationParams(newPage, currentLimit)}
+                                onLimitChange={(newLimit) => updatePaginationParams(1, newLimit)}
+                                itemName="items"
+                            />
                         </div>
 
                         <div className="flex justify-end">
                             <button
                                 type="submit"
-                                disabled={saving}
-                                className="w-full sm:w-auto bg-[#043e30] hover:bg-emerald-900 dark:bg-emerald-900 dark:hover:bg-emerald-800 text-amber-400 font-extrabold px-8 py-3 rounded-xl shadow-md transition-all duration-200 text-sm disabled:opacity-50"
+                                disabled={saving || isLocked}
+                                className="w-full sm:w-auto bg-[#043e30] hover:bg-emerald-900 dark:bg-emerald-900 dark:hover:bg-emerald-800 text-amber-400 font-extrabold px-8 py-3 rounded-xl shadow-md transition-all duration-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {saving ? "সংরক্ষণ হচ্ছে..." : "সকল মার্কস সংরক্ষণ করুন"}
+                                {saving
+                                    ? "সংরক্ষণ হচ্ছে..."
+                                    : isLocked
+                                    ? "🔒 ফলাফল প্রকাশিত (লক করা)"
+                                    : "সকল মার্কস সংরক্ষণ করুন"}
                             </button>
                         </div>
                     </form>
                 )}
             </div>
         </div>
+    );
+}
+
+export default function TeacherMarkInput() {
+    return (
+        <Suspense fallback={<div className="p-8 text-center text-slate-500 font-medium">লোড হচ্ছে...</div>}>
+            <TeacherMarkInputContent />
+        </Suspense>
     );
 }

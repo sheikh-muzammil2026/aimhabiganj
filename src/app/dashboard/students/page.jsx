@@ -1,10 +1,23 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import { toast } from "react-toastify";
+import Pagination from "@/components/dashboard/Pagination";
 
-export default function AllStudentsPage() {
+function StudentsContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
+  // URL search params থেকে page এবং limit সিঙ্ক (ডিফল্ট limit: 20)
+  const pageParam = parseInt(searchParams.get("page"), 10);
+  const limitParam = parseInt(searchParams.get("limit"), 10);
+
+  const currentPage = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
+  const currentLimit = [10, 20, 50, 100].includes(limitParam) ? limitParam : 20;
+
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -23,9 +36,26 @@ export default function AllStudentsPage() {
   const [selectedFeeCategory, setSelectedFeeCategory] = useState("all");
 
   // পেজিনেশন স্টেটসমূহ
-  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalStudents, setTotalStudents] = useState(0);
+
+  // URL query params আপডেট করার হেলপার ফাংশন
+  const updatePaginationParams = useCallback(
+    (newPage, newLimit) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("page", String(newPage));
+      params.set("limit", String(newLimit || currentLimit));
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [searchParams, currentLimit, pathname, router]
+  );
+
+  // ফিল্টার পরিবর্তন হলে পেজ নম্বর ১-এ রিসেট করার হেলপার
+  const resetPageToFirst = useCallback(() => {
+    if (currentPage !== 1) {
+      updatePaginationParams(1, currentLimit);
+    }
+  }, [currentPage, currentLimit, updatePaginationParams]);
 
   const fetchStudents = useCallback(async () => {
     try {
@@ -34,8 +64,8 @@ export default function AllStudentsPage() {
 
       const params = new URLSearchParams({
         status: "Approved",
-        page: currentPage,
-        limit: 10
+        page: String(currentPage),
+        limit: String(currentLimit),
       });
       if (searchTerm) params.append("search", searchTerm);
       if (selectedSession !== "all") params.append("sessionYear", selectedSession);
@@ -48,10 +78,10 @@ export default function AllStudentsPage() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/students?${params.toString()}`);
       const result = await response.json();
 
-      if (result.success) {
+      if (result.success || result.data) {
         setStudents(result.data || []);
         setTotalPages(result.totalPages || 1);
-        setTotalStudents(result.total || 0);
+        setTotalStudents(result.total !== undefined ? result.total : result.totalCount || 0);
       } else {
         setError(result.message || "শিক্ষার্থীদের তথ্য লোড করা যায়নি।");
       }
@@ -63,6 +93,7 @@ export default function AllStudentsPage() {
     }
   }, [
     currentPage,
+    currentLimit,
     searchTerm,
     selectedSession,
     selectedDivision,
@@ -74,8 +105,10 @@ export default function AllStudentsPage() {
 
   // ডেটা ফেচ করার ইফেক্ট
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchStudents();
+    const timer = setTimeout(() => {
+      fetchStudents();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchStudents]);
 
   // এক একক শিক্ষার্থীর রোল সেভ/আপডেট করার ফাংশন
@@ -264,7 +297,7 @@ export default function AllStudentsPage() {
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
-                setCurrentPage(1);
+                resetPageToFirst();
               }}
               className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white transition-all"
             />
@@ -276,7 +309,7 @@ export default function AllStudentsPage() {
               value={selectedSession}
               onChange={(e) => {
                 setSelectedSession(e.target.value);
-                setCurrentPage(1);
+                resetPageToFirst();
               }}
               className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white font-medium text-slate-700"
             >
@@ -295,7 +328,7 @@ export default function AllStudentsPage() {
                 setSelectedDivision(e.target.value);
                 setSelectedClass("all");
                 setSelectedAcademyType("all");
-                setCurrentPage(1);
+                resetPageToFirst();
               }}
               className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white font-medium text-slate-700"
             >
@@ -314,7 +347,7 @@ export default function AllStudentsPage() {
                 onChange={(e) => {
                   setSelectedAcademyType(e.target.value);
                   setSelectedClass("all");
-                  setCurrentPage(1);
+                  resetPageToFirst();
                 }}
                 className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white font-medium text-slate-700"
               >
@@ -333,7 +366,7 @@ export default function AllStudentsPage() {
               value={selectedClass}
               onChange={(e) => {
                 setSelectedClass(e.target.value);
-                setCurrentPage(1);
+                resetPageToFirst();
               }}
               disabled={selectedDivision === "all"}
               className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white font-medium text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -353,7 +386,7 @@ export default function AllStudentsPage() {
               value={selectedType}
               onChange={(e) => {
                 setSelectedType(e.target.value);
-                setCurrentPage(1);
+                resetPageToFirst();
               }}
               className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white font-medium text-slate-700"
             >
@@ -370,7 +403,7 @@ export default function AllStudentsPage() {
               value={selectedFeeCategory}
               onChange={(e) => {
                 setSelectedFeeCategory(e.target.value);
-                setCurrentPage(1);
+                resetPageToFirst();
               }}
               className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white font-medium text-slate-700"
             >
@@ -594,33 +627,28 @@ export default function AllStudentsPage() {
             </div>
 
             {/* ৫. পেজিনেশন কন্ট্রোলস */}
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 border-t border-slate-100 mt-4 rounded-b-2xl">
-              <span className="text-xs font-semibold text-slate-500">
-                পেজ {currentPage} এর {totalPages} (মোট {totalStudents} জন শিক্ষার্থী)
-              </span>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  disabled={currentPage <= 1}
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  ◀ পূর্ববর্তী (Previous)
-                </button>
-                <button
-                  type="button"
-                  disabled={currentPage >= totalPages}
-                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                  className="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-xs transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  পরবর্তী (Next) ▶
-                </button>
-              </div>
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalStudents}
+              limit={currentLimit}
+              limitOptions={[10, 20, 50, 100]}
+              onPageChange={(newPage) => updatePaginationParams(newPage, currentLimit)}
+              onLimitChange={(newLimit) => updatePaginationParams(1, newLimit)}
+              itemName="students"
+            />
 
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+export default function AllStudentsPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-slate-500 font-medium">লোড হচ্ছে...</div>}>
+      <StudentsContent />
+    </Suspense>
   );
 }
