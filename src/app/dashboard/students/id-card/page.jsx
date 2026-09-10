@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { IdCardBack } from '@/components/dashboard/IdCardBack';
-import React, { useState, useEffect } from 'react';
-import BarcodeSVG from 'react-barcode';
+import { IdCardBack } from "@/components/dashboard/IdCardBack";
+import React, { useState, useEffect } from "react";
+import BarcodeSVG from "react-barcode";
 
 export default function IdCardGenerator() {
   const [students, setStudents] = useState([]);
@@ -11,44 +11,57 @@ export default function IdCardGenerator() {
   const [selectedIds, setSelectedIds] = useState([]);
 
   // ফিল্টারিং স্টেটসমূহ
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedSession, setSelectedSession] = useState('all');
-  const [selectedDivision, setSelectedDivision] = useState('all');
-  const [selectedAcademyType, setSelectedAcademyType] = useState('all');
-  const [selectedClass, setSelectedClass] = useState('all');
-  const [selectedType, setSelectedType] = useState('all');
-  const [selectedFeeCategory, setSelectedFeeCategory] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedSession, setSelectedSession] = useState("all");
+  const [selectedDivision, setSelectedDivision] = useState("all");
+  const [selectedAcademyType, setSelectedAcademyType] = useState("all");
+  const [selectedClass, setSelectedClass] = useState("all");
+  const [selectedType, setSelectedType] = useState("all");
+  const [selectedFeeCategory, setSelectedFeeCategory] = useState("all");
 
   // পেজিনেশন স্টেটসমূহ
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalStudents, setTotalStudents] = useState(0);
-  const [limit] = useState(10);
+  const [limit] = useState(20);
 
   // ১. Backend থেকে স্টুডেন্ট ডাটা ফেচ করা (পেজিনেটেড)
   useEffect(() => {
     fetchStudents();
-  }, [currentPage, searchTerm, selectedSession, selectedDivision, selectedAcademyType, selectedClass, selectedType, selectedFeeCategory]);
+  }, [
+    currentPage,
+    searchTerm,
+    selectedSession,
+    selectedDivision,
+    selectedAcademyType,
+    selectedClass,
+    selectedType,
+    selectedFeeCategory,
+  ]);
 
   const fetchStudents = async () => {
     try {
       setLoading(true);
       setError(null);
       const params = new URLSearchParams({
-        status: 'Approved',
+        status: "Approved",
         page: currentPage,
-        limit: limit
+        limit: limit,
       });
       if (searchTerm) params.append("search", searchTerm);
-      if (selectedSession !== 'all') params.append("sessionYear", selectedSession);
-      if (selectedDivision !== 'all') params.append("division", selectedDivision);
-      if (selectedAcademyType !== 'all') params.append("academyType", selectedAcademyType);
-      if (selectedClass !== 'all') params.append("class", selectedClass);
-      if (selectedType !== 'all') params.append("type", selectedType);
-      if (selectedFeeCategory !== 'all') params.append("feeCategory", selectedFeeCategory);
+      if (selectedSession !== "all")
+        params.append("sessionYear", selectedSession);
+      if (selectedDivision !== "all")
+        params.append("division", selectedDivision);
+      if (selectedAcademyType !== "all")
+        params.append("academyType", selectedAcademyType);
+      if (selectedClass !== "all") params.append("class", selectedClass);
+      if (selectedType !== "all") params.append("type", selectedType);
+      if (selectedFeeCategory !== "all")
+        params.append("feeCategory", selectedFeeCategory);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_API}/api/students?${params.toString()}`
+        `${process.env.NEXT_PUBLIC_SERVER_API}/api/students?${params.toString()}`,
       );
       const result = await response.json();
 
@@ -57,11 +70,11 @@ export default function IdCardGenerator() {
         setTotalPages(result.totalPages || 1);
         setTotalStudents(result.total || result.totalCount || 0);
       } else {
-        setError(result.message || 'শিক্ষার্থীদের তথ্য লোড করা যায়নি।');
+        setError(result.message || "শিক্ষার্থীদের তথ্য লোড করা যায়নি।");
       }
     } catch (err) {
-      console.error('Error fetching students:', err);
-      setError('সার্ভারের সাথে সংযোগ স্থাপন করা সম্ভব হয়নি।');
+      console.error("Error fetching students:", err);
+      setError("সার্ভারের সাথে সংযোগ স্থাপন করা সম্ভব হয়নি।");
     } finally {
       setLoading(false);
     }
@@ -69,42 +82,38 @@ export default function IdCardGenerator() {
 
   // একাডেমি টাইপ ভিত্তিক ক্লাসের তালিকা পাওয়ার ফাংশন
   const getAcademyClasses = (academyType) => {
-    if (academyType === 'প্রাক-প্রাথমিক') return ['প্লে', 'নার্সারি'];
-    if (academyType === 'প্রাথমিক')
-      return ['প্রথম', 'দ্বিতীয়', 'তৃতীয়', 'চতুর্থ', 'পঞ্চম'];
-    if (academyType === 'মাধ্যমিক')
-      return ['ষষ্ঠ', 'সপ্তম', 'অষ্টম', 'নবম', 'দশম'];
-    if (academyType === 'উচ্চমাধ্যমিক') return ['১১শ শ্রেণি', '১২ব শ্রেণি'];
-    return [];
+    if (academyType === "প্রাক-প্রাথমিক") return ["প্লে", "নার্সারি"];
+    if (academyType === "প্রাথমিক")
+      return ["প্রথম", "দ্বিতীয়", "তৃতীয়", "চতুর্থ", "পঞ্চম"];
+    if (academyType === "মাধ্যমিক")
+      return ["ষষ্ঠ", "সপ্তম", "অষ্টম", "নবম", "দশম"];
   };
 
   // বিভাগ অনুযায়ী ক্লাসের ড্রপডাউন অপশন ডায়নামিকভাবে তৈরি করা
   const getClassOptions = () => {
-    if (selectedDivision === 'preHifz') {
-      return ['কায়দা/আমপারা', 'নাজেরা'];
+    if (selectedDivision === "preHifz") {
+      return ["কায়দা/আমপারা", "নাজেরা"];
     }
-    if (selectedDivision === 'hifz') {
-      return ['সবক', 'শুনানি'];
+    if (selectedDivision === "hifz") {
+      return ["সবক", "শুনানি"];
     }
-    if (selectedDivision === 'academy') {
-      if (selectedAcademyType !== 'all') {
+    if (selectedDivision === "academy") {
+      if (selectedAcademyType !== "all") {
         return getAcademyClasses(selectedAcademyType);
       }
       return [
-        'প্লে',
-        'নার্সারি',
-        'প্রথম',
-        'দ্বিতীয়',
-        'তৃতীয়',
-        'চতুর্থ',
-        'পঞ্চম',
-        'ষষ্ঠ',
-        'সপ্তম',
-        'অষ্টম',
-        'নবম',
-        'দশম',
-        '১১শ শ্রেণি',
-        '১২ব শ্রেণি',
+        "প্লে",
+        "নার্সারি",
+        "প্রথম",
+        "দ্বিতীয়",
+        "তৃতীয়",
+        "চতুর্থ",
+        "পঞ্চম",
+        "ষষ্ঠ",
+        "সপ্তম",
+        "অষ্টম",
+        "নবম",
+        "দশম",
       ];
     }
     return [];
@@ -114,37 +123,37 @@ export default function IdCardGenerator() {
   const getStudentClassDetails = (student) => {
     if (student?.divisionPreHifz?.active) {
       return {
-        divisionKey: 'preHifz',
-        divisionName: 'প্রি-হিফজ',
-        className: student.divisionPreHifz.class || 'N/A',
-        type: student.divisionPreHifz.type || 'N/A',
-        academyType: '',
+        divisionKey: "preHifz",
+        divisionName: "প্রি-হিফজ",
+        className: student.divisionPreHifz.class || "N/A",
+        type: student.divisionPreHifz.type || "N/A",
+        academyType: "",
       };
     }
     if (student?.divisionHifz?.active) {
       return {
-        divisionKey: 'hifz',
-        divisionName: 'হিফজ',
-        className: student.divisionHifz.class || 'N/A',
-        type: student.divisionHifz.type || 'N/A',
-        academyType: '',
+        divisionKey: "hifz",
+        divisionName: "হিফজ",
+        className: student.divisionHifz.class || "N/A",
+        type: student.divisionHifz.type || "N/A",
+        academyType: "",
       };
     }
     if (student?.divisionAcademy?.active) {
       return {
-        divisionKey: 'academy',
-        divisionName: 'একাডেমিক',
-        className: student.divisionAcademy.class || 'N/A',
-        type: student.divisionAcademy.type || 'N/A',
-        academyType: student.divisionAcademy.academyType || '',
+        divisionKey: "academy",
+        divisionName: "একাডেমিক",
+        className: student.divisionAcademy.class || "N/A",
+        type: student.divisionAcademy.type || "N/A",
+        academyType: student.divisionAcademy.academyType || "",
       };
     }
     return {
-      divisionKey: 'none',
-      divisionName: 'অন্যান্য',
-      className: student?.officeUse?.recommendedClass || 'N/A',
-      type: 'N/A',
-      academyType: '',
+      divisionKey: "none",
+      divisionName: "অন্যান্য",
+      className: student?.officeUse?.recommendedClass || "N/A",
+      type: "N/A",
+      academyType: "",
     };
   };
 
@@ -152,32 +161,40 @@ export default function IdCardGenerator() {
   const filteredStudents = students;
 
   const sessionYears = [
-    '২০২৬',
-    '২০২৫',
-    '২০২৪',
-    '২০২৩',
-    '২০২২',
-    '২০২১',
-    '২০২০',
-    '২০১৯',
-    '২০১৮',
+    "২০২৬",
+    "২০২৫",
+    "২০২৪",
+    "২০২৩",
+    "২০২২",
+    "২০২১",
+    "২০২০",
+    "২০১৯",
+    "২০১৮",
   ];
 
-  const uniqueFeeCategories = ["General", "Orphan", "Poor Fund", "Scholarship", "Staff Child"];
+  const uniqueFeeCategories = [
+    "General",
+    "Orphan",
+    "Poor Fund",
+    "Scholarship",
+    "Staff Child",
+  ];
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
       const currentPageIds = filteredStudents.map((s) => s._id);
       setSelectedIds((prev) => {
         const nextIds = [...prev];
-        currentPageIds.forEach(id => {
+        currentPageIds.forEach((id) => {
           if (!nextIds.includes(id)) nextIds.push(id);
         });
         return nextIds;
       });
     } else {
       const currentPageIds = filteredStudents.map((s) => s._id);
-      setSelectedIds((prev) => prev.filter(id => !currentPageIds.includes(id)));
+      setSelectedIds((prev) =>
+        prev.filter((id) => !currentPageIds.includes(id)),
+      );
     }
   };
 
@@ -196,21 +213,32 @@ export default function IdCardGenerator() {
   const studentsToPrint = students.filter((s) => selectedIds.includes(s._id));
 
   // অটো-ফিট নাম এবং তথ্যের জন্য SVG টেক্সট কম্পোনেন্ট (ফুল উইডথ নিবে ও অটো ছোট/বড় হবে)
-  const AutoScaledText = ({ text, className = "", fontWeight = "bold", fill = "#000" }) => {
+  const AutoScaledText = ({
+    text,
+    className = "",
+    fontWeight = "bold",
+    fill = "#000",
+  }) => {
     return (
-      <div className={`w-full h-4 flex items-center overflow-hidden ${className}`}>
-        <svg className="w-full h-full" viewBox="0 0 300 24" preserveAspectRatio="none">
+      <div
+        className={`w-full h-4 flex items-center overflow-hidden ${className}`}
+      >
+        <svg
+          className="w-full h-full"
+          viewBox="0 0 300 24"
+          preserveAspectRatio="none"
+        >
           <text
             x="0"
             y="18"
             fontSize="18"
             fontWeight={fontWeight}
             fill={fill}
-            fontFamily="sans-serif"
+            fontFamily="hindSiliguri"
             textLength="300"
             lengthAdjust="spacingAndGlyphs"
           >
-            {text || 'N/A'}
+            {text || "N/A"}
           </text>
         </svg>
       </div>
@@ -260,7 +288,7 @@ export default function IdCardGenerator() {
 
           <div>
             <label className="block text-xs font-semibold text-gray-650 dark:text-gray-400 mb-1">
-              শিক্ষাবর্ষ / সেশন
+              শিক্ষাবর্ষ
             </label>
             <select
               value={selectedSession}
@@ -281,14 +309,14 @@ export default function IdCardGenerator() {
 
           <div>
             <label className="block text-xs font-semibold text-gray-650 dark:text-gray-400 mb-1">
-              বিভাগ (Division)
+              বিভাগ
             </label>
             <select
               value={selectedDivision}
               onChange={(e) => {
                 setSelectedDivision(e.target.value);
-                setSelectedAcademyType('all');
-                setSelectedClass('all');
+                setSelectedAcademyType("all");
+                setSelectedClass("all");
                 setCurrentPage(1);
               }}
               className="w-full border border-gray-300 dark:border-slate-750 bg-white dark:bg-slate-900 text-slate-850 dark:text-slate-200 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500"
@@ -300,7 +328,7 @@ export default function IdCardGenerator() {
             </select>
           </div>
 
-          {selectedDivision === 'academy' && (
+          {selectedDivision === "academy" && (
             <div>
               <label className="block text-xs font-semibold text-gray-650 dark:text-gray-400 mb-1">
                 একাডেমি টাইপ
@@ -309,7 +337,7 @@ export default function IdCardGenerator() {
                 value={selectedAcademyType}
                 onChange={(e) => {
                   setSelectedAcademyType(e.target.value);
-                  setSelectedClass('all');
+                  setSelectedClass("all");
                   setCurrentPage(1);
                 }}
                 className="w-full border border-gray-300 dark:border-slate-750 bg-white dark:bg-slate-900 text-slate-850 dark:text-slate-200 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500"
@@ -325,7 +353,7 @@ export default function IdCardGenerator() {
 
           <div>
             <label className="block text-xs font-semibold text-gray-650 dark:text-gray-400 mb-1">
-              শ্রেণি / জামাত
+              শ্রেণি
             </label>
             <select
               value={selectedClass}
@@ -333,7 +361,7 @@ export default function IdCardGenerator() {
                 setSelectedClass(e.target.value);
                 setCurrentPage(1);
               }}
-              disabled={selectedDivision === 'all'}
+              disabled={selectedDivision === "all"}
               className="w-full border border-gray-300 dark:border-slate-750 bg-white dark:bg-slate-900 text-slate-850 dark:text-slate-200 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:disabled:bg-slate-800/40 disabled:opacity-50"
             >
               <option value="all">সকল শ্রেণি</option>
@@ -388,15 +416,17 @@ export default function IdCardGenerator() {
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t dark:border-slate-800 pt-4 mb-4">
           <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-semibold text-center sm:text-left">
-            মোট স্টুডেন্ট: {totalStudents} জন | সিলেক্ট করা হয়েছে: {selectedIds.length} জন
+            মোট স্টুডেন্ট: {totalStudents} জন | সিলেক্ট করা হয়েছে:{" "}
+            {selectedIds.length} জন
           </span>
           <button
             onClick={handlePrint}
             disabled={selectedIds.length === 0}
-            className={`w-full sm:w-auto px-4 sm:px-6 py-2.5 rounded-md font-bold text-sm sm:text-base text-white transition ${selectedIds.length === 0
-              ? 'bg-gray-400 dark:bg-gray-800 dark:text-gray-500 cursor-not-allowed'
-              : 'bg-emerald-600 hover:bg-emerald-700 shadow-lg'
-              }`}
+            className={`w-full sm:w-auto px-4 sm:px-6 py-2.5 rounded-md font-bold text-sm sm:text-base text-white transition ${
+              selectedIds.length === 0
+                ? "bg-gray-400 dark:bg-gray-800 dark:text-gray-500 cursor-not-allowed"
+                : "bg-emerald-600 hover:bg-emerald-700 shadow-lg"
+            }`}
           >
             🖨️ সিলেক্টেড আইডি কার্ড প্রিন্ট করুন ({selectedIds.length})
           </button>
@@ -414,7 +444,7 @@ export default function IdCardGenerator() {
                   onChange={handleSelectAll}
                   checked={
                     filteredStudents.length > 0 &&
-                    filteredStudents.every(s => selectedIds.includes(s._id))
+                    filteredStudents.every((s) => selectedIds.includes(s._id))
                   }
                   className="rounded border-gray-300"
                 />
@@ -424,9 +454,13 @@ export default function IdCardGenerator() {
 
             <div className="max-h-96 overflow-y-auto divide-y divide-gray-200 dark:divide-slate-800">
               {loading ? (
-                <div className="text-center p-6 text-sm text-gray-500 dark:text-gray-400">ডাটা লোড হচ্ছে...</div>
+                <div className="text-center p-6 text-sm text-gray-500 dark:text-gray-400">
+                  ডাটা লোড হচ্ছে...
+                </div>
               ) : filteredStudents.length === 0 ? (
-                <div className="text-center p-6 text-sm text-gray-500 dark:text-gray-400">কোনো শিক্ষার্থী পাওয়া যায়নি!</div>
+                <div className="text-center p-6 text-sm text-gray-500 dark:text-gray-400">
+                  কোনো শিক্ষার্থী পাওয়া যায়নি!
+                </div>
               ) : (
                 filteredStudents.map((student) => {
                   const details = getStudentClassDetails(student);
@@ -435,24 +469,33 @@ export default function IdCardGenerator() {
                     <div
                       key={student._id}
                       onClick={() => handleSelectStudent(student._id)}
-                      className={`p-3 flex items-start gap-3 cursor-pointer transition ${isSelected ? 'bg-blue-50/70 dark:bg-blue-950/20' : 'hover:bg-gray-50 dark:hover:bg-slate-900/40'
-                        }`}
+                      className={`p-3 flex items-start gap-3 cursor-pointer transition ${
+                        isSelected
+                          ? "bg-blue-50/70 dark:bg-blue-950/20"
+                          : "hover:bg-gray-50 dark:hover:bg-slate-900/40"
+                      }`}
                     >
                       <input
                         type="checkbox"
                         checked={isSelected}
-                        onChange={() => { }} // হ্যান্ডেল করা হচ্ছে প্যারেন্ট div ক্লিক দিয়ে
+                        onChange={() => {}} // হ্যান্ডেল করা হচ্ছে প্যারেন্ট div ক্লিক দিয়ে
                         className="mt-1 rounded border-gray-300"
                       />
                       <img
-                        src={student.studentImage || student.photoUrl || '/default-avatar.png'}
-                        alt={student.studentNameEnglish || 'Student'}
+                        src={
+                          student.studentImage ||
+                          student.photoUrl ||
+                          "/default-avatar.png"
+                        }
+                        alt={student.studentNameEnglish || "Student"}
                         className="w-12 h-12 rounded-full object-cover border dark:border-slate-700 shrink-0"
                       />
                       <div className="flex-1 min-w-0 text-xs space-y-1">
                         <div className="flex justify-between items-start gap-1">
                           <p className="font-bold text-gray-900 dark:text-gray-205 dark:text-gray-200 text-sm truncate">
-                            {student.studentNameBangla || student.studentNameEnglish || 'N/A'}
+                            {student.studentNameBangla ||
+                              student.studentNameEnglish ||
+                              "N/A"}
                           </p>
                           {!(student.studentImage || student.photoUrl) ? (
                             <span className="text-[10px] bg-red-100 dark:bg-red-950/30 text-red-600 dark:text-red-400 px-1.5 py-0.5 rounded shrink-0">
@@ -465,16 +508,24 @@ export default function IdCardGenerator() {
                           )}
                         </div>
                         <p className="text-gray-650 dark:text-gray-400 font-medium">
-                          আইডি/রোল: <span className="text-gray-900 dark:text-gray-200 font-semibold">{student.studentId || student.roll || 'N/A'}</span>
+                          আইডি:{" "}
+                          <span className="text-gray-900 dark:text-gray-200 font-semibold">
+                            {student.studentId || "N/A"}
+                          </span>
                         </p>
                         <div className="flex items-center gap-1.5">
                           <span className="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded text-[10px] font-medium">
                             {details.divisionName}
                           </span>
-                          <span className="text-gray-600 dark:text-gray-400">{details.className}</span>
+                          <span className="text-gray-600 dark:text-gray-400">
+                            {details.className}
+                          </span>
                         </div>
                         <p className="text-gray-500 dark:text-gray-450">
-                          মোবাইল: {student.fatherMobile || student.guardianMobile || 'N/A'}
+                          মোবাইল:{" "}
+                          {student.fatherMobile ||
+                            student.guardianMobile ||
+                            "N/A"}
                         </p>
                       </div>
                     </div>
@@ -495,28 +546,48 @@ export default function IdCardGenerator() {
                       onChange={handleSelectAll}
                       checked={
                         filteredStudents.length > 0 &&
-                        filteredStudents.every(s => selectedIds.includes(s._id))
+                        filteredStudents.every((s) =>
+                          selectedIds.includes(s._id),
+                        )
                       }
                     />
                   </th>
-                  <th className="p-3 text-slate-700 dark:text-slate-250">ছবি</th>
-                  <th className="p-3 text-slate-700 dark:text-slate-250">আইডি / রোল</th>
-                  <th className="p-3 text-slate-700 dark:text-slate-250">নাম</th>
-                  <th className="p-3 text-slate-700 dark:text-slate-250">বিভাগ ও শ্রেণি</th>
-                  <th className="p-3 text-slate-700 dark:text-slate-250">মোবাইল</th>
-                  <th className="p-3 text-slate-700 dark:text-slate-250">স্ট্যাটাস</th>
+                  <th className="p-3 text-slate-700 dark:text-slate-250">
+                    ছবি
+                  </th>
+                  <th className="p-3 text-slate-700 dark:text-slate-250">
+                    আইডি
+                  </th>
+                  <th className="p-3 text-slate-700 dark:text-slate-250">
+                    নাম
+                  </th>
+                  <th className="p-3 text-slate-700 dark:text-slate-250">
+                    বিভাগ ও শ্রেণি
+                  </th>
+                  <th className="p-3 text-slate-700 dark:text-slate-250">
+                    মোবাইল
+                  </th>
+                  <th className="p-3 text-slate-700 dark:text-slate-250">
+                    স্ট্যাটাস
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="7" className="text-center p-4 text-slate-500 dark:text-slate-400">
+                    <td
+                      colSpan="7"
+                      className="text-center p-4 text-slate-500 dark:text-slate-400"
+                    >
                       ডাটা লোড হচ্ছে...
                     </td>
                   </tr>
                 ) : filteredStudents.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="text-center p-4 text-slate-500 dark:text-slate-400">
+                    <td
+                      colSpan="7"
+                      className="text-center p-4 text-slate-500 dark:text-slate-400"
+                    >
                       কোনো শিক্ষার্থী পাওয়া যায়নি!
                     </td>
                   </tr>
@@ -524,7 +595,10 @@ export default function IdCardGenerator() {
                   filteredStudents.map((student) => {
                     const details = getStudentClassDetails(student);
                     return (
-                      <tr key={student._id} className="border-b border-gray-250 dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-900/60">
+                      <tr
+                        key={student._id}
+                        className="border-b border-gray-250 dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-900/60"
+                      >
                         <td className="p-3">
                           <input
                             type="checkbox"
@@ -534,16 +608,22 @@ export default function IdCardGenerator() {
                         </td>
                         <td className="p-3">
                           <img
-                            src={student.studentImage || student.photoUrl || '/default-avatar.png'}
-                            alt={student.studentNameEnglish || 'Student'}
+                            src={
+                              student.studentImage ||
+                              student.photoUrl ||
+                              "/default-avatar.png"
+                            }
+                            alt={student.studentNameEnglish || "Student"}
                             className="w-8 h-8 rounded-full object-cover border dark:border-slate-700"
                           />
                         </td>
                         <td className="p-3 font-medium text-gray-700 dark:text-gray-300">
-                          {student.studentId || student.roll || 'N/A'}
+                          {student.studentId || "N/A"}
                         </td>
                         <td className="p-3 font-medium text-gray-800 dark:text-gray-200">
-                          {student.studentNameBangla || student.studentNameEnglish || 'N/A'}
+                          {student.studentNameBangla ||
+                            student.studentNameEnglish ||
+                            "N/A"}
                         </td>
                         <td className="p-3">
                           <span className="text-xs bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded mr-1">
@@ -552,7 +632,9 @@ export default function IdCardGenerator() {
                           {details.className}
                         </td>
                         <td className="p-3">
-                          {student.fatherMobile || student.guardianMobile || 'N/A'}
+                          {student.fatherMobile ||
+                            student.guardianMobile ||
+                            "N/A"}
                         </td>
                         <td className="p-3">
                           {!(student.studentImage || student.photoUrl) ? (
@@ -576,7 +658,7 @@ export default function IdCardGenerator() {
           {/* ৫. পেজিনেশন কন্ট্রোলস */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white dark:bg-[#0f172a] p-4 border-t border-slate-100 dark:border-slate-800/80 mt-4 rounded-b-lg">
             <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
-              পেজ {currentPage} এর {totalPages} (মোট {totalStudents} জন শিক্ষার্থী)
+              {totalPages} পেজ থেকে {currentPage} নং পেজ
             </span>
             <div className="flex gap-2">
               <button
@@ -590,14 +672,15 @@ export default function IdCardGenerator() {
               <button
                 type="button"
                 disabled={currentPage >= totalPages}
-                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
                 className="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 পরবর্তী (Next) ▶
               </button>
             </div>
           </div>
-
         </div>
       </div>
 
@@ -610,7 +693,8 @@ export default function IdCardGenerator() {
         {studentsToPrint.length === 0 ? (
           <div className="print:hidden text-center py-8 sm:py-12 bg-white dark:bg-[#0f172a] rounded-lg border-2 border-dashed border-gray-300 dark:border-slate-800 p-4">
             <p className="text-sm sm:text-base text-gray-500 dark:text-gray-450 font-medium">
-              প্রিন্ট প্রিভিউ দেখতে টেবিল থেকে শিক্ষার্থী নির্বাচন (Checkbox Select) করুন।
+              প্রিন্ট প্রিভিউ দেখতে টেবিল থেকে শিক্ষার্থী নির্বাচন (Checkbox
+              Select) করুন।
             </p>
           </div>
         ) : (
@@ -620,23 +704,26 @@ export default function IdCardGenerator() {
               const details = getStudentClassDetails(student);
 
               // ১) সেশন থেকে শুধুমাত্র প্রথম ৪ ডিজিট (যেমন: ২০২৬) নেওয়া
-              const sessionOnlyYear = (student.sessionYear || '').split(/[-–/]/)[0].trim() || 'N/A';
+              const sessionOnlyYear =
+                (student.sessionYear || "").split(/[-–/]/)[0].trim() || "N/A";
 
               // ২) বারকোডের জন্য সমস্ত ডাইনামিক ডাটা স্ট্রিং আকারে প্যাক করা
-              const barcodePayload = String(student.studentId || student.roll || '');
+              const barcodePayload = String(
+                student.studentId || student.roll || "",
+              );
 
               return (
                 <div
                   key={student._id}
                   className="w-[2.125in] h-[3.375in] bg-white rounded-xl p-[3px] relative shadow-xl overflow-hidden mx-auto print:shadow-none print:break-inside-avoid shrink-0"
                   style={{
-                    border: '6px solid #0022C8',
-                    boxSizing: 'border-box',
+                    border: "6px solid #0022C8",
+                    boxSizing: "border-box",
                   }}
                 >
                   <div
                     className="w-full h-full bg-white rounded-lg flex flex-col justify-between relative overflow-hidden"
-                    style={{ border: '2px solid #1E40AF' }}
+                    style={{ border: "2px solid #1E40AF" }}
                   >
                     {/* ================= ১. হেডার সেকশন ================= */}
 
@@ -663,10 +750,10 @@ export default function IdCardGenerator() {
                     {/* ================= ২. মিডল সেকশন (ছবি, আইডি নম্বর ও বারকোড) ================= */}
                     <div className="flex justify-between items-center px-2 pt-1 mb-2 relative">
                       <div className="w-[75px] h-[75px] rounded-full border-2 border-[#38BDF8] overflow-hidden bg-gray-100 flex items-center justify-center shadow-inner">
-                        {student.studentImage? (
+                        {student.studentImage ? (
                           <img
                             src={student.studentImage}
-                            alt={student.studentNameEnglish || 'Student'}
+                            alt={student.studentNameEnglish || "Student"}
                             className="w-full h-full object-cover"
                           />
                         ) : (
@@ -686,7 +773,10 @@ export default function IdCardGenerator() {
                             ID CARD
                           </span>
                           <span className="text-[8px] font-black text-[#0022C8] tracking-tight">
-                            ID NO-{student.studentId || student.roll || student._id?.slice(-6)}
+                            ID NO-
+                            {student.studentId ||
+                              student.roll ||
+                              student._id?.slice(-6)}
                           </span>
                         </div>
 
@@ -695,11 +785,11 @@ export default function IdCardGenerator() {
                           <div className="transform rotate-90 origin-center scale-90">
                             {/* ✅ নতুন কোড: */}
                             <BarcodeSVG
-                              value={barcodePayload || '0000'}
+                              value={barcodePayload || "0000"}
                               format="CODE128"
-                              width={1.2}              // লাইনগুলো একটু মোটা করা হয়েছে যেন সহজে স্ক্যান হয়
-                              height={28}             // বারকোডের উচ্চতা বাড়ানো হয়েছে
-                              displayValue={false}    // শুধু বারকোড দেখাবে, কোনো টেক্সট বা আইডি বারকোডের নিচে দেখাবে না
+                              width={1.2} // লাইনগুলো একটু মোটা করা হয়েছে যেন সহজে স্ক্যান হয়
+                              height={28} // বারকোডের উচ্চতা বাড়ানো হয়েছে
+                              displayValue={false} // শুধু বারকোড দেখাবে, কোনো টেক্সট বা আইডি বারকোডের নিচে দেখাবে না
                               margin={0}
                               background="transparent"
                             />
@@ -713,7 +803,11 @@ export default function IdCardGenerator() {
                       {/* স্টুডেন্টের নাম - অটো ছোট হয়ে জায়গা মত বসবে */}
                       <div className="w-full">
                         <AutoScaledText
-                          text={student.studentNameBangla || student.studentNameEnglish || 'N/A'}
+                          text={
+                            student.studentNameBangla ||
+                            student.studentNameEnglish ||
+                            "N/A"
+                          }
                           fill="#000"
                           fontWeight="bold"
                         />
@@ -722,11 +816,19 @@ export default function IdCardGenerator() {
                       <div className="space-y-1 text-[9px] font-serif">
                         {/* পিতা */}
                         <div className="flex items-center">
-                          <span className="w-[55px] font-bold text-[#A0006D] shrink-0">Father</span>
-                          <span className="font-bold text-[#A0006D] mr-1">:</span>
+                          <span className="w-[55px] font-bold text-[#A0006D] shrink-0">
+                            Father
+                          </span>
+                          <span className="font-bold text-[#A0006D] mr-1">
+                            :
+                          </span>
                           <div className="flex-1 overflow-hidden">
                             <AutoScaledText
-                              text={student.fatherNameBangla || student.fatherNameEnglish || 'N/A'}
+                              text={
+                                student.fatherNameBangla ||
+                                student.fatherNameEnglish ||
+                                "N/A"
+                              }
                               fill="#000"
                               fontWeight="normal"
                             />
@@ -735,8 +837,12 @@ export default function IdCardGenerator() {
 
                         {/* এডমিশন সেশন */}
                         <div className="flex items-center">
-                          <span className="w-[55px] font-bold text-[#A0006D] shrink-0">Ad.Session</span>
-                          <span className="font-bold text-[#A0006D] mr-1">:</span>
+                          <span className="w-[55px] font-bold text-[#A0006D] shrink-0">
+                            Ad.Session
+                          </span>
+                          <span className="font-bold text-[#A0006D] mr-1">
+                            :
+                          </span>
                           <span className="font-semibold text-black flex-1">
                             {sessionOnlyYear}
                           </span>
@@ -744,8 +850,12 @@ export default function IdCardGenerator() {
 
                         {/* বিভাগ (হিফজ/একাডেমিক) */}
                         <div className="flex items-center">
-                          <span className="w-[55px] font-bold text-[#A0006D] shrink-0">Division</span>
-                          <span className="font-bold text-[#A0006D] mr-1">:</span>
+                          <span className="w-[55px] font-bold text-[#A0006D] shrink-0">
+                            Division
+                          </span>
+                          <span className="font-bold text-[#A0006D] mr-1">
+                            :
+                          </span>
                           <span className="font-semibold text-black flex-1">
                             {details.divisionName}
                           </span>
@@ -753,40 +863,53 @@ export default function IdCardGenerator() {
 
                         {/* জন্ম তারিখ */}
                         <div className="flex items-center">
-                          <span className="w-[55px] font-bold text-[#A0006D] shrink-0">D.O.B</span>
-                          <span className="font-bold text-[#A0006D] mr-1">:</span>
+                          <span className="w-[55px] font-bold text-[#A0006D] shrink-0">
+                            D.O.B
+                          </span>
+                          <span className="font-bold text-[#A0006D] mr-1">
+                            :
+                          </span>
                           <span className="font-semibold text-black flex-1 font-mono text-[8px]">
-                            {student.dateOfBirth || student.dob || 'N/A'}
+                            {student.dateOfBirth || student.dob || "N/A"}
                           </span>
                         </div>
 
                         {/* মোবাইল নম্বর (সুন্দর ও সোজা ফন্ট) */}
                         <div className="flex items-center">
-                          <span className="w-[55px] font-bold text-[#A0006D] shrink-0">Mobile</span>
-                          <span className="font-bold text-[#A0006D] mr-1">:</span>
+                          <span className="w-[55px] font-bold text-[#A0006D] shrink-0">
+                            Mobile
+                          </span>
+                          <span className="font-bold text-[#A0006D] mr-1">
+                            :
+                          </span>
                           <span className="font-semibold text-black flex-1 font-mono text-[8px]">
-                            {student.fatherMobile || student.guardianMobile || 'N/A'}
+                            {student.fatherMobile ||
+                              student.guardianMobile ||
+                              "N/A"}
                           </span>
                         </div>
 
                         {/* ব্ল্যাড গ্রুপ */}
                         <div className="flex  items-center">
-                          <span className="w-[55px] font-bold text-[8px]  text-[#A0006D] shrink-0">Blood Group</span>
-                          <span className="font-bold text-[#A0006D] mr-1">:</span>
+                          <span className="w-[55px] font-bold text-[8px]  text-[#A0006D] shrink-0">
+                            Blood Group
+                          </span>
+                          <span className="font-bold text-[#A0006D] mr-1">
+                            :
+                          </span>
                           <span className="font-semibold text-black flex-1">
-                            {student.bloodGroup || 'N/A'}
+                            {student.bloodGroup || "N/A"}
                           </span>
                         </div>
                       </div>
                     </div>
 
-
                     <div
                       className="bg-[#047857] text-white text-right px-3 py-1 relative flex flex-col items-end justify-end border-t border-amber-500"
                       style={{
-                        backgroundColor: '#047857', // ইমারাল্ড গ্রিন
-                        WebkitPrintColorAdjust: 'exact',
-                        printColorAdjust: 'exact'
+                        backgroundColor: "#047857", // ইমারাল্ড গ্রিন
+                        WebkitPrintColorAdjust: "exact",
+                        printColorAdjust: "exact",
                       }}
                     >
                       {/* সিগনেচার ইমেজ */}
@@ -806,9 +929,7 @@ export default function IdCardGenerator() {
             })}
             <IdCardBack />
           </div>
-
         )}
-
       </div>
     </div>
   );
