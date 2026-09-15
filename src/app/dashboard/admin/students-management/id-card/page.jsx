@@ -1,6 +1,5 @@
 "use client";
-
-import { IdCardBack } from "@/components/dashboard/IdCardBack";
+import { IdCardBack } from "@/components/dashboard/students/id-card/IdCardBack";
 import React, { useState, useEffect } from "react";
 import BarcodeSVG from "react-barcode";
 
@@ -250,9 +249,58 @@ export default function IdCardGenerator() {
       {/* প্রিন্ট সিএসএস ফিক্স (ব্যাকগ্রাউন্ড কালার ঠিক রাখার জন্য) */}
       <style jsx global>{`
         @media print {
+          /* ১. প্রিন্ট মোডে অনাবশ্যক লেআউট রিসেট */
+          html,
           body {
+            background: #ffffff !important;
+            height: auto !important;
+            min-height: 100% !important;
+            overflow: visible !important;
+            margin: 0 !important;
+            padding: 0 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+          }
+
+          /* ২. A4 পেজ মার্জিন ও সাইজ */
+          @page {
+            size: A4 portrait;
+            margin: 10mm 8mm;
+          }
+
+          /* ৩. স্ক্রিনের অনাবশ্যক এলিমেন্ট লুকানো */
+          .print-hide,
+          nav,
+          header,
+          sidebar,
+          footer {
+            display: none !important;
+          }
+
+          /* ৪. প্রিন্ট গ্রিড কন্টেইনার (Grid উঠিয়ে Flex/Block ব্যবহার) */
+          .print-grid-container {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            justify-content: flex-start !important;
+            align-items: flex-start !important;
+            gap: 12px 10px !important;
+            width: 100% !important;
+            height: auto !important;
+            overflow: visible !important;
+          }
+
+          /* ৫. প্রতিটি কার্ডের প্রিন্ট আচরণ (A4 পেজে ৩টি করে বসবে) */
+          .id-card-print-box {
+            width: 2.125in !important;
+            height: 3.375in !important;
+            box-sizing: border-box !important;
+
+            /* কার্ড ভাঙা রোধ করার জন্য */
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+            -webkit-column-break-inside: avoid !important;
+
+            margin-bottom: 8px !important;
           }
         }
       `}</style>

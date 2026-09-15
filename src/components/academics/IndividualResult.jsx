@@ -28,13 +28,7 @@ export default function ResultSheetGenerator() {
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState(""); // সার্চ বাটন প্রেসের পর কাজের জন্য স্টেট
 
-  const sessionYears = [
-    "২০২৬",
-    "২০২৫",
-    "২০২৪",
-    "২০২৩",
-    "২০২২",
-  ];
+  const sessionYears = ["২০২৬", "২০২৫", "২০২৪", "২০২৩", "২০২২"];
 
   // ১. Backend থেকে স্টুডেন্ট ফেচ (Student ID সার্চ ভিত্তিক)
   const fetchStudents = async () => {
@@ -307,8 +301,12 @@ export default function ResultSheetGenerator() {
     if (!termData || Object.keys(termData).length === 0) return true;
     if (termData.isAbsent) return true;
 
-    const ctStr = String(termData.ct || "").trim().toUpperCase();
-    const examStr = String(termData.exam || "").trim().toUpperCase();
+    const ctStr = String(termData.ct || "")
+      .trim()
+      .toUpperCase();
+    const examStr = String(termData.exam || "")
+      .trim()
+      .toUpperCase();
     if (
       ctStr === "A" ||
       ctStr === "ABS" ||
@@ -402,10 +400,10 @@ export default function ResultSheetGenerator() {
         average:
           validCount > 0
             ? (
-              (currentExamType === "বার্ষিক পরীক্ষা"
-                ? totalNormalizedMarks
-                : totalObtained) / validCount
-            ).toFixed(2)
+                (currentExamType === "বার্ষিক পরীক্ষা"
+                  ? totalNormalizedMarks
+                  : totalObtained) / validCount
+              ).toFixed(2)
             : "0.00",
         grade: "INC",
         gpa: "0.00",
@@ -417,10 +415,10 @@ export default function ResultSheetGenerator() {
     const avgMarks =
       validCount > 0
         ? (
-          (currentExamType === "বার্ষিক পরীক্ষা"
-            ? totalNormalizedMarks
-            : totalObtained) / validCount
-        ).toFixed(2)
+            (currentExamType === "বার্ষিক পরীক্ষা"
+              ? totalNormalizedMarks
+              : totalObtained) / validCount
+          ).toFixed(2)
         : "0.00";
 
     // কোনো আবশ্যিক বিষয়ে ফেল থাকলে সামগ্রিক গ্রেড বাধ্যতামূলকভাবে 'F' এবং জিপিএ 0.00
@@ -453,95 +451,142 @@ export default function ResultSheetGenerator() {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-[#09101d] text-gray-800 dark:text-gray-200 p-3 sm:p-4 md:p-6">
-      {/* ----------------- ১. কন্ট্রোল ড্যাশবোর্ড (প্রিন্টে হাইড থাকবে) ----------------- */}
-      <div className="print:hidden max-w-7xl mx-auto bg-white dark:bg-[#0f172a] p-4 sm:p-6 rounded-lg border border-slate-200 dark:border-slate-800 shadow-md mb-6 sm:mb-8">
-        <h1 className="text-xl sm:text-2xl font-bold text-[#043e30] dark:text-emerald-400 mb-4 sm:mb-6 border-b dark:border-slate-800 pb-2">
-          রেজাল্ট শিট জেনারেটর ড্যাশবোর্ড
-        </h1>
+      <div className="print:hidden max-w-7xl mx-auto mb-8 font-sans">
+        {/* ড্যাশবোর্ড মেইন কার্ড - ইসলামিক ডিপ গ্রিন ও ফাইনাল গোল্ডেন বর্ডার */}
+        <div className="bg-gradient-to-br from-[#063226] via-[#04241b] to-[#021812] rounded-3xl p-6 sm:p-8 border border-emerald-600/30 shadow-2xl shadow-emerald-950/40 text-emerald-50 relative overflow-hidden">
+          {/* ব্যাকগ্রাউন্ড গোল্ডেন ও এমারেল্ড গ্লো */}
+          <div className="absolute -top-24 -right-24 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
-            {error}
-          </div>
-        )}
-
-        <form
-          onSubmit={handleSearch}
-          className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4"
-        >
-          {/* ১. শিক্ষার্থীর আইডি */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-              শিক্ষার্থীর আইডি
-            </label>
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                placeholder="Student ID দিয়ে খুঁজুন..."
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                className="w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 rounded-md py-2 pl-3 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"
-              />
+          {/* ১. হেডার ও প্রিন্ট বাটন (গোল্ডেন একসেন্ট সহ) */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 mb-6 border-b border-emerald-800/60">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-amber-300 bg-amber-950/60 border border-amber-500/30 px-3.5 py-1 rounded-full inline-block mb-2 shadow-inner">
+                ✦ রেজাল্ট ম্যানেজমেন্ট প্যানেল ✦
+              </span>
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-emerald-100 flex items-center gap-2">
+                রেজাল্ট শিট জেনারেটর ড্যাশবোর্ড
+              </h1>
             </div>
-          </div>
 
-          {/* ২. শিক্ষাবর্ষ ফিল্টার */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-              শিক্ষাবর্ষ
-            </label>
-            <select
-              value={targetYear}
-              onChange={(e) => setTargetYear(e.target.value)}
-              className="w-full border border-gray-300 dark:border-slate-700 rounded-md p-2 text-sm bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-medium focus:outline-none focus:ring-2 focus:ring-teal-500"
+            {/* প্রিন্ট বাটন (রয়্যাল গোল্ডেন স্টাইল) */}
+            <button
+              onClick={handlePrint}
+              disabled={selectedIds.length === 0}
+              className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2.5 shadow-lg shrink-0 ${
+                selectedIds.length === 0
+                  ? "bg-emerald-950/80 text-emerald-700 border border-emerald-900/60 cursor-not-allowed"
+                  : "bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-emerald-950 shadow-amber-500/20 active:scale-95 cursor-pointer font-black"
+              }`}
             >
-              {sessionYears.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
+              <span className="text-lg">🖨️</span>
+              <span>রেজাল্ট শিট প্রিন্ট করুন</span>
+              <span
+                className={`px-2.5 py-0.5 rounded-full text-xs font-black ${
+                  selectedIds.length === 0
+                    ? "bg-emerald-900/50 text-emerald-700"
+                    : "bg-emerald-950/40 text-emerald-950"
+                }`}
+              >
+                {selectedIds.length}
+              </span>
+            </button>
           </div>
 
-          {/* ৩. পরীক্ষার নাম ও খুঁজুন বাটন */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-              পরীক্ষার নাম
-            </label>
-            <div className="flex items-center gap-2">
-              <select
-                value={examType}
-                onChange={(e) => setExamType(e.target.value)}
-                className="w-full border border-gray-300 dark:border-slate-700 rounded-md p-2 text-sm bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-medium focus:outline-none focus:ring-2 focus:ring-teal-500"
-              >
-                <option value="১ম সাময়িক পরীক্ষা">১ম সাময়িক পরীক্ষা</option>
-                <option value="২য় সাময়িক পরীক্ষা">২য় সাময়িক পরীক্ষা</option>
-                <option value="বার্ষিক পরীক্ষা">বার্ষিক পরীক্ষা</option>
-              </select>
+          {/* এরর নোটিফিকেশন */}
+          {error && (
+            <div className="mb-6 p-4 bg-rose-950/50 border border-rose-800/80 text-rose-200 rounded-2xl text-sm font-medium flex items-center gap-3 backdrop-blur-md animate-fade-in">
+              <span className="p-1.5 bg-rose-900/50 rounded-lg text-rose-300 text-base">
+                ⚠️
+              </span>
+              <span>{error}</span>
+            </div>
+          )}
 
+          {/* ২. ফিল্টার ও সার্চ সিস্টেম */}
+          <form onSubmit={handleSearch} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+              {/* ১. শিক্ষার্থী আইডি */}
+              <div className="md:col-span-5 bg-[#083c2e]/60 p-3.5 rounded-2xl border border-emerald-700/40 focus-within:border-amber-400/60 focus-within:ring-1 focus-within:ring-amber-400/50 transition-all">
+                <label className="block text-[11px] font-extrabold text-emerald-300 uppercase tracking-wider mb-1.5">
+                  ১. শিক্ষার্থীর আইডি
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    placeholder="Student ID দিয়ে খুঁজুন..."
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    className="w-full bg-[#031d16] text-emerald-100 placeholder-emerald-600/70 border border-emerald-800/80 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-amber-400 transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* ২. শিক্ষাবর্ষ */}
+              <div className="md:col-span-3 bg-[#083c2e]/60 p-3.5 rounded-2xl border border-emerald-700/40 focus-within:border-amber-400/60 transition-all">
+                <label className="block text-[11px] font-extrabold text-emerald-300 uppercase tracking-wider mb-1.5">
+                  ২. শিক্ষাবর্ষ
+                </label>
+                <select
+                  value={targetYear}
+                  onChange={(e) => setTargetYear(e.target.value)}
+                  className="w-full bg-[#031d16] text-emerald-100 border border-emerald-800/80 rounded-xl py-2 px-3 text-sm font-medium focus:outline-none focus:border-amber-400 cursor-pointer"
+                >
+                  {sessionYears.map((year) => (
+                    <option
+                      key={year}
+                      value={year}
+                      className="bg-[#04241b] text-emerald-100"
+                    >
+                      {year}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* ৩. পরীক্ষার নাম */}
+              <div className="md:col-span-4 bg-[#083c2e]/60 p-3.5 rounded-2xl border border-emerald-700/40 focus-within:border-amber-400/60 transition-all">
+                <label className="block text-[11px] font-extrabold text-emerald-300 uppercase tracking-wider mb-1.5">
+                  ৩. পরীক্ষার নাম
+                </label>
+                <select
+                  value={examType}
+                  onChange={(e) => setExamType(e.target.value)}
+                  className="w-full bg-[#031d16] text-emerald-100 border border-emerald-800/80 rounded-xl py-2 px-3 text-sm font-medium focus:outline-none focus:border-amber-400 cursor-pointer"
+                >
+                  <option
+                    value="১ম সাময়িক পরীক্ষা"
+                    className="bg-[#04241b] text-emerald-100"
+                  >
+                    ১ম সাময়িক পরীক্ষা
+                  </option>
+                  <option
+                    value="২য় সাময়িক পরীক্ষা"
+                    className="bg-[#04241b] text-emerald-100"
+                  >
+                    ২য় সাময়িক পরীক্ষা
+                  </option>
+                  <option
+                    value="বার্ষিক পরীক্ষা"
+                    className="bg-[#04241b] text-emerald-100"
+                  >
+                    বার্ষিক পরীক্ষা
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            {/* ৩. খুঁজুন বাটন (ইসলামিক ডিপ গ্রিন ও গোল্ডেন হোভার) */}
+            <div className="flex justify-end pt-2">
               <button
                 type="submit"
-                className="bg-teal-600 hover:bg-teal-700 text-white font-medium px-4 py-2 rounded-md text-sm transition-all flex items-center gap-1.5 shrink-0 shadow-sm"
+                className="w-full sm:w-auto bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold px-8 py-3.5 rounded-2xl text-sm transition-all duration-200 flex items-center justify-center gap-2.5 shadow-lg shadow-emerald-900/50 border border-emerald-400/30 active:scale-95 cursor-pointer"
               >
-                <Search className="w-4 h-4" />
+                <Search className="w-4 h-4 stroke-[2.5]" />
                 <span>খুঁজুন</span>
               </button>
             </div>
-          </div>
-        </form>
-
-        {/* প্রিন্ট কন্ট্রোল */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t dark:border-slate-800 pt-4 mb-2">
-          <button
-            onClick={handlePrint}
-            disabled={selectedIds.length === 0}
-            className={`w-full sm:w-auto px-6 py-2.5 rounded-md font-bold text-white transition ${selectedIds.length === 0
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-teal-600 hover:bg-teal-700 shadow-lg"
-              }`}
-          >
-            🖨️ রেজাল্ট শিট প্রিন্ট করুন ({selectedIds.length})
-          </button>
+          </form>
         </div>
       </div>
 
@@ -639,12 +684,12 @@ export default function ResultSheetGenerator() {
                   <div className="w-full h-full border border-[#C5A059] p-2 flex flex-col justify-between box-border relative">
                     {/* ব্যাকগ্রাউন্ড ওয়াটারমার্ক */}
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 opacity-[0.06]">
-                      <div className="w-[280px] h-[280px] rounded-full overflow-hidden flex items-center justify-center">
+                      <div className="w-[500px] h-[500px] rounded-full overflow-hidden flex items-center justify-center">
                         <Image
                           src="/aimlogo1.png"
                           alt="Watermark Logo"
-                          width={280}
-                          height={280}
+                          width={500}
+                          height={500}
                           className="w-full h-full object-cover scale-[1.05] transform-gpu"
                         />
                       </div>
@@ -656,29 +701,29 @@ export default function ResultSheetGenerator() {
                       <div>
                         <div className="flex justify-between items-center relative gap-2 flex-shrink-0 w-full overflow-hidden">
                           {/* মাদ্রাসার লোগো */}
-                          <div className="w-22 h-22 rounded-full overflow-hidden flex-shrink-0 relative flex items-center justify-center">
+                          <div className="w-20 h-20 md:w-45 md:h-45 print:!w-36 print:!h-36 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-3">
                             <Image
                               src={"/aimlogo1.png"}
                               alt="Institution Logo"
-                              width={120}
-                              height={120}
+                              width={200}
+                              height={200}
                               quality={100}
                               priority
-                              className="w-full h-full object-cover scale-[1.05] transform-gpu"
+                              className="w-full h-full object-cover scale-[1.08] transform-gpu"
                             />
                           </div>
 
                           {/* লোগো ও ছবির মাঝখানে ব্যানার */}
                           <div className="flex-1 text-center min-w-0">
-                            <div className="w-full text-center">
+                            <div className="flex-grow text-center">
                               <Image
-                                src={"/banner.png"}
+                                src={"/banner_routine.png"}
                                 alt="Institution Banner"
-                                width={1200}
-                                height={240}
+                                width={1000}
+                                height={400}
                                 quality={100}
                                 priority
-                                className="w-full h-auto max-h-24 object-contain mx-auto"
+                                className="w-full h-auto max-h-45 object-fill mx-auto print:max-h-45"
                               />
                             </div>
                           </div>
@@ -703,7 +748,8 @@ export default function ResultSheetGenerator() {
                               মার্কসীট
                             </div>
                             <p className="text-[11px] font-bold text-gray-800 mt-1">
-                              {examType} - {(resData.year || "").split(/[-–/]/)[0].trim()}
+                              {examType} -{" "}
+                              {(resData.year || "").split(/[-–/]/)[0].trim()}
                             </p>
                             <p className="text-[11px] font-bold text-gray-800">
                               শ্রেণি: {student.class || "N/A"}
@@ -862,7 +908,8 @@ export default function ResultSheetGenerator() {
 
                                 let gradeInfo;
                                 if (examType === "বার্ষিক পরীক্ষা") {
-                                  gradeInfo = getFinalSubjectGradeForAnnual(item);
+                                  gradeInfo =
+                                    getFinalSubjectGradeForAnnual(item);
                                 } else {
                                   const normalizedMark =
                                     getNormalizedMarkForGrade(item, examType);
@@ -940,22 +987,75 @@ export default function ResultSheetGenerator() {
                         </div>
                       </div>
 
-                      {/* ফুটার এবং সিগনেচার */}
-                      <div className="mt-8 pt-4">
-                        <div className="flex justify-between items-end px-4 text-xs font-bold text-gray-800">
-                          <div className="text-center">
-                            <div className="border-t border-dashed border-gray-400 w-32 mb-1"></div>
-                            শ্রেণি শিক্ষকের স্বাক্ষর
+                      <div className="flex justify-between items-end my-1 px-4 flex-shrink-0">
+                        {/* পরীক্ষা নিয়ন্ত্রক এর স্বাক্ষর */}
+                        <div className="text-center flex flex-col items-center print:mt-auto relative">
+                          <div className="relative w-36 h-10">
+                            <Image
+                              src={"/anarul.png"}
+                              alt="Controller Signature"
+                              width={200}
+                              height={60}
+                              unoptimized
+                              className="absolute -top-2 right-8 h-12 w-20 object-contain mix-blend-multiply contrast-[800%] brightness-[60%] grayscale -rotate-90"
+                            />
                           </div>
-                          <div className="text-center">
-                            <div className="border-t border-dashed border-gray-400 w-32 mb-1"></div>
-                            অভিভাবকের স্বাক্ষর
-                          </div>
-                          <div className="text-center">
-                            <div className="border-t border-dashed border-gray-400 w-32 mb-1"></div>
-                            অধ্যক্ষ / পরিচালকের স্বাক্ষর
-                          </div>
+                          <div className="w-28 border-b border-gray-800 mb-0.5"></div>
+                          <span className="text-[9.5px] font-bold text-gray-800">
+                            পরীক্ষা নিয়ন্ত্রকের স্বাক্ষর
+                          </span>
                         </div>
+
+                        {/* প্রিন্সিপাল এর স্বাক্ষর */}
+                        <div className="text-center flex flex-col items-center">
+                          <div className="relative w-36 h-10 print:mt-auto">
+                            <Image
+                              src={"/principle's_signature.jpg"}
+                              alt="Principal Signature"
+                              width={100}
+                              height={40}
+                              unoptimized
+                              className="absolute -top-2 right-8 h-12 w-20 object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45"
+                            />
+                          </div>
+                          <div className="w-28 border-b border-gray-800 mb-0.5"></div>
+                          <span className="text-[9.5px] font-bold text-gray-800">
+                            প্রিন্সিপালের স্বাক্ষর
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="relative z-10 mt-auto pt-1 border-t border-gray-300 flex-shrink-0">
+                      <div className="flex flex-wrap justify-center items-center gap-x-1 gap-y-0.5 text-[8.5px] font-semibold text-gray-800">
+                        <span className="flex items-center gap-0.5">
+                          <Phone className="w-2.5 h-2.5 text-gray-700" />
+                          01316-209201
+                        </span>
+
+                        <span className="flex items-center gap-0.5">
+                          <BsWhatsapp className="w-2.5 h-2.5 text-green-600" />
+                          01748-886161
+                        </span>
+
+                        <span className="flex items-center gap-0.5">
+                          <Globe className="w-2.5 h-2.5 text-blue-500" />
+                          www.aimhabiganj.com
+                        </span>
+
+                        <span className="flex items-center gap-0.5">
+                          <Mail className="w-2.5 h-2.5 text-red-500" />
+                          aimhabiganj@gmail.com
+                        </span>
+
+                        <span className="flex items-center gap-0.5">
+                          <FaFacebook className="w-2.5 h-2.5 text-blue-600" />
+                          aimhabiganj
+                        </span>
+
+                        <span className="flex items-center gap-0.5">
+                          <BsYoutube className="w-2.5 h-2.5 text-red-600" />
+                          aimhabiganj
+                        </span>
                       </div>
                     </div>
                   </div>

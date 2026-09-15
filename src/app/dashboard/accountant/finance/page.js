@@ -10,10 +10,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-import Overview from "./components/Overview";
-import IncomeEntry from "./components/IncomeEntry";
-import ExpenseEntry from "./components/ExpenseEntry";
-import MonthlyReport from "./components/MonthlyReport";
+import Overview from "../../../components/dashboard/finance/Overview";
+import IncomeEntry from "../../../components/dashboard/finance/IncomeEntry";
+import ExpenseEntry from "../../../components/dashboard/finance/ExpenseEntry";
+import MonthlyReport from "../../../components/dashboard/finance/MonthlyReport";
 import { MdEmail, MdInstallMobile } from "react-icons/md";
 
 const API_BASE_URL =

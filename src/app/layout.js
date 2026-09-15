@@ -3,56 +3,55 @@ import "./globals.css";
 import Providers from "@/components/Providers/providers";
 
 const geistSans = Geist({
-    variable: "--font-geist-sans",
-    subsets: ["latin"],
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
-    variable: "--font-geist-mono",
-    subsets: ["latin"],
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
 });
 
 // আরবি ফন্ট (variable প্রপার্টি যুক্ত করা হয়েছে)
 const reemKufi = Reem_Kufi({
-    variable: "--font-reem-kufi",
-    subsets: ['arabic'],
-    weight: ['400', '500', '600', '700'], 
-    display: "swap",
+  variable: "--font-reem-kufi",
+  subsets: ["arabic"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 // বাংলা ফন্ট
 const hindSiliguri = Hind_Siliguri({
-    variable: "--font-hind-siliguri",
-    subsets: ["bengali"],
-    weight: ["300", "400", "500", "600", "700"],
-    display: "swap",
+  variable: "--font-hind-siliguri",
+  subsets: ["bengali"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata = {
-    title: "As-Salam Ideal Madrasah  (AIM)",
-    description: "Welcome to our website",
+  title: "As-Salam Ideal Madrasah  (AIM)",
+  description: "Welcome to our website",
   icons: {
     icon: [
-      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
     ],
     apple: [
-      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
     ],
   },
-  manifest: '/site.webmanifest',
+  manifest: "/site.webmanifest",
 };
 
 export default function RootLayout({ children }) {
-    return (
-        <html
-            lang="en" // অথবা প্রয়োজন অনুযায়ী "bn" বা "ar" দিতে পারেন
-            className={`${geistSans.variable} ${geistMono.variable} ${reemKufi.variable} ${hindSiliguri.variable} h-full antialiased`}
-        >
-            {/* বডিতে ডিফল্টভাবে বাংলা ফন্ট চালু রাখতে hindSiliguri.className যোগ করতে পারেন */}
-            <body className={`${hindSiliguri.className} min-h-full flex flex-col`}>
-                <Providers>{children}</Providers>
-            </body>
-        </html>
-    );
+  return (
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} ${reemKufi.variable} ${hindSiliguri.variable} h-full antialiased`}
+    >
+      <body className={`${hindSiliguri.className} min-h-full flex flex-col`}>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  );
 }
