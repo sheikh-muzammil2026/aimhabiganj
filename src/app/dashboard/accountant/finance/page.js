@@ -10,11 +10,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-import Overview from "../../../components/dashboard/finance/Overview";
-import IncomeEntry from "../../../components/dashboard/finance/IncomeEntry";
-import ExpenseEntry from "../../../components/dashboard/finance/ExpenseEntry";
-import MonthlyReport from "../../../components/dashboard/finance/MonthlyReport";
 import { MdEmail, MdInstallMobile } from "react-icons/md";
+import Overview from "@/components/dashboard/finance/Overview";
+import IncomeEntry from "@/components/dashboard/finance/IncomeEntry";
+import ExpenseEntry from "@/components/dashboard/finance/ExpenseEntry";
+import MonthlyReport from "@/components/dashboard/finance/MonthlyReport";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_SERVER_URL ||

@@ -50,6 +50,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       lucideIcon: <GraduationCap className="w-5 h-5" />,
       roles: ["admin", "teacher"],
       dropdown: [
+        // পরবর্তিতে এখানে অ্যাড হবেঃ সিলেবাস,ক্লাস রুটিন, পরিক্ষা ও ফলাফল।
         {
           title: "পরীক্ষা ফি",
           href: "/dashboard/shared/academics/exam/exam-fee",
