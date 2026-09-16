@@ -22,7 +22,43 @@ import {
 export default function Sidebar({ isOpen, setIsOpen }) {
   const pathname = usePathname();
   const [openDropdown, setOpenDropdown] = useState(null);
-  const [openSubmenu, setOpenSubmenu] = useState(null);
+  const [openNestedSubmenus, setOpenNestedSubmenus] = useState({});
+
+  const isNodeActive = (node, currentPath) => {
+    if (!node) return false;
+    if (
+      node.href &&
+      (currentPath === node.href ||
+        currentPath.startsWith(node.href.split("?")[0] + "/"))
+    ) {
+      return true;
+    }
+    if (node.href && currentPath.split("?")[0] === node.href.split("?")[0]) {
+      return true;
+    }
+    if (node.submenu && Array.isArray(node.submenu)) {
+      return node.submenu.some((child) => isNodeActive(child, currentPath));
+    }
+    if (node.dropdown && Array.isArray(node.dropdown)) {
+      return node.dropdown.some((child) => isNodeActive(child, currentPath));
+    }
+    return false;
+  };
+
+  const isSubmenuOpen = (title, node) => {
+    if (openNestedSubmenus[title] !== undefined) {
+      return openNestedSubmenus[title];
+    }
+    return isNodeActive(node, pathname);
+  };
+
+  const toggleNestedSubmenu = (title, node) => {
+    const currentlyOpen = isSubmenuOpen(title, node);
+    setOpenNestedSubmenus((prev) => ({
+      ...prev,
+      [title]: !currentlyOpen,
+    }));
+  };
 
   // বটম মেনুর ড্রয়ার স্টেট ট্র্যাকিং
   const [activeMobileDrawer, setActiveMobileDrawer] = useState(null); // 'full' (অন্যান্য) অথবা নির্দিষ্ট item object
@@ -38,64 +74,86 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   const menuConfig = [
     {
       id: "admin-dashboard",
-      title: "ওভারভিউ",
+      title: "ড্যাশবোর্ড",
       icon: "🕌",
       lucideIcon: <LayoutDashboard className="w-5 h-5" />,
       href: `/dashboard/${userRole}`,
-      roles: ["admin"],
+      roles: ["admin", "teacher"],
     },
     {
       id: "academics",
-      title: "পরীক্ষা ও ফলাফল",
+      title: "শিক্ষা কার্যক্রম",
       icon: "📚",
       lucideIcon: <GraduationCap className="w-5 h-5" />,
       roles: ["admin", "teacher"],
       dropdown: [
-        // পরবর্তিতে এখানে অ্যাড হবেঃ সিলেবাস,ক্লাস রুটিন, পরিক্ষা ও ফলাফল।
         {
-          title: "পরীক্ষা ফি",
-          href: "/dashboard/shared/academics/exam/exam-fee",
+          title: "সিলেবাস",
+          href: "/dashboard/shared/academics/syllabus",
         },
         {
-          title: "পরীক্ষা রুটিন",
-          href: "/dashboard/shared/academics/exam/routine",
+          title: "ক্লাস রুটিন",
+          href: "/dashboard/shared/academics/class-routine",
         },
         {
-          title: "উপস্থিতি স্বাক্ষরপত্র",
-          href: "/dashboard/shared/academics/exam/attendance-sheet",
-        },
-        {
-          title: "এডমিট কার্ড",
-          href: "/dashboard/shared/academics/exam/admit-card",
-        },
-        {
-          title: "সীট প্ল্যান",
+          title: "পরীক্ষা ও ফলাফল",
           submenu: [
             {
-              title: "সীট প্ল্যান এন্ট্রি",
-              href: "/dashboard/shared/academics/exam/seat-plan/seat-plan-entry",
+              title: "পরীক্ষা",
+              submenu: [
+                {
+                  title: "পরীক্ষা ফি",
+                  href: "/dashboard/shared/academics/exam-results/exam/exam-fee",
+                },
+                {
+                  title: "পরীক্ষা রুটিন",
+                  href: "/dashboard/shared/academics/exam-results/exam/routine",
+                },
+                {
+                  title: "উপস্থিতি স্বাক্ষরপত্র",
+                  href: "/dashboard/shared/academics/exam-results/exam/attendance-sheet",
+                },
+                {
+                  title: "এডমিট কার্ড",
+                  href: "/dashboard/shared/academics/exam-results/exam/admit-card",
+                },
+                {
+                  title: "সীট প্ল্যান",
+                  submenu: [
+                    {
+                      title: "সীট প্ল্যান এন্ট্রি",
+                      href: "/dashboard/shared/academics/exam-results/exam/seat-plan/seat-plan-entry",
+                    },
+                    {
+                      title: "হল ও ক্লাস ভিত্তিক সামারি",
+                      href: "/dashboard/shared/academics/exam-results/exam/seat-plan/Hall&Class-wise-summary",
+                    },
+                    {
+                      title: "হল ভিত্তিক ম্যাপ",
+                      href: "/dashboard/shared/academics/exam-results/exam/seat-plan/hall-wise-map",
+                    },
+                  ],
+                },
+              ],
             },
             {
-              title: "হল ও ক্লাস ভিত্তিক সামারি",
-              href: "/dashboard/shared/academics/exam/seat-plan/Hall&Class-wise-summary",
-            },
-            {
-              title: "হল ভিত্তিক ম্যাপ",
-              href: "/dashboard/shared/academics/exam/seat-plan/hall-wise-map",
+              title: "ফলাফল",
+              submenu: [
+                {
+                  title: "ইনপুট রেজাল্ট",
+                  href: "/dashboard/shared/academics/exam-results/results/input",
+                },
+                {
+                  title: "ক্লাসভিত্তিক ফলাফল",
+                  href: "/dashboard/shared/academics/exam-results/results/class-wise-result",
+                },
+                {
+                  title: "ব্যক্তিগত ফলাফল",
+                  href: "/dashboard/shared/academics/exam-results/results/individual-result",
+                },
+              ],
             },
           ],
-        },
-        {
-          title: "রিজাল্ট ইনপুট",
-          href: "/dashboard/shared/academics/results/input",
-        },
-        {
-          title: "ক্লাসভিত্তিক ফলাফল",
-          href: "/dashboard/shared/academics/results/class-wise-result",
-        },
-        {
-          title: "ব্যক্তিগত ফলাফল",
-          href: "/dashboard/shared/academics/results/individual-result",
         },
       ],
     },
@@ -271,30 +329,189 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   useEffect(() => {
     if (!isPending) {
       allowedMenuItems.forEach((item) => {
-        if (item.dropdown) {
-          const hasActiveChild = item.dropdown.some((sub) => {
-            if (sub.href && pathname.startsWith(sub.href.split("?")[0])) {
-              return true;
-            }
-            if (sub.submenu) {
-              const hasActiveSubChild = sub.submenu.some(
-                (child) =>
-                  child.href && pathname.startsWith(child.href.split("?")[0]),
-              );
-              if (hasActiveSubChild) {
-                setOpenSubmenu(sub.title);
-                return true;
-              }
-            }
-            return false;
-          });
-          if (hasActiveChild) {
-            setOpenDropdown(item.id);
-          }
+        if (item.dropdown && isNodeActive(item, pathname)) {
+          setOpenDropdown(item.id);
         }
       });
     }
   }, [pathname, isPending, userRole]);
+
+  // ডেক্সটপ নেস্টেড সাবমেনু রেন্ডারার
+  const renderDesktopSubmenu = (node, index, level = 0) => {
+    if (node.submenu) {
+      const isOpen = isSubmenuOpen(node.title, node);
+      const isActive = isNodeActive(node, pathname);
+
+      return (
+        <div key={node.title || index} className="space-y-1">
+          <button
+            type="button"
+            onClick={() => toggleNestedSubmenu(node.title, node)}
+            className={`w-full flex items-center justify-between py-2 px-3 text-[11px] sm:text-xs rounded-lg transition-all duration-200 font-semibold ${
+              isOpen || isActive
+                ? "text-amber-350 bg-emerald-900/40 text-amber-300"
+                : "text-emerald-200/80 hover:text-white hover:bg-emerald-800/20"
+            }`}
+            style={{ paddingLeft: `${12 + level * 8}px` }}
+          >
+            <span className="truncate">📂 {node.title}</span>
+            <span
+              className={`text-[8px] transition-transform duration-200 ml-1 ${
+                isOpen ? "rotate-180" : ""
+              }`}
+            >
+              ▼
+            </span>
+          </button>
+
+          {isOpen && (
+            <div className="pl-3 space-y-1 ml-2 overflow-hidden transition-all duration-200 border-l border-emerald-700/50">
+              {node.submenu.map((child, childIdx) =>
+                renderDesktopSubmenu(child, childIdx, level + 1),
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const isChildActive = pathname === node.href;
+    return (
+      <Link
+        key={node.href || index}
+        href={node.href || "#"}
+        className={`block py-1.5 px-3 text-[10px] sm:text-[11px] rounded-md transition-all duration-200 font-medium ${
+          isChildActive
+            ? "text-amber-400 font-bold bg-emerald-900/60 border-l-2 border-amber-400 pl-2"
+            : "text-emerald-300/70 hover:text-white hover:bg-emerald-800/10 hover:pl-4"
+        }`}
+        style={{ paddingLeft: `${12 + level * 6}px` }}
+      >
+        {level === 0 ? "✨" : "✦"} {node.title}
+      </Link>
+    );
+  };
+
+  // মোবাইল অ্যাক্টিভ ড্রয়ার নেস্টেড সাবমেনু রেন্ডারার
+  const renderMobileActiveSubmenu = (node, index, level = 0) => {
+    if (node.submenu) {
+      const isOpen = isSubmenuOpen(node.title, node);
+      const isAnyChildActive = isNodeActive(node, pathname);
+
+      return (
+        <div key={node.title || index} className="space-y-1">
+          <button
+            type="button"
+            onClick={() => toggleNestedSubmenu(node.title, node)}
+            className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs font-bold transition-all ${
+              isOpen || isAnyChildActive
+                ? "bg-emerald-900 text-amber-300 border-amber-400"
+                : "bg-emerald-950/50 text-emerald-100 border-emerald-800/40"
+            }`}
+            style={{ paddingLeft: `${12 + level * 8}px` }}
+          >
+            <div className="flex items-center gap-3 truncate">
+              <Sparkles className="w-3.5 h-3.5 text-amber-300 flex-shrink-0" />
+              <span className="truncate">📂 {node.title}</span>
+            </div>
+            <span
+              className={`text-[8px] transition-transform duration-200 ml-1 ${
+                isOpen ? "rotate-180" : ""
+              }`}
+            >
+              ▼
+            </span>
+          </button>
+
+          {isOpen && (
+            <div className="pl-4 space-y-2 py-1 border-l border-emerald-700/40 ml-2">
+              {node.submenu.map((subChild, childIdx) =>
+                renderMobileActiveSubmenu(subChild, childIdx, level + 1),
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const isChildActive = pathname === node.href;
+    return (
+      <Link
+        key={node.href || index}
+        href={node.href || "#"}
+        onClick={() => setActiveMobileDrawer(null)}
+        className={`flex items-center gap-3 p-2.5 rounded-lg border text-[11px] font-semibold transition-all ${
+          isChildActive
+            ? "bg-amber-400 text-[#043e30] border-amber-400 font-bold"
+            : "bg-emerald-950/30 text-emerald-200 border-emerald-800/30 hover:bg-emerald-900/40"
+        }`}
+        style={{ paddingLeft: `${12 + level * 8}px` }}
+      >
+        <span>✦ {node.title}</span>
+      </Link>
+    );
+  };
+
+  // মোবাইল ফুল ড্রয়ার নেস্টেড সাবমেনু রেন্ডারার
+  const renderMobileFullSubmenu = (node, index, level = 0) => {
+    if (node.submenu) {
+      const isOpen = isSubmenuOpen(node.title, node);
+      const isAnyChildActive = isNodeActive(node, pathname);
+
+      return (
+        <div
+          key={node.title || index}
+          className="space-y-1 pl-4 pr-2 py-1 bg-emerald-950/40"
+          style={{ paddingLeft: `${16 + level * 8}px` }}
+        >
+          <button
+            type="button"
+            onClick={() => toggleNestedSubmenu(node.title, node)}
+            className={`w-full flex items-center justify-between p-2 text-xs font-bold transition-colors ${
+              isOpen || isAnyChildActive ? "text-amber-300" : "text-emerald-200"
+            }`}
+          >
+            <div className="flex items-center gap-2 truncate">
+              <span className="truncate">📂 {node.title}</span>
+            </div>
+            <span
+              className={`text-[8px] transition-transform duration-200 ml-1 ${
+                isOpen ? "rotate-180" : ""
+              }`}
+            >
+              ▼
+            </span>
+          </button>
+
+          {isOpen && (
+            <div className="pl-4 space-y-1 pb-1 border-l border-emerald-800/40 ml-1">
+              {node.submenu.map((subChild, childIdx) =>
+                renderMobileFullSubmenu(subChild, childIdx, level + 1),
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const isChildActive = pathname === node.href;
+    return (
+      <Link
+        key={node.href || index}
+        href={node.href || "#"}
+        onClick={() => setActiveMobileDrawer(null)}
+        className={`flex items-center gap-2 p-2 text-[11px] font-medium transition-colors ${
+          isChildActive
+            ? "text-amber-400 font-bold bg-emerald-900/30"
+            : "text-emerald-300/80 hover:text-white"
+        }`}
+        style={{ paddingLeft: `${16 + level * 8}px` }}
+      >
+        <Sparkles className="w-2.5 h-2.5 text-amber-400 flex-shrink-0" />
+        <span>{node.title}</span>
+      </Link>
+    );
+  };
 
   // বটম মেনু বাটনে ক্লিক হ্যান্ডলার
   const handleBottomNavItemClick = (item) => {
@@ -417,78 +634,15 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                   {/* ড্রপডাউন মেনু */}
                   {hasDropdown && (
                     <div
-                      className={`pl-4 space-y-1 border-l-2 border-emerald-800/50 ml-5 overflow-hidden transition-all duration-300 ${isDropdownOpen ? "max-h-[800px] opacity-100 py-1" : "max-h-0 opacity-0"}`}
+                      className={`pl-4 space-y-1 border-l-2 border-emerald-800/50 ml-5 transition-all duration-300 ${
+                        isDropdownOpen
+                          ? "max-h-[2000px] opacity-100 py-1"
+                          : "max-h-0 opacity-0 overflow-hidden"
+                      }`}
                     >
-                      {item.dropdown.map((sub, subIdx) => {
-                        if (sub.submenu) {
-                          const isSubmenuOpen = openSubmenu === sub.title;
-                          const isAnySubmenuChildActive = sub.submenu.some(
-                            (child) => pathname === child.href,
-                          );
-
-                          return (
-                            <div key={subIdx} className="space-y-1">
-                              <button
-                                onClick={() =>
-                                  setOpenSubmenu(
-                                    isSubmenuOpen ? null : sub.title,
-                                  )
-                                }
-                                className={`w-full flex items-center justify-between py-2 px-3 text-[11px] sm:text-xs rounded-lg transition-all duration-200 font-semibold ${
-                                  isSubmenuOpen || isAnySubmenuChildActive
-                                    ? "text-amber-350 bg-emerald-900/40 text-amber-300"
-                                    : "text-emerald-200/80 hover:text-white hover:bg-emerald-800/20"
-                                }`}
-                              >
-                                <span>📂 {sub.title}</span>
-                                <span
-                                  className={`text-[8px] transition-transform duration-200 ${isSubmenuOpen ? "rotate-180" : ""}`}
-                                >
-                                  ▼
-                                </span>
-                              </button>
-
-                              {/* সাবমেনু আইটেমসমূহ */}
-                              <div
-                                className={`pl-3 space-y-1 ml-2 overflow-hidden transition-all duration-200 border-l border-emerald-700/50 ${isSubmenuOpen ? "max-h-[300px] opacity-100" : "max-h-0 opacity-0"}`}
-                              >
-                                {sub.submenu.map((subChild, childIdx) => {
-                                  const isChildActive =
-                                    pathname === subChild.href;
-                                  return (
-                                    <Link
-                                      key={childIdx}
-                                      href={subChild.href}
-                                      className={`block py-1.5 px-3 text-[10px] sm:text-[11px] rounded-md transition-all duration-200 font-medium ${
-                                        isChildActive
-                                          ? "text-amber-400 font-bold bg-emerald-900/60 border-l-2 border-amber-400 pl-2"
-                                          : "text-emerald-300/70 hover:text-white hover:bg-emerald-800/10 hover:pl-4"
-                                      }`}
-                                    >
-                                      ✦ {subChild.title}
-                                    </Link>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          );
-                        }
-
-                        const isSubActive = pathname === sub.href;
-                        return (
-                          <Link
-                            key={subIdx}
-                            href={sub.href || "#"}
-                            className={`block py-2 px-3 text-[11px] sm:text-xs rounded-lg transition-all duration-200 font-medium ${
-                              isSubActive
-                                ? "text-amber-400 font-bold bg-emerald-900/60 border-l-2 border-amber-400 pl-2"
-                                : "text-emerald-200/80 hover:text-white hover:bg-emerald-800/30 hover:pl-4"
-                            }`}
-                          >
-                            ✨ {sub.title}
-                          </Link>
-                        );
-                      })}
+                      {item.dropdown.map((sub, subIdx) =>
+                        renderDesktopSubmenu(sub, subIdx, 0),
+                      )}
                     </div>
                   )}
                 </div>
@@ -670,82 +824,9 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                   </div>
 
                   <div className="grid grid-cols-1 gap-2 pb-4">
-                    {activeMobileDrawer.dropdown.map((subItem, idx) => {
-                      if (subItem.submenu) {
-                        const isSubmenuOpen = openSubmenu === subItem.title;
-                        const isAnyChildActive = subItem.submenu.some(
-                          (child) => pathname === child.href,
-                        );
-                        return (
-                          <div key={idx} className="space-y-1">
-                            <button
-                              onClick={() =>
-                                setOpenSubmenu(
-                                  isSubmenuOpen ? null : subItem.title,
-                                )
-                              }
-                              className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs font-bold transition-all ${
-                                isSubmenuOpen || isAnyChildActive
-                                  ? "bg-emerald-900 text-amber-300 border-amber-400"
-                                  : "bg-emerald-950/50 text-emerald-100 border-emerald-800/40"
-                              }`}
-                            >
-                              <div className="flex items-center gap-3">
-                                <Sparkles className="w-3.5 h-3.5 text-amber-300 flex-shrink-0" />
-                                <span>📂 {subItem.title}</span>
-                              </div>
-                              <span
-                                className={`text-[8px] transition-transform duration-200 ${isSubmenuOpen ? "rotate-180" : ""}`}
-                              >
-                                ▼
-                              </span>
-                            </button>
-
-                            {isSubmenuOpen && (
-                              <div className="pl-4 space-y-2 py-1">
-                                {subItem.submenu.map((subChild, childIdx) => {
-                                  const isChildActive =
-                                    pathname === subChild.href;
-                                  return (
-                                    <Link
-                                      key={childIdx}
-                                      href={subChild.href}
-                                      onClick={() =>
-                                        setActiveMobileDrawer(null)
-                                      }
-                                      className={`flex items-center gap-3 p-2.5 rounded-lg border text-[11px] font-semibold transition-all ${
-                                        isChildActive
-                                          ? "bg-amber-400 text-[#043e30] border-amber-400"
-                                          : "bg-emerald-950/30 text-emerald-200 border-emerald-800/30"
-                                      }`}
-                                    >
-                                      <span>✦ {subChild.title}</span>
-                                    </Link>
-                                  );
-                                })}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      }
-
-                      const isSubActive = pathname === subItem.href;
-                      return (
-                        <Link
-                          key={idx}
-                          href={subItem.href}
-                          onClick={() => setActiveMobileDrawer(null)}
-                          className={`flex items-center gap-3 p-3 rounded-xl border text-xs font-semibold transition-all ${
-                            isSubActive
-                              ? "bg-amber-400 text-[#043e30] border-amber-400 font-bold shadow-md"
-                              : "bg-emerald-950/50 text-emerald-100 border-emerald-800/40 hover:bg-emerald-900/60"
-                          }`}
-                        >
-                          <Sparkles className="w-3.5 h-3.5 text-amber-300 flex-shrink-0" />
-                          <span>{subItem.title}</span>
-                        </Link>
-                      );
-                    })}
+                    {activeMobileDrawer.dropdown.map((subItem, idx) =>
+                      renderMobileActiveSubmenu(subItem, idx, 0),
+                    )}
                   </div>
                 </div>
               )}
@@ -811,96 +892,9 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
                             {isDropdownOpen && (
                               <div className="bg-emerald-950/90 border-t border-emerald-800/40 divide-y divide-emerald-900/40">
-                                {item.dropdown.map((subItem, subIdx) => {
-                                  if (subItem.submenu) {
-                                    const isSubmenuOpen =
-                                      openSubmenu === subItem.title;
-                                    const isAnyChildActive =
-                                      subItem.submenu.some(
-                                        (child) => pathname === child.href,
-                                      );
-
-                                    return (
-                                      <div
-                                        key={subIdx}
-                                        className="space-y-1 pl-4 pr-2 py-1 bg-emerald-950/40"
-                                      >
-                                        <button
-                                          onClick={() =>
-                                            setOpenSubmenu(
-                                              isSubmenuOpen
-                                                ? null
-                                                : subItem.title,
-                                            )
-                                          }
-                                          className={`w-full flex items-center justify-between p-2 text-xs font-bold transition-colors ${
-                                            isSubmenuOpen || isAnyChildActive
-                                              ? "text-amber-300"
-                                              : "text-emerald-200"
-                                          }`}
-                                        >
-                                          <div className="flex items-center gap-2">
-                                            <span>📂 {subItem.title}</span>
-                                          </div>
-                                          <span
-                                            className={`text-[8px] transition-transform duration-200 ${isSubmenuOpen ? "rotate-180" : ""}`}
-                                          >
-                                            ▼
-                                          </span>
-                                        </button>
-
-                                        {isSubmenuOpen && (
-                                          <div className="pl-4 space-y-1 pb-1">
-                                            {subItem.submenu.map(
-                                              (subChild, childIdx) => {
-                                                const isChildActive =
-                                                  pathname === subChild.href;
-                                                return (
-                                                  <Link
-                                                    key={childIdx}
-                                                    href={subChild.href}
-                                                    onClick={() =>
-                                                      setActiveMobileDrawer(
-                                                        null,
-                                                      )
-                                                    }
-                                                    className={`flex items-center gap-2 p-2 text-[11px] font-medium transition-colors ${
-                                                      isChildActive
-                                                        ? "text-amber-400 font-bold bg-emerald-900/30"
-                                                        : "text-emerald-300/80 hover:text-white"
-                                                    }`}
-                                                  >
-                                                    <Sparkles className="w-2.5 h-2.5 text-amber-400" />
-                                                    {subChild.title}
-                                                  </Link>
-                                                );
-                                              },
-                                            )}
-                                          </div>
-                                        )}
-                                      </div>
-                                    );
-                                  }
-
-                                  const isSubActive = pathname === subItem.href;
-                                  return (
-                                    <Link
-                                      key={subIdx}
-                                      href={subItem.href || "#"}
-                                      onClick={() =>
-                                        setActiveMobileDrawer(null)
-                                      }
-                                      className={`flex items-center gap-2 p-3 pl-8 text-xs font-medium transition-colors ${
-                                        isSubActive
-                                          ? "text-amber-400 font-bold bg-emerald-900/50"
-                                          : "text-emerald-200/80 hover:text-white"
-                                      }`}
-                                    >
-                                      <Sparkles className="w-3 h-3 text-amber-400" />
-                                      {subItem.title}
-                                    </Link>
-                                  );
-                                })}
+                                {item.dropdown.map((subItem, subIdx) =>
+                                  renderMobileFullSubmenu(subItem, subIdx, 0),
+                                )}
                               </div>
                             )}
                           </div>

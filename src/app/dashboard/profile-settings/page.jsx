@@ -88,7 +88,7 @@ export default function ProfileSettingsPage() {
         {
           method: "POST",
           body: formData,
-        }
+        },
       );
 
       const data = await response.json();
@@ -377,8 +377,7 @@ export default function ProfileSettingsPage() {
             </div>
 
             <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-4">
-              ছবি আপলোড সরাসরি ImgBB ক্লাউড হোস্টিং এ সংরক্ষিত হয়। সর্বোচ্চ ৩MB
-              পর্যন্ত ছবি অনুমোদিত।
+              সর্বোচ্চ ৩MB পর্যন্ত ছবি অনুমোদিত।
             </p>
           </div>
         </div>
@@ -499,7 +498,10 @@ export default function ProfileSettingsPage() {
               </div>
             )}
 
-            <form onSubmit={handleRequestEmailUpdate} className="mt-5 space-y-4">
+            <form
+              onSubmit={handleRequestEmailUpdate}
+              className="mt-5 space-y-4"
+            >
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                   নতুন ইমেইল ঠিকানা <span className="text-rose-500">*</span>
@@ -513,8 +515,8 @@ export default function ProfileSettingsPage() {
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-emerald-600 transition-all"
                 />
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5">
-                  নিরাপত্তার স্বার্থে নতুন ইমেইলে একটি নিশ্চিতকরণ লিংক পাঠানো হবে।
-                  লিংকটিতে ক্লিক করলেই কেবল নতুন ইমেইল কার্যকর হবে।
+                  নিরাপত্তার স্বার্থে নতুন ইমেইলে একটি নিশ্চিতকরণ লিংক পাঠানো
+                  হবে। লিংকটিতে ক্লিক করলেই কেবল নতুন ইমেইল কার্যকর হবে।
                 </p>
               </div>
 
