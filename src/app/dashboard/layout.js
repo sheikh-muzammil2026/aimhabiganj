@@ -10,6 +10,7 @@ const DashboardLayout = ({ children }) => {
     // থিম ইনিশিয়ালাইজ ও ডার্ক মোড ক্লাস হ্যান্ডেল করা
     useEffect(() => {
         const savedTheme = localStorage.getItem("theme") || "light";
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setTheme(savedTheme);
         if (savedTheme === "dark") {
             document.documentElement.classList.add("dark");
@@ -97,6 +98,15 @@ const DashboardLayout = ({ children }) => {
                             <span className="text-lg">🔔</span>
                             <span className="absolute top-1 right-1 w-2 h-2 bg-amber-500 rounded-full ring-2 ring-white"></span>
                         </button>
+
+                        {/* প্রোফাইল সেটিংস লিংক */}
+                        <Link
+                            href="/dashboard/profile-settings"
+                            className="p-2 text-slate-500 dark:text-slate-400 hover:text-emerald-800 dark:hover:text-emerald-400 transition-colors focus:outline-hidden"
+                            title="প্রোফাইল সেটিংস"
+                        >
+                            <span className="text-lg">⚙️</span>
+                        </Link>
                     </div>
                 </header>
 

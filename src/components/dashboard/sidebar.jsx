@@ -16,6 +16,7 @@ import {
   CalendarCheck,
   UserCheck,
   Shield,
+  Settings,
 } from "lucide-react";
 
 export default function Sidebar({ isOpen, setIsOpen }) {
@@ -248,6 +249,14 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         { title: "ক্লাস ও পরীক্ষার রুটিন", href: "/dashboard/parent/routines" },
         { title: "শিক্ষকদের নোটিশ", href: "/dashboard/parent/notices" },
       ],
+    },
+    {
+      id: "profile-settings",
+      title: "প্রোফাইল সেটিংস",
+      icon: "⚙️",
+      lucideIcon: <Settings className="w-5 h-5" />,
+      href: "/dashboard/profile-settings",
+      roles: ["admin", "teacher", "accountant", "parent", "student", "user"],
     },
   ];
 
@@ -491,8 +500,12 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         {/* ইউজার প্রোফাইল কার্ড */}
         {!isPending && session && (
           <div className="p-3 border-t border-emerald-800/40 bg-emerald-950/40">
-            <div className="flex items-center gap-3 px-2 py-2 rounded-xl bg-emerald-900/30 border border-emerald-800/30">
-              <div className="w-8 h-8 rounded-full bg-amber-400 text-[#043e30] flex items-center justify-center font-black text-sm">
+            <Link
+              href="/dashboard/profile-settings"
+              className="flex items-center gap-3 px-2 py-2 rounded-xl bg-emerald-900/30 border border-emerald-800/30 hover:bg-emerald-900/60 hover:border-amber-400/30 transition-all group"
+              title="প্রোফাইল সেটিংস"
+            >
+              <div className="w-8 h-8 rounded-full bg-amber-400 text-[#043e30] flex items-center justify-center font-black text-sm group-hover:scale-105 transition-transform">
                 {user?.image ? (
                   <img
                     src={user.image}
@@ -504,14 +517,15 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="text-xs font-bold text-slate-100 truncate">
+                <h4 className="text-xs font-bold text-slate-100 truncate group-hover:text-amber-300 transition-colors">
                   {userName}
                 </h4>
                 <span className="inline-block text-[9px] font-extrabold bg-amber-400/10 text-amber-400 px-2 py-0.5 rounded-md uppercase tracking-widest mt-0.5">
                   {displayRoleName(userRole)}
                 </span>
               </div>
-            </div>
+              <Settings className="w-3.5 h-3.5 text-emerald-400 opacity-60 group-hover:opacity-100 group-hover:rotate-90 transition-all" />
+            </Link>
           </div>
         )}
       </aside>
