@@ -1,11 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth-client";
 import Pagination from "@/components/dashboard/Pagination";
+import { Globe, Mail, Phone } from "lucide-react";
+import { BsWhatsapp, BsYoutube } from "react-icons/bs";
+import { FaFacebook } from "react-icons/fa";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_API;
 
@@ -14,11 +17,11 @@ function ClassWiseResultContent() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  // URL search params থেকে page এবং limit সিঙ্ক (ডিফল্ট limit: 20)
   const pageParam = parseInt(searchParams.get("page"), 10);
   const limitParam = parseInt(searchParams.get("limit"), 10);
 
-  const currentPage = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
+  const currentPage =
+    Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
   const currentLimit = [10, 20, 50, 100].includes(limitParam) ? limitParam : 20;
 
   const { data: session } = authClient.useSession();
@@ -38,7 +41,6 @@ function ClassWiseResultContent() {
   const [loading, setLoading] = useState(false);
   const [toggling, setToggling] = useState(false);
 
-  // URL query params আপডেট করার হেলপার ফাংশন
   const updatePaginationParams = useCallback(
     (newPage, newLimit) => {
       const params = new URLSearchParams(searchParams.toString());
@@ -46,24 +48,18 @@ function ClassWiseResultContent() {
       params.set("limit", String(newLimit || currentLimit));
       router.push(`${pathname}?${params.toString()}`, { scroll: false });
     },
-    [searchParams, currentLimit, pathname, router]
+    [searchParams, currentLimit, pathname, router],
   );
 
-  // ফিল্টার পরিবর্তন হলে পেজ নম্বর ১-এ রিসেট করার হেলপার
   const resetPageToFirst = useCallback(() => {
     if (currentPage !== 1) {
       updatePaginationParams(1, currentLimit);
     }
   }, [currentPage, currentLimit, updatePaginationParams]);
 
-  // সিগনেচার ইমেজ সোর্স (ডাইনামিক ভ্যারিয়েবল ও ফলব্যাক)
-  const [principalSignatureSrc, setPrincipalSignatureSrc] = useState(
-    "/principle's_signature.jpg",
-  );
-  const [controllerSignatureSrc, setControllerSignatureSrc] =
-    useState("/anarul.png");
+  const [principalSignatureSrc] = useState("/principle's_signature.jpg");
+  const [controllerSignatureSrc] = useState("/anarul.png");
 
-  // ক্লাসের ফলাফল ডাটা ফেচ করা
   const fetchClassResults = useCallback(async () => {
     if (!selectedClass) return;
 
@@ -100,7 +96,11 @@ function ClassWiseResultContent() {
         setResults(data.data);
         setIsPublished(Boolean(data.isPublished));
         setTotalPages(data.totalPages || 1);
-        setTotalResults(data.total !== undefined ? data.total : data.totalCount || data.data.length);
+        setTotalResults(
+          data.total !== undefined
+            ? data.total
+            : data.totalCount || data.data.length,
+        );
       } else {
         setResults([]);
         setIsPublished(Boolean(data.isPublished));
@@ -122,7 +122,6 @@ function ClassWiseResultContent() {
     return () => clearTimeout(timer);
   }, [fetchClassResults]);
 
-  // অ্যাডমিন দ্বারা ফলাফল প্রকাশ / অপ্রকাশিত টগল হ্যান্ডলার
   const handleTogglePublish = async () => {
     if (!isAdmin) {
       toast.error("শুধুমাত্র অ্যাডমিন ফলাফল প্রকাশ বা অপ্রকাশিত করতে পারেন।");
@@ -168,22 +167,6 @@ function ClassWiseResultContent() {
     }
   };
 
-  // বিষয়ের প্রাপ্ত মার্কস ও অনুপস্থিতি তথ্য
-  const getSubjectData = (sub) => {
-    const termData = sub[examType] || {};
-    const isAbsent =
-      termData.isAbsent ||
-      termData.exam === "A" ||
-      termData.exam === "Abs" ||
-      termData.ct === "A" ||
-      termData.ct === "Abs";
-    const ct = parseFloat(termData.ct) || 0;
-    const exam = parseFloat(termData.exam) || 0;
-    const total = ct + exam;
-    return { isAbsent, total };
-  };
-
-  // বিষয়ভিত্তিক গ্রেড পয়েন্ট (আন্তর্জাতিক গ্রেডিং সিস্টেম)
   const getSubjectPoint = (mark) => {
     const num = typeof mark === "number" ? mark : parseFloat(mark) || 0;
     if (num >= 80) return 5.0;
@@ -195,7 +178,6 @@ function ClassWiseResultContent() {
     return 0.0;
   };
 
-  // সামগ্রিক জিপিএ থেকে আন্তর্জাতিক গ্রেড বাউন্ডারি
   const getOverallGradeFromGPA = (gpaVal) => {
     const num = parseFloat(gpaVal) || 0;
     if (num >= 5.0) return "A+";
@@ -207,88 +189,153 @@ function ClassWiseResultContent() {
     return "F";
   };
 
-  // শিক্ষার্থী সব বিষয়ে অনুপস্থিত কি না যাচাই
-  const checkIfAbsentInAll = (subjects) => {
-    if (!Array.isArray(subjects) || subjects.length === 0) return true;
-    return subjects.every((sub) => getSubjectData(sub).isAbsent);
-  };
+  const getStudentCalculations = useCallback(
+    (student) => {
+      const subjects = student.allSubjects || [];
+      const totalSubs = subjects.length;
 
-  // শিক্ষার্থী কোনো বিষয়ে ফেল করেছে কি না (৩৩-এর নিচে পেলে অথবা অনুপস্থিত থাকলে ফেল)
-  const checkIfFailed = (subjects) => {
-    if (!Array.isArray(subjects) || subjects.length === 0) return false;
-    return subjects.some((sub) => {
-      const { isAbsent, total } = getSubjectData(sub);
-      return isAbsent || total < 33;
+      if (totalSubs === 0) {
+        return {
+          totalMarks: 0,
+          average: "0.00",
+          totalGradePoints: "0.00",
+          gpa: "0.00",
+          grade: "F",
+          hasFailed: true,
+          isAbsentAll: true,
+        };
+      }
+
+      let totalMarks = 0;
+      let totalPoints = 0;
+      let absentSubsCount = 0;
+      let hasFailedSub = false;
+
+      subjects.forEach((sub) => {
+        const termData = sub[examType] || {};
+        const isAbsent =
+          Boolean(termData.isAbsent) ||
+          termData.exam === "A" ||
+          termData.exam === "a" ||
+          termData.exam === "ABS" ||
+          termData.ct === "A" ||
+          termData.ct === "a" ||
+          termData.ct === "ABS";
+
+        const ct = parseFloat(termData.ct) || 0;
+        const exam = parseFloat(termData.exam) || 0;
+        const total = isAbsent ? 0 : ct + exam;
+
+        if (isAbsent) {
+          absentSubsCount++;
+          hasFailedSub = true;
+        } else if (total < 33) {
+          hasFailedSub = true;
+          totalMarks += total;
+        } else {
+          totalMarks += total;
+          totalPoints += getSubjectPoint(total);
+        }
+      });
+
+      const isAbsentAll = absentSubsCount === totalSubs;
+      const average =
+        totalSubs > 0 ? (totalMarks / totalSubs).toFixed(2) : "0.00";
+      const totalGradePoints = totalPoints.toFixed(2);
+
+      let gpa = "0.00";
+      let grade = "F";
+
+      if (isAbsentAll) {
+        gpa = "0.00";
+        grade = "ABS";
+      } else if (hasFailedSub) {
+        gpa = "0.00";
+        grade = "F";
+      } else {
+        const calculatedGPA = Math.min(5.0, totalPoints / totalSubs);
+        gpa = calculatedGPA.toFixed(2);
+        grade = getOverallGradeFromGPA(calculatedGPA);
+      }
+
+      return {
+        totalMarks,
+        average,
+        totalGradePoints,
+        gpa,
+        grade,
+        hasFailed: hasFailedSub,
+        isAbsentAll,
+      };
+    },
+    [examType],
+  );
+
+  const studentCalculationsMap = useMemo(() => {
+    const map = new Map();
+    results.forEach((s) => {
+      map.set(s.studentId, getStudentCalculations(s));
     });
-  };
+    return map;
+  }, [results, getStudentCalculations]);
 
-  // মোট নম্বর গণনার হেল্পার ফাংশন
-  const calculateTotalMark = (subjects) => {
-    if (!Array.isArray(subjects)) return 0;
-    return subjects.reduce((sum, item) => {
-      const { isAbsent, total } = getSubjectData(item);
-      if (isAbsent) return sum;
-      return sum + total;
-    }, 0);
-  };
+  const meritRankMap = useMemo(() => {
+    const rankMap = new Map();
+    const passedList = results
+      .filter((s) => {
+        const calc = studentCalculationsMap.get(s.studentId);
+        return calc && !calc.hasFailed && !calc.isAbsentAll;
+      })
+      .sort((a, b) => {
+        const calcA = studentCalculationsMap.get(a.studentId);
+        const calcB = studentCalculationsMap.get(b.studentId);
 
-  // ডুপ্লিকেট/সমান মার্কস চিহ্নিত করার জন্য মার্ক ফ্রিকোয়েন্সি গণনা
-  const marksCount = {};
-  results.forEach((student) => {
-    const total = calculateTotalMark(student.allSubjects);
-    marksCount[total] = (marksCount[total] || 0) + 1;
-  });
+        const gpaDiff = parseFloat(calcB.gpa) - parseFloat(calcA.gpa);
+        if (Math.abs(gpaDiff) > 0.001) return gpaDiff;
 
-  // শ্রেণিভিত্তিক সামগ্রিক ফলাফল পরিসংখ্যান গণনা
+        const markDiff = calcB.totalMarks - calcA.totalMarks;
+        if (markDiff !== 0) return markDiff;
+
+        const rollA = parseInt(a.roll) || 999999;
+        const rollB = parseInt(b.roll) || 999999;
+        return rollA - rollB;
+      });
+
+    passedList.forEach((student, idx) => {
+      if (idx > 0) {
+        const prevStudent = passedList[idx - 1];
+        const prevCalc = studentCalculationsMap.get(prevStudent.studentId);
+        const currCalc = studentCalculationsMap.get(student.studentId);
+        if (
+          parseFloat(currCalc.gpa) === parseFloat(prevCalc.gpa) &&
+          currCalc.totalMarks === prevCalc.totalMarks
+        ) {
+          rankMap.set(student.studentId, rankMap.get(prevStudent.studentId));
+        } else {
+          rankMap.set(student.studentId, idx + 1);
+        }
+      } else {
+        rankMap.set(student.studentId, 1);
+      }
+    });
+
+    return rankMap;
+  }, [results, studentCalculationsMap]);
+
   const totalStudents = results.length;
   let absentCount = 0;
   let failedCount = 0;
   let passedCount = 0;
-  const gradeCounts = {
-    "A+": 0,
-    A: 0,
-    "A-": 0,
-    B: 0,
-    C: 0,
-    D: 0,
-    F: 0,
-  };
 
   results.forEach((student) => {
-    const subjects = student.allSubjects || [];
-    const totalSubs = subjects.length;
-    if (totalSubs === 0) return;
-
-    let absentSubCount = 0;
-    let hasFailedSub = false;
-    let totalPoints = 0;
-
-    subjects.forEach((sub) => {
-      const { isAbsent, total } = getSubjectData(sub);
-      if (isAbsent) {
-        absentSubCount++;
-        hasFailedSub = true;
-      } else if (total < 33) {
-        hasFailedSub = true;
-      } else {
-        totalPoints += getSubjectPoint(total);
-      }
-    });
-
-    if (absentSubCount === totalSubs) {
+    const calc = studentCalculationsMap.get(student.studentId);
+    if (!calc) return;
+    if (calc.isAbsentAll) {
       absentCount++;
-    } else if (hasFailedSub) {
+    } else if (calc.hasFailed) {
       failedCount++;
-      gradeCounts["F"]++;
     } else {
       passedCount++;
-      const gpa = (totalPoints / totalSubs).toFixed(2);
-      const grade = getOverallGradeFromGPA(gpa);
-      if (gradeCounts[grade] !== undefined) {
-        gradeCounts[grade]++;
-      } else {
-        gradeCounts["F"]++;
-      }
     }
   });
 
@@ -298,38 +345,36 @@ function ClassWiseResultContent() {
       ? ((passedCount / presentStudents) * 100).toFixed(2)
       : "0.00";
 
-  // সকল ডাইনামিক সাবজেক্টের ইউনিক লিস্ট
-  const allSubjectsList = Array.from(
-    new Set(
-      results.flatMap(
-        (student) => student.allSubjects?.map((s) => s.subject) || [],
+  const allSubjectsList = useMemo(() => {
+    return Array.from(
+      new Set(
+        results.flatMap(
+          (student) => student.allSubjects?.map((s) => s.subject) || [],
+        ),
       ),
-    ),
-  );
+    );
+  }, [results]);
 
-  // প্রিন্ট হ্যান্ডলার
   const handlePrint = () => {
     window.print();
   };
 
   return (
     <>
-      {/* প্রিন্ট ও ওয়াটারমার্কের জন্য উন্নত CSS স্টাইল */}
       <style jsx global>{`
-        /* সাধারণ ওয়াটারমার্ক ফিক্স */
         .watermark-wrapper {
           position: absolute !important;
           top: 50% !important;
           left: 50% !important;
           transform: translate(-50%, -50%) !important;
-          z-index: 10 !important;
+          z-index: 0 !important;
           pointer-events: none !important;
           display: flex !important;
           justify-content: center !important;
           align-items: center !important;
           width: 100% !important;
           height: 100% !important;
-          opacity: 0.12 !important;
+          opacity: 0.08 !important;
         }
 
         .watermark-wrapper img {
@@ -341,11 +386,16 @@ function ClassWiseResultContent() {
         @media print {
           @page {
             size: A4 landscape;
-            margin: 0mm 1mm 1mm 1mm;
+            margin: 10mm;
           }
+          html,
           body {
-            background: white !important;
-            color: black !important;
+            width: 100% !important;
+            height: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #fff !important;
+            color: #000 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
@@ -364,66 +414,75 @@ function ClassWiseResultContent() {
             width: 100% !important;
             position: relative !important;
           }
-
+          .overflow-x-auto {
+            overflow: visible !important;
+            width: 100% !important;
+          }
           *::-webkit-scrollbar {
-            display: none !important; /* Chrome, Safari and Opera */
+            display: none !important;
             width: 0 !important;
             height: 0 !important;
           }
-
-          /* প্রিন্ট মোডে ওয়াটারমার্ক সেন্টার ও দৃশ্যমান রাখার জন্য ফিক্স */
           .watermark-wrapper {
-            overflow: visible !important;
-            -ms-overflow-style: none !important; /* IE and Edge */
-            scrollbar-width: none !important; /* Firefox */
             position: fixed !important;
             top: 50% !important;
             left: 50% !important;
             transform: translate(-50%, -50%) !important;
-            z-index: 1 !important;
-            opacity: 0.12 !important;
+            z-index: 0 !important;
+            opacity: 0.08 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
-
-          /* টেবিল ব্যাকগ্রাউন্ড ট্রান্সপারেন্ট করা হয়েছে যেন ওয়াটারমার্ক ঢাকা না পড়ে */
           table {
-            font-size: 11px !important;
+            width: 100% !important;
+            min-width: 100% !important;
+            font-size: 9px !important;
             border-collapse: collapse !important;
             background: transparent !important;
-            position: relative !important;
-            z-index: 2 !important;
+            page-break-inside: auto !important;
+          }
+          thead {
+            display: table-header-group !important;
+          }
+          tfoot {
+            display: table-footer-group !important;
+          }
+          tr {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
           }
           th,
           td {
-            border: 1px solid #94a3b8 !important;
-            padding: 6px 4px !important;
+            border: 1px solid #475569 !important;
+            padding: 3.5px 2px !important;
           }
           thead th {
             background-color: #043e30 !important;
-            color: #fde047 !important;
+            color: #fef08a !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
-          /* সমান মার্কস রো (সবুজ) */
-          tr.same-mark-row {
-            background-color: rgba(209, 250, 229, 0.7) !important;
+          .cell-fail {
+            background-color: #fee2e2 !important;
+            color: #dc2626 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
-          /* ফেল করা রো (লাল/গোলাপি) */
-          tr.fail-row {
-            background-color: rgba(254, 205, 211, 0.7) !important;
+          .print-page-break-avoid {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
           }
         }
       `}</style>
 
       <div className="p-1 sm:p-6 bg-slate-50 min-h-screen">
         <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-7 relative print-container">
-          {/* হেডার (ওয়েব ভিউ) */}
           <div className="border-b border-slate-100 pb-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
             <div>
               <div className="flex items-center gap-3 flex-wrap">
                 <h1 className="text-xl sm:text-2xl font-black text-[#043e30]">
                   শ্রেণিভিত্তিক ফলাফল ও মেরিট তালিকা
                 </h1>
-                {/* পাবলিকেশন স্ট্যাটাস ব্যাজ */}
                 <span
                   className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition-colors ${
                     isPublished
@@ -436,7 +495,9 @@ function ClassWiseResultContent() {
                       isPublished ? "bg-emerald-500" : "bg-rose-500"
                     }`}
                   ></span>
-                  {isPublished ? "প্রকাশিত (Published)" : "অপ্রকাশিত (Unpublished)"}
+                  {isPublished
+                    ? "প্রকাশিত (Published)"
+                    : "অপ্রকাশিত (Unpublished)"}
                 </span>
               </div>
               <p className="text-xs text-slate-500 mt-1">
@@ -446,7 +507,6 @@ function ClassWiseResultContent() {
             </div>
 
             <div className="flex items-center gap-2.5 flex-wrap">
-              {/* শুধুমাত্র অ্যাডমিনের জন্য পাবলিশ/আনপাবলিশ টগল বাটন */}
               {isAdmin && (
                 <button
                   type="button"
@@ -488,45 +548,6 @@ function ClassWiseResultContent() {
             </div>
           </div>
 
-          {/* প্রিন্ট হেডার */}
-          <div className="hidden print-only text-center mb-0 pb-0">
-            <div className="flex items-center justify-center gap-0 mb-1 border-b-4 border-double border-gray-800 pb-1 pl-2">
-              <div className="w-20 h-20 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-3">
-                <Image
-                  src={"/aimlogo1.png"}
-                  alt="Institution Logo"
-                  width={200}
-                  height={200}
-                  quality={100}
-                  priority
-                  className="w-full h-full object-cover scale-[1.05] transform-gpu"
-                />
-              </div>
-              <div className="flex-grow text-center">
-                <Image
-                  src={"/banner_routine.png"}
-                  alt="Institution Banner"
-                  width={2000}
-                  height={400}
-                  quality={100}
-                  priority
-                  className="w-full h-auto max-h-25 object-fill mx-auto print:max-h-25"
-                />
-              </div>
-            </div>
-
-            <h2 className="text-base font-bold text-slate-800">
-              শ্রেণি: {selectedClass} -{" "}
-              {examType === "term1"
-                ? "১ম সাময়িক"
-                : examType === "term2"
-                  ? "২য় সাময়িক"
-                  : "বার্ষিক পরীক্ষা"}{" "}
-              পরীক্ষা - {(year || "").split(/[-–/]/)[0].trim()}
-            </h2>
-          </div>
-
-          {/* ফিল্টার সেকশন */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 mb-6 no-print">
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1.5">
@@ -550,8 +571,6 @@ function ClassWiseResultContent() {
                 <option value="ষষ্ঠ">ষষ্ঠ</option>
                 <option value="সপ্তম">সপ্তম</option>
                 <option value="অষ্টম">অষ্টম</option>
-                <option value="নবম">নবম</option>
-                <option value="দশম">দশম</option>
               </select>
             </div>
 
@@ -567,8 +586,8 @@ function ClassWiseResultContent() {
                 }}
                 className="w-full bg-white border border-slate-300 text-slate-800 text-xs sm:text-sm rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-600 focus:outline-none"
               >
-                <option value="term1">১ম সাময়িক</option>
-                <option value="term2">২য় সাময়িক</option>
+                <option value="term1">প্রথম সাময়িক</option>
+                <option value="term2">দ্বিতীয় সাময়িক</option>
                 <option value="annual">বার্ষিক পরীক্ষা</option>
               </select>
             </div>
@@ -589,7 +608,6 @@ function ClassWiseResultContent() {
             </div>
           </div>
 
-          {/* নন-অ্যাডমিন এবং ফলাফল অপ্রকাশিত থাকলে অ্যাক্সেস লক ভিউ */}
           {!isAdmin && !isPublished && !loading ? (
             <div className="py-16 px-6 text-center bg-amber-50/60 rounded-2xl border border-amber-200 text-slate-700 max-w-xl mx-auto my-8 shadow-sm no-print">
               <div className="w-16 h-16 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
@@ -599,7 +617,14 @@ function ClassWiseResultContent() {
                 ফলাফল এখনো প্রকাশ করা হয়নি
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                {selectedClass} শ্রেণির {examType === "term1" ? "১ম সাময়িক" : examType === "term2" ? "২য় সাময়িক" : "বার্ষিক"} পরীক্ষার ফলাফল কর্তৃপক্ষ কর্তৃক আনুষ্ঠানিকভাবে এখনো প্রকাশিত হয়নি। ফলাফল প্রকাশিত হলে এখানে দেখা যাবে।
+                {selectedClass} শ্রেণির{" "}
+                {examType === "term1"
+                  ? "১ম সাময়িক"
+                  : examType === "term2"
+                    ? "২য় সাময়িক"
+                    : "বার্ষিক"}{" "}
+                পরীক্ষার ফলাফল কর্তৃপক্ষ কর্তৃক আনুষ্ঠানিকভাবে এখনো প্রকাশিত
+                হয়নি। ফলাফল প্রকাশিত হলে এখানে দেখা যাবে।
               </p>
             </div>
           ) : loading ? (
@@ -611,61 +636,184 @@ function ClassWiseResultContent() {
               এই শ্রেণিতে কোনো ফলাফলের রেকর্ড পাওয়া যায়নি।
             </div>
           ) : (
-            <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm relative">
-              {/* অ্যাডমিন প্রিভিউ নোটিশ যদি অপ্রকাশিত অবস্থায় অ্যাডমিন দেখে */}
+            <div className="relative">
               {isAdmin && !isPublished && (
-                <div className="bg-amber-100/70 border-b border-amber-300 p-3 text-xs text-amber-900 font-bold flex items-center gap-2 no-print">
+                <div className="bg-amber-100/70 border border-amber-300 rounded-lg p-3 text-xs text-amber-900 font-bold flex items-center gap-2 mb-4 no-print">
                   <span>⚠️</span>
-                  এটি একটি অপ্রকাশিত ফলাফল। অ্যাডমিন প্রিভিউ হিসেবে আপনি এটি দেখতে পাচ্ছেন। প্রকাশ করতে উপরের বাটনে চাপুন।
+                  এটি একটি অপ্রকাশিত ফলাফল। অ্যাডমিন প্রিভিউ হিসেবে আপনি এটি
+                  দেখতে পাচ্ছেন। প্রকাশ করতে উপরের বাটনে চাপুন।
                 </div>
               )}
-              {/* ওয়াটারমার্ক (Watermark) */}
+
               <div className="watermark-wrapper">
                 <Image
                   src="/aimlogo1.png"
                   alt="Watermark Logo"
-                  width={500}
-                  height={500}
+                  width={360}
+                  height={360}
                   className="object-contain"
                 />
               </div>
 
-              {/* মোবাইল ভিউ */}
-              <div className="block sm:hidden divide-y divide-slate-200 bg-white/80 no-print relative z-10">
+              {/* ১. ৩-কলাম হেডার লেআউট (Madrasah Logo, Banner & Info, Grading System Table) */}
+              <div className="mb-3 border-b-2 border-slate-800 pb-2 print-page-break-avoid">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="w-16 sm:w-20 flex-shrink-0 flex items-center justify-center">
+                    <Image
+                      src="/aimlogo1.png"
+                      alt="Institution Logo"
+                      width={80}
+                      height={80}
+                      priority
+                      className="w-14 h-14 sm:w-16 sm:h-16 object-contain"
+                    />
+                  </div>
+
+                  <div className="flex-1 text-center px-1">
+                    <Image
+                      src="/banner.png"
+                      alt="Institution Banner"
+                      width={500}
+                      height={95}
+                      priority
+                      className="w-full max-w-[300px] sm:max-w-[380px] h-auto max-h-14 object-contain mx-auto"
+                    />
+                    <h2 className="text-xs sm:text-sm font-bold text-slate-900 mt-0.5">
+                      শ্রেণিভিত্তিক ফলাফল বিবরণী -{" "}
+                      {(year || "").split(/[-–/]/)[0].trim()}
+                    </h2>
+                    <p className="text-[10px] sm:text-xs font-semibold text-slate-700">
+                      শ্রেণি:{" "}
+                      <span className="font-bold text-slate-900">
+                        {selectedClass}
+                      </span>{" "}
+                      | পরীক্ষা:{" "}
+                      <span className="font-bold text-slate-900">
+                        {examType === "term1"
+                          ? "প্রথম সাময়িক"
+                          : examType === "term2"
+                            ? "দ্বিতীয় সাময়িক"
+                            : "বার্ষিক পরীক্ষা"}
+                      </span>
+                    </p>
+                  </div>
+
+                  <div className="flex-shrink-0 flex justify-end">
+                    <table className="border-collapse border border-slate-600 text-[7.5px] sm:text-[8px] leading-none text-center bg-white shadow-xs">
+                      <thead>
+                        <tr className="bg-slate-100 text-slate-800 font-bold">
+                          <th className="border border-slate-500 px-1 py-0.5 whitespace-nowrap">
+                            Mark Interval
+                          </th>
+                          <th className="border border-slate-500 px-1 py-0.5 whitespace-nowrap">
+                            Grade
+                          </th>
+                          <th className="border border-slate-500 px-1 py-0.5 whitespace-nowrap">
+                            Point
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td className="border border-slate-400 px-1 py-0.2">
+                            80 - 100
+                          </td>
+                          <td className="border border-slate-400 px-1 py-0.2 font-bold">
+                            A+
+                          </td>
+                          <td className="border border-slate-400 px-1 py-0.2">
+                            5.00
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="border border-slate-400 px-1 py-0.2">
+                            70 - 79
+                          </td>
+                          <td className="border border-slate-400 px-1 py-0.2 font-bold">
+                            A
+                          </td>
+                          <td className="border border-slate-400 px-1 py-0.2">
+                            4.00
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="border border-slate-400 px-1 py-0.2">
+                            60 - 69
+                          </td>
+                          <td className="border border-slate-400 px-1 py-0.2 font-bold">
+                            A-
+                          </td>
+                          <td className="border border-slate-400 px-1 py-0.2">
+                            3.50
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="border border-slate-400 px-1 py-0.2">
+                            50 - 59
+                          </td>
+                          <td className="border border-slate-400 px-1 py-0.2 font-bold">
+                            B
+                          </td>
+                          <td className="border border-slate-400 px-1 py-0.2">
+                            3.00
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="border border-slate-400 px-1 py-0.2">
+                            40 - 49
+                          </td>
+                          <td className="border border-slate-400 px-1 py-0.2 font-bold">
+                            C
+                          </td>
+                          <td className="border border-slate-400 px-1 py-0.2">
+                            2.00
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td className="border border-slate-400 px-1 py-0.2">
+                            0 - 39
+                          </td>
+                          <td className="border border-slate-400 px-1 py-0.2 font-bold text-red-600">
+                            F
+                          </td>
+                          <td className="border border-slate-400 px-1 py-0.2">
+                            0.00
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              {/* মোবাইল ভিউ (স্ক্রিন অনলি) */}
+              <div className="block sm:hidden divide-y divide-slate-200 bg-white/90 no-print relative z-10">
                 {results.map((student) => {
-                  const total = calculateTotalMark(student.allSubjects);
-                  const hasFailed = checkIfFailed(student.allSubjects);
-                  const isAbsentAll = checkIfAbsentInAll(student.allSubjects);
-                  const isDuplicateMark = marksCount[total] > 1;
+                  const calc =
+                    studentCalculationsMap.get(student.studentId) || {};
+                  const merit =
+                    calc.hasFailed || calc.isAbsentAll
+                      ? "-"
+                      : meritRankMap.get(student.studentId) || "-";
 
                   return (
-                    <div
-                      key={student.studentId}
-                      className={`p-4 space-y-3 transition-colors ${
-                        isAbsentAll
-                          ? "bg-slate-100/90 text-slate-500"
-                          : hasFailed
-                            ? "bg-rose-100/90"
-                            : isDuplicateMark
-                              ? "bg-emerald-100/80"
-                              : ""
-                      }`}
-                    >
-                      <div className="flex justify-between items-center bg-emerald-50/60 p-2.5 rounded-lg border border-emerald-100">
+                    <div key={student.studentId} className="p-4 space-y-3">
+                      <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg border border-slate-200">
                         <div className="flex items-center gap-2">
                           <span className="bg-[#043e30] text-amber-300 font-bold px-2 py-0.5 rounded text-xs">
-                            রোল: {student.roll || student.rollnumber || "N/A"}
+                            রোল: {student.roll || "N/A"}
                           </span>
-                          <span className="font-mono font-bold text-emerald-800 text-xs">
+                          <span className="font-mono font-bold text-slate-700 text-xs">
                             ID: {student.studentId}
                           </span>
                         </div>
                         <div className="text-right">
                           <span className="text-[10px] text-slate-500 block leading-tight">
-                            মোট নম্বর
+                            মেধাস্থান
                           </span>
-                          <span className="font-extrabold text-emerald-900 text-sm">
-                            {isAbsentAll ? "ABS" : total}
+                          <span className="font-extrabold text-[#043e30] text-sm">
+                            {merit}
                           </span>
                         </div>
                       </div>
@@ -681,35 +829,177 @@ function ClassWiseResultContent() {
 
                       <div>
                         <span className="text-[11px] font-semibold text-slate-500 block mb-1.5">
-                          বিষয়ভিত্তিক মার্কস
+                          বিষয়ভিত্তিক নম্বর
                         </span>
                         <div className="flex flex-wrap gap-1.5">
                           {student.allSubjects?.map((sub, idx) => {
                             const termData = sub[examType] || {};
-
-                            if (
-                              termData.isAbsent ||
+                            const isAbsent =
+                              Boolean(termData.isAbsent) ||
                               termData.exam === "A" ||
-                              termData.exam === "Abs"
-                            ) {
-                              const displayVal =
-                                termData.exam === "A"
-                                  ? "A"
-                                  : termData.exam === "Abs"
-                                    ? "Abs"
-                                    : "A";
-                              return (
-                                <span
-                                  key={idx}
-                                  className="inline-flex items-center gap-1 bg-red-100 text-red-700 px-2 py-1 rounded text-xs border border-red-200"
-                                >
-                                  <span className="font-semibold">
-                                    {sub.subject}:
-                                  </span>
-                                  <span className="font-bold">
-                                    {displayVal}
-                                  </span>
+                              termData.exam === "Abs" ||
+                              termData.exam === "ABS" ||
+                              termData.ct === "A" ||
+                              termData.ct === "Abs" ||
+                              termData.ct === "ABS";
+                            const ct = parseFloat(termData.ct) || 0;
+                            const exam = parseFloat(termData.exam) || 0;
+                            const subTotal = isAbsent ? 0 : ct + exam;
+                            const isSubFail = isAbsent || subTotal < 33;
+
+                            return (
+                              <span
+                                key={idx}
+                                className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs border ${
+                                  isSubFail
+                                    ? "bg-[#fee2e2] text-red-700 border-red-200 font-bold"
+                                    : "bg-slate-100 text-slate-700 border-slate-200/60"
+                                }`}
+                              >
+                                <span className="font-semibold">
+                                  {sub.subject}:
                                 </span>
+                                <span>{isAbsent ? "Absent" : subTotal}</span>
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center text-xs">
+                        <div className="bg-slate-50 p-1.5 rounded">
+                          <span className="text-[10px] text-slate-500 block">
+                            মোট মার্ক
+                          </span>
+                          <span className="font-bold text-slate-800">
+                            {calc.isAbsentAll ? "ABS" : calc.totalMarks}
+                          </span>
+                        </div>
+                        <div className="bg-slate-50 p-1.5 rounded">
+                          <span className="text-[10px] text-slate-500 block">
+                            জিপিএ
+                          </span>
+                          <span className="font-bold text-slate-800">
+                            {calc.gpa}
+                          </span>
+                        </div>
+                        <div className="bg-slate-50 p-1.5 rounded">
+                          <span className="text-[10px] text-slate-500 block">
+                            গ্রেড
+                          </span>
+                          <span
+                            className={`font-bold ${calc.grade === "F" ? "text-red-600" : "text-emerald-700"}`}
+                          >
+                            {calc.grade}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* ২. ডেস্কটপ ও প্রিন্ট টেবিল ভিউ */}
+              <div className="hidden sm:block print-only overflow-x-auto relative z-10">
+                <table className="w-full text-left border-collapse text-[10px] sm:text-xs">
+                  <thead>
+                    <tr className="bg-[#043e30] text-amber-300">
+                      <th className="p-1.5 border border-emerald-900 font-bold text-center w-10">
+                        রোল
+                      </th>
+                      <th className="p-1.5 border border-emerald-900 font-bold w-16">
+                        আইডি
+                      </th>
+                      <th className="p-1.5 border border-emerald-900 font-bold min-w-[120px]">
+                        শিক্ষার্থীর নাম
+                      </th>
+
+                      {allSubjectsList.map((subjectName, i) => (
+                        <th
+                          key={i}
+                          className="p-1 border border-emerald-900 font-bold text-center whitespace-nowrap"
+                        >
+                          {subjectName}
+                        </th>
+                      ))}
+
+                      <th className="p-1.5 border border-emerald-900 font-bold text-center whitespace-nowrap">
+                        মোট মার্ক
+                      </th>
+                      <th className="p-1.5 border border-emerald-900 font-bold text-center whitespace-nowrap">
+                        গড়
+                      </th>
+                      <th className="p-1.5 border border-emerald-900 font-bold text-center whitespace-nowrap">
+                        মোট গ্রেড পয়েন্ট
+                      </th>
+                      <th className="p-1.5 border border-emerald-900 font-bold text-center whitespace-nowrap">
+                        জিপিএ
+                      </th>
+                      <th className="p-1.5 border border-emerald-900 font-bold text-center whitespace-nowrap">
+                        গ্রেড
+                      </th>
+                      <th className="p-1.5 border border-emerald-900 font-bold text-center whitespace-nowrap">
+                        মেধাস্থান
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white/90">
+                    {results.map((student) => {
+                      const calc =
+                        studentCalculationsMap.get(student.studentId) || {};
+                      const merit =
+                        calc.hasFailed || calc.isAbsentAll
+                          ? "-"
+                          : meritRankMap.get(student.studentId) || "-";
+
+                      return (
+                        <tr
+                          key={student.studentId}
+                          className="hover:bg-slate-50 border-b border-slate-200"
+                        >
+                          <td className="p-1.5 border border-slate-300 font-bold text-slate-700 text-center">
+                            {student.roll || "N/A"}
+                          </td>
+                          <td className="p-1.5 border border-slate-300 font-mono font-bold text-slate-800">
+                            {student.studentId}
+                          </td>
+                          <td className="p-1.5 border border-slate-300 font-bold text-slate-900 whitespace-nowrap">
+                            {student.studentName || "N/A"}
+                          </td>
+
+                          {allSubjectsList.map((subjName, idx) => {
+                            const matchedSub = student.allSubjects?.find(
+                              (s) => s.subject === subjName,
+                            );
+                            if (!matchedSub) {
+                              return (
+                                <td
+                                  key={idx}
+                                  className="p-1 border border-slate-300 text-center text-slate-400"
+                                >
+                                  -
+                                </td>
+                              );
+                            }
+
+                            const termData = matchedSub[examType] || {};
+                            const isAbsent =
+                              Boolean(termData.isAbsent) ||
+                              termData.exam === "A" ||
+                              termData.exam === "Abs" ||
+                              termData.exam === "ABS" ||
+                              termData.ct === "A" ||
+                              termData.ct === "Abs" ||
+                              termData.ct === "ABS";
+
+                            if (isAbsent) {
+                              return (
+                                <td
+                                  key={idx}
+                                  className="p-1 border border-slate-300 text-center font-bold bg-[#fee2e2] text-red-600 cell-fail"
+                                >
+                                  অনুঃ
+                                </td>
                               );
                             }
 
@@ -719,148 +1009,42 @@ function ClassWiseResultContent() {
                             const isSubFail = subTotal < 33;
 
                             return (
-                              <span
-                                key={idx}
-                                className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs border ${
-                                  isSubFail
-                                    ? "bg-red-100 text-red-800 border-red-200 font-bold"
-                                    : "bg-slate-100 text-slate-700 border-slate-200/60"
-                                }`}
-                              >
-                                <span className="font-semibold">
-                                  {sub.subject}:
-                                </span>
-                                <span>{subTotal}</span>
-                              </span>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* ডেস্কটপ ও প্রিন্ট ভিউ */}
-              <div className="hidden sm:block print-only overflow-x-auto relative z-10">
-                <table className="w-full text-left border-collapse text-xs sm:text-sm">
-                  <thead>
-                    <tr className="bg-[#043e30] text-amber-300">
-                      <th className="p-3 border border-emerald-800 font-bold text-center w-14">
-                        রোল
-                      </th>
-                      <th className="p-3 border border-emerald-800 font-bold w-24">
-                        আইডি
-                      </th>
-                      <th className="p-3 border border-emerald-800 font-bold min-w-[150px]">
-                        শিক্ষার্থীর নাম
-                      </th>
-
-                      {allSubjectsList.map((subjectName, i) => (
-                        <th
-                          key={i}
-                          className="p-2 border border-emerald-800 font-bold text-center"
-                        >
-                          {subjectName}
-                        </th>
-                      ))}
-
-                      <th className="p-3 border border-emerald-800 font-bold text-center w-24">
-                        মোট নম্বর
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 bg-white/80">
-                    {results.map((student) => {
-                      const total = calculateTotalMark(student.allSubjects);
-                      const hasFailed = checkIfFailed(student.allSubjects);
-                      const isAbsentAll = checkIfAbsentInAll(
-                        student.allSubjects,
-                      );
-                      const isDuplicateMark = marksCount[total] > 1;
-
-                      let rowStyleClass = "hover:bg-slate-50/80";
-                      if (isAbsentAll) {
-                        rowStyleClass =
-                          "bg-slate-100/90 text-slate-500 hover:bg-slate-200/80";
-                      } else if (hasFailed) {
-                        rowStyleClass =
-                          "fail-row bg-rose-100/90 hover:bg-rose-200/80";
-                      } else if (isDuplicateMark) {
-                        rowStyleClass =
-                          "same-mark-row bg-emerald-100/80 hover:bg-emerald-200/80";
-                      }
-
-                      return (
-                        <tr
-                          key={student.studentId}
-                          className={`transition-colors ${rowStyleClass}`}
-                        >
-                          <td className="p-3 border border-slate-200 font-bold text-slate-600 text-center">
-                            {student.roll || student.rollnumber || "N/A"}
-                          </td>
-                          <td className="p-3 border border-slate-200 font-mono font-bold text-emerald-800">
-                            {student.studentId}
-                          </td>
-                          <td className="p-3 border border-slate-200 font-bold text-slate-800">
-                            {student.studentName || "N/A"}
-                          </td>
-
-                          {/* বিষয়ভিত্তিক মার্কস কলাম */}
-                          {allSubjectsList.map((subjName, idx) => {
-                            const matchedSub = student.allSubjects?.find(
-                              (s) => s.subject === subjName,
-                            );
-                            if (matchedSub) {
-                              const termData = matchedSub[examType] || {};
-
-                              if (
-                                termData.isAbsent ||
-                                termData.exam === "A" ||
-                                termData.exam === "Abs"
-                              ) {
-                                const displayVal =
-                                  termData.exam === "A"
-                                    ? "A"
-                                    : termData.exam === "Abs"
-                                      ? "Abs"
-                                      : "A";
-                                return (
-                                  <td
-                                    key={idx}
-                                    className="p-2 border border-slate-200 text-center font-bold text-red-600"
-                                  >
-                                    {displayVal}
-                                  </td>
-                                );
-                              }
-
-                              const ct = parseFloat(termData.ct) || 0;
-                              const exam = parseFloat(termData.exam) || 0;
-                              const subTotal = ct + exam;
-                              const isSubFail = subTotal < 33;
-
-                              return (
-                                <td
-                                  key={idx}
-                                  className={`p-2 border border-slate-200 text-center font-semibold ${isSubFail ? "text-red-600 font-bold" : "text-slate-700"}`}
-                                >
-                                  {subTotal}
-                                </td>
-                              );
-                            }
-                            return (
                               <td
                                 key={idx}
-                                className="p-2 border border-slate-200 text-center text-slate-400"
+                                className={`p-1 border border-slate-300 text-center font-semibold ${
+                                  isSubFail
+                                    ? "bg-[#fee2e2] text-red-600 font-bold cell-fail"
+                                    : "text-slate-800"
+                                }`}
                               >
-                                -
+                                {subTotal}
                               </td>
                             );
                           })}
 
-                          <td className="p-3 border border-slate-200 font-extrabold text-center text-emerald-900 bg-emerald-50/30">
-                            {isAbsentAll ? "ABS" : total}
+                          <td className="p-1.5 border border-slate-300 font-bold text-center text-slate-900">
+                            {calc.isAbsentAll ? "ABS" : calc.totalMarks}
+                          </td>
+                          <td className="p-1.5 border border-slate-300 font-semibold text-center text-slate-800">
+                            {calc.isAbsentAll ? "-" : calc.average}
+                          </td>
+                          <td className="p-1.5 border border-slate-300 font-semibold text-center text-slate-800">
+                            {calc.isAbsentAll ? "-" : calc.totalGradePoints}
+                          </td>
+                          <td className="p-1.5 border border-slate-300 font-bold text-center text-slate-900">
+                            {calc.gpa}
+                          </td>
+                          <td
+                            className={`p-1.5 border border-slate-300 font-bold text-center ${
+                              calc.grade === "F" || calc.grade === "ABS"
+                                ? "text-red-600"
+                                : "text-emerald-700"
+                            }`}
+                          >
+                            {calc.grade}
+                          </td>
+                          <td className="p-1.5 border border-slate-300 font-bold text-center text-[#043e30]">
+                            {merit}
                           </td>
                         </tr>
                       );
@@ -868,14 +1052,9 @@ function ClassWiseResultContent() {
                   </tbody>
                 </table>
               </div>
-            </div>
-          )}
 
-          {/* এক নজরে সকল তথ্য */}
-          {results.length > 0 && (
-            <div>
-              {/* ১ লাইনে তথ্য */}
-              <div className="text-xs sm:text-sm font-bold text-slate-800 bg-white/90 rounded-xl mt-1  flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
+              {/* এক নজরে পরিসংখ্যান */}
+              <div className="text-[10px] sm:text-xs font-bold text-slate-800 bg-white/95 rounded-lg mt-2 py-1 flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 print-page-break-avoid">
                 <span>
                   মোট পরীক্ষার্থী:{" "}
                   <strong className="text-slate-900">{totalStudents}</strong>{" "}
@@ -899,64 +1078,101 @@ function ClassWiseResultContent() {
                   <strong className="text-amber-600">{absentCount}</strong> জন।
                 </span>
               </div>
+
+              {/* ৫. ফুটার লেআউট (স্বাক্ষর এরিয়া এবং সোশ্যাল ও কন্টাক্ট ইনফো) */}
+              <div className="mt-1 pt-1 print-page-break-avoid">
+                <div className="flex justify-between items-end px-4 sm:px-12 mb-6">
+                  <div className="text-center flex flex-col items-center">
+                    <div className="relative w-28 sm:w-36 h-10 flex items-end justify-center mb-1">
+                      <Image
+                        src={controllerSignatureSrc || "/anarul.png"}
+                        alt="Exam Controller Signature"
+                        width={90}
+                        height={34}
+                        priority
+                        className="max-h-10 w-auto object-contain mix-blend-multiply contrast-[800%] brightness-[60%] grayscale -rotate-90 mx-auto"
+                      />
+                    </div>
+                    <div className="w-28 sm:w-36 border-b border-slate-800 mb-1"></div>
+                    <span className="text-[9.5px] sm:text-xs font-bold text-slate-800 block">
+                      পরীক্ষা নিয়ন্ত্রক
+                    </span>
+                  </div>
+
+                  <div className="text-center flex flex-col items-center">
+                    <div className="relative w-28 sm:w-36 h-10 flex items-end justify-center mb-1">
+                      <Image
+                        src={
+                          principalSignatureSrc || "/principle's_signature.jpg"
+                        }
+                        alt="Principal Signature"
+                        width={90}
+                        height={34}
+                        priority
+                        className="max-h-10 w-auto object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45 mx-auto"
+                      />
+                    </div>
+                    <div className="w-28 sm:w-36 border-b border-slate-800 mb-1"></div>
+                    <span className="text-[9.5px] sm:text-xs font-bold text-slate-800 block">
+                      প্রিন্সিপালের স্বাক্ষর
+                    </span>
+                  </div>
+                </div>
+
+                <div className="relative z-10 pt-2 border-t border-gray-300">
+                  <div className="flex flex-wrap justify-center items-center gap-x-2.5 gap-y-0.5 text-[8.5px] sm:text-[9px] font-semibold text-gray-800">
+                    <span className="flex items-center gap-0.5">
+                      <Phone className="w-2.5 h-2.5 text-gray-700" />
+                      01316-209201
+                    </span>
+
+                    <span className="flex items-center gap-0.5">
+                      <BsWhatsapp className="w-2.5 h-2.5 text-green-600" />
+                      01748-886161
+                    </span>
+
+                    <span className="flex items-center gap-0.5">
+                      <Globe className="w-2.5 h-2.5 text-blue-500" />
+                      www.aimhabiganj.com
+                    </span>
+
+                    <span className="flex items-center gap-0.5">
+                      <Mail className="w-2.5 h-2.5 text-red-500" />
+                      aimhabiganj@gmail.com
+                    </span>
+
+                    <span className="flex items-center gap-0.5">
+                      <FaFacebook className="w-2.5 h-2.5 text-blue-600" />
+                      aimhabiganj
+                    </span>
+
+                    <span className="flex items-center gap-0.5">
+                      <BsYoutube className="w-2.5 h-2.5 text-red-600" />
+                      aimhabiganj
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
-          {/* পেজিনেশন কন্ট্রোলস */}
           {results.length > 0 && (
-            <div className="no-print">
+            <div className="no-print mt-4">
               <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
                 totalItems={totalResults}
                 limit={currentLimit}
                 limitOptions={[10, 20, 50, 100]}
-                onPageChange={(newPage) => updatePaginationParams(newPage, currentLimit)}
-                onLimitChange={(newLimit) => updatePaginationParams(1, newLimit)}
+                onPageChange={(newPage) =>
+                  updatePaginationParams(newPage, currentLimit)
+                }
+                onLimitChange={(newLimit) =>
+                  updatePaginationParams(1, newLimit)
+                }
                 itemName="items"
                 className="no-print"
               />
-            </div>
-          )}
-
-          {/* Signatures Section (Bottom of Page / Print Footer) */}
-          {results.length > 0 && (
-            <div className="flex justify-between items-end sm:px-16 print:break-inside-avoid">
-              {/* পরীক্ষা নিয়ন্ত্রক */}
-              <div className="text-center flex flex-col items-center">
-                <div className="relative w-36 h-12 flex items-end justify-center mb-1">
-                  <Image
-                    src={controllerSignatureSrc || "/anarul.png"}
-                    alt="Exam Controller Signature"
-                    width={140}
-                    height={50}
-                    priority
-                    className="max-h-12 w-auto object-contain mix-blend-multiply contrast-[800%] brightness-[60%] grayscale -rotate-90 mx-auto"
-                  />
-                </div>
-                <div className="w-36 sm:w-44 border-b-2 border-slate-800 mb-1"></div>
-                <span className="text-xs sm:text-sm font-bold text-slate-800 block">
-                  পরীক্ষা নিয়ন্ত্রক
-                </span>
-              </div>
-
-              {/* অধ্যক্ষ / প্রতিষ্ঠান প্রধান */}
-              <div className="text-center flex flex-col items-center">
-                <div className="relative w-36 h-12 flex items-end justify-center mb-1">
-                  <Image
-                    src={principalSignatureSrc || "/principle's_signature.jpg"}
-                    alt="Principal Signature"
-                    width={140}
-                    height={50}
-                    priority
-                    className="max-h-12 w-auto object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45 mx-auto"
-                  />
-                </div>
-                <div className="w-36 sm:w-44 border-b-2 border-slate-800 mb-1"></div>
-                <span className="text-xs sm:text-sm font-bold text-slate-800 block">
-                  প্রিন্সিপাল
-                </span>
-              </div>
             </div>
           )}
         </div>
@@ -967,7 +1183,13 @@ function ClassWiseResultContent() {
 
 export default function ClassResultView() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-slate-500 font-medium">লোড হচ্ছে...</div>}>
+    <Suspense
+      fallback={
+        <div className="p-8 text-center text-slate-500 font-medium">
+          লোড হচ্ছে...
+        </div>
+      }
+    >
       <ClassWiseResultContent />
     </Suspense>
   );
