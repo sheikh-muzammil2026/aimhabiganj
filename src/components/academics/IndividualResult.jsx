@@ -2,11 +2,16 @@
 
 import { Globe, Mail, Phone, Search } from "lucide-react";
 import Image from "next/image";
-import { QRCodeSVG } from "qrcode.react";
 import React, { useState, useEffect } from "react";
 import { BsWhatsapp, BsYoutube } from "react-icons/bs";
 import { FaFacebook } from "react-icons/fa";
 import { authClient } from "@/lib/auth-client";
+
+const toBengaliDigits = (num) => {
+  if (num === null || num === undefined) return "";
+  const bengaliDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+  return String(num).replace(/[0-9]/g, (digit) => bengaliDigits[Number(digit)]);
+};
 
 export default function ResultSheetGenerator() {
   const { data: session } = authClient.useSession();
@@ -139,20 +144,25 @@ export default function ResultSheetGenerator() {
     return () => clearTimeout(timer);
   }, [selectedIds, targetYear, user?.email, user?.role]);
 
-  // বিষয়ভিত্তিক গ্রেড এবং গ্রেড পয়েন্ট নির্ধারণ (International Grading System)
+  // বিষয়ভিত্তিক গ্রেড এবং গ্রেড পয়েন্ট নির্ধারণ
   const calculateSubjectGrade = (mark) => {
-    if (mark === "ABS" || mark === "A" || mark === "Abs") {
-      return { grade: "ABS", gpa: "0.00", point: 0.0 };
+    if (
+      mark === "ABS" ||
+      mark === "A" ||
+      mark === "Abs" ||
+      mark === "অনুঃ" ||
+      mark === "a"
+    ) {
+      return { grade: "অনুঃ", gpa: "০.০০", point: 0.0 };
     }
     const num = typeof mark === "number" ? mark : parseFloat(mark);
-    if (isNaN(num)) return { grade: "-", gpa: "0.00", point: 0.0 };
-    if (num >= 80) return { grade: "A+", gpa: "5.00", point: 5.0 };
-    if (num >= 70) return { grade: "A", gpa: "4.00", point: 4.0 };
-    if (num >= 60) return { grade: "A-", gpa: "3.50", point: 3.5 };
-    if (num >= 50) return { grade: "B", gpa: "3.00", point: 3.0 };
-    if (num >= 40) return { grade: "C", gpa: "2.00", point: 2.0 };
-    if (num >= 33) return { grade: "D", gpa: "1.00", point: 1.0 };
-    return { grade: "F", gpa: "0.00", point: 0.0 };
+    if (isNaN(num)) return { grade: "-", gpa: "০.০০", point: 0.0 };
+    if (num >= 80) return { grade: "A+", gpa: "৫.০০", point: 5.0 };
+    if (num >= 70) return { grade: "A", gpa: "৪.০০", point: 4.0 };
+    if (num >= 60) return { grade: "A-", gpa: "৩.০০", point: 3.0 };
+    if (num >= 50) return { grade: "B", gpa: "২.০০", point: 2.0 };
+    if (num >= 40) return { grade: "C", gpa: "১.০০", point: 1.0 };
+    return { grade: "F", gpa: "০.০০", point: 0.0 };
   };
 
   // GPA পয়েন্ট অনুযায়ী লেটার গ্রেড বের করার নিয়ম
@@ -160,10 +170,9 @@ export default function ResultSheetGenerator() {
     const num = parseFloat(point) || 0;
     if (num >= 5.0) return "A+";
     if (num >= 4.0) return "A";
-    if (num >= 3.5) return "A-";
-    if (num >= 3.0) return "B";
-    if (num >= 2.0) return "C";
-    if (num >= 1.0) return "D";
+    if (num >= 3.0) return "A-";
+    if (num >= 2.0) return "B";
+    if (num >= 1.0) return "C";
     return "F";
   };
 
@@ -178,16 +187,25 @@ export default function ResultSheetGenerator() {
 
     const { ct, exam, isAbsent } = examObj;
 
+    const ctStr = String(ct || "")
+      .trim()
+      .toUpperCase();
+    const examStr = String(exam || "")
+      .trim()
+      .toUpperCase();
+
     if (
       isAbsent ||
-      ct === "A" ||
-      exam === "A" ||
-      ct === "ABS" ||
-      exam === "ABS" ||
-      ct === "Abs" ||
-      exam === "Abs"
+      ctStr === "A" ||
+      examStr === "A" ||
+      ctStr === "ABS" ||
+      examStr === "ABS" ||
+      ctStr === "ABSENT" ||
+      examStr === "ABSENT" ||
+      ct === "অনুঃ" ||
+      exam === "অনুঃ"
     ) {
-      return "ABS";
+      return "অনুঃ";
     }
 
     const hasCt = ct !== undefined && ct !== null && String(ct).trim() !== "";
@@ -217,7 +235,7 @@ export default function ResultSheetGenerator() {
     } else if (currentExamType === "২য় সাময়িক পরীক্ষা") {
       return t2;
     } else if (currentExamType === "বার্ষিক পরীক্ষা") {
-      if (ann === "ABS" || t1 === "ABS" || t2 === "ABS") return "ABS";
+      if (ann === "অনুঃ" || t1 === "অনুঃ" || t2 === "অনুঃ") return "অনুঃ";
 
       const num1 = typeof t1 === "number" ? t1 : 0;
       const num2 = typeof t2 === "number" ? t2 : 0;
@@ -239,20 +257,20 @@ export default function ResultSheetGenerator() {
     const t2 = parseExamData(term2Data);
     const ann = parseExamData(annualData);
 
-    if (t1 === "ABS" || t2 === "ABS" || ann === "ABS") {
-      return { grade: "ABS", gpa: "0.00", point: 0.0 };
+    if (t1 === "অনুঃ" || t2 === "অনুঃ" || ann === "অনুঃ") {
+      return { grade: "অনুঃ", gpa: "০.০০", point: 0.0 };
     }
     if (t1 === "-" && t2 === "-" && ann === "-") {
-      return { grade: "-", gpa: "0.00", point: 0.0 };
+      return { grade: "-", gpa: "০.০০", point: 0.0 };
     }
 
     const g1 = calculateSubjectGrade(t1);
     const g2 = calculateSubjectGrade(t2);
     const gAnn = calculateSubjectGrade(ann);
 
-    // কোনো একটি টার্মে F থাকলে বা পয়েন্ট ০ হলে বিষয়ে ফেল
+    // কোনো একটি টার্মে F থাকলে বা পয়েন্ট ০ হলে বিষয়ে ফেল (< 40)
     if (g1.point === 0 || g2.point === 0 || gAnn.point === 0) {
-      return { grade: "F", gpa: "0.00", point: 0.0 };
+      return { grade: "F", gpa: "০.০০", point: 0.0 };
     }
 
     // ৩টি টার্মের গ্রেড পয়েন্টের গড়
@@ -261,7 +279,7 @@ export default function ResultSheetGenerator() {
 
     return {
       grade: finalGrade,
-      gpa: avgPoint.toFixed(2),
+      gpa: toBengaliDigits(avgPoint.toFixed(2)),
       point: avgPoint,
     };
   };
@@ -269,7 +287,7 @@ export default function ResultSheetGenerator() {
   // বার্ষিক পরীক্ষায় শতকরা বা ১০০-এর স্কেলে মার্ক নরমালাইজেশন
   const getNormalizedMarkForGrade = (item, currentExamType) => {
     const mark = getMarkForExamType(item, currentExamType);
-    if (mark === "ABS" || mark === "-") return mark;
+    if (mark === "অনুঃ" || mark === "-") return mark;
     if (currentExamType === "বার্ষিক পরীক্ষা") {
       const term1Data = item.term1 || item["১ম সাময়িক পরীক্ষা"] || {};
       const term2Data = item.term2 || item["২য় সাময়িক পরীক্ষা"] || {};
@@ -310,8 +328,12 @@ export default function ResultSheetGenerator() {
     if (
       ctStr === "A" ||
       ctStr === "ABS" ||
+      ctStr === "ABSENT" ||
       examStr === "A" ||
-      examStr === "ABS"
+      examStr === "ABS" ||
+      examStr === "ABSENT" ||
+      termData.ct === "অনুঃ" ||
+      termData.exam === "অনুঃ"
     ) {
       return true;
     }
@@ -333,11 +355,11 @@ export default function ResultSheetGenerator() {
   const calculateSummary = (resultsList = [], currentExamType) => {
     if (!resultsList || resultsList.length === 0) {
       return {
-        totalObtained: 0,
-        average: "0.00",
+        totalObtained: "০",
+        average: "০.০০",
         grade: "-",
-        gpa: "0.00",
-        status: "Absent",
+        gpa: "০.০০",
+        status: "অনুপস্থিত",
       };
     }
 
@@ -382,32 +404,34 @@ export default function ResultSheetGenerator() {
       }
     });
 
-    // ১. সকল বিষয়ে অনুপস্থিত থাকলে -> Status = "Absent"
+    // ১. সকল বিষয়ে অনুপস্থিত থাকলে -> Status = "অনুপস্থিত"
     if (absentCount === totalSubjects) {
       return {
-        totalObtained: 0,
-        average: "0.00",
-        grade: "ABS",
-        gpa: "0.00",
-        status: "Absent",
+        totalObtained: "অনুঃ",
+        average: "-",
+        grade: "অনুঃ",
+        gpa: "০.০০",
+        status: "অনুপস্থিত",
       };
     }
 
-    // ২. কিছু বিষয়ে অনুপস্থিত থাকলে (সবগুলোতে নয়) -> Status = "Incomplete"
+    // ২. কিছু বিষয়ে অনুপস্থিত থাকলে (সবগুলোতে নয়) -> Status = "অকৃতকার্য"
     if (absentCount > 0) {
       return {
-        totalObtained,
+        totalObtained: toBengaliDigits(totalObtained),
         average:
           validCount > 0
-            ? (
-                (currentExamType === "বার্ষিক পরীক্ষা"
-                  ? totalNormalizedMarks
-                  : totalObtained) / validCount
-              ).toFixed(2)
-            : "0.00",
-        grade: "INC",
-        gpa: "0.00",
-        status: "Incomplete",
+            ? toBengaliDigits(
+                (
+                  (currentExamType === "বার্ষিক পরীক্ষা"
+                    ? totalNormalizedMarks
+                    : totalObtained) / validCount
+                ).toFixed(2),
+              )
+            : "০.০০",
+        grade: "F",
+        gpa: "০.০০",
+        status: "অকৃতকার্য",
       };
     }
 
@@ -421,27 +445,28 @@ export default function ResultSheetGenerator() {
           ).toFixed(2)
         : "0.00";
 
-    // কোনো আবশ্যিক বিষয়ে ফেল থাকলে সামগ্রিক গ্রেড বাধ্যতামূলকভাবে 'F' এবং জিপিএ 0.00
+    // কোনো বিষয়ে ফেল থাকলে (< 40) সামগ্রিক গ্রেড বাধ্যতামূলকভাবে 'F' এবং জিপিএ ০.০০
     if (hasFailedCompulsory) {
       return {
-        totalObtained,
-        average: avgMarks,
+        totalObtained: toBengaliDigits(totalObtained),
+        average: toBengaliDigits(avgMarks),
         grade: "F",
-        gpa: "0.00",
-        status: "Failed",
+        gpa: "০.০০",
+        status: "অকৃতকার্য",
       };
     }
 
     // সকল বিষয়ে পাস করলে জিপিএ ও গ্রেড নির্ধারণ
-    const calculatedGPA = (totalGradePoints / totalSubjects).toFixed(2);
-    const overallGrade = getOverallGradeFromGPA(calculatedGPA);
+    const rawGPA = Math.min(5.0, totalGradePoints / totalSubjects);
+    const calculatedGPA = rawGPA.toFixed(2);
+    const overallGrade = getOverallGradeFromGPA(rawGPA);
 
     return {
-      totalObtained,
-      average: avgMarks,
+      totalObtained: toBengaliDigits(totalObtained),
+      average: toBengaliDigits(avgMarks),
       grade: overallGrade,
-      gpa: calculatedGPA,
-      status: "Passed",
+      gpa: toBengaliDigits(calculatedGPA),
+      status: "উত্তীর্ণ",
     };
   };
 
@@ -465,7 +490,7 @@ export default function ResultSheetGenerator() {
                 ✦ রেজাল্ট ম্যানেজমেন্ট প্যানেল ✦
               </span>
               <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-emerald-100 flex items-center gap-2">
-                রেজাল্ট শিট জেনারেটর ড্যাশবোর্ড
+                রেজাল্ট শিট জেনারেটর
               </h1>
             </div>
 
@@ -481,15 +506,6 @@ export default function ResultSheetGenerator() {
             >
               <span className="text-lg">🖨️</span>
               <span>রেজাল্ট শিট প্রিন্ট করুন</span>
-              <span
-                className={`px-2.5 py-0.5 rounded-full text-xs font-black ${
-                  selectedIds.length === 0
-                    ? "bg-emerald-900/50 text-emerald-700"
-                    : "bg-emerald-950/40 text-emerald-950"
-                }`}
-              >
-                {selectedIds.length}
-              </span>
             </button>
           </div>
 
@@ -514,7 +530,7 @@ export default function ResultSheetGenerator() {
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
-                    placeholder="Student ID দিয়ে খুঁজুন..."
+                    placeholder="শিক্ষার্থীর আইডি দিয়ে খুঁজুন..."
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
                     className="w-full bg-[#031d16] text-emerald-100 placeholder-emerald-600/70 border border-emerald-800/80 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-amber-400 transition-all"
@@ -641,6 +657,14 @@ export default function ResultSheetGenerator() {
             break-inside: avoid !important;
             overflow: hidden !important;
           }
+
+          .signature-controller,
+          .signature-principal {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            image-rendering: -webkit-optimize-contrast !important;
+            image-rendering: crisp-edges !important;
+          }
         }
       `}</style>
 
@@ -683,22 +707,23 @@ export default function ResultSheetGenerator() {
                 <div className="w-full h-full border-[3px] border-[#C5A059] p-1 box-border relative">
                   <div className="w-full h-full border border-[#C5A059] p-2 flex flex-col justify-between box-border relative">
                     {/* ব্যাকগ্রাউন্ড ওয়াটারমার্ক */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 opacity-[0.06]">
-                      <div className="w-[500px] h-[500px] rounded-full overflow-hidden flex items-center justify-center">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0 opacity-[0.05]">
+                      <div className="w-[420px] h-[420px] rounded-full overflow-hidden flex items-center justify-center">
                         <Image
                           src="/aimlogo1.png"
                           alt="Watermark Logo"
-                          width={500}
-                          height={500}
+                          width={420}
+                          height={420}
                           className="w-full h-full object-cover scale-[1.05] transform-gpu"
                         />
                       </div>
                     </div>
 
                     {/* মূল কন্টেন্ট */}
-                    <div className="relative z-10 flex-1 flex flex-col justify-between overflow-hidden">
-                      {/* হেডার: লোগো ও মাদরাসার নাম */}
-                      <div>
+                    <div className="relative z-10 flex-1 flex flex-col justify-between">
+                      <div className="flex-1 flex flex-col">
+                        {/* হেডার: লোগো ও মাদরাসার নাম */}
+                        <div>
                         <div className="flex justify-between items-center relative gap-2 flex-shrink-0 w-full overflow-hidden">
                           {/* মাদ্রাসার লোগো */}
                           <div className="w-20 h-20 md:w-45 md:h-45 print:!w-36 print:!h-36 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-3">
@@ -734,30 +759,8 @@ export default function ResultSheetGenerator() {
 
                         {/* রেজাল্ট ব্যাজ ও হেডলাইন */}
                         <div className="flex justify-between items-center my-2 px-1">
-                          {/* বাম পাশে QR Code */}
-                          <div className="p-1 border border-gray-300 rounded bg-white shadow-sm">
-                            <QRCodeSVG
-                              value={`STUDENT-RESULT:${student.studentId}`}
-                              size={52}
-                            />
-                          </div>
-
-                          {/* মাঝখানে ক্যাপসুল টাইটেল */}
-                          <div className="text-center">
-                            <div className="bg-[#043e30] text-white px-5 py-1 rounded-full inline-block font-bold text-xs tracking-wide shadow-sm">
-                              মার্কসীট
-                            </div>
-                            <p className="text-[11px] font-bold text-gray-800 mt-1">
-                              {examType} -{" "}
-                              {(resData.year || "").split(/[-–/]/)[0].trim()}
-                            </p>
-                            <p className="text-[11px] font-bold text-gray-800">
-                              শ্রেণি: {student.class || "N/A"}
-                            </p>
-                          </div>
-
-                          {/* ডান পাশে ছবি বা N/A বক্স */}
-                          <div className="w-14 h-16 border-2 border-gray-300 rounded-lg flex items-center justify-center bg-gray-50 overflow-hidden text-[10px] text-gray-400 font-bold">
+                          {/* বাম পাশে শিক্ষার্থীর ছবি (QR কোডের স্থানে) */}
+                          <div className="w-16 h-18 border-2 border-gray-300 rounded-lg flex items-center justify-center bg-gray-50 overflow-hidden text-[9px] text-gray-400 font-bold shadow-xs">
                             {student?.studentImage ? (
                               <Image
                                 src={student?.studentImage}
@@ -768,8 +771,111 @@ export default function ResultSheetGenerator() {
                                 className="object-cover w-full h-full"
                               />
                             ) : (
-                              "N/A"
+                              "ছবি নেই"
                             )}
+                          </div>
+
+                          {/* মাঝখানে ক্যাপসুল টাইটেল */}
+                          <div className="text-center">
+                            <div className="bg-[#043e30] text-white px-5 py-1 rounded-full inline-block font-bold text-xs tracking-wide shadow-sm">
+                              মার্কসীট
+                            </div>
+                            <p className="text-[11px] font-bold text-gray-800 mt-1">
+                              {examType} -{" "}
+                              {toBengaliDigits(
+                                (resData.year || "").split(/[-–/]/)[0].trim(),
+                              )}
+                            </p>
+                            <p className="text-[11px] font-bold text-gray-800">
+                              শ্রেণি: {student.class || "প্রযোজ্য নয়"}
+                            </p>
+                          </div>
+
+                          {/* ডান পাশে গ্রেডিং সিস্টেম বিবরণী (শিক্ষার্থীর ছবির স্থানে) */}
+                          <div className="flex justify-end">
+                            <table className="border-collapse border border-slate-600 text-[6.5px] sm:text-[7px] leading-tight text-center bg-white shadow-xs">
+                              <thead>
+                                <tr className="bg-[#043e30] text-amber-300 font-bold">
+                                  <th className="border border-slate-500 px-1 py-0.5 whitespace-nowrap">
+                                    নম্বর
+                                  </th>
+                                  <th className="border border-slate-500 px-0.5 py-0.5 whitespace-nowrap">
+                                    গ্রেড
+                                  </th>
+                                  <th className="border border-slate-500 px-1 py-0.5 whitespace-nowrap">
+                                    পয়েন্ট
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td className="border border-slate-400 px-1 py-0">
+                                    ৮০-১০০
+                                  </td>
+                                  <td className="border border-slate-400 px-0.5 py-0 font-bold">
+                                    A+
+                                  </td>
+                                  <td className="border border-slate-400 px-1 py-0">
+                                    ৫.০০
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border border-slate-400 px-1 py-0">
+                                    ৭০-৭৯
+                                  </td>
+                                  <td className="border border-slate-400 px-0.5 py-0 font-bold">
+                                    A
+                                  </td>
+                                  <td className="border border-slate-400 px-1 py-0">
+                                    ৪.০০
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border border-slate-400 px-1 py-0">
+                                    ৬০-৬৯
+                                  </td>
+                                  <td className="border border-slate-400 px-0.5 py-0 font-bold">
+                                    A-
+                                  </td>
+                                  <td className="border border-slate-400 px-1 py-0">
+                                    ৩.০০
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border border-slate-400 px-1 py-0">
+                                    ৫০-৫৯
+                                  </td>
+                                  <td className="border border-slate-400 px-0.5 py-0 font-bold">
+                                    B
+                                  </td>
+                                  <td className="border border-slate-400 px-1 py-0">
+                                    ২.০০
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border border-slate-400 px-1 py-0">
+                                    ৪০-৪৯
+                                  </td>
+                                  <td className="border border-slate-400 px-0.5 py-0 font-bold">
+                                    C
+                                  </td>
+                                  <td className="border border-slate-400 px-1 py-0">
+                                    ১.০০
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border border-slate-400 px-1 py-0">
+                                    ০-৩৯
+                                  </td>
+                                  <td className="border border-slate-400 px-0.5 py-0 font-bold text-red-600">
+                                    F
+                                  </td>
+                                  <td className="border border-slate-400 px-1 py-0">
+                                    ০.০০
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
                           </div>
                         </div>
 
@@ -781,7 +887,7 @@ export default function ResultSheetGenerator() {
                               পরীক্ষার্থীর নাম:
                             </span>
                             <span className="font-bold border-b border-dashed border-gray-400 flex-1 truncate">
-                              {student.name}
+                              {student.name || "প্রযোজ্য নয়"}
                             </span>
                           </div>
 
@@ -791,7 +897,7 @@ export default function ResultSheetGenerator() {
                               আইডি:
                             </span>
                             <span className="font-bold border-b border-dashed border-gray-400 flex-1">
-                              {student.studentId}
+                              {toBengaliDigits(student.studentId)}
                             </span>
                           </div>
 
@@ -801,7 +907,7 @@ export default function ResultSheetGenerator() {
                               পিতার নাম:
                             </span>
                             <span className="border-b border-dashed border-gray-400 flex-1 truncate">
-                              {student.fatherNameBangla || "N/A"}
+                              {student.fatherNameBangla || "প্রযোজ্য নয়"}
                             </span>
                           </div>
 
@@ -811,7 +917,9 @@ export default function ResultSheetGenerator() {
                               রোল নং:
                             </span>
                             <span className="border-b border-dashed border-gray-400 flex-1">
-                              {student.roll || "N/A"}
+                              {student.roll
+                                ? toBengaliDigits(student.roll)
+                                : "প্রযোজ্য নয়"}
                             </span>
                           </div>
 
@@ -842,7 +950,7 @@ export default function ResultSheetGenerator() {
                       </div>
 
                       {/* নম্বর টেবিল */}
-                      <div className="my-1 flex-1">
+                      <div className="my-1 flex-shrink-0">
                         <table className="w-full border-collapse border border-[#C5A059] text-center text-xs">
                           <thead>
                             <tr className="bg-[#fcf8ed] font-bold text-gray-800 text-xs">
@@ -866,14 +974,14 @@ export default function ResultSheetGenerator() {
 
                               <th className="border border-[#C5A059] p-1.5 w-20 font-bold">
                                 {examType === "বার্ষিক পরীক্ষা"
-                                  ? "মোট মার্কস"
-                                  : "প্রাপ্ত মার্কস"}
+                                  ? "মোট নম্বর"
+                                  : "প্রাপ্ত নম্বর"}
                               </th>
                               <th className="border border-[#C5A059] p-1.5 w-16">
                                 গ্রেড
                               </th>
                               <th className="border border-[#C5A059] p-1.5 w-14">
-                                জিপি (GP)
+                                গ্রেড পয়েন্ট
                               </th>
                             </tr>
                           </thead>
@@ -917,6 +1025,23 @@ export default function ResultSheetGenerator() {
                                     calculateSubjectGrade(normalizedMark);
                                 }
 
+                                const formatVal = (v) => {
+                                  if (v === "অনুঃ") return "অনুঃ";
+                                  if (
+                                    v === "-" ||
+                                    v === undefined ||
+                                    v === null
+                                  )
+                                    return "-";
+                                  if (
+                                    typeof v === "number" ||
+                                    (!isNaN(parseFloat(v)) && isFinite(v))
+                                  ) {
+                                    return toBengaliDigits(v);
+                                  }
+                                  return v;
+                                };
+
                                 return (
                                   <tr
                                     key={idx}
@@ -929,25 +1054,34 @@ export default function ResultSheetGenerator() {
                                     {examType === "বার্ষিক পরীক্ষা" && (
                                       <>
                                         <td className="border border-[#C5A059] p-1.5">
-                                          {t1}
+                                          {formatVal(t1)}
                                         </td>
                                         <td className="border border-[#C5A059] p-1.5">
-                                          {t2}
+                                          {formatVal(t2)}
                                         </td>
                                         <td className="border border-[#C5A059] p-1.5">
-                                          {ann}
+                                          {formatVal(ann)}
                                         </td>
                                       </>
                                     )}
 
                                     <td className="border border-[#C5A059] p-1.5 font-bold">
-                                      {finalMark}
+                                      {formatVal(finalMark)}
                                     </td>
-                                    <td className="border border-[#C5A059] p-1.5 font-bold">
+                                    <td
+                                      className={`border border-[#C5A059] p-1.5 font-bold ${
+                                        gradeInfo.grade === "F" ||
+                                        gradeInfo.grade === "অনুঃ"
+                                          ? "text-red-600"
+                                          : ""
+                                      }`}
+                                    >
                                       {gradeInfo.grade}
                                     </td>
                                     <td className="border border-[#C5A059] p-1.5">
-                                      {gradeInfo.gpa}
+                                      {gradeInfo.grade === "অনুঃ"
+                                        ? "০.০০"
+                                        : toBengaliDigits(gradeInfo.gpa)}
                                     </td>
                                   </tr>
                                 );
@@ -958,7 +1092,7 @@ export default function ResultSheetGenerator() {
                       </div>
 
                       {/* সামারি সেকশন */}
-                      <div className="mt-2 border border-[#C5A059] bg-[#fcf8ed] p-2 rounded-sm">
+                      <div className="mt-1 border border-[#C5A059] bg-[#fcf8ed] p-2 rounded-sm flex-shrink-0">
                         <div className="grid grid-cols-4 gap-2 text-center text-xs font-bold text-gray-800">
                           <div>
                             <span className="block text-[10px] text-gray-600 font-normal">
@@ -986,10 +1120,13 @@ export default function ResultSheetGenerator() {
                           </div>
                         </div>
                       </div>
+                    </div>
 
-                      <div className="flex justify-between items-end my-1 px-4 flex-shrink-0">
+                    {/* ফুটার লেআউট (স্বাক্ষর এরিয়া এবং সোশ্যাল ও কন্টাক্ট ইনফো) */}
+                    <div className="mt-auto flex-shrink-0 pt-2 relative z-10">
+                      <div className="flex justify-between items-end mb-2 px-4">
                         {/* পরীক্ষা নিয়ন্ত্রক এর স্বাক্ষর */}
-                        <div className="text-center flex flex-col items-center print:mt-auto relative">
+                        <div className="text-center flex flex-col items-center relative">
                           <div className="relative w-36 h-10">
                             <Image
                               src={"/anarul.png"}
@@ -997,7 +1134,7 @@ export default function ResultSheetGenerator() {
                               width={200}
                               height={60}
                               unoptimized
-                              className="absolute -top-2 right-8 h-12 w-20 object-contain mix-blend-multiply contrast-[800%] brightness-[60%] grayscale -rotate-90"
+                              className="signature-controller absolute -top-2 right-8 h-12 w-20 object-contain mix-blend-multiply contrast-[800%] brightness-[60%] grayscale -rotate-90"
                             />
                           </div>
                           <div className="w-28 border-b border-gray-800 mb-0.5"></div>
@@ -1007,15 +1144,15 @@ export default function ResultSheetGenerator() {
                         </div>
 
                         {/* প্রিন্সিপাল এর স্বাক্ষর */}
-                        <div className="text-center flex flex-col items-center">
-                          <div className="relative w-36 h-10 print:mt-auto">
+                        <div className="text-center flex flex-col items-center relative">
+                          <div className="relative w-36 h-10">
                             <Image
                               src={"/principle's_signature.jpg"}
                               alt="Principal Signature"
                               width={100}
                               height={40}
                               unoptimized
-                              className="absolute -top-2 right-8 h-12 w-20 object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45"
+                              className="signature-principal absolute -top-2 right-8 h-12 w-20 object-contain mix-blend-multiply contrast-[800%] brightness-[85%] grayscale -rotate-45"
                             />
                           </div>
                           <div className="w-28 border-b border-gray-800 mb-0.5"></div>
@@ -1024,45 +1161,48 @@ export default function ResultSheetGenerator() {
                           </span>
                         </div>
                       </div>
-                    </div>
-                    <div className="relative z-10 mt-auto pt-1 border-t border-gray-300 flex-shrink-0">
-                      <div className="flex flex-wrap justify-center items-center gap-x-1 gap-y-0.5 text-[8.5px] font-semibold text-gray-800">
-                        <span className="flex items-center gap-0.5">
-                          <Phone className="w-2.5 h-2.5 text-gray-700" />
-                          01316-209201
-                        </span>
 
-                        <span className="flex items-center gap-0.5">
-                          <BsWhatsapp className="w-2.5 h-2.5 text-green-600" />
-                          01748-886161
-                        </span>
+                      {/* সোশ্যাল ও কন্টাক্ট ইনফো */}
+                      <div className="pt-1 border-t border-gray-300">
+                        <div className="flex flex-wrap justify-center items-center gap-x-1 gap-y-0.5 text-[8.5px] font-semibold text-gray-800">
+                          <span className="flex items-center gap-0.5">
+                            <Phone className="w-2.5 h-2.5 text-gray-700" />
+                            ০১৩১৬-২০৯২০১
+                          </span>
 
-                        <span className="flex items-center gap-0.5">
-                          <Globe className="w-2.5 h-2.5 text-blue-500" />
-                          www.aimhabiganj.com
-                        </span>
+                          <span className="flex items-center gap-0.5">
+                            <BsWhatsapp className="w-2.5 h-2.5 text-green-600" />
+                            ০১৭৪৮-৮৮৬১৬১
+                          </span>
 
-                        <span className="flex items-center gap-0.5">
-                          <Mail className="w-2.5 h-2.5 text-red-500" />
-                          aimhabiganj@gmail.com
-                        </span>
+                          <span className="flex items-center gap-0.5">
+                            <Globe className="w-2.5 h-2.5 text-blue-500" />
+                            www.aimhabiganj.com
+                          </span>
 
-                        <span className="flex items-center gap-0.5">
-                          <FaFacebook className="w-2.5 h-2.5 text-blue-600" />
-                          aimhabiganj
-                        </span>
+                          <span className="flex items-center gap-0.5">
+                            <Mail className="w-2.5 h-2.5 text-red-500" />
+                            aimhabiganj@gmail.com
+                          </span>
 
-                        <span className="flex items-center gap-0.5">
-                          <BsYoutube className="w-2.5 h-2.5 text-red-600" />
-                          aimhabiganj
-                        </span>
+                          <span className="flex items-center gap-0.5">
+                            <FaFacebook className="w-2.5 h-2.5 text-blue-600" />
+                            aimhabiganj
+                          </span>
+
+                          <span className="flex items-center gap-0.5">
+                            <BsYoutube className="w-2.5 h-2.5 text-red-600" />
+                            aimhabiganj
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            );
-          })}
+            </div>
+          );
+        })}
         </div>
       )}
     </div>

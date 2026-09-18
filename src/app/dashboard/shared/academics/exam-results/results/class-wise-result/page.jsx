@@ -12,6 +12,12 @@ import { FaFacebook } from "react-icons/fa";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_API;
 
+const toBengaliDigits = (num) => {
+  if (num === null || num === undefined) return "";
+  const bengaliDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+  return String(num).replace(/[0-9]/g, (digit) => bengaliDigits[Number(digit)]);
+};
+
 function ClassWiseResultContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -171,10 +177,9 @@ function ClassWiseResultContent() {
     const num = typeof mark === "number" ? mark : parseFloat(mark) || 0;
     if (num >= 80) return 5.0;
     if (num >= 70) return 4.0;
-    if (num >= 60) return 3.5;
-    if (num >= 50) return 3.0;
-    if (num >= 40) return 2.0;
-    if (num >= 33) return 1.0;
+    if (num >= 60) return 3.0;
+    if (num >= 50) return 2.0;
+    if (num >= 40) return 1.0;
     return 0.0;
   };
 
@@ -182,10 +187,9 @@ function ClassWiseResultContent() {
     const num = parseFloat(gpaVal) || 0;
     if (num >= 5.0) return "A+";
     if (num >= 4.0) return "A";
-    if (num >= 3.5) return "A-";
-    if (num >= 3.0) return "B";
-    if (num >= 2.0) return "C";
-    if (num >= 1.0) return "D";
+    if (num >= 3.0) return "A-";
+    if (num >= 2.0) return "B";
+    if (num >= 1.0) return "C";
     return "F";
   };
 
@@ -218,9 +222,13 @@ function ClassWiseResultContent() {
           termData.exam === "A" ||
           termData.exam === "a" ||
           termData.exam === "ABS" ||
+          termData.exam === "Abs" ||
+          termData.exam === "অনুঃ" ||
           termData.ct === "A" ||
           termData.ct === "a" ||
-          termData.ct === "ABS";
+          termData.ct === "ABS" ||
+          termData.ct === "Abs" ||
+          termData.ct === "অনুঃ";
 
         const ct = parseFloat(termData.ct) || 0;
         const exam = parseFloat(termData.exam) || 0;
@@ -229,7 +237,7 @@ function ClassWiseResultContent() {
         if (isAbsent) {
           absentSubsCount++;
           hasFailedSub = true;
-        } else if (total < 33) {
+        } else if (total < 40) {
           hasFailedSub = true;
           totalMarks += total;
         } else {
@@ -248,7 +256,7 @@ function ClassWiseResultContent() {
 
       if (isAbsentAll) {
         gpa = "0.00";
-        grade = "ABS";
+        grade = "অনুঃ";
       } else if (hasFailedSub) {
         gpa = "0.00";
         grade = "F";
@@ -362,27 +370,6 @@ function ClassWiseResultContent() {
   return (
     <>
       <style jsx global>{`
-        .watermark-wrapper {
-          position: absolute !important;
-          top: 50% !important;
-          left: 50% !important;
-          transform: translate(-50%, -50%) !important;
-          z-index: 0 !important;
-          pointer-events: none !important;
-          display: flex !important;
-          justify-content: center !important;
-          align-items: center !important;
-          width: 100% !important;
-          height: 100% !important;
-          opacity: 0.08 !important;
-        }
-
-        .watermark-wrapper img {
-          width: 320px !important;
-          height: auto !important;
-          object-fit: contain !important;
-        }
-
         @media print {
           @page {
             size: A4 landscape;
@@ -429,11 +416,12 @@ function ClassWiseResultContent() {
             left: 50% !important;
             transform: translate(-50%, -50%) !important;
             z-index: 0 !important;
-            opacity: 0.08 !important;
+            opacity: 0.07 !important;
+            pointer-events: none !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
-          table {
+          .main-result-table {
             width: 100% !important;
             min-width: 100% !important;
             font-size: 9px !important;
@@ -441,24 +429,65 @@ function ClassWiseResultContent() {
             background: transparent !important;
             page-break-inside: auto !important;
           }
-          thead {
+          .main-result-table thead {
             display: table-header-group !important;
           }
-          tfoot {
+          .main-result-table tfoot {
             display: table-footer-group !important;
           }
-          tr {
+          .main-result-table tr {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
           }
-          th,
-          td {
+          .main-result-table th,
+          .main-result-table td {
             border: 1px solid #475569 !important;
             padding: 3.5px 2px !important;
           }
-          thead th {
+          .main-result-table thead th {
             background-color: #043e30 !important;
             color: #fef08a !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          .grading-box-table {
+            width: auto !important;
+            min-width: unset !important;
+            border-collapse: collapse !important;
+            background-color: #ffffff !important;
+            border: 1px solid #475569 !important;
+            font-size: 8px !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          .grading-box-table th {
+            background-color: #f1f5f9 !important;
+            color: #1e293b !important;
+            border: 1px solid #64748b !important;
+            padding: 1px 3px !important;
+            white-space: nowrap !important;
+            font-weight: 700 !important;
+            font-size: 8px !important;
+            line-height: 1.1 !important;
+            text-align: center !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          .grading-box-table td {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            border: 1px solid #94a3b8 !important;
+            padding: 1px 3px !important;
+            white-space: nowrap !important;
+            font-size: 8px !important;
+            line-height: 1.1 !important;
+            text-align: center !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          .grading-box-table td.grading-fail {
+            color: #dc2626 !important;
+            font-weight: 700 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
@@ -471,6 +500,26 @@ function ClassWiseResultContent() {
           .print-page-break-avoid {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
+          }
+          .header-logo-container {
+            width: 6rem !important;
+            height: 6rem !important;
+            flex-shrink: 0 !important;
+          }
+          .signature-controller,
+          .signature-principal {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            image-rendering: -webkit-optimize-contrast !important;
+            image-rendering: crisp-edges !important;
+          }
+          .print-result-wrapper {
+            display: flex !important;
+            flex-direction: column !important;
+            min-height: 185mm !important;
+          }
+          .print-footer-container {
+            margin-top: auto !important;
           }
         }
       `}</style>
@@ -495,9 +544,7 @@ function ClassWiseResultContent() {
                       isPublished ? "bg-emerald-500" : "bg-rose-500"
                     }`}
                   ></span>
-                  {isPublished
-                    ? "প্রকাশিত (Published)"
-                    : "অপ্রকাশিত (Unpublished)"}
+                  {isPublished ? "প্রকাশিত" : "অপ্রকাশিত"}
                 </span>
               </div>
               <p className="text-xs text-slate-500 mt-1">
@@ -645,305 +692,158 @@ function ClassWiseResultContent() {
                 </div>
               )}
 
-              <div className="watermark-wrapper">
-                <Image
-                  src="/aimlogo1.png"
-                  alt="Watermark Logo"
-                  width={360}
-                  height={360}
-                  className="object-contain"
-                />
-              </div>
-
-              {/* ১. ৩-কলাম হেডার লেআউট (Madrasah Logo, Banner & Info, Grading System Table) */}
-              <div className="mb-3 border-b-2 border-slate-800 pb-2 print-page-break-avoid">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="w-16 sm:w-20 flex-shrink-0 flex items-center justify-center">
-                    <Image
-                      src="/aimlogo1.png"
-                      alt="Institution Logo"
-                      width={80}
-                      height={80}
-                      priority
-                      className="w-14 h-14 sm:w-16 sm:h-16 object-contain"
-                    />
-                  </div>
-
-                  <div className="flex-1 text-center px-1">
-                    <Image
-                      src="/banner.png"
-                      alt="Institution Banner"
-                      width={500}
-                      height={95}
-                      priority
-                      className="w-full max-w-[300px] sm:max-w-[380px] h-auto max-h-14 object-contain mx-auto"
-                    />
-                    <h2 className="text-xs sm:text-sm font-bold text-slate-900 mt-0.5">
-                      শ্রেণিভিত্তিক ফলাফল বিবরণী -{" "}
-                      {(year || "").split(/[-–/]/)[0].trim()}
-                    </h2>
-                    <p className="text-[10px] sm:text-xs font-semibold text-slate-700">
-                      শ্রেণি:{" "}
-                      <span className="font-bold text-slate-900">
-                        {selectedClass}
-                      </span>{" "}
-                      | পরীক্ষা:{" "}
-                      <span className="font-bold text-slate-900">
-                        {examType === "term1"
-                          ? "প্রথম সাময়িক"
-                          : examType === "term2"
-                            ? "দ্বিতীয় সাময়িক"
-                            : "বার্ষিক পরীক্ষা"}
-                      </span>
-                    </p>
-                  </div>
-
-                  <div className="flex-shrink-0 flex justify-end">
-                    <table className="border-collapse border border-slate-600 text-[7.5px] sm:text-[8px] leading-none text-center bg-white shadow-xs">
-                      <thead>
-                        <tr className="bg-slate-100 text-slate-800 font-bold">
-                          <th className="border border-slate-500 px-1 py-0.5 whitespace-nowrap">
-                            Mark Interval
-                          </th>
-                          <th className="border border-slate-500 px-1 py-0.5 whitespace-nowrap">
-                            Grade
-                          </th>
-                          <th className="border border-slate-500 px-1 py-0.5 whitespace-nowrap">
-                            Point
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td className="border border-slate-400 px-1 py-0.2">
-                            80 - 100
-                          </td>
-                          <td className="border border-slate-400 px-1 py-0.2 font-bold">
-                            A+
-                          </td>
-                          <td className="border border-slate-400 px-1 py-0.2">
-                            5.00
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="border border-slate-400 px-1 py-0.2">
-                            70 - 79
-                          </td>
-                          <td className="border border-slate-400 px-1 py-0.2 font-bold">
-                            A
-                          </td>
-                          <td className="border border-slate-400 px-1 py-0.2">
-                            4.00
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="border border-slate-400 px-1 py-0.2">
-                            60 - 69
-                          </td>
-                          <td className="border border-slate-400 px-1 py-0.2 font-bold">
-                            A-
-                          </td>
-                          <td className="border border-slate-400 px-1 py-0.2">
-                            3.50
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="border border-slate-400 px-1 py-0.2">
-                            50 - 59
-                          </td>
-                          <td className="border border-slate-400 px-1 py-0.2 font-bold">
-                            B
-                          </td>
-                          <td className="border border-slate-400 px-1 py-0.2">
-                            3.00
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="border border-slate-400 px-1 py-0.2">
-                            40 - 49
-                          </td>
-                          <td className="border border-slate-400 px-1 py-0.2 font-bold">
-                            C
-                          </td>
-                          <td className="border border-slate-400 px-1 py-0.2">
-                            2.00
-                          </td>
-                        </tr>
-
-                        <tr>
-                          <td className="border border-slate-400 px-1 py-0.2">
-                            0 - 39
-                          </td>
-                          <td className="border border-slate-400 px-1 py-0.2 font-bold text-red-600">
-                            F
-                          </td>
-                          <td className="border border-slate-400 px-1 py-0.2">
-                            0.00
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
+              <div className="watermark-wrapper absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0 opacity-[0.06]">
+                <div className="w-[480px] h-[480px] rounded-full overflow-hidden flex items-center justify-center">
+                  <Image
+                    src="/aimlogo1.png"
+                    alt="Watermark Logo"
+                    width={480}
+                    height={480}
+                    className="w-full h-full object-cover scale-[1.08] transform-gpu"
+                  />
                 </div>
               </div>
 
-              {/* মোবাইল ভিউ (স্ক্রিন অনলি) */}
-              <div className="block sm:hidden divide-y divide-slate-200 bg-white/90 no-print relative z-10">
-                {results.map((student) => {
-                  const calc =
-                    studentCalculationsMap.get(student.studentId) || {};
-                  const merit =
-                    calc.hasFailed || calc.isAbsentAll
-                      ? "-"
-                      : meritRankMap.get(student.studentId) || "-";
+              <div className="relative z-10 print-result-wrapper flex flex-col min-h-[calc(100vh-280px)] print:min-h-[185mm]">
+                <div className="flex-1 flex flex-col">
+                  {/* ১. ৩-কলাম হেডার লেআউট (Madrasah Logo, Banner & Info, Grading System Table) */}
+                  <div className="mb-3 border-b-2 border-slate-800 pb-2 print-page-break-avoid">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="header-logo-container w-30 h-30 print:w-30 print:h-30 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-3">
+                        <Image
+                          src={"/aimlogo1.png"}
+                          alt="Institution Logo"
+                          width={96}
+                          height={96}
+                          quality={100}
+                          priority
+                          className="w-full h-full object-cover scale-[1.10] transform-gpu"
+                        />
+                      </div>
+                      <div className="flex-1 text-center px-1">
+                        <Image
+                          src={"/banner_routine.png"}
+                          alt="Institution Banner"
+                          width={2000}
+                          height={400}
+                          quality={100}
+                          priority
+                          className="w-full h-auto max-h-34 object-fill mx-auto print:max-h-34"
+                        />
 
-                  return (
-                    <div key={student.studentId} className="p-4 space-y-3">
-                      <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-                        <div className="flex items-center gap-2">
-                          <span className="bg-[#043e30] text-amber-300 font-bold px-2 py-0.5 rounded text-xs">
-                            রোল: {student.roll || "N/A"}
+                        <p className="text-[10px] sm:text-xs font-semibold text-slate-700">
+                          শ্রেণি:{" "}
+                          <span className="font-bold text-slate-900">
+                            {selectedClass}
+                          </span>{" "}
+                          | পরীক্ষা:{" "}
+                          <span className="font-bold text-slate-900">
+                            {examType === "term1"
+                              ? "প্রথম সাময়িক"
+                              : examType === "term2"
+                                ? "দ্বিতীয় সাময়িক"
+                                : "বার্ষিক পরীক্ষা"}
                           </span>
-                          <span className="font-mono font-bold text-slate-700 text-xs">
-                            ID: {student.studentId}
+                          <span> - </span>
+                          <span>
+                            {toBengaliDigits(
+                              (year || "").split(/[-–/]/)[0].trim(),
+                            )}
                           </span>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-[10px] text-slate-500 block leading-tight">
-                            মেধাস্থান
-                          </span>
-                          <span className="font-extrabold text-[#043e30] text-sm">
-                            {merit}
-                          </span>
-                        </div>
+                        </p>
                       </div>
 
-                      <div>
-                        <span className="text-[11px] font-semibold text-slate-500 block">
-                          শিক্ষার্থীর নাম
-                        </span>
-                        <h4 className="font-bold text-slate-800 text-sm">
-                          {student.studentName || "N/A"}
-                        </h4>
-                      </div>
+                      <div className="flex-shrink-0 flex justify-end">
+                        <table className="grading-box-table border-collapse border border-slate-600 text-[7.5px] sm:text-[8px] leading-none text-center bg-white shadow-xs">
+                          <thead>
+                            <tr className="bg-slate-100 text-slate-800 font-bold">
+                              <th className="border border-slate-500 px-1 py-0.5 whitespace-nowrap">
+                                নম্বর
+                              </th>
+                              <th className="border border-slate-500 px-1 py-0.5 whitespace-nowrap">
+                                গ্রেড
+                              </th>
+                              <th className="border border-slate-500 px-1 py-0.5 whitespace-nowrap">
+                                পয়েন্ট
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td className="border border-slate-400 px-1 py-0.2">
+                                ৮০ - ১০০
+                              </td>
+                              <td className="border border-slate-400 px-1 py-0.2 font-bold">
+                                A+
+                              </td>
+                              <td className="border border-slate-400 px-1 py-0.2">
+                                ৫.০০
+                              </td>
+                            </tr>
+                            <tr>
+                              <td className="border border-slate-400 px-1 py-0.2">
+                                ৭০ - ৭৯
+                              </td>
+                              <td className="border border-slate-400 px-1 py-0.2 font-bold">
+                                A
+                              </td>
+                              <td className="border border-slate-400 px-1 py-0.2">
+                                ৪.০০
+                              </td>
+                            </tr>
+                            <tr>
+                              <td className="border border-slate-400 px-1 py-0.2">
+                                ৬০ - ৬৯
+                              </td>
+                              <td className="border border-slate-400 px-1 py-0.2 font-bold">
+                                A-
+                              </td>
+                              <td className="border border-slate-400 px-1 py-0.2">
+                                ৩.০০
+                              </td>
+                            </tr>
+                            <tr>
+                              <td className="border border-slate-400 px-1 py-0.2">
+                                ৫০ - ৫৯
+                              </td>
+                              <td className="border border-slate-400 px-1 py-0.2 font-bold">
+                                B
+                              </td>
+                              <td className="border border-slate-400 px-1 py-0.2">
+                                ২.০০
+                              </td>
+                            </tr>
+                            <tr>
+                              <td className="border border-slate-400 px-1 py-0.2">
+                                ৪০ - ৪৯
+                              </td>
+                              <td className="border border-slate-400 px-1 py-0.2 font-bold">
+                                C
+                              </td>
+                              <td className="border border-slate-400 px-1 py-0.2">
+                                ১.০০
+                              </td>
+                            </tr>
 
-                      <div>
-                        <span className="text-[11px] font-semibold text-slate-500 block mb-1.5">
-                          বিষয়ভিত্তিক নম্বর
-                        </span>
-                        <div className="flex flex-wrap gap-1.5">
-                          {student.allSubjects?.map((sub, idx) => {
-                            const termData = sub[examType] || {};
-                            const isAbsent =
-                              Boolean(termData.isAbsent) ||
-                              termData.exam === "A" ||
-                              termData.exam === "Abs" ||
-                              termData.exam === "ABS" ||
-                              termData.ct === "A" ||
-                              termData.ct === "Abs" ||
-                              termData.ct === "ABS";
-                            const ct = parseFloat(termData.ct) || 0;
-                            const exam = parseFloat(termData.exam) || 0;
-                            const subTotal = isAbsent ? 0 : ct + exam;
-                            const isSubFail = isAbsent || subTotal < 33;
-
-                            return (
-                              <span
-                                key={idx}
-                                className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs border ${
-                                  isSubFail
-                                    ? "bg-[#fee2e2] text-red-700 border-red-200 font-bold"
-                                    : "bg-slate-100 text-slate-700 border-slate-200/60"
-                                }`}
-                              >
-                                <span className="font-semibold">
-                                  {sub.subject}:
-                                </span>
-                                <span>{isAbsent ? "Absent" : subTotal}</span>
-                              </span>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center text-xs">
-                        <div className="bg-slate-50 p-1.5 rounded">
-                          <span className="text-[10px] text-slate-500 block">
-                            মোট মার্ক
-                          </span>
-                          <span className="font-bold text-slate-800">
-                            {calc.isAbsentAll ? "ABS" : calc.totalMarks}
-                          </span>
-                        </div>
-                        <div className="bg-slate-50 p-1.5 rounded">
-                          <span className="text-[10px] text-slate-500 block">
-                            জিপিএ
-                          </span>
-                          <span className="font-bold text-slate-800">
-                            {calc.gpa}
-                          </span>
-                        </div>
-                        <div className="bg-slate-50 p-1.5 rounded">
-                          <span className="text-[10px] text-slate-500 block">
-                            গ্রেড
-                          </span>
-                          <span
-                            className={`font-bold ${calc.grade === "F" ? "text-red-600" : "text-emerald-700"}`}
-                          >
-                            {calc.grade}
-                          </span>
-                        </div>
+                            <tr>
+                              <td className="border border-slate-400 px-1 py-0.2">
+                                ০ - ৩৯
+                              </td>
+                              <td className="border border-slate-400 px-1 py-0.2 font-bold text-red-600 grading-fail">
+                                F
+                              </td>
+                              <td className="border border-slate-400 px-1 py-0.2">
+                                ০.০০
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
 
-              {/* ২. ডেস্কটপ ও প্রিন্ট টেবিল ভিউ */}
-              <div className="hidden sm:block print-only overflow-x-auto relative z-10">
-                <table className="w-full text-left border-collapse text-[10px] sm:text-xs">
-                  <thead>
-                    <tr className="bg-[#043e30] text-amber-300">
-                      <th className="p-1.5 border border-emerald-900 font-bold text-center w-10">
-                        রোল
-                      </th>
-                      <th className="p-1.5 border border-emerald-900 font-bold w-16">
-                        আইডি
-                      </th>
-                      <th className="p-1.5 border border-emerald-900 font-bold min-w-[120px]">
-                        শিক্ষার্থীর নাম
-                      </th>
-
-                      {allSubjectsList.map((subjectName, i) => (
-                        <th
-                          key={i}
-                          className="p-1 border border-emerald-900 font-bold text-center whitespace-nowrap"
-                        >
-                          {subjectName}
-                        </th>
-                      ))}
-
-                      <th className="p-1.5 border border-emerald-900 font-bold text-center whitespace-nowrap">
-                        মোট মার্ক
-                      </th>
-                      <th className="p-1.5 border border-emerald-900 font-bold text-center whitespace-nowrap">
-                        গড়
-                      </th>
-                      <th className="p-1.5 border border-emerald-900 font-bold text-center whitespace-nowrap">
-                        মোট গ্রেড পয়েন্ট
-                      </th>
-                      <th className="p-1.5 border border-emerald-900 font-bold text-center whitespace-nowrap">
-                        জিপিএ
-                      </th>
-                      <th className="p-1.5 border border-emerald-900 font-bold text-center whitespace-nowrap">
-                        গ্রেড
-                      </th>
-                      <th className="p-1.5 border border-emerald-900 font-bold text-center whitespace-nowrap">
-                        মেধাস্থান
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white/90">
+                  {/* মোবাইল ভিউ (স্ক্রিন অনলি) */}
+                  <div className="block sm:hidden divide-y divide-slate-200 bg-white/90 no-print relative z-10">
                     {results.map((student) => {
                       const calc =
                         studentCalculationsMap.get(student.studentId) || {};
@@ -953,203 +853,401 @@ function ClassWiseResultContent() {
                           : meritRankMap.get(student.studentId) || "-";
 
                       return (
-                        <tr
-                          key={student.studentId}
-                          className="hover:bg-slate-50 border-b border-slate-200"
-                        >
-                          <td className="p-1.5 border border-slate-300 font-bold text-slate-700 text-center">
-                            {student.roll || "N/A"}
-                          </td>
-                          <td className="p-1.5 border border-slate-300 font-mono font-bold text-slate-800">
-                            {student.studentId}
-                          </td>
-                          <td className="p-1.5 border border-slate-300 font-bold text-slate-900 whitespace-nowrap">
-                            {student.studentName || "N/A"}
-                          </td>
+                        <div key={student.studentId} className="p-4 space-y-3">
+                          <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                            <div className="flex items-center gap-2">
+                              <span className="bg-[#043e30] text-amber-300 font-bold px-2 py-0.5 rounded text-xs">
+                                রোল:{" "}
+                                {student.roll
+                                  ? toBengaliDigits(student.roll)
+                                  : "প্রযোজ্য নয়"}
+                              </span>
+                              <span className="font-mono font-bold text-slate-700 text-xs">
+                                আইডি: {toBengaliDigits(student.studentId)}
+                              </span>
+                            </div>
+                            <div className="text-right">
+                              <span className="text-[10px] text-slate-500 block leading-tight">
+                                মেধাস্থান
+                              </span>
+                              <span className="font-extrabold text-[#043e30] text-sm">
+                                {merit !== "-" ? toBengaliDigits(merit) : "-"}
+                              </span>
+                            </div>
+                          </div>
 
-                          {allSubjectsList.map((subjName, idx) => {
-                            const matchedSub = student.allSubjects?.find(
-                              (s) => s.subject === subjName,
-                            );
-                            if (!matchedSub) {
-                              return (
-                                <td
-                                  key={idx}
-                                  className="p-1 border border-slate-300 text-center text-slate-400"
-                                >
-                                  -
-                                </td>
-                              );
-                            }
+                          <div>
+                            <span className="text-[11px] font-semibold text-slate-500 block">
+                              শিক্ষার্থীর নাম
+                            </span>
+                            <h4 className="font-bold text-slate-800 text-sm">
+                              {student.studentName || "প্রযোজ্য নয়"}
+                            </h4>
+                          </div>
 
-                            const termData = matchedSub[examType] || {};
-                            const isAbsent =
-                              Boolean(termData.isAbsent) ||
-                              termData.exam === "A" ||
-                              termData.exam === "Abs" ||
-                              termData.exam === "ABS" ||
-                              termData.ct === "A" ||
-                              termData.ct === "Abs" ||
-                              termData.ct === "ABS";
+                          <div>
+                            <span className="text-[11px] font-semibold text-slate-500 block mb-1.5">
+                              বিষয়ভিত্তিক নম্বর
+                            </span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {student.allSubjects?.map((sub, idx) => {
+                                const termData = sub[examType] || {};
+                                const isAbsent =
+                                  Boolean(termData.isAbsent) ||
+                                  termData.exam === "A" ||
+                                  termData.exam === "a" ||
+                                  termData.exam === "Abs" ||
+                                  termData.exam === "ABS" ||
+                                  termData.exam === "অনুঃ" ||
+                                  termData.ct === "A" ||
+                                  termData.ct === "a" ||
+                                  termData.ct === "Abs" ||
+                                  termData.ct === "ABS" ||
+                                  termData.ct === "অনুঃ";
+                                const ct = parseFloat(termData.ct) || 0;
+                                const exam = parseFloat(termData.exam) || 0;
+                                const subTotal = isAbsent ? 0 : ct + exam;
+                                const isSubFail = isAbsent || subTotal < 40;
 
-                            if (isAbsent) {
-                              return (
-                                <td
-                                  key={idx}
-                                  className="p-1 border border-slate-300 text-center font-bold bg-[#fee2e2] text-red-600 cell-fail"
-                                >
-                                  অনুঃ
-                                </td>
-                              );
-                            }
+                                return (
+                                  <span
+                                    key={idx}
+                                    className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs border ${
+                                      isSubFail
+                                        ? "bg-[#fee2e2] text-red-700 border-red-200 font-bold"
+                                        : "bg-slate-100 text-slate-700 border-slate-200/60"
+                                    }`}
+                                  >
+                                    <span className="font-semibold">
+                                      {sub.subject}:
+                                    </span>
+                                    <span>
+                                      {isAbsent
+                                        ? "অনুঃ"
+                                        : toBengaliDigits(subTotal)}
+                                    </span>
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          </div>
 
-                            const ct = parseFloat(termData.ct) || 0;
-                            const exam = parseFloat(termData.exam) || 0;
-                            const subTotal = ct + exam;
-                            const isSubFail = subTotal < 33;
-
-                            return (
-                              <td
-                                key={idx}
-                                className={`p-1 border border-slate-300 text-center font-semibold ${
-                                  isSubFail
-                                    ? "bg-[#fee2e2] text-red-600 font-bold cell-fail"
-                                    : "text-slate-800"
-                                }`}
+                          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center text-xs">
+                            <div className="bg-slate-50 p-1.5 rounded">
+                              <span className="text-[10px] text-slate-500 block">
+                                মোট মার্ক
+                              </span>
+                              <span className="font-bold text-slate-800">
+                                {calc.isAbsentAll
+                                  ? "অনুঃ"
+                                  : toBengaliDigits(calc.totalMarks)}
+                              </span>
+                            </div>
+                            <div className="bg-slate-50 p-1.5 rounded">
+                              <span className="text-[10px] text-slate-500 block">
+                                জিপিএ
+                              </span>
+                              <span className="font-bold text-slate-800">
+                                {toBengaliDigits(calc.gpa)}
+                              </span>
+                            </div>
+                            <div className="bg-slate-50 p-1.5 rounded">
+                              <span className="text-[10px] text-slate-500 block">
+                                গ্রেড
+                              </span>
+                              <span
+                                className={`font-bold ${calc.grade === "F" || calc.grade === "অনুঃ" ? "text-red-600" : "text-emerald-700"}`}
                               >
-                                {subTotal}
-                              </td>
-                            );
-                          })}
-
-                          <td className="p-1.5 border border-slate-300 font-bold text-center text-slate-900">
-                            {calc.isAbsentAll ? "ABS" : calc.totalMarks}
-                          </td>
-                          <td className="p-1.5 border border-slate-300 font-semibold text-center text-slate-800">
-                            {calc.isAbsentAll ? "-" : calc.average}
-                          </td>
-                          <td className="p-1.5 border border-slate-300 font-semibold text-center text-slate-800">
-                            {calc.isAbsentAll ? "-" : calc.totalGradePoints}
-                          </td>
-                          <td className="p-1.5 border border-slate-300 font-bold text-center text-slate-900">
-                            {calc.gpa}
-                          </td>
-                          <td
-                            className={`p-1.5 border border-slate-300 font-bold text-center ${
-                              calc.grade === "F" || calc.grade === "ABS"
-                                ? "text-red-600"
-                                : "text-emerald-700"
-                            }`}
-                          >
-                            {calc.grade}
-                          </td>
-                          <td className="p-1.5 border border-slate-300 font-bold text-center text-[#043e30]">
-                            {merit}
-                          </td>
-                        </tr>
+                                {calc.grade}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
                       );
                     })}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* এক নজরে পরিসংখ্যান */}
-              <div className="text-[10px] sm:text-xs font-bold text-slate-800 bg-white/95 rounded-lg mt-2 py-1 flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 print-page-break-avoid">
-                <span>
-                  মোট পরীক্ষার্থী:{" "}
-                  <strong className="text-slate-900">{totalStudents}</strong>{" "}
-                  জন,
-                </span>
-                <span>
-                  পাশ করেছে:{" "}
-                  <strong className="text-emerald-700">{passedCount}</strong>{" "}
-                  জন,
-                </span>
-                <span>
-                  পাসের হার:{" "}
-                  <strong className="text-[#043e30]">{passRate}%</strong>,
-                </span>
-                <span>
-                  অকৃতকার্য:{" "}
-                  <strong className="text-rose-600">{failedCount}</strong> জন,
-                </span>
-                <span>
-                  অনুপস্থিত:{" "}
-                  <strong className="text-amber-600">{absentCount}</strong> জন।
-                </span>
-              </div>
-
-              {/* ৫. ফুটার লেআউট (স্বাক্ষর এরিয়া এবং সোশ্যাল ও কন্টাক্ট ইনফো) */}
-              <div className="mt-1 pt-1 print-page-break-avoid">
-                <div className="flex justify-between items-end px-4 sm:px-12 mb-6">
-                  <div className="text-center flex flex-col items-center">
-                    <div className="relative w-28 sm:w-36 h-10 flex items-end justify-center mb-1">
-                      <Image
-                        src={controllerSignatureSrc || "/anarul.png"}
-                        alt="Exam Controller Signature"
-                        width={90}
-                        height={34}
-                        priority
-                        className="max-h-10 w-auto object-contain mix-blend-multiply contrast-[800%] brightness-[60%] grayscale -rotate-90 mx-auto"
-                      />
-                    </div>
-                    <div className="w-28 sm:w-36 border-b border-slate-800 mb-1"></div>
-                    <span className="text-[9.5px] sm:text-xs font-bold text-slate-800 block">
-                      পরীক্ষা নিয়ন্ত্রক
-                    </span>
                   </div>
 
-                  <div className="text-center flex flex-col items-center">
-                    <div className="relative w-28 sm:w-36 h-10 flex items-end justify-center mb-1">
-                      <Image
-                        src={
-                          principalSignatureSrc || "/principle's_signature.jpg"
-                        }
-                        alt="Principal Signature"
-                        width={90}
-                        height={34}
-                        priority
-                        className="max-h-10 w-auto object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45 mx-auto"
-                      />
-                    </div>
-                    <div className="w-28 sm:w-36 border-b border-slate-800 mb-1"></div>
-                    <span className="text-[9.5px] sm:text-xs font-bold text-slate-800 block">
-                      প্রিন্সিপালের স্বাক্ষর
+                  {/* ২. ডেস্কটপ ও প্রিন্ট টেবিল ভিউ */}
+                  <div className="hidden sm:block print-only overflow-x-auto relative z-10">
+                    <table className="main-result-table w-full text-left border-collapse text-[10px] sm:text-xs">
+                      <thead>
+                        <tr className="bg-[#043e30] text-amber-300">
+                          <th className="p-1.5 border border-emerald-900 font-bold text-center w-10">
+                            রোল
+                          </th>
+                          <th className="p-1.5 border border-emerald-900 font-bold w-16">
+                            আইডি
+                          </th>
+                          <th className="p-1.5 border border-emerald-900 font-bold min-w-[120px]">
+                            শিক্ষার্থীর নাম
+                          </th>
+
+                          {allSubjectsList.map((subjectName, i) => (
+                            <th
+                              key={i}
+                              className="p-1 border border-emerald-900 font-bold text-center whitespace-nowrap"
+                            >
+                              {subjectName}
+                            </th>
+                          ))}
+
+                          <th className="p-1.5 border border-emerald-900 font-bold text-center whitespace-nowrap">
+                            মোট মার্ক
+                          </th>
+                          <th className="p-1.5 border border-emerald-900 font-bold text-center whitespace-nowrap">
+                            গড়
+                          </th>
+                          <th className="p-1.5 border border-emerald-900 font-bold text-center whitespace-nowrap">
+                            মোট পয়েন্ট
+                          </th>
+                          <th className="p-1.5 border border-emerald-900 font-bold text-center whitespace-nowrap">
+                            জিপিএ
+                          </th>
+                          <th className="p-1.5 border border-emerald-900 font-bold text-center whitespace-nowrap">
+                            গ্রেড
+                          </th>
+                          <th className="p-1.5 border border-emerald-900 font-bold text-center whitespace-nowrap">
+                            মেধাস্থান
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white/90">
+                        {results.map((student) => {
+                          const calc =
+                            studentCalculationsMap.get(student.studentId) || {};
+                          const merit =
+                            calc.hasFailed || calc.isAbsentAll
+                              ? "-"
+                              : meritRankMap.get(student.studentId) || "-";
+
+                          return (
+                            <tr
+                              key={student.studentId}
+                              className="hover:bg-slate-50 border-b border-slate-200"
+                            >
+                              <td className="p-1.5 border border-slate-300 font-bold text-slate-700 text-center">
+                                {student.roll
+                                  ? toBengaliDigits(student.roll)
+                                  : "প্রযোজ্য নয়"}
+                              </td>
+                              <td className="p-1.5 border border-slate-300 font-mono font-bold text-slate-800">
+                                {toBengaliDigits(student.studentId)}
+                              </td>
+                              <td className="p-1.5 border border-slate-300 font-bold text-slate-900 whitespace-nowrap">
+                                {student.studentName || "প্রযোজ্য নয়"}
+                              </td>
+
+                              {allSubjectsList.map((subjName, idx) => {
+                                const matchedSub = student.allSubjects?.find(
+                                  (s) => s.subject === subjName,
+                                );
+                                if (!matchedSub) {
+                                  return (
+                                    <td
+                                      key={idx}
+                                      className="p-1 border border-slate-300 text-center text-slate-400"
+                                    >
+                                      -
+                                    </td>
+                                  );
+                                }
+
+                                const termData = matchedSub[examType] || {};
+                                const isAbsent =
+                                  Boolean(termData.isAbsent) ||
+                                  termData.exam === "A" ||
+                                  termData.exam === "a" ||
+                                  termData.exam === "Abs" ||
+                                  termData.exam === "ABS" ||
+                                  termData.exam === "অনুঃ" ||
+                                  termData.ct === "A" ||
+                                  termData.ct === "a" ||
+                                  termData.ct === "Abs" ||
+                                  termData.ct === "ABS" ||
+                                  termData.ct === "অনুঃ";
+
+                                if (isAbsent) {
+                                  return (
+                                    <td
+                                      key={idx}
+                                      className="p-1 border border-slate-300 text-center font-bold bg-[#fee2e2] text-red-600 cell-fail"
+                                    >
+                                      অনুঃ
+                                    </td>
+                                  );
+                                }
+
+                                const ct = parseFloat(termData.ct) || 0;
+                                const exam = parseFloat(termData.exam) || 0;
+                                const subTotal = ct + exam;
+                                const isSubFail = subTotal < 40;
+
+                                return (
+                                  <td
+                                    key={idx}
+                                    className={`p-1 border border-slate-300 text-center font-semibold ${
+                                      isSubFail
+                                        ? "bg-[#fee2e2] text-red-600 font-bold cell-fail"
+                                        : "text-slate-800"
+                                    }`}
+                                  >
+                                    {toBengaliDigits(subTotal)}
+                                  </td>
+                                );
+                              })}
+
+                              <td className="p-1.5 border border-slate-300 font-bold text-center text-slate-900">
+                                {calc.isAbsentAll
+                                  ? "অনুঃ"
+                                  : toBengaliDigits(calc.totalMarks)}
+                              </td>
+                              <td className="p-1.5 border border-slate-300 font-semibold text-center text-slate-800">
+                                {calc.isAbsentAll
+                                  ? "-"
+                                  : toBengaliDigits(calc.average)}
+                              </td>
+                              <td className="p-1.5 border border-slate-300 font-semibold text-center text-slate-800">
+                                {calc.isAbsentAll
+                                  ? "-"
+                                  : toBengaliDigits(calc.totalGradePoints)}
+                              </td>
+                              <td className="p-1.5 border border-slate-300 font-bold text-center text-slate-900">
+                                {toBengaliDigits(calc.gpa)}
+                              </td>
+                              <td
+                                className={`p-1.5 border border-slate-300 font-bold text-center ${
+                                  calc.grade === "F" ||
+                                  calc.grade === "ABS" ||
+                                  calc.grade === "অনুঃ"
+                                    ? "text-red-600"
+                                    : "text-emerald-700"
+                                }`}
+                              >
+                                {calc.grade}
+                              </td>
+                              <td className="p-1.5 border border-slate-300 font-bold text-center text-[#043e30]">
+                                {merit !== "-" ? toBengaliDigits(merit) : "-"}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* এক নজরে পরিসংখ্যান */}
+                  <div className="text-[10px] sm:text-xs font-bold text-slate-800 bg-white/95 rounded-lg mt-1.5 py-1 flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 print-page-break-avoid">
+                    <span>
+                      মোট পরীক্ষার্থী:{" "}
+                      <strong className="text-slate-900">
+                        {toBengaliDigits(totalStudents)}
+                      </strong>{" "}
+                      জন,
+                    </span>
+                    <span>
+                      পাশ করেছে:{" "}
+                      <strong className="text-emerald-700">
+                        {toBengaliDigits(passedCount)}
+                      </strong>{" "}
+                      জন,
+                    </span>
+                    <span>
+                      পাসের হার:{" "}
+                      <strong className="text-[#043e30]">
+                        {toBengaliDigits(passRate)}%
+                      </strong>
+                      ,
+                    </span>
+                    <span>
+                      অকৃতকার্য:{" "}
+                      <strong className="text-rose-600">
+                        {toBengaliDigits(failedCount)}
+                      </strong>{" "}
+                      জন,
+                    </span>
+                    <span>
+                      অনুপস্থিত:{" "}
+                      <strong className="text-amber-600">
+                        {toBengaliDigits(absentCount)}
+                      </strong>{" "}
+                      জন।
                     </span>
                   </div>
                 </div>
 
-                <div className="relative z-10 pt-2 border-t border-gray-300">
-                  <div className="flex flex-wrap justify-center items-center gap-x-2.5 gap-y-0.5 text-[8.5px] sm:text-[9px] font-semibold text-gray-800">
-                    <span className="flex items-center gap-0.5">
-                      <Phone className="w-2.5 h-2.5 text-gray-700" />
-                      01316-209201
-                    </span>
+                {/* ৫. ফুটার লেআউট (স্বাক্ষর এরিয়া এবং সোশ্যাল ও কন্টাক্ট ইনফো) */}
+                <div className="mt-auto pt-2 print-page-break-avoid relative z-10 print-footer-container">
+                  <div className="flex justify-between items-end px-4 sm:px-12 mb-6">
+                    <div className="text-center flex flex-col items-center">
+                      <div className="relative w-28 sm:w-36 h-10 flex items-end justify-center mb-1">
+                        <Image
+                          src={controllerSignatureSrc || "/anarul.png"}
+                          alt="Exam Controller Signature"
+                          width={90}
+                          height={34}
+                          priority
+                          className="signature-controller max-h-10 w-auto object-contain mix-blend-multiply contrast-[800%] brightness-[60%] grayscale -rotate-90 mx-auto"
+                        />
+                      </div>
+                      <div className="w-28 sm:w-36 border-b border-slate-800 mb-1"></div>
+                      <span className="text-[9.5px] sm:text-xs font-bold text-slate-800 block">
+                        পরীক্ষা নিয়ন্ত্রক
+                      </span>
+                    </div>
 
-                    <span className="flex items-center gap-0.5">
-                      <BsWhatsapp className="w-2.5 h-2.5 text-green-600" />
-                      01748-886161
-                    </span>
+                    <div className="text-center flex flex-col items-center">
+                      <div className="relative w-28 sm:w-36 h-10 flex items-end justify-center mb-1">
+                        <Image
+                          src={
+                            principalSignatureSrc ||
+                            "/principle's_signature.jpg"
+                          }
+                          alt="Principal Signature"
+                          width={90}
+                          height={34}
+                          priority
+                          className="signature-principal max-h-10 w-auto object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45 mx-auto"
+                        />
+                      </div>
+                      <div className="w-28 sm:w-36 border-b border-slate-800 mb-1"></div>
+                      <span className="text-[9.5px] sm:text-xs font-bold text-slate-800 block">
+                        প্রিন্সিপালের স্বাক্ষর
+                      </span>
+                    </div>
+                  </div>
 
-                    <span className="flex items-center gap-0.5">
-                      <Globe className="w-2.5 h-2.5 text-blue-500" />
-                      www.aimhabiganj.com
-                    </span>
+                  <div className="relative z-10 pt-2 border-t border-gray-300">
+                    <div className="flex flex-wrap justify-center items-center gap-x-2.5 gap-y-0.5 text-[8.5px] sm:text-[9px] font-semibold text-gray-800">
+                      <span className="flex items-center gap-0.5">
+                        <Phone className="w-2.5 h-2.5 text-gray-700" />
+                        ০১৩১৬-২০৯২০১
+                      </span>
 
-                    <span className="flex items-center gap-0.5">
-                      <Mail className="w-2.5 h-2.5 text-red-500" />
-                      aimhabiganj@gmail.com
-                    </span>
+                      <span className="flex items-center gap-0.5">
+                        <BsWhatsapp className="w-2.5 h-2.5 text-green-600" />
+                        ০১৭৪৮-৮৮৬১৬১
+                      </span>
 
-                    <span className="flex items-center gap-0.5">
-                      <FaFacebook className="w-2.5 h-2.5 text-blue-600" />
-                      aimhabiganj
-                    </span>
+                      <span className="flex items-center gap-0.5">
+                        <Globe className="w-2.5 h-2.5 text-blue-500" />
+                        www.aimhabiganj.com
+                      </span>
 
-                    <span className="flex items-center gap-0.5">
-                      <BsYoutube className="w-2.5 h-2.5 text-red-600" />
-                      aimhabiganj
-                    </span>
+                      <span className="flex items-center gap-0.5">
+                        <Mail className="w-2.5 h-2.5 text-red-500" />
+                        aimhabiganj@gmail.com
+                      </span>
+
+                      <span className="flex items-center gap-0.5">
+                        <FaFacebook className="w-2.5 h-2.5 text-blue-600" />
+                        aimhabiganj
+                      </span>
+
+                      <span className="flex items-center gap-0.5">
+                        <BsYoutube className="w-2.5 h-2.5 text-red-600" />
+                        aimhabiganj
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
