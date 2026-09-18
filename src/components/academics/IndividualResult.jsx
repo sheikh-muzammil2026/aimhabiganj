@@ -27,24 +27,69 @@ export default function ResultSheetGenerator() {
   const [loadingResults, setLoadingResults] = useState(false);
   const [resultsError, setResultsError] = useState(null);
 
-  // ফিল্টারিং স্টেট: Year, Exam Type, Student ID (Search)
+  // ফিল্টারিং স্টেট: Class, Year, Exam Type, Student ID (Search)
+  const [selectedClass, setSelectedClass] = useState("all");
   const [targetYear, setTargetYear] = useState("২০২৬");
   const [examType, setExamType] = useState("বার্ষিক পরীক্ষা");
   const [searchInput, setSearchInput] = useState("");
-  const [searchTerm, setSearchTerm] = useState(""); // সার্চ বাটন প্রেসের পর কাজের জন্য স্টেট
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [syllabusCategories, setSyllabusCategories] = useState({
+    preHifz: [],
+    hifz: [],
+    prePrimary: [],
+    primary: [],
+    secondary: [],
+  });
 
   const sessionYears = ["২০২৬", "২০২৫", "২০২৪", "২০২৩", "২০২২"];
 
-  // ১. Backend থেকে স্টুডেন্ট ফেচ (Student ID সার্চ ভিত্তিক)
-  const fetchStudents = async () => {
-    if (!searchTerm) return;
+  // ০. ডায়নামিক সিলেবাস ফেচ
+  useEffect(() => {
+    const fetchSyllabus = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_SERVER_API}/api/syllabus`,
+        );
+        const json = await res.json();
+        if (json.success && json.categories) {
+          setSyllabusCategories(json.categories);
+        }
+      } catch (err) {
+        console.error("Failed to fetch syllabus:", err);
+      }
+    };
+    fetchSyllabus();
+  }, []);
+
+  // ১. Backend থেকে স্টুডেন্ট ফেচ (Class ও Student ID সার্চ ভিত্তিক)
+  const fetchStudents = async (term = searchTerm, cls = selectedClass) => {
+    const trimmedTerm = (term || "").trim();
+    const hasClass = cls && cls !== "all";
+
+    if (!trimmedTerm && !hasClass) {
+      setSelectedIds([]);
+      setStudents([]);
+      setResultSheets([]);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
       const params = new URLSearchParams({
         status: "Approved",
-        search: searchTerm,
       });
+
+      if (trimmedTerm) {
+        params.append("search", trimmedTerm);
+      }
+      if (hasClass) {
+        params.append("class", cls);
+      }
+      if (targetYear) {
+        params.append("sessionYear", targetYear);
+      }
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_API}/api/students?${params.toString()}`,
@@ -58,8 +103,14 @@ export default function ResultSheetGenerator() {
           const matchedIds = fetchedStudents.map((s) => s.studentId);
           setSelectedIds(matchedIds);
         } else {
-          // সরাসরি সার্চ করা আইডিকে ধরে নেওয়ার চেষ্টা
-          setSelectedIds([searchTerm]);
+          if (trimmedTerm) {
+            setStudents([]);
+            setSelectedIds([trimmedTerm]);
+          } else {
+            setStudents([]);
+            setSelectedIds([]);
+            setError("এই শ্রেণীতে কোনো শিক্ষার্থী পাওয়া যায়নি।");
+          }
         }
       } else {
         setError(result.message || "শিক্ষার্থীদের তথ্য লোড করা যায়নি।");
@@ -72,18 +123,19 @@ export default function ResultSheetGenerator() {
     }
   };
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchStudents();
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
-
   // সার্চ হ্যান্ডলার
   const handleSearch = (e) => {
     e.preventDefault();
-    if (!searchInput.trim()) return;
-    setSearchTerm(searchInput.trim());
+    const trimmed = searchInput.trim();
+    if (!trimmed && (!selectedClass || selectedClass === "all")) {
+      setError(
+        "অনুগ্রহ করে শিক্ষার্থীর আইডি লিখুন অথবা একটি শ্রেণী নির্বাচন করুন।",
+      );
+      return;
+    }
+    setError(null);
+    setSearchTerm(trimmed);
+    fetchStudents(trimmed, selectedClass);
   };
 
   // ২. রেজাল্ট ফেচিং
@@ -103,7 +155,7 @@ export default function ResultSheetGenerator() {
           const res = await fetch(
             `${process.env.NEXT_PUBLIC_SERVER_API}/api/results/student/${studentId}?year=${encodeURIComponent(
               targetYear,
-            )}`,
+            )}&examType=${encodeURIComponent(examType)}`,
             {
               headers: {
                 "x-user-email": user?.email || "",
@@ -142,7 +194,7 @@ export default function ResultSheetGenerator() {
       fetchStudentResults();
     }, 0);
     return () => clearTimeout(timer);
-  }, [selectedIds, targetYear, user?.email, user?.role]);
+  }, [selectedIds, targetYear, examType, user?.email, user?.role]);
 
   // বিষয়ভিত্তিক গ্রেড এবং গ্রেড পয়েন্ট নির্ধারণ
   const calculateSubjectGrade = (mark) => {
@@ -415,7 +467,7 @@ export default function ResultSheetGenerator() {
       };
     }
 
-    // ২. কিছু বিষয়ে অনুপস্থিত থাকলে (সবগুলোতে নয়) -> Status = "অকৃতকার্য"
+    // ২. কিছু বিষয়ে অনুপস্থিত থাকলে (সবগুলোতে নয়) -> Status = "অসম্পূর্ণ"
     if (absentCount > 0) {
       return {
         totalObtained: toBengaliDigits(totalObtained),
@@ -429,9 +481,9 @@ export default function ResultSheetGenerator() {
                 ).toFixed(2),
               )
             : "০.০০",
-        grade: "F",
+        grade: "অসম্পূর্ণ",
         gpa: "০.০০",
-        status: "অকৃতকার্য",
+        status: "অসম্পূর্ণ",
       };
     }
 
@@ -521,16 +573,16 @@ export default function ResultSheetGenerator() {
 
           {/* ২. ফিল্টার ও সার্চ সিস্টেম */}
           <form onSubmit={handleSearch} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-              {/* ১. শিক্ষার্থী আইডি */}
-              <div className="md:col-span-5 bg-[#083c2e]/60 p-3.5 rounded-2xl border border-emerald-700/40 focus-within:border-amber-400/60 focus-within:ring-1 focus-within:ring-amber-400/50 transition-all">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* ২. শিক্ষার্থী আইডি */}
+              <div className="bg-[#083c2e]/60 p-3.5 rounded-2xl border border-emerald-700/40 focus-within:border-amber-400/60 focus-within:ring-1 focus-within:ring-amber-400/50 transition-all">
                 <label className="block text-[11px] font-extrabold text-emerald-300 uppercase tracking-wider mb-1.5">
-                  ১. শিক্ষার্থীর আইডি
+                  ২. শিক্ষার্থীর আইডি
                 </label>
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
-                    placeholder="শিক্ষার্থীর আইডি দিয়ে খুঁজুন..."
+                    placeholder="শিক্ষার্থীর আইডি (ঐচ্ছিক)..."
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
                     className="w-full bg-[#031d16] text-emerald-100 placeholder-emerald-600/70 border border-emerald-800/80 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-amber-400 transition-all"
@@ -538,10 +590,10 @@ export default function ResultSheetGenerator() {
                 </div>
               </div>
 
-              {/* ২. শিক্ষাবর্ষ */}
-              <div className="md:col-span-3 bg-[#083c2e]/60 p-3.5 rounded-2xl border border-emerald-700/40 focus-within:border-amber-400/60 transition-all">
+              {/* ৩. শিক্ষাবর্ষ */}
+              <div className="bg-[#083c2e]/60 p-3.5 rounded-2xl border border-emerald-700/40 focus-within:border-amber-400/60 transition-all">
                 <label className="block text-[11px] font-extrabold text-emerald-300 uppercase tracking-wider mb-1.5">
-                  ২. শিক্ষাবর্ষ
+                  ৩. শিক্ষাবর্ষ
                 </label>
                 <select
                   value={targetYear}
@@ -560,10 +612,10 @@ export default function ResultSheetGenerator() {
                 </select>
               </div>
 
-              {/* ৩. পরীক্ষার নাম */}
-              <div className="md:col-span-4 bg-[#083c2e]/60 p-3.5 rounded-2xl border border-emerald-700/40 focus-within:border-amber-400/60 transition-all">
+              {/* ৪. পরীক্ষার নাম */}
+              <div className="bg-[#083c2e]/60 p-3.5 rounded-2xl border border-emerald-700/40 focus-within:border-amber-400/60 transition-all">
                 <label className="block text-[11px] font-extrabold text-emerald-300 uppercase tracking-wider mb-1.5">
-                  ৩. পরীক্ষার নাম
+                  ৪. পরীক্ষার নাম
                 </label>
                 <select
                   value={examType}
@@ -592,7 +644,7 @@ export default function ResultSheetGenerator() {
               </div>
             </div>
 
-            {/* ৩. খুঁজুন বাটন (ইসলামিক ডিপ গ্রিন ও গোল্ডেন হোভার) */}
+            {/* ৫. খুঁজুন বাটন (ইসলামিক ডিপ গ্রিন ও গোল্ডেন হোভার) */}
             <div className="flex justify-end pt-2">
               <button
                 type="submit"
@@ -695,6 +747,50 @@ export default function ResultSheetGenerator() {
               ...matchedStudent,
             };
 
+            const studentClass =
+              student.class ||
+              matchedStudent.divisionAcademy?.class ||
+              matchedStudent.divisionHifz?.class ||
+              matchedStudent.divisionPreHifz?.class ||
+              resData.student?.class ||
+              "প্রযোজ্য নয়";
+
+            const studentName =
+              student.studentNameBangla ||
+              student.studentNameEnglish ||
+              student.name ||
+              resData.student?.name ||
+              "প্রযোজ্য নয়";
+
+            const studentRoll =
+              student.roll && student.roll !== "N/A"
+                ? student.roll
+                : student.officeUse?.rollNumber ||
+                  resData.student?.roll ||
+                  "প্রযোজ্য নয়";
+
+            const studentFatherName =
+              student.fatherNameBangla ||
+              student.guardianName ||
+              resData.student?.fatherNameBangla ||
+              "প্রযোজ্য নয়";
+
+            const studentThana =
+              student.currentAddress?.thana ||
+              resData.student?.currentAddress?.thana ||
+              "চুনারুঘাট";
+
+            const studentDistrict =
+              student.currentAddress?.district ||
+              resData.student?.currentAddress?.district ||
+              "হবিগঞ্জ";
+
+            const studentPhoto =
+              student.studentImage ||
+              student.profilePhoto ||
+              resData.student?.studentImage ||
+              null;
+
             const results = resData.results || [];
             const summary = calculateSummary(results, examType);
 
@@ -724,485 +820,485 @@ export default function ResultSheetGenerator() {
                       <div className="flex-1 flex flex-col">
                         {/* হেডার: লোগো ও মাদরাসার নাম */}
                         <div>
-                        <div className="flex justify-between items-center relative gap-2 flex-shrink-0 w-full overflow-hidden">
-                          {/* মাদ্রাসার লোগো */}
-                          <div className="w-20 h-20 md:w-45 md:h-45 print:!w-36 print:!h-36 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-3">
-                            <Image
-                              src={"/aimlogo1.png"}
-                              alt="Institution Logo"
-                              width={200}
-                              height={200}
-                              quality={100}
-                              priority
-                              className="w-full h-full object-cover scale-[1.08] transform-gpu"
-                            />
-                          </div>
-
-                          {/* লোগো ও ছবির মাঝখানে ব্যানার */}
-                          <div className="flex-1 text-center min-w-0">
-                            <div className="flex-grow text-center">
+                          <div className="flex justify-between items-center relative gap-2 flex-shrink-0 w-full overflow-hidden">
+                            {/* মাদ্রাসার লোগো */}
+                            <div className="w-20 h-20 md:w-45 md:h-45 print:!w-36 print:!h-36 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-3">
                               <Image
-                                src={"/banner_routine.png"}
-                                alt="Institution Banner"
-                                width={1000}
-                                height={400}
+                                src={"/aimlogo1.png"}
+                                alt="Institution Logo"
+                                width={200}
+                                height={200}
                                 quality={100}
                                 priority
-                                className="w-full h-auto max-h-45 object-fill mx-auto print:max-h-45"
+                                className="w-full h-full object-cover scale-[1.08] transform-gpu"
                               />
                             </div>
-                          </div>
-                        </div>
 
-                        {/* ডাবল গোল্ডেন লাইন সেপারেটর */}
-                        <div className="border-t-2 border-b border-[#C5A059] my-2 py-0.5"></div>
-
-                        {/* রেজাল্ট ব্যাজ ও হেডলাইন */}
-                        <div className="flex justify-between items-center my-2 px-1">
-                          {/* বাম পাশে শিক্ষার্থীর ছবি (QR কোডের স্থানে) */}
-                          <div className="w-16 h-18 border-2 border-gray-300 rounded-lg flex items-center justify-center bg-gray-50 overflow-hidden text-[9px] text-gray-400 font-bold shadow-xs">
-                            {student?.studentImage ? (
-                              <Image
-                                src={student?.studentImage}
-                                alt="Student"
-                                width={56}
-                                height={64}
-                                priority
-                                className="object-cover w-full h-full"
-                              />
-                            ) : (
-                              "ছবি নেই"
-                            )}
-                          </div>
-
-                          {/* মাঝখানে ক্যাপসুল টাইটেল */}
-                          <div className="text-center">
-                            <div className="bg-[#043e30] text-white px-5 py-1 rounded-full inline-block font-bold text-xs tracking-wide shadow-sm">
-                              মার্কসীট
+                            {/* লোগো ও ছবির মাঝখানে ব্যানার */}
+                            <div className="flex-1 text-center min-w-0">
+                              <div className="flex-grow text-center">
+                                <Image
+                                  src={"/banner_routine.png"}
+                                  alt="Institution Banner"
+                                  width={1000}
+                                  height={400}
+                                  quality={100}
+                                  priority
+                                  className="w-full h-auto max-h-45 object-fill mx-auto print:max-h-45"
+                                />
+                              </div>
                             </div>
-                            <p className="text-[11px] font-bold text-gray-800 mt-1">
-                              {examType} -{" "}
-                              {toBengaliDigits(
-                                (resData.year || "").split(/[-–/]/)[0].trim(),
+                          </div>
+
+                          {/* ডাবল গোল্ডেন লাইন সেপারেটর */}
+                          <div className="border-t-2 border-b border-[#C5A059] my-2 py-0.5"></div>
+
+                          {/* রেজাল্ট ব্যাজ ও হেডলাইন */}
+                          <div className="flex justify-between items-center my-2 px-1">
+                            {/* বাম পাশে শিক্ষার্থীর ছবি (QR কোডের স্থানে) */}
+                            <div className="w-16 h-18 border-2 border-gray-300 rounded-lg flex items-center justify-center bg-gray-50 overflow-hidden text-[9px] text-gray-400 font-bold shadow-xs">
+                              {studentPhoto ? (
+                                <Image
+                                  src={studentPhoto}
+                                  alt="Student"
+                                  width={56}
+                                  height={64}
+                                  priority
+                                  className="object-cover w-full h-full"
+                                />
+                              ) : (
+                                "ছবি নেই"
                               )}
-                            </p>
-                            <p className="text-[11px] font-bold text-gray-800">
-                              শ্রেণি: {student.class || "প্রযোজ্য নয়"}
-                            </p>
-                          </div>
+                            </div>
 
-                          {/* ডান পাশে গ্রেডিং সিস্টেম বিবরণী (শিক্ষার্থীর ছবির স্থানে) */}
-                          <div className="flex justify-end">
-                            <table className="border-collapse border border-slate-600 text-[6.5px] sm:text-[7px] leading-tight text-center bg-white shadow-xs">
-                              <thead>
-                                <tr className="bg-[#043e30] text-amber-300 font-bold">
-                                  <th className="border border-slate-500 px-1 py-0.5 whitespace-nowrap">
-                                    নম্বর
-                                  </th>
-                                  <th className="border border-slate-500 px-0.5 py-0.5 whitespace-nowrap">
-                                    গ্রেড
-                                  </th>
-                                  <th className="border border-slate-500 px-1 py-0.5 whitespace-nowrap">
-                                    পয়েন্ট
-                                  </th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                <tr>
-                                  <td className="border border-slate-400 px-1 py-0">
-                                    ৮০-১০০
-                                  </td>
-                                  <td className="border border-slate-400 px-0.5 py-0 font-bold">
-                                    A+
-                                  </td>
-                                  <td className="border border-slate-400 px-1 py-0">
-                                    ৫.০০
-                                  </td>
-                                </tr>
-                                <tr>
-                                  <td className="border border-slate-400 px-1 py-0">
-                                    ৭০-৭৯
-                                  </td>
-                                  <td className="border border-slate-400 px-0.5 py-0 font-bold">
-                                    A
-                                  </td>
-                                  <td className="border border-slate-400 px-1 py-0">
-                                    ৪.০০
-                                  </td>
-                                </tr>
-                                <tr>
-                                  <td className="border border-slate-400 px-1 py-0">
-                                    ৬০-৬৯
-                                  </td>
-                                  <td className="border border-slate-400 px-0.5 py-0 font-bold">
-                                    A-
-                                  </td>
-                                  <td className="border border-slate-400 px-1 py-0">
-                                    ৩.০০
-                                  </td>
-                                </tr>
-                                <tr>
-                                  <td className="border border-slate-400 px-1 py-0">
-                                    ৫০-৫৯
-                                  </td>
-                                  <td className="border border-slate-400 px-0.5 py-0 font-bold">
-                                    B
-                                  </td>
-                                  <td className="border border-slate-400 px-1 py-0">
-                                    ২.০০
-                                  </td>
-                                </tr>
-                                <tr>
-                                  <td className="border border-slate-400 px-1 py-0">
-                                    ৪০-৪৯
-                                  </td>
-                                  <td className="border border-slate-400 px-0.5 py-0 font-bold">
-                                    C
-                                  </td>
-                                  <td className="border border-slate-400 px-1 py-0">
-                                    ১.০০
-                                  </td>
-                                </tr>
-                                <tr>
-                                  <td className="border border-slate-400 px-1 py-0">
-                                    ০-৩৯
-                                  </td>
-                                  <td className="border border-slate-400 px-0.5 py-0 font-bold text-red-600">
-                                    F
-                                  </td>
-                                  <td className="border border-slate-400 px-1 py-0">
-                                    ০.০০
-                                  </td>
-                                </tr>
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
+                            {/* মাঝখানে ক্যাপসুল টাইটেল */}
+                            <div className="text-center">
+                              <div className="bg-[#043e30] text-white px-5 py-1 rounded-full inline-block font-bold text-xs tracking-wide shadow-sm">
+                                মার্কসীট
+                              </div>
+                              <p className="text-[11px] font-bold text-gray-800 mt-1">
+                                {examType} -{" "}
+                                {toBengaliDigits(
+                                  (resData.year || "").split(/[-–/]/)[0].trim(),
+                                )}
+                              </p>
+                              <p className="text-[11px] font-bold text-gray-800">
+                                শ্রেণি: {studentClass}
+                              </p>
+                            </div>
 
-                        {/* পরীক্ষার্থীর ডট ডট তথ্যাবলী */}
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] my-3 px-1">
-                          {/* ১ম পরীক্ষার্থীর নাম */}
-                          <div className="flex items-end">
-                            <span className="font-bold w-20 shrink-0">
-                              পরীক্ষার্থীর নাম:
-                            </span>
-                            <span className="font-bold border-b border-dashed border-gray-400 flex-1 truncate">
-                              {student.name || "প্রযোজ্য নয়"}
-                            </span>
-                          </div>
-
-                          {/* ২. আইডি */}
-                          <div className="flex items-end">
-                            <span className="font-bold w-16 shrink-0">
-                              আইডি:
-                            </span>
-                            <span className="font-bold border-b border-dashed border-gray-400 flex-1">
-                              {toBengaliDigits(student.studentId)}
-                            </span>
-                          </div>
-
-                          {/* ৩. পিতার নাম */}
-                          <div className="flex items-end">
-                            <span className="font-bold w-20 shrink-0">
-                              পিতার নাম:
-                            </span>
-                            <span className="border-b border-dashed border-gray-400 flex-1 truncate">
-                              {student.fatherNameBangla || "প্রযোজ্য নয়"}
-                            </span>
-                          </div>
-
-                          {/* ৪. রোল নং */}
-                          <div className="flex items-end">
-                            <span className="font-bold w-16 shrink-0">
-                              রোল নং:
-                            </span>
-                            <span className="border-b border-dashed border-gray-400 flex-1">
-                              {student.roll
-                                ? toBengaliDigits(student.roll)
-                                : "প্রযোজ্য নয়"}
-                            </span>
-                          </div>
-
-                          {/* ৫. উপজেলা */}
-                          <div className="flex items-end">
-                            <span className="font-bold w-20 shrink-0">
-                              উপজেলা:
-                            </span>
-                            <span className="border-b border-dashed border-gray-400 flex-1">
-                              {student.currentAddress?.thana || "চুনারুঘাট"}
-                            </span>
-                          </div>
-
-                          {/* ৬. জেলা */}
-                          <div className="flex items-end">
-                            <span className="font-bold w-16 shrink-0">
-                              জেলা:
-                            </span>
-                            <span className="border-b border-dashed border-gray-400 flex-1">
-                              {student.currentAddress?.district || "হবিগঞ্জ"}
-                            </span>
-                          </div>
-                        </div>
-                        {/* টেবিল হেডার টাইটেল */}
-                        <div className="text-center font-bold text-xs my-1 text-gray-800">
-                          বিষয়ভিত্তিক নম্বর বিবরণী
-                        </div>
-                      </div>
-
-                      {/* নম্বর টেবিল */}
-                      <div className="my-1 flex-shrink-0">
-                        <table className="w-full border-collapse border border-[#C5A059] text-center text-xs">
-                          <thead>
-                            <tr className="bg-[#fcf8ed] font-bold text-gray-800 text-xs">
-                              <th className="border border-[#C5A059] p-1.5 text-left px-2.5">
-                                বিষয়
-                              </th>
-
-                              {examType === "বার্ষিক পরীক্ষা" && (
-                                <>
-                                  <th className="border border-[#C5A059] p-1.5 w-16">
-                                    ১ম সাময়িক
-                                  </th>
-                                  <th className="border border-[#C5A059] p-1.5 w-16">
-                                    ২য় সাময়িক
-                                  </th>
-                                  <th className="border border-[#C5A059] p-1.5 w-16">
-                                    বার্ষিক
-                                  </th>
-                                </>
-                              )}
-
-                              <th className="border border-[#C5A059] p-1.5 w-20 font-bold">
-                                {examType === "বার্ষিক পরীক্ষা"
-                                  ? "মোট নম্বর"
-                                  : "প্রাপ্ত নম্বর"}
-                              </th>
-                              <th className="border border-[#C5A059] p-1.5 w-16">
-                                গ্রেড
-                              </th>
-                              <th className="border border-[#C5A059] p-1.5 w-14">
-                                গ্রেড পয়েন্ট
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {results.length === 0 ? (
-                              <tr>
-                                <td
-                                  colSpan={
-                                    examType === "বার্ষিক পরীক্ষা" ? 7 : 4
-                                  }
-                                  className="p-3 text-center border border-[#C5A059]"
-                                >
-                                  কোনো নম্বর পাওয়া যায়নি
-                                </td>
-                              </tr>
-                            ) : (
-                              results.map((item, idx) => {
-                                const t1 = parseExamData(
-                                  item.term1 || item["১ম সাময়িক পরীক্ষা"],
-                                );
-                                const t2 = parseExamData(
-                                  item.term2 || item["২য় সাময়িক পরীক্ষা"],
-                                );
-                                const ann = parseExamData(
-                                  item.annual || item["বার্ষিক পরীক্ষা"],
-                                );
-
-                                const finalMark = getMarkForExamType(
-                                  item,
-                                  examType,
-                                );
-
-                                let gradeInfo;
-                                if (examType === "বার্ষিক পরীক্ষা") {
-                                  gradeInfo =
-                                    getFinalSubjectGradeForAnnual(item);
-                                } else {
-                                  const normalizedMark =
-                                    getNormalizedMarkForGrade(item, examType);
-                                  gradeInfo =
-                                    calculateSubjectGrade(normalizedMark);
-                                }
-
-                                const formatVal = (v) => {
-                                  if (v === "অনুঃ") return "অনুঃ";
-                                  if (
-                                    v === "-" ||
-                                    v === undefined ||
-                                    v === null
-                                  )
-                                    return "-";
-                                  if (
-                                    typeof v === "number" ||
-                                    (!isNaN(parseFloat(v)) && isFinite(v))
-                                  ) {
-                                    return toBengaliDigits(v);
-                                  }
-                                  return v;
-                                };
-
-                                return (
-                                  <tr
-                                    key={idx}
-                                    className="border-b border-[#C5A059]"
-                                  >
-                                    <td className="border border-[#C5A059] p-1.5 text-left px-2.5 font-semibold">
-                                      {item.subject}
+                            {/* ডান পাশে গ্রেডিং সিস্টেম বিবরণী (শিক্ষার্থীর ছবির স্থানে) */}
+                            <div className="flex justify-end">
+                              <table className="border-collapse border border-slate-600 text-[6.5px] sm:text-[7px] leading-tight text-center bg-white shadow-xs">
+                                <thead>
+                                  <tr className="bg-[#043e30] text-amber-300 font-bold">
+                                    <th className="border border-slate-500 px-1 py-0.5 whitespace-nowrap">
+                                      নম্বর
+                                    </th>
+                                    <th className="border border-slate-500 px-0.5 py-0.5 whitespace-nowrap">
+                                      গ্রেড
+                                    </th>
+                                    <th className="border border-slate-500 px-1 py-0.5 whitespace-nowrap">
+                                      পয়েন্ট
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr>
+                                    <td className="border border-slate-400 px-1 py-0">
+                                      ৮০-১০০
                                     </td>
-
-                                    {examType === "বার্ষিক পরীক্ষা" && (
-                                      <>
-                                        <td className="border border-[#C5A059] p-1.5">
-                                          {formatVal(t1)}
-                                        </td>
-                                        <td className="border border-[#C5A059] p-1.5">
-                                          {formatVal(t2)}
-                                        </td>
-                                        <td className="border border-[#C5A059] p-1.5">
-                                          {formatVal(ann)}
-                                        </td>
-                                      </>
-                                    )}
-
-                                    <td className="border border-[#C5A059] p-1.5 font-bold">
-                                      {formatVal(finalMark)}
+                                    <td className="border border-slate-400 px-0.5 py-0 font-bold">
+                                      A+
                                     </td>
-                                    <td
-                                      className={`border border-[#C5A059] p-1.5 font-bold ${
-                                        gradeInfo.grade === "F" ||
-                                        gradeInfo.grade === "অনুঃ"
-                                          ? "text-red-600"
-                                          : ""
-                                      }`}
-                                    >
-                                      {gradeInfo.grade}
-                                    </td>
-                                    <td className="border border-[#C5A059] p-1.5">
-                                      {gradeInfo.grade === "অনুঃ"
-                                        ? "০.০০"
-                                        : toBengaliDigits(gradeInfo.gpa)}
+                                    <td className="border border-slate-400 px-1 py-0">
+                                      ৫.০০
                                     </td>
                                   </tr>
-                                );
-                              })
-                            )}
-                          </tbody>
-                        </table>
-                      </div>
+                                  <tr>
+                                    <td className="border border-slate-400 px-1 py-0">
+                                      ৭০-৭৯
+                                    </td>
+                                    <td className="border border-slate-400 px-0.5 py-0 font-bold">
+                                      A
+                                    </td>
+                                    <td className="border border-slate-400 px-1 py-0">
+                                      ৪.০০
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td className="border border-slate-400 px-1 py-0">
+                                      ৬০-৬৯
+                                    </td>
+                                    <td className="border border-slate-400 px-0.5 py-0 font-bold">
+                                      A-
+                                    </td>
+                                    <td className="border border-slate-400 px-1 py-0">
+                                      ৩.০০
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td className="border border-slate-400 px-1 py-0">
+                                      ৫০-৫৯
+                                    </td>
+                                    <td className="border border-slate-400 px-0.5 py-0 font-bold">
+                                      B
+                                    </td>
+                                    <td className="border border-slate-400 px-1 py-0">
+                                      ২.০০
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td className="border border-slate-400 px-1 py-0">
+                                      ৪০-৪৯
+                                    </td>
+                                    <td className="border border-slate-400 px-0.5 py-0 font-bold">
+                                      C
+                                    </td>
+                                    <td className="border border-slate-400 px-1 py-0">
+                                      ১.০০
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td className="border border-slate-400 px-1 py-0">
+                                      ০-৩৯
+                                    </td>
+                                    <td className="border border-slate-400 px-0.5 py-0 font-bold text-red-600">
+                                      F
+                                    </td>
+                                    <td className="border border-slate-400 px-1 py-0">
+                                      ০.০০
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
 
-                      {/* সামারি সেকশন */}
-                      <div className="mt-1 border border-[#C5A059] bg-[#fcf8ed] p-2 rounded-sm flex-shrink-0">
-                        <div className="grid grid-cols-4 gap-2 text-center text-xs font-bold text-gray-800">
-                          <div>
-                            <span className="block text-[10px] text-gray-600 font-normal">
-                              মোট নম্বর
-                            </span>
-                            {summary.totalObtained}
+                          {/* পরীক্ষার্থীর ডট ডট তথ্যাবলী */}
+                          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] my-3 px-1">
+                            {/* ১ম পরীক্ষার্থীর নাম */}
+                            <div className="flex items-end">
+                              <span className="font-bold w-20 shrink-0">
+                                পরীক্ষার্থীর নাম:
+                              </span>
+                              <span className="font-bold border-b border-dashed border-gray-400 flex-1 truncate">
+                                {studentName}
+                              </span>
+                            </div>
+
+                            {/* ২. আইডি */}
+                            <div className="flex items-end">
+                              <span className="font-bold w-16 shrink-0">
+                                আইডি:
+                              </span>
+                              <span className="font-bold border-b border-dashed border-gray-400 flex-1">
+                                {toBengaliDigits(student.studentId)}
+                              </span>
+                            </div>
+
+                            {/* ৩. পিতার নাম */}
+                            <div className="flex items-end">
+                              <span className="font-bold w-20 shrink-0">
+                                পিতার নাম:
+                              </span>
+                              <span className="border-b border-dashed border-gray-400 flex-1 truncate">
+                                {studentFatherName}
+                              </span>
+                            </div>
+
+                            {/* ৪. রোল নং */}
+                            <div className="flex items-end">
+                              <span className="font-bold w-16 shrink-0">
+                                রোল নং:
+                              </span>
+                              <span className="border-b border-dashed border-gray-400 flex-1">
+                                {studentRoll !== "প্রযোজ্য নয়"
+                                  ? toBengaliDigits(studentRoll)
+                                  : "প্রযোজ্য নয়"}
+                              </span>
+                            </div>
+
+                            {/* ৫. উপজেলা */}
+                            <div className="flex items-end">
+                              <span className="font-bold w-20 shrink-0">
+                                উপজেলা:
+                              </span>
+                              <span className="border-b border-dashed border-gray-400 flex-1">
+                                {studentThana}
+                              </span>
+                            </div>
+
+                            {/* ৬. জেলা */}
+                            <div className="flex items-end">
+                              <span className="font-bold w-16 shrink-0">
+                                জেলা:
+                              </span>
+                              <span className="border-b border-dashed border-gray-400 flex-1">
+                                {studentDistrict}
+                              </span>
+                            </div>
                           </div>
-                          <div>
-                            <span className="block text-[10px] text-gray-600 font-normal">
-                              গড় নম্বর
-                            </span>
-                            {summary.average}
+                          {/* টেবিল হেডার টাইটেল */}
+                          <div className="text-center font-bold text-xs my-1 text-gray-800">
+                            বিষয়ভিত্তিক নম্বর বিবরণী
                           </div>
-                          <div>
-                            <span className="block text-[10px] text-gray-600 font-normal">
-                              ফাইনাল গ্রেড
-                            </span>
-                            {summary.grade}
-                          </div>
-                          <div>
-                            <span className="block text-[10px] text-gray-600 font-normal">
-                              ফাইনাল জিপিএ
-                            </span>
-                            {summary.gpa}
+                        </div>
+
+                        {/* নম্বর টেবিল */}
+                        <div className="my-1 flex-shrink-0">
+                          <table className="w-full border-collapse border border-[#C5A059] text-center text-xs">
+                            <thead>
+                              <tr className="bg-[#fcf8ed] font-bold text-gray-800 text-xs">
+                                <th className="border border-[#C5A059] p-1.5 text-left px-2.5">
+                                  বিষয়
+                                </th>
+
+                                {examType === "বার্ষিক পরীক্ষা" && (
+                                  <>
+                                    <th className="border border-[#C5A059] p-1.5 w-16">
+                                      ১ম সাময়িক
+                                    </th>
+                                    <th className="border border-[#C5A059] p-1.5 w-16">
+                                      ২য় সাময়িক
+                                    </th>
+                                    <th className="border border-[#C5A059] p-1.5 w-16">
+                                      বার্ষিক
+                                    </th>
+                                  </>
+                                )}
+
+                                <th className="border border-[#C5A059] p-1.5 w-20 font-bold">
+                                  {examType === "বার্ষিক পরীক্ষা"
+                                    ? "মোট নম্বর"
+                                    : "প্রাপ্ত নম্বর"}
+                                </th>
+                                <th className="border border-[#C5A059] p-1.5 w-16">
+                                  গ্রেড
+                                </th>
+                                <th className="border border-[#C5A059] p-1.5 w-14">
+                                  গ্রেড পয়েন্ট
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {results.length === 0 ? (
+                                <tr>
+                                  <td
+                                    colSpan={
+                                      examType === "বার্ষিক পরীক্ষা" ? 7 : 4
+                                    }
+                                    className="p-3 text-center border border-[#C5A059]"
+                                  >
+                                    কোনো নম্বর পাওয়া যায়নি
+                                  </td>
+                                </tr>
+                              ) : (
+                                results.map((item, idx) => {
+                                  const t1 = parseExamData(
+                                    item.term1 || item["১ম সাময়িক পরীক্ষা"],
+                                  );
+                                  const t2 = parseExamData(
+                                    item.term2 || item["২য় সাময়িক পরীক্ষা"],
+                                  );
+                                  const ann = parseExamData(
+                                    item.annual || item["বার্ষিক পরীক্ষা"],
+                                  );
+
+                                  const finalMark = getMarkForExamType(
+                                    item,
+                                    examType,
+                                  );
+
+                                  let gradeInfo;
+                                  if (examType === "বার্ষিক পরীক্ষা") {
+                                    gradeInfo =
+                                      getFinalSubjectGradeForAnnual(item);
+                                  } else {
+                                    const normalizedMark =
+                                      getNormalizedMarkForGrade(item, examType);
+                                    gradeInfo =
+                                      calculateSubjectGrade(normalizedMark);
+                                  }
+
+                                  const formatVal = (v) => {
+                                    if (v === "অনুঃ") return "অনুঃ";
+                                    if (
+                                      v === "-" ||
+                                      v === undefined ||
+                                      v === null
+                                    )
+                                      return "-";
+                                    if (
+                                      typeof v === "number" ||
+                                      (!isNaN(parseFloat(v)) && isFinite(v))
+                                    ) {
+                                      return toBengaliDigits(v);
+                                    }
+                                    return v;
+                                  };
+
+                                  return (
+                                    <tr
+                                      key={idx}
+                                      className="border-b border-[#C5A059]"
+                                    >
+                                      <td className="border border-[#C5A059] p-1.5 text-left px-2.5 font-semibold">
+                                        {item.subject}
+                                      </td>
+
+                                      {examType === "বার্ষিক পরীক্ষা" && (
+                                        <>
+                                          <td className="border border-[#C5A059] p-1.5">
+                                            {formatVal(t1)}
+                                          </td>
+                                          <td className="border border-[#C5A059] p-1.5">
+                                            {formatVal(t2)}
+                                          </td>
+                                          <td className="border border-[#C5A059] p-1.5">
+                                            {formatVal(ann)}
+                                          </td>
+                                        </>
+                                      )}
+
+                                      <td className="border border-[#C5A059] p-1.5 font-bold">
+                                        {formatVal(finalMark)}
+                                      </td>
+                                      <td
+                                        className={`border border-[#C5A059] p-1.5 font-bold ${
+                                          gradeInfo.grade === "F" ||
+                                          gradeInfo.grade === "অনুঃ"
+                                            ? "text-red-600"
+                                            : ""
+                                        }`}
+                                      >
+                                        {gradeInfo.grade}
+                                      </td>
+                                      <td className="border border-[#C5A059] p-1.5">
+                                        {gradeInfo.grade === "অনুঃ"
+                                          ? "০.০০"
+                                          : toBengaliDigits(gradeInfo.gpa)}
+                                      </td>
+                                    </tr>
+                                  );
+                                })
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {/* সামারি সেকশন */}
+                        <div className="mt-1 border border-[#C5A059] bg-[#fcf8ed] p-2 rounded-sm flex-shrink-0">
+                          <div className="grid grid-cols-4 gap-2 text-center text-xs font-bold text-gray-800">
+                            <div>
+                              <span className="block text-[10px] text-gray-600 font-normal">
+                                মোট নম্বর
+                              </span>
+                              {summary.totalObtained}
+                            </div>
+                            <div>
+                              <span className="block text-[10px] text-gray-600 font-normal">
+                                গড় নম্বর
+                              </span>
+                              {summary.average}
+                            </div>
+                            <div>
+                              <span className="block text-[10px] text-gray-600 font-normal">
+                                ফাইনাল গ্রেড
+                              </span>
+                              {summary.grade}
+                            </div>
+                            <div>
+                              <span className="block text-[10px] text-gray-600 font-normal">
+                                ফাইনাল জিপিএ
+                              </span>
+                              {summary.gpa}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* ফুটার লেআউট (স্বাক্ষর এরিয়া এবং সোশ্যাল ও কন্টাক্ট ইনফো) */}
-                    <div className="mt-auto flex-shrink-0 pt-2 relative z-10">
-                      <div className="flex justify-between items-end mb-2 px-4">
-                        {/* পরীক্ষা নিয়ন্ত্রক এর স্বাক্ষর */}
-                        <div className="text-center flex flex-col items-center relative">
-                          <div className="relative w-36 h-10">
-                            <Image
-                              src={"/anarul.png"}
-                              alt="Controller Signature"
-                              width={200}
-                              height={60}
-                              unoptimized
-                              className="signature-controller absolute -top-2 right-8 h-12 w-20 object-contain mix-blend-multiply contrast-[800%] brightness-[60%] grayscale -rotate-90"
-                            />
+                      {/* ফুটার লেআউট (স্বাক্ষর এরিয়া এবং সোশ্যাল ও কন্টাক্ট ইনফো) */}
+                      <div className="mt-auto flex-shrink-0 pt-2 relative z-10">
+                        <div className="flex justify-between items-end mb-2 px-4">
+                          {/* পরীক্ষা নিয়ন্ত্রক এর স্বাক্ষর */}
+                          <div className="text-center flex flex-col items-center relative">
+                            <div className="relative w-36 h-10">
+                              <Image
+                                src={"/anarul.png"}
+                                alt="Controller Signature"
+                                width={200}
+                                height={60}
+                                unoptimized
+                                className="signature-controller absolute -top-2 right-8 h-12 w-20 object-contain mix-blend-multiply contrast-[800%] brightness-[60%] grayscale -rotate-90"
+                              />
+                            </div>
+                            <div className="w-28 border-b border-gray-800 mb-0.5"></div>
+                            <span className="text-[9.5px] font-bold text-gray-800">
+                              পরীক্ষা নিয়ন্ত্রকের স্বাক্ষর
+                            </span>
                           </div>
-                          <div className="w-28 border-b border-gray-800 mb-0.5"></div>
-                          <span className="text-[9.5px] font-bold text-gray-800">
-                            পরীক্ষা নিয়ন্ত্রকের স্বাক্ষর
-                          </span>
+
+                          {/* প্রিন্সিপাল এর স্বাক্ষর */}
+                          <div className="text-center flex flex-col items-center relative">
+                            <div className="relative w-36 h-10">
+                              <Image
+                                src={"/principle's_signature.jpg"}
+                                alt="Principal Signature"
+                                width={100}
+                                height={40}
+                                unoptimized
+                                className="signature-principal absolute -top-2 right-8 h-12 w-20 object-contain mix-blend-multiply contrast-[800%] brightness-[85%] grayscale -rotate-45"
+                              />
+                            </div>
+                            <div className="w-28 border-b border-gray-800 mb-0.5"></div>
+                            <span className="text-[9.5px] font-bold text-gray-800">
+                              প্রিন্সিপালের স্বাক্ষর
+                            </span>
+                          </div>
                         </div>
 
-                        {/* প্রিন্সিপাল এর স্বাক্ষর */}
-                        <div className="text-center flex flex-col items-center relative">
-                          <div className="relative w-36 h-10">
-                            <Image
-                              src={"/principle's_signature.jpg"}
-                              alt="Principal Signature"
-                              width={100}
-                              height={40}
-                              unoptimized
-                              className="signature-principal absolute -top-2 right-8 h-12 w-20 object-contain mix-blend-multiply contrast-[800%] brightness-[85%] grayscale -rotate-45"
-                            />
+                        {/* সোশ্যাল ও কন্টাক্ট ইনফো */}
+                        <div className="pt-1 border-t border-gray-300">
+                          <div className="flex flex-wrap justify-center items-center gap-x-1 gap-y-0.5 text-[8.5px] font-semibold text-gray-800">
+                            <span className="flex items-center gap-0.5">
+                              <Phone className="w-2.5 h-2.5 text-gray-700" />
+                              ০১৩১৬-২০৯২০১
+                            </span>
+
+                            <span className="flex items-center gap-0.5">
+                              <BsWhatsapp className="w-2.5 h-2.5 text-green-600" />
+                              ০১৭৪৮-৮৮৬১৬১
+                            </span>
+
+                            <span className="flex items-center gap-0.5">
+                              <Globe className="w-2.5 h-2.5 text-blue-500" />
+                              www.aimhabiganj.com
+                            </span>
+
+                            <span className="flex items-center gap-0.5">
+                              <Mail className="w-2.5 h-2.5 text-red-500" />
+                              aimhabiganj@gmail.com
+                            </span>
+
+                            <span className="flex items-center gap-0.5">
+                              <FaFacebook className="w-2.5 h-2.5 text-blue-600" />
+                              aimhabiganj
+                            </span>
+
+                            <span className="flex items-center gap-0.5">
+                              <BsYoutube className="w-2.5 h-2.5 text-red-600" />
+                              aimhabiganj
+                            </span>
                           </div>
-                          <div className="w-28 border-b border-gray-800 mb-0.5"></div>
-                          <span className="text-[9.5px] font-bold text-gray-800">
-                            প্রিন্সিপালের স্বাক্ষর
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* সোশ্যাল ও কন্টাক্ট ইনফো */}
-                      <div className="pt-1 border-t border-gray-300">
-                        <div className="flex flex-wrap justify-center items-center gap-x-1 gap-y-0.5 text-[8.5px] font-semibold text-gray-800">
-                          <span className="flex items-center gap-0.5">
-                            <Phone className="w-2.5 h-2.5 text-gray-700" />
-                            ০১৩১৬-২০৯২০১
-                          </span>
-
-                          <span className="flex items-center gap-0.5">
-                            <BsWhatsapp className="w-2.5 h-2.5 text-green-600" />
-                            ০১৭৪৮-৮৮৬১৬১
-                          </span>
-
-                          <span className="flex items-center gap-0.5">
-                            <Globe className="w-2.5 h-2.5 text-blue-500" />
-                            www.aimhabiganj.com
-                          </span>
-
-                          <span className="flex items-center gap-0.5">
-                            <Mail className="w-2.5 h-2.5 text-red-500" />
-                            aimhabiganj@gmail.com
-                          </span>
-
-                          <span className="flex items-center gap-0.5">
-                            <FaFacebook className="w-2.5 h-2.5 text-blue-600" />
-                            aimhabiganj
-                          </span>
-
-                          <span className="flex items-center gap-0.5">
-                            <BsYoutube className="w-2.5 h-2.5 text-red-600" />
-                            aimhabiganj
-                          </span>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
         </div>
       )}
     </div>

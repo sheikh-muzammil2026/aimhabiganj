@@ -40,6 +40,26 @@ function ClassWiseResultContent() {
   const [examType, setExamType] = useState("term1");
   const [year, setYear] = useState("২০২৬");
 
+  // ডায়নামিক সিলেবাস স্টেট (MongoDB syllabus কালেকশন থেকে)
+  const [syllabusCategories, setSyllabusCategories] = useState({});
+  const [syllabusMap, setSyllabusMap] = useState({});
+
+  useEffect(() => {
+    const fetchSyllabus = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/syllabus`);
+        const data = await res.json();
+        if (data.success && data.classSubjects) {
+          setSyllabusMap(data.classSubjects);
+          if (data.categories) setSyllabusCategories(data.categories);
+        }
+      } catch (err) {
+        console.error("Error fetching syllabus in class-wise-result:", err);
+      }
+    };
+    fetchSyllabus();
+  }, []);
+
   const [results, setResults] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
@@ -247,6 +267,7 @@ function ClassWiseResultContent() {
       });
 
       const isAbsentAll = absentSubsCount === totalSubs;
+      const isPartialAbsent = absentSubsCount > 0 && absentSubsCount < totalSubs;
       const average =
         totalSubs > 0 ? (totalMarks / totalSubs).toFixed(2) : "0.00";
       const totalGradePoints = totalPoints.toFixed(2);
@@ -257,6 +278,9 @@ function ClassWiseResultContent() {
       if (isAbsentAll) {
         gpa = "0.00";
         grade = "অনুঃ";
+      } else if (isPartialAbsent) {
+        gpa = "0.00";
+        grade = "অসম্পূর্ণ";
       } else if (hasFailedSub) {
         gpa = "0.00";
         grade = "F";
@@ -274,6 +298,7 @@ function ClassWiseResultContent() {
         grade,
         hasFailed: hasFailedSub,
         isAbsentAll,
+        isPartialAbsent,
       };
     },
     [examType],
@@ -292,7 +317,12 @@ function ClassWiseResultContent() {
     const passedList = results
       .filter((s) => {
         const calc = studentCalculationsMap.get(s.studentId);
-        return calc && !calc.hasFailed && !calc.isAbsentAll;
+        return (
+          calc &&
+          !calc.hasFailed &&
+          !calc.isAbsentAll &&
+          !calc.isPartialAbsent
+        );
       })
       .sort((a, b) => {
         const calcA = studentCalculationsMap.get(a.studentId);
@@ -330,6 +360,22 @@ function ClassWiseResultContent() {
     return rankMap;
   }, [results, studentCalculationsMap]);
 
+  // একই মোট মার্ক পাওয়া শিক্ষার্থীদের (Tied Scores) শনাক্ত করার সেট
+  const tiedMarksSet = useMemo(() => {
+    const counts = {};
+    results.forEach((s) => {
+      const calc = studentCalculationsMap.get(s.studentId);
+      if (calc && !calc.isAbsentAll && calc.totalMarks > 0) {
+        counts[calc.totalMarks] = (counts[calc.totalMarks] || 0) + 1;
+      }
+    });
+    const tied = new Set();
+    Object.entries(counts).forEach(([mark, count]) => {
+      if (count > 1) tied.add(Number(mark));
+    });
+    return tied;
+  }, [results, studentCalculationsMap]);
+
   const totalStudents = results.length;
   let absentCount = 0;
   let failedCount = 0;
@@ -340,7 +386,7 @@ function ClassWiseResultContent() {
     if (!calc) return;
     if (calc.isAbsentAll) {
       absentCount++;
-    } else if (calc.hasFailed) {
+    } else if (calc.hasFailed || calc.isPartialAbsent) {
       failedCount++;
     } else {
       passedCount++;
@@ -353,15 +399,19 @@ function ClassWiseResultContent() {
       ? ((passedCount / presentStudents) * 100).toFixed(2)
       : "0.00";
 
+  // ডেটাবেজ থেকে সেভ করা হুবহু বিষয়ের নামগুলো ডায়নামিকভাবে তৈরি
   const allSubjectsList = useMemo(() => {
-    return Array.from(
+    const dbSubjects = Array.from(
       new Set(
         results.flatMap(
-          (student) => student.allSubjects?.map((s) => s.subject) || [],
+          (student) =>
+            student.allSubjects?.map((s) => s.subject).filter(Boolean) || [],
         ),
       ),
     );
-  }, [results]);
+    if (dbSubjects.length > 0) return dbSubjects;
+    return (syllabusMap && syllabusMap[selectedClass]) || [];
+  }, [results, syllabusMap, selectedClass]);
 
   const handlePrint = () => {
     window.print();
@@ -415,8 +465,9 @@ function ClassWiseResultContent() {
             top: 50% !important;
             left: 50% !important;
             transform: translate(-50%, -50%) !important;
+            margin: 0 !important;
             z-index: 0 !important;
-            opacity: 0.07 !important;
+            opacity: 0.06 !important;
             pointer-events: none !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
@@ -450,26 +501,44 @@ function ClassWiseResultContent() {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
+          .tied-row,
+          .tied-row td {
+            background-color: #dcfce7 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          .grading-box-container {
+            width: 7.5rem !important;
+            height: 7.5rem !important;
+            flex-shrink: 0 !important;
+            display: flex !important;
+            justify-content: flex-end !important;
+          }
           .grading-box-table {
-            width: auto !important;
-            min-width: unset !important;
+            width: 7.5rem !important;
+            height: 7.5rem !important;
+            table-layout: fixed !important;
             border-collapse: collapse !important;
             background-color: #ffffff !important;
             border: 1px solid #475569 !important;
-            font-size: 8px !important;
+            font-size: 7px !important;
+            line-height: 1 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+          }
+          .grading-box-table th,
+          .grading-box-table td {
+            padding: 0 1px !important;
+            text-align: center !important;
+            vertical-align: middle !important;
+            font-size: 7px !important;
+            line-height: 1 !important;
           }
           .grading-box-table th {
             background-color: #f1f5f9 !important;
             color: #1e293b !important;
             border: 1px solid #64748b !important;
-            padding: 1px 3px !important;
-            white-space: nowrap !important;
             font-weight: 700 !important;
-            font-size: 8px !important;
-            line-height: 1.1 !important;
-            text-align: center !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
@@ -477,23 +546,22 @@ function ClassWiseResultContent() {
             background-color: #ffffff !important;
             color: #0f172a !important;
             border: 1px solid #94a3b8 !important;
-            padding: 1px 3px !important;
-            white-space: nowrap !important;
-            font-size: 8px !important;
-            line-height: 1.1 !important;
-            text-align: center !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
           .grading-box-table td.grading-fail {
-            color: #dc2626 !important;
+            color: rgba(220, 38, 38, 0.3) !important;
             font-weight: 700 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
-          .cell-fail {
-            background-color: #fee2e2 !important;
-            color: #dc2626 !important;
+          .grade-f {
+            color: rgba(220, 38, 38, 0.3) !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          .grade-incomplete {
+            color: #000000 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
@@ -502,8 +570,8 @@ function ClassWiseResultContent() {
             break-inside: avoid !important;
           }
           .header-logo-container {
-            width: 6rem !important;
-            height: 6rem !important;
+            width: 7.5rem !important;
+            height: 7.5rem !important;
             flex-shrink: 0 !important;
           }
           .signature-controller,
@@ -520,6 +588,33 @@ function ClassWiseResultContent() {
           }
           .print-footer-container {
             margin-top: auto !important;
+            display: block !important;
+            width: 100% !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          .print-social-info {
+            display: block !important;
+            visibility: visible !important;
+            width: 100% !important;
+            padding-top: 4px !important;
+            border-top: 1px solid #cbd5e1 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          .print-social-info span {
+            display: inline-flex !important;
+            align-items: center !important;
+            color: #1f2937 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          .print-social-info svg {
+            display: inline-block !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
         }
       `}</style>
@@ -608,16 +703,46 @@ function ClassWiseResultContent() {
                 }}
                 className="w-full bg-white border border-slate-300 text-slate-800 text-xs sm:text-sm rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-600 focus:outline-none"
               >
-                <option value="প্লে">প্লে</option>
-                <option value="নার্সারি">নার্সারি</option>
-                <option value="প্রথম">প্রথম</option>
-                <option value="দ্বিতীয়">দ্বিতীয়</option>
-                <option value="তৃতীয়">তৃতীয়</option>
-                <option value="চতুর্থ">চতুর্থ</option>
-                <option value="পঞ্চম">পঞ্চম</option>
-                <option value="ষষ্ঠ">ষষ্ঠ</option>
-                <option value="সপ্তম">সপ্তম</option>
-                <option value="অষ্টম">অষ্টম</option>
+                {Object.keys(syllabusCategories).length > 0 ? (
+                  Object.entries(syllabusCategories).map(([dept, classes]) => (
+                    <optgroup key={dept} label={`-- ${dept} --`}>
+                      {classes.map((cls) => (
+                        <option key={cls} value={cls}>
+                          {cls}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))
+                ) : (
+                  <>
+                    <optgroup label="-- প্রি-হিফজ --">
+                      <option value="কায়দা/আমপারা">কায়দা/আমপারা</option>
+                      <option value="নাজেরা">নাজেরা</option>
+                    </optgroup>
+                    <optgroup label="-- হিফজ --">
+                      <option value="সবক">সবক</option>
+                      <option value="শুনানি">শুনানি</option>
+                    </optgroup>
+                    <optgroup label="-- প্রাক-প্রাথমিক --">
+                      <option value="প্লে">প্লে</option>
+                      <option value="নার্সারি">নার্সারি</option>
+                    </optgroup>
+                    <optgroup label="-- প্রাথমিক --">
+                      <option value="প্রথম">প্রথম</option>
+                      <option value="দ্বিতীয়">দ্বিতীয়</option>
+                      <option value="তৃতীয়">তৃতীয়</option>
+                      <option value="চতুর্থ">চতুর্থ</option>
+                      <option value="পঞ্চম">পঞ্চম</option>
+                    </optgroup>
+                    <optgroup label="-- মাধ্যমিক --">
+                      <option value="ষষ্ঠ">ষষ্ঠ</option>
+                      <option value="সপ্তম">সপ্তম</option>
+                      <option value="অষ্টম">অষ্টম</option>
+                      <option value="নবম">নবম</option>
+                      <option value="দশম">দশম</option>
+                    </optgroup>
+                  </>
+                )}
               </select>
             </div>
 
@@ -713,8 +838,8 @@ function ClassWiseResultContent() {
                         <Image
                           src={"/aimlogo1.png"}
                           alt="Institution Logo"
-                          width={96}
-                          height={96}
+                          width={120}
+                          height={120}
                           quality={100}
                           priority
                           className="w-full h-full object-cover scale-[1.10] transform-gpu"
@@ -753,86 +878,85 @@ function ClassWiseResultContent() {
                         </p>
                       </div>
 
-                      <div className="flex-shrink-0 flex justify-end">
-                        <table className="grading-box-table border-collapse border border-slate-600 text-[7.5px] sm:text-[8px] leading-none text-center bg-white shadow-xs">
+                      <div className="grading-box-container w-30 h-30 print:w-30 print:h-30 flex-shrink-0 flex justify-end">
+                        <table className="grading-box-table w-full h-full border-collapse border border-slate-600 text-[6.5px] sm:text-[7px] leading-none text-center bg-white shadow-xs table-fixed">
                           <thead>
-                            <tr className="bg-slate-100 text-slate-800 font-bold">
-                              <th className="border border-slate-500 px-1 py-0.5 whitespace-nowrap">
+                            <tr className="bg-slate-100 text-slate-800 font-bold h-[16px]">
+                              <th className="border border-slate-500 px-0.5 py-0 whitespace-nowrap">
                                 নম্বর
                               </th>
-                              <th className="border border-slate-500 px-1 py-0.5 whitespace-nowrap">
+                              <th className="border border-slate-500 px-0.5 py-0 whitespace-nowrap">
                                 গ্রেড
                               </th>
-                              <th className="border border-slate-500 px-1 py-0.5 whitespace-nowrap">
+                              <th className="border border-slate-500 px-0.5 py-0 whitespace-nowrap">
                                 পয়েন্ট
                               </th>
                             </tr>
                           </thead>
                           <tbody>
-                            <tr>
-                              <td className="border border-slate-400 px-1 py-0.2">
+                            <tr className="h-[14px]">
+                              <td className="border border-slate-400 px-0.5 py-0">
                                 ৮০ - ১০০
                               </td>
-                              <td className="border border-slate-400 px-1 py-0.2 font-bold">
+                              <td className="border border-slate-400 px-0.5 py-0 font-bold">
                                 A+
                               </td>
-                              <td className="border border-slate-400 px-1 py-0.2">
+                              <td className="border border-slate-400 px-0.5 py-0">
                                 ৫.০০
                               </td>
                             </tr>
-                            <tr>
-                              <td className="border border-slate-400 px-1 py-0.2">
+                            <tr className="h-[14px]">
+                              <td className="border border-slate-400 px-0.5 py-0">
                                 ৭০ - ৭৯
                               </td>
-                              <td className="border border-slate-400 px-1 py-0.2 font-bold">
+                              <td className="border border-slate-400 px-0.5 py-0 font-bold">
                                 A
                               </td>
-                              <td className="border border-slate-400 px-1 py-0.2">
+                              <td className="border border-slate-400 px-0.5 py-0">
                                 ৪.০০
                               </td>
                             </tr>
-                            <tr>
-                              <td className="border border-slate-400 px-1 py-0.2">
+                            <tr className="h-[14px]">
+                              <td className="border border-slate-400 px-0.5 py-0">
                                 ৬০ - ৬৯
                               </td>
-                              <td className="border border-slate-400 px-1 py-0.2 font-bold">
+                              <td className="border border-slate-400 px-0.5 py-0 font-bold">
                                 A-
                               </td>
-                              <td className="border border-slate-400 px-1 py-0.2">
+                              <td className="border border-slate-400 px-0.5 py-0">
                                 ৩.০০
                               </td>
                             </tr>
-                            <tr>
-                              <td className="border border-slate-400 px-1 py-0.2">
+                            <tr className="h-[14px]">
+                              <td className="border border-slate-400 px-0.5 py-0">
                                 ৫০ - ৫৯
                               </td>
-                              <td className="border border-slate-400 px-1 py-0.2 font-bold">
+                              <td className="border border-slate-400 px-0.5 py-0 font-bold">
                                 B
                               </td>
-                              <td className="border border-slate-400 px-1 py-0.2">
+                              <td className="border border-slate-400 px-0.5 py-0">
                                 ২.০০
                               </td>
                             </tr>
-                            <tr>
-                              <td className="border border-slate-400 px-1 py-0.2">
+                            <tr className="h-[14px]">
+                              <td className="border border-slate-400 px-0.5 py-0">
                                 ৪০ - ৪৯
                               </td>
-                              <td className="border border-slate-400 px-1 py-0.2 font-bold">
+                              <td className="border border-slate-400 px-0.5 py-0 font-bold">
                                 C
                               </td>
-                              <td className="border border-slate-400 px-1 py-0.2">
+                              <td className="border border-slate-400 px-0.5 py-0">
                                 ১.০০
                               </td>
                             </tr>
-
-                            <tr>
-                              <td className="border border-slate-400 px-1 py-0.2">
+                            <tr className="h-[14px]">
+                              <td className="border border-slate-400 px-0.5 py-0">
                                 ০ - ৩৯
                               </td>
-                              <td className="border border-slate-400 px-1 py-0.2 font-bold text-red-600 grading-fail">
+                              <td className="border border-slate-400 px-0.5 py-0 font-bold text-red-600/30 grading-fail">
                                 F
                               </td>
-                              <td className="border border-slate-400 px-1 py-0.2">
+                              <td className="border border-slate-400 px-0.5 py-0">
                                 ০.০০
                               </td>
                             </tr>
@@ -851,9 +975,17 @@ function ClassWiseResultContent() {
                         calc.hasFailed || calc.isAbsentAll
                           ? "-"
                           : meritRankMap.get(student.studentId) || "-";
+                      const isTied = tiedMarksSet.has(calc.totalMarks);
 
                       return (
-                        <div key={student.studentId} className="p-4 space-y-3">
+                        <div
+                          key={student.studentId}
+                          className={`p-4 space-y-3 ${
+                            isTied
+                              ? "bg-green-50/80 border-l-4 border-green-500"
+                              : ""
+                          }`}
+                        >
                           <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg border border-slate-200">
                             <div className="flex items-center gap-2">
                               <span className="bg-[#043e30] text-amber-300 font-bold px-2 py-0.5 rounded text-xs">
@@ -907,16 +1039,11 @@ function ClassWiseResultContent() {
                                 const ct = parseFloat(termData.ct) || 0;
                                 const exam = parseFloat(termData.exam) || 0;
                                 const subTotal = isAbsent ? 0 : ct + exam;
-                                const isSubFail = isAbsent || subTotal < 40;
 
                                 return (
                                   <span
                                     key={idx}
-                                    className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs border ${
-                                      isSubFail
-                                        ? "bg-[#fee2e2] text-red-700 border-red-200 font-bold"
-                                        : "bg-slate-100 text-slate-700 border-slate-200/60"
-                                    }`}
+                                    className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs border bg-slate-100 text-slate-800 border-slate-200/60 font-semibold"
                                   >
                                     <span className="font-semibold">
                                       {sub.subject}:
@@ -956,7 +1083,14 @@ function ClassWiseResultContent() {
                                 গ্রেড
                               </span>
                               <span
-                                className={`font-bold ${calc.grade === "F" || calc.grade === "অনুঃ" ? "text-red-600" : "text-emerald-700"}`}
+                                className={`font-bold ${
+                                  calc.grade === "F"
+                                    ? "text-red-600/30"
+                                    : calc.grade === "অসম্পূর্ণ" ||
+                                        calc.grade === "অনুঃ"
+                                      ? "text-slate-900"
+                                      : "text-emerald-700"
+                                }`}
                               >
                                 {calc.grade}
                               </span>
@@ -1019,11 +1153,16 @@ function ClassWiseResultContent() {
                             calc.hasFailed || calc.isAbsentAll
                               ? "-"
                               : meritRankMap.get(student.studentId) || "-";
+                          const isTied = tiedMarksSet.has(calc.totalMarks);
 
                           return (
                             <tr
                               key={student.studentId}
-                              className="hover:bg-slate-50 border-b border-slate-200"
+                              className={`border-b border-slate-200 ${
+                                isTied
+                                  ? "bg-green-100 dark:bg-green-950/30 tied-row"
+                                  : "hover:bg-slate-50 bg-white/90"
+                              }`}
                             >
                               <td className="p-1.5 border border-slate-300 font-bold text-slate-700 text-center">
                                 {student.roll
@@ -1070,7 +1209,7 @@ function ClassWiseResultContent() {
                                   return (
                                     <td
                                       key={idx}
-                                      className="p-1 border border-slate-300 text-center font-bold bg-[#fee2e2] text-red-600 cell-fail"
+                                      className="p-1 border border-slate-300 text-center font-bold text-slate-900"
                                     >
                                       অনুঃ
                                     </td>
@@ -1080,16 +1219,11 @@ function ClassWiseResultContent() {
                                 const ct = parseFloat(termData.ct) || 0;
                                 const exam = parseFloat(termData.exam) || 0;
                                 const subTotal = ct + exam;
-                                const isSubFail = subTotal < 40;
 
                                 return (
                                   <td
                                     key={idx}
-                                    className={`p-1 border border-slate-300 text-center font-semibold ${
-                                      isSubFail
-                                        ? "bg-[#fee2e2] text-red-600 font-bold cell-fail"
-                                        : "text-slate-800"
-                                    }`}
+                                    className="p-1 border border-slate-300 text-center font-semibold text-slate-900"
                                   >
                                     {toBengaliDigits(subTotal)}
                                   </td>
@@ -1116,11 +1250,13 @@ function ClassWiseResultContent() {
                               </td>
                               <td
                                 className={`p-1.5 border border-slate-300 font-bold text-center ${
-                                  calc.grade === "F" ||
-                                  calc.grade === "ABS" ||
-                                  calc.grade === "অনুঃ"
-                                    ? "text-red-600"
-                                    : "text-emerald-700"
+                                  calc.grade === "F"
+                                    ? "text-red-600/30 grade-f"
+                                    : calc.grade === "অসম্পূর্ণ" ||
+                                        calc.grade === "অনুঃ" ||
+                                        calc.grade === "ABS"
+                                      ? "text-slate-900 grade-incomplete"
+                                      : "text-emerald-700"
                                 }`}
                               >
                                 {calc.grade}
@@ -1216,7 +1352,7 @@ function ClassWiseResultContent() {
                     </div>
                   </div>
 
-                  <div className="relative z-10 pt-2 border-t border-gray-300">
+                  <div className="relative z-10 pt-2 border-t border-gray-300 print-social-info">
                     <div className="flex flex-wrap justify-center items-center gap-x-2.5 gap-y-0.5 text-[8.5px] sm:text-[9px] font-semibold text-gray-800">
                       <span className="flex items-center gap-0.5">
                         <Phone className="w-2.5 h-2.5 text-gray-700" />

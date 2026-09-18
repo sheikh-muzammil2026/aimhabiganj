@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth-client";
@@ -150,10 +150,39 @@ function TeacherMarkInputContent() {
   const [examType, setExamType] = useState("term1");
   const [year, setYear] = useState("২০২৬");
 
-  const availableSubjects =
-    selectedClass && CLASS_SUBJECTS[selectedClass]
-      ? CLASS_SUBJECTS[selectedClass]
-      : [];
+  // ডায়নামিক সিলেবাস স্টেট (MongoDB syllabus কালেকশন থেকে)
+  const [syllabusMap, setSyllabusMap] = useState({});
+  const [syllabusCategories, setSyllabusCategories] = useState({});
+
+  useEffect(() => {
+    const fetchSyllabus = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/syllabus`);
+        const result = await res.json();
+        if (result.success && result.classSubjects) {
+          setSyllabusMap(result.classSubjects);
+          if (result.categories) setSyllabusCategories(result.categories);
+        }
+      } catch (err) {
+        console.error("Syllabus fetch error:", err);
+      }
+    };
+    fetchSyllabus();
+  }, []);
+
+  const availableSubjects = useMemo(() => {
+    return syllabusMap &&
+      syllabusMap[selectedClass] &&
+      syllabusMap[selectedClass].length > 0
+      ? syllabusMap[selectedClass]
+      : CLASS_SUBJECTS[selectedClass] || [];
+  }, [syllabusMap, selectedClass]);
+
+  const activeSubject =
+    availableSubjects.includes(selectedSubject)
+      ? selectedSubject
+      : availableSubjects[0] || "";
+
   const [studentsMarksList, setStudentsMarksList] = useState([]);
 
   const [isPublished, setIsPublished] = useState(false);
@@ -214,7 +243,7 @@ function TeacherMarkInputContent() {
       }
 
       // যদি কোনো বিষয় সিলেক্ট করা না থাকে
-      if (!selectedSubject) {
+      if (!activeSubject) {
         const initialList = rawStudents.map((student) => ({
           studentId: student.studentId || "",
           studentName:
@@ -231,7 +260,7 @@ function TeacherMarkInputContent() {
       // ২য় ধাপ: /api/marks/get থেকে সরাসরি ওই বিষয় ও ক্লাসের মার্কস ও পাবলিশ স্ট্যাটাস আনা
       const markQueryParams = new URLSearchParams({
         class: selectedClass,
-        subject: selectedSubject,
+        subject: activeSubject,
         year: year,
         examType: examType,
       });
@@ -291,7 +320,7 @@ function TeacherMarkInputContent() {
     }
   }, [
     selectedClass,
-    selectedSubject,
+    activeSubject,
     examType,
     year,
     currentPage,
@@ -333,7 +362,7 @@ function TeacherMarkInputContent() {
     try {
       const payload = {
         class: selectedClass,
-        subject: selectedSubject,
+        subject: activeSubject,
         examType: examType,
         year: year,
         marksData: studentsMarksList,
@@ -453,41 +482,62 @@ function TeacherMarkInputContent() {
               onChange={(e) => {
                 const newClass = e.target.value;
                 setSelectedClass(newClass);
-                const subs = CLASS_SUBJECTS[newClass] || [];
+                const subs =
+                  (syllabusMap && syllabusMap[newClass]) ||
+                  CLASS_SUBJECTS[newClass] ||
+                  [];
                 setSelectedSubject(subs[0] || "");
                 resetPageToFirst();
               }}
               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-750 text-slate-800 dark:text-slate-200 text-xs sm:text-sm rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-600 focus:outline-none"
             >
-              <optgroup label="-- প্রি-হিফজ --" className="dark:bg-slate-900">
-                <option value="কায়দা/আমপারা">কায়দা/আমপারা</option>
-                <option value="নাজেরা">নাজেরা</option>
-              </optgroup>
-              <optgroup label="-- হিফজ --" className="dark:bg-slate-900">
-                <option value="সবক">সবক</option>
-                <option value="শুনানি">শুনানি</option>
-              </optgroup>
-              <optgroup
-                label="-- প্রাক-প্রাথমিক --"
-                className="dark:bg-slate-900"
-              >
-                <option value="প্লে">প্লে</option>
-                <option value="নার্সারি">নার্সারি</option>
-              </optgroup>
-              <optgroup label="-- প্রাথমিক --" className="dark:bg-slate-900">
-                <option value="প্রথম">প্রথম</option>
-                <option value="দ্বিতীয়">দ্বিতীয়</option>
-                <option value="তৃতীয়">তৃতীয়</option>
-                <option value="চতুর্থ">চতুর্থ</option>
-                <option value="পঞ্চম">পঞ্চম</option>
-              </optgroup>
-              <optgroup label="-- মাধ্যমিক --" className="dark:bg-slate-900">
-                <option value="ষষ্ঠ">ষষ্ঠ</option>
-                <option value="সপ্তম">সপ্তম</option>
-                <option value="অষ্টম">অষ্টম</option>
-                <option value="নবম">নবম</option>
-                <option value="দশম">দশম</option>
-              </optgroup>
+              {Object.keys(syllabusCategories).length > 0 ? (
+                Object.entries(syllabusCategories).map(([dept, classes]) => (
+                  <optgroup
+                    key={dept}
+                    label={`-- ${dept} --`}
+                    className="dark:bg-slate-900"
+                  >
+                    {classes.map((cls) => (
+                      <option key={cls} value={cls}>
+                        {cls}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))
+              ) : (
+                <>
+                  <optgroup label="-- প্রি-হিফজ --" className="dark:bg-slate-900">
+                    <option value="কায়দা/আমপারা">কায়দা/আমপারা</option>
+                    <option value="নাজেরা">নাজেরা</option>
+                  </optgroup>
+                  <optgroup label="-- হিফজ --" className="dark:bg-slate-900">
+                    <option value="সবক">সবক</option>
+                    <option value="শুনানি">শুনানি</option>
+                  </optgroup>
+                  <optgroup
+                    label="-- প্রাক-প্রাথমিক --"
+                    className="dark:bg-slate-900"
+                  >
+                    <option value="প্লে">প্লে</option>
+                    <option value="নার্সারি">নার্সারি</option>
+                  </optgroup>
+                  <optgroup label="-- প্রাথমিক --" className="dark:bg-slate-900">
+                    <option value="প্রথম">প্রথম</option>
+                    <option value="দ্বিতীয়">দ্বিতীয়</option>
+                    <option value="তৃতীয়">তৃতীয়</option>
+                    <option value="চতুর্থ">চতুর্থ</option>
+                    <option value="পঞ্চম">পঞ্চম</option>
+                  </optgroup>
+                  <optgroup label="-- মাধ্যমিক --" className="dark:bg-slate-900">
+                    <option value="ষষ্ঠ">ষষ্ঠ</option>
+                    <option value="সপ্তম">সপ্তম</option>
+                    <option value="অষ্টম">অষ্টম</option>
+                    <option value="নবম">নবম</option>
+                    <option value="দশম">দশম</option>
+                  </optgroup>
+                </>
+              )}
             </select>
           </div>
 
@@ -497,7 +547,7 @@ function TeacherMarkInputContent() {
               বিষয় নির্বাচন করুন *
             </label>
             <select
-              value={selectedSubject}
+              value={activeSubject}
               onChange={(e) => {
                 setSelectedSubject(e.target.value);
                 resetPageToFirst();
