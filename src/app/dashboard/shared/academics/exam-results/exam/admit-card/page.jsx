@@ -3,7 +3,7 @@
 import { Globe, Mail, Phone } from "lucide-react";
 import Image from "next/image";
 import { QRCodeSVG } from "qrcode.react";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { BsWhatsapp, BsYoutube } from "react-icons/bs";
 import { FaFacebook } from "react-icons/fa";
 
@@ -38,25 +38,8 @@ export default function AdmitCardGenerator() {
   const [totalStudents, setTotalStudents] = useState(0);
   const [limit] = useState(10);
 
-  // ১. Backend থেকে স্টুডেন্ট ও পরীক্ষার তালিকা ফেচ করা
-  useEffect(() => {
-    fetchExams();
-  }, []);
-
-  useEffect(() => {
-    fetchStudents();
-  }, [
-    currentPage,
-    searchTerm,
-    selectedSession,
-    selectedDivision,
-    selectedAcademyType,
-    selectedClass,
-    selectedType,
-    selectedFeeCategory,
-  ]);
-
-  const fetchExams = async () => {
+  // ১. Backend থেকে পরীক্ষার তালিকা ফেচ করা
+  const fetchExams = useCallback(async () => {
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_API}/api/admit-cards/exams`,
@@ -69,14 +52,23 @@ export default function AdmitCardGenerator() {
     } catch (err) {
       console.error("Error fetching exams list:", err);
     }
-  };
+  }, []);
 
-  const fetchStudents = async () => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchExams();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchExams]);
+
+  // ২. Backend থেকে স্টুডেন্ট ডাটা ফেচ করা
+  const fetchStudents = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       const params = new URLSearchParams({
         status: "Approved",
+        activity: "active",
         page: currentPage,
         limit: limit,
       });
@@ -98,7 +90,12 @@ export default function AdmitCardGenerator() {
       const result = await response.json();
 
       if (result.success) {
-        setStudents(result.data || []);
+        const sorted = (result.data || []).sort(
+          (a, b) =>
+            (parseInt(a.roll, 10) || Infinity) -
+            (parseInt(b.roll, 10) || Infinity),
+        );
+        setStudents(sorted);
         setTotalPages(result.totalPages || 1);
         setTotalStudents(result.total || result.totalCount || 0);
       } else {
@@ -110,7 +107,24 @@ export default function AdmitCardGenerator() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [
+    currentPage,
+    limit,
+    searchTerm,
+    selectedSession,
+    selectedDivision,
+    selectedAcademyType,
+    selectedClass,
+    selectedType,
+    selectedFeeCategory,
+  ]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchStudents();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchStudents]);
 
   // ২. সিলেক্টেড স্টুডেন্ট ও পরীক্ষার তথ্যের ভিত্তিতে ব্যাকএন্ড থেকে এডমিট কার্ডের ডাটা ফেচ করা
   useEffect(() => {
@@ -127,7 +141,12 @@ export default function AdmitCardGenerator() {
         );
         const result = await response.json();
         if (result.success) {
-          setAdmitCards(result.data || []);
+          const sorted = (result.data || []).sort(
+            (a, b) =>
+              (parseInt(a.roll, 10) || Infinity) -
+              (parseInt(b.roll, 10) || Infinity),
+          );
+          setAdmitCards(sorted);
         } else {
           setAdmitCardsError(
             result.message || "এডমিট কার্ডের তথ্য লোড করা যায়নি।",

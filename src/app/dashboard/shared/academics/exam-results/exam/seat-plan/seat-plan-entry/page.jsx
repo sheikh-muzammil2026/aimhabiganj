@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { toast } from "react-toastify";
@@ -24,19 +24,21 @@ export default function AllStudentsPage() {
     const [selectedAcademyType, setSelectedAcademyType] = useState("all");
     const [selectedClass, setSelectedClass] = useState("all");
 
-    useEffect(() => {
-        fetchStudents();
-    }, []);
-
-    const fetchStudents = async () => {
+    const fetchStudents = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
-            const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/students?status=Approved`);
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_SERVER_API}/api/students?status=Approved&activity=active&limit=1000`
+            );
             const result = await response.json();
 
             if (result.success) {
-                const studentList = result.data || [];
+                const studentList = (result.data || []).sort(
+                    (a, b) =>
+                        (parseInt(a.roll, 10) || Infinity) -
+                        (parseInt(b.roll, 10) || Infinity)
+                );
                 setStudents(studentList);
 
                 // সিট প্ল্যানের প্রাথমিক ডাটা সেটআপ (যদি ডাটাবেজে আগে থেকে hallNo, benchNo & seatNo থাকে)
@@ -59,7 +61,14 @@ export default function AllStudentsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchStudents();
+        }, 0);
+        return () => clearTimeout(timer);
+    }, [fetchStudents]);
 
     // সিট, বেঞ্চ বা হলের ইনপুট চ্যাঞ্জ হ্যান্ডলার
     const handleSeatInputChange = (id, field, value) => {
@@ -170,33 +179,41 @@ export default function AllStudentsPage() {
     };
 
     // ডায়নামিক ফিল্টারিং লজিক
-    const filteredStudents = students.filter((student) => {
-        const details = getStudentClassDetails(student);
+    const filteredStudents = useMemo(() => {
+        return students
+            .filter((student) => {
+                const details = getStudentClassDetails(student);
 
-        const matchesSearch =
-            (student.studentNameBangla && student.studentNameBangla.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (student.studentNameEnglish && student.studentNameEnglish.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (student.studentId && student.studentId.toString().includes(searchTerm)) ||
-            (student.fatherNameBangla && student.fatherNameBangla.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (student.fatherMobile && student.fatherMobile.includes(searchTerm)) ||
-            (student.guardianMobile && student.guardianMobile.includes(searchTerm)) ||
-            (student.currentAddress?.district && student.currentAddress.district.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (student.permanentAddress?.district && student.permanentAddress.district.toLowerCase().includes(searchTerm.toLowerCase()));
+                const matchesSearch =
+                    (student.studentNameBangla && student.studentNameBangla.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                    (student.studentNameEnglish && student.studentNameEnglish.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                    (student.studentId && student.studentId.toString().includes(searchTerm)) ||
+                    (student.fatherNameBangla && student.fatherNameBangla.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                    (student.fatherMobile && student.fatherMobile.includes(searchTerm)) ||
+                    (student.guardianMobile && student.guardianMobile.includes(searchTerm)) ||
+                    (student.currentAddress?.district && student.currentAddress.district.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                    (student.permanentAddress?.district && student.permanentAddress.district.toLowerCase().includes(searchTerm.toLowerCase()));
 
-        const studentYear = (student.sessionYear || "").split(/[-–/]/)[0].trim();
-        const matchesSession = selectedSession === "all" || studentYear === selectedSession;
-        const matchesDivision = selectedDivision === "all" || details.divisionKey === selectedDivision;
-        const matchesAcademyType = selectedAcademyType === "all" || details.academyType === selectedAcademyType;
-        const matchesClass = selectedClass === "all" || details.className === selectedClass;
+                const studentYear = (student.sessionYear || "").split(/[-–/]/)[0].trim();
+                const matchesSession = selectedSession === "all" || studentYear === selectedSession;
+                const matchesDivision = selectedDivision === "all" || details.divisionKey === selectedDivision;
+                const matchesAcademyType = selectedAcademyType === "all" || details.academyType === selectedAcademyType;
+                const matchesClass = selectedClass === "all" || details.className === selectedClass;
 
-        return (
-            matchesSearch &&
-            matchesSession &&
-            matchesDivision &&
-            matchesAcademyType &&
-            matchesClass
-        );
-    });
+                return (
+                    matchesSearch &&
+                    matchesSession &&
+                    matchesDivision &&
+                    matchesAcademyType &&
+                    matchesClass
+                );
+            })
+            .sort(
+                (a, b) =>
+                    (parseInt(a.roll, 10) || Infinity) -
+                    (parseInt(b.roll, 10) || Infinity)
+            );
+    }, [students, searchTerm, selectedSession, selectedDivision, selectedAcademyType, selectedClass]);
 
     const sessionYears = [
         "২০২৬", "২০২৫", "২০২৪",

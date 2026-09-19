@@ -220,10 +220,11 @@ function TeacherMarkInputContent() {
 
     setLoading(true);
     try {
-      // ১ম ধাপ: ব্যাকএন্ড থেকে Approved শিক্ষার্থীদের তালিকা নিয়ে আসা (পেজিনেটেড)
+      // ১ম ধাপ: ব্যাকএন্ড থেকে Approved ও Active শিক্ষার্থীদের তালিকা নিয়ে আসা (পেজিনেটেড)
       const params = new URLSearchParams({
         class: selectedClass,
         status: "approved",
+        activity: "active",
         page: String(currentPage),
         limit: String(currentLimit),
       });
@@ -234,7 +235,11 @@ function TeacherMarkInputContent() {
 
       let rawStudents = [];
       if (studentData.success && Array.isArray(studentData.data)) {
-        rawStudents = studentData.data;
+        rawStudents = [...studentData.data].sort(
+          (a, b) =>
+            (parseInt(a.roll, 10) || Infinity) -
+            (parseInt(b.roll, 10) || Infinity),
+        );
         setTotalPages(studentData.totalPages || 1);
         setTotalStudents(studentData.total || studentData.totalCount || 0);
       } else {

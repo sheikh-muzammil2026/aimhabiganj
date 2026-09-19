@@ -2,7 +2,7 @@
 
 import { Globe, Mail, Phone, Search } from "lucide-react";
 import Image from "next/image";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { BsWhatsapp, BsYoutube } from "react-icons/bs";
 import { FaFacebook } from "react-icons/fa";
 import { authClient } from "@/lib/auth-client";
@@ -79,6 +79,8 @@ export default function ResultSheetGenerator() {
       setError(null);
       const params = new URLSearchParams({
         status: "Approved",
+        activity: "active",
+        limit: "1000",
       });
 
       if (trimmedTerm) {
@@ -97,7 +99,11 @@ export default function ResultSheetGenerator() {
       const result = await response.json();
 
       if (result.success) {
-        const fetchedStudents = result.data || [];
+        const fetchedStudents = (result.data || []).sort(
+          (a, b) =>
+            (parseInt(a.roll, 10) || Infinity) -
+            (parseInt(b.roll, 10) || Infinity),
+        );
         if (fetchedStudents.length > 0) {
           setStudents(fetchedStudents);
           const matchedIds = fetchedStudents.map((s) => s.studentId);
@@ -522,6 +528,69 @@ export default function ResultSheetGenerator() {
     };
   };
 
+  // একাধিক শিক্ষার্থীর রেজাল্ট একসাথে লোড হলে মোট নম্বরের (Total Marks) ভিত্তিতে মেধাস্থান হিসাব
+  const clientMeritMap = useMemo(() => {
+    const map = new Map();
+    if (!resultSheets || resultSheets.length === 0) return map;
+
+    const passed = [];
+    resultSheets.forEach((sheet) => {
+      const resultsList = sheet.results || [];
+      const summary = calculateSummary(resultsList, examType);
+      const isPassed =
+        summary.status === "উত্তীর্ণ" &&
+        summary.grade !== "F" &&
+        summary.grade !== "অনুঃ" &&
+        summary.grade !== "অসম্পূর্ণ";
+
+      const totalMarks =
+        resultsList.reduce((sum, item) => {
+          const m = getMarkForExamType(item, examType);
+          return typeof m === "number" ? sum + m : sum;
+        }, 0) || 0;
+
+      const sid = String(sheet.studentId || sheet.student?.studentId || "");
+      const rollNum =
+        parseInt(sheet.student?.roll || sheet.student?.officeUse?.rollNumber, 10) ||
+        999999;
+      const gpaNum = parseFloat(summary.gpa) || 0;
+
+      if (isPassed && sid) {
+        passed.push({
+          studentId: sid,
+          totalMarks,
+          gpa: gpaNum,
+          roll: rollNum,
+        });
+      }
+    });
+
+    // ১. মোট নম্বর (Total Marks) এর ভিত্তিতে অবতরণ ক্রমে সর্টিং
+    passed.sort((a, b) => {
+      const markDiff = b.totalMarks - a.totalMarks;
+      if (markDiff !== 0) return markDiff;
+      const gpaDiff = b.gpa - a.gpa;
+      if (Math.abs(gpaDiff) > 0.001) return gpaDiff;
+      return a.roll - b.roll;
+    });
+
+    // ২. সমসংখ্যক মোট নম্বরে একই মেধাস্থান নির্ধারণ
+    passed.forEach((st, idx) => {
+      if (idx > 0) {
+        const prev = passed[idx - 1];
+        if (st.totalMarks === prev.totalMarks) {
+          map.set(st.studentId, map.get(prev.studentId));
+        } else {
+          map.set(st.studentId, idx + 1);
+        }
+      } else {
+        map.set(st.studentId, 1);
+      }
+    });
+
+    return map;
+  }, [resultSheets, examType]);
+
   const handlePrint = () => {
     window.print();
   };
@@ -793,6 +862,10 @@ export default function ResultSheetGenerator() {
 
             const results = resData.results || [];
             const summary = calculateSummary(results, examType);
+            const studentMerit =
+              resData.meritPosition && resData.meritPosition !== "-"
+                ? resData.meritPosition
+                : clientMeritMap.get(String(currentStudentId)) || "-";
 
             return (
               <div
@@ -1038,6 +1111,28 @@ export default function ResultSheetGenerator() {
                                 {studentDistrict}
                               </span>
                             </div>
+
+                            {/* ৭. শ্রেণি */}
+                            <div className="flex items-end">
+                              <span className="font-bold w-20 shrink-0">
+                                শ্রেণি:
+                              </span>
+                              <span className="border-b border-dashed border-gray-400 flex-1 truncate">
+                                {studentClass}
+                              </span>
+                            </div>
+
+                            {/* ৮. মেধাস্থান */}
+                            <div className="flex items-end">
+                              <span className="font-bold w-16 shrink-0">
+                                মেধাস্থান:
+                              </span>
+                              <span className="border-b border-dashed border-gray-400 flex-1 font-bold text-[#043e30]">
+                                {studentMerit && studentMerit !== "-"
+                                  ? toBengaliDigits(studentMerit)
+                                  : "-"}
+                              </span>
+                            </div>
                           </div>
                           {/* টেবিল হেডার টাইটেল */}
                           <div className="text-center font-bold text-xs my-1 text-gray-800">
@@ -1189,7 +1284,7 @@ export default function ResultSheetGenerator() {
 
                         {/* সামারি সেকশন */}
                         <div className="mt-1 border border-[#C5A059] bg-[#fcf8ed] p-2 rounded-sm flex-shrink-0">
-                          <div className="grid grid-cols-4 gap-2 text-center text-xs font-bold text-gray-800">
+                          <div className="grid grid-cols-5 gap-2 text-center text-xs font-bold text-gray-800">
                             <div>
                               <span className="block text-[10px] text-gray-600 font-normal">
                                 মোট নম্বর
@@ -1213,6 +1308,16 @@ export default function ResultSheetGenerator() {
                                 ফাইনাল জিপিএ
                               </span>
                               {summary.gpa}
+                            </div>
+                            <div className="bg-[#043e30]/10 rounded-sm py-0.5 border border-[#043e30]/20">
+                              <span className="block text-[10px] text-[#043e30] font-bold">
+                                মেধাস্থান
+                              </span>
+                              <span className="text-[#043e30] font-black">
+                                {studentMerit && studentMerit !== "-"
+                                  ? toBengaliDigits(studentMerit)
+                                  : "-"}
+                              </span>
                             </div>
                           </div>
                         </div>

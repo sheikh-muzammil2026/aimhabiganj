@@ -75,7 +75,12 @@ export default function ExamAttendanceSheet() {
                     hijriYear: '১৪৪৭'
                 });
                 setSubjects(result.subjects || []);
-                setStudents(result.students || []);
+                const sortedStudents = (result.students || []).sort(
+                    (a, b) =>
+                        (parseInt(a.roll, 10) || Infinity) -
+                        (parseInt(b.roll, 10) || Infinity)
+                );
+                setStudents(sortedStudents);
             } else {
                 setError(result.message || 'উপস্থিতি স্বাক্ষরপত্র শিটের তথ্য লোড করা যায়নি।');
             }
@@ -89,7 +94,10 @@ export default function ExamAttendanceSheet() {
 
     useEffect(() => {
         if (selectedExam && selectedClass) {
-            fetchAttendanceData();
+            const timer = setTimeout(() => {
+                fetchAttendanceData();
+            }, 0);
+            return () => clearTimeout(timer);
         }
     }, [selectedExam, selectedClass, fetchAttendanceData]);
 

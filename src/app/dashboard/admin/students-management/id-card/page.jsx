@@ -1,6 +1,6 @@
 "use client";
 import { IdCardBack } from "@/components/dashboard/students/id-card/IdCardBack";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import BarcodeSVG from "react-barcode";
 
 export default function IdCardGenerator() {
@@ -12,7 +12,7 @@ export default function IdCardGenerator() {
   // ফিল্টারিং স্টেটসমূহ
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSession, setSelectedSession] = useState("all");
-  const [selectedDivision, setSelectedDivision] = useState("all");
+  const [selectedDivision, setSelectedDivision] = useState("all"); // preHifz, hifz, academy
   const [selectedAcademyType, setSelectedAcademyType] = useState("all");
   const [selectedClass, setSelectedClass] = useState("all");
   const [selectedType, setSelectedType] = useState("all");
@@ -24,26 +24,13 @@ export default function IdCardGenerator() {
   const [totalStudents, setTotalStudents] = useState(0);
   const [limit] = useState(20);
 
-  // ১. Backend থেকে স্টুডেন্ট ডাটা ফেচ করা (পেজিনেটেড)
-  useEffect(() => {
-    fetchStudents();
-  }, [
-    currentPage,
-    searchTerm,
-    selectedSession,
-    selectedDivision,
-    selectedAcademyType,
-    selectedClass,
-    selectedType,
-    selectedFeeCategory,
-  ]);
-
-  const fetchStudents = async () => {
+  const fetchStudents = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       const params = new URLSearchParams({
         status: "Approved",
+        activity: "active",
         page: currentPage,
         limit: limit,
       });
@@ -65,7 +52,12 @@ export default function IdCardGenerator() {
       const result = await response.json();
 
       if (result.success) {
-        setStudents(result.data || []);
+        const sorted = (result.data || []).sort(
+          (a, b) =>
+            (parseInt(a.roll, 10) || Infinity) -
+            (parseInt(b.roll, 10) || Infinity),
+        );
+        setStudents(sorted);
         setTotalPages(result.totalPages || 1);
         setTotalStudents(result.total || result.totalCount || 0);
       } else {
@@ -77,7 +69,24 @@ export default function IdCardGenerator() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [
+    currentPage,
+    limit,
+    searchTerm,
+    selectedSession,
+    selectedDivision,
+    selectedAcademyType,
+    selectedClass,
+    selectedType,
+    selectedFeeCategory,
+  ]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchStudents();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchStudents]);
 
   // একাডেমি টাইপ ভিত্তিক ক্লাসের তালিকা পাওয়ার ফাংশন
   const getAcademyClasses = (academyType) => {

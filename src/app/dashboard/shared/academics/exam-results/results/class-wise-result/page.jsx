@@ -119,7 +119,12 @@ function ClassWiseResultContent() {
       }
 
       if (data.success && Array.isArray(data.data)) {
-        setResults(data.data);
+        const sorted = [...data.data].sort(
+          (a, b) =>
+            (parseInt(a.roll, 10) || Infinity) -
+            (parseInt(b.roll, 10) || Infinity),
+        );
+        setResults(sorted);
         setIsPublished(Boolean(data.isPublished));
         setTotalPages(data.totalPages || 1);
         setTotalResults(
@@ -157,6 +162,105 @@ function ClassWiseResultContent() {
     setToggling(true);
     try {
       const nextStatus = !isPublished;
+      let rollUpdates = [];
+
+      if (nextStatus) {
+        // ফলাফল প্রকাশের সময় ক্লাসের সকল শিক্ষার্থীর মেধা অনুযায়ী স্বয়ংক্রিয় রোল নাম্বার নির্ধারণ
+        const queryParams = new URLSearchParams({
+          class: selectedClass,
+          year: year,
+          term: examType,
+          page: "1",
+          limit: "1000",
+        });
+
+        const resAll = await fetch(
+          `${API_BASE_URL}/api/results/class?${queryParams.toString()}`,
+          {
+            headers: {
+              "x-user-email": user?.email || "",
+              "x-user-role": user?.role || "",
+            },
+          },
+        );
+        const dataAll = await resAll.json();
+        const fullResults =
+          dataAll.success && Array.isArray(dataAll.data) ? dataAll.data : results;
+
+        const allCalcs = new Map();
+        fullResults.forEach((s) => {
+          allCalcs.set(s.studentId, getStudentCalculations(s));
+        });
+
+        const passedStudents = [];
+        const failedStudents = [];
+        const absentStudents = [];
+
+        fullResults.forEach((s) => {
+          const calc = allCalcs.get(s.studentId);
+          if (calc?.isAbsentAll) {
+            absentStudents.push(s);
+          } else if (calc?.hasFailed || calc?.isPartialAbsent) {
+            failedStudents.push(s);
+          } else {
+            passedStudents.push(s);
+          }
+        });
+
+        // ১. উত্তীর্ণ শিক্ষার্থীদের মোট মার্ক (অবতরণ), GPA (অবতরণ) এবং পূর্ববর্তী রোল (আরোহণ) অনুযায়ী সাজানো
+        passedStudents.sort((a, b) => {
+          const calcA = allCalcs.get(a.studentId);
+          const calcB = allCalcs.get(b.studentId);
+          const markDiff = (calcB?.totalMarks || 0) - (calcA?.totalMarks || 0);
+          if (markDiff !== 0) return markDiff;
+          const gpaDiff = parseFloat(calcB?.gpa || 0) - parseFloat(calcA?.gpa || 0);
+          if (Math.abs(gpaDiff) > 0.001) return gpaDiff;
+          const rollA = parseInt(a.roll, 10) || 999999;
+          const rollB = parseInt(b.roll, 10) || 999999;
+          return rollA - rollB;
+        });
+
+        // ২. অনুত্তীর্ণ শিক্ষার্থীদের মোট মার্ক (অবতরণ) ও পূর্ববর্তী রোল (আরোহণ) অনুযায়ী সাজানো
+        failedStudents.sort((a, b) => {
+          const calcA = allCalcs.get(a.studentId);
+          const calcB = allCalcs.get(b.studentId);
+          const markDiff = (calcB?.totalMarks || 0) - (calcA?.totalMarks || 0);
+          if (markDiff !== 0) return markDiff;
+          const rollA = parseInt(a.roll, 10) || 999999;
+          const rollB = parseInt(b.roll, 10) || 999999;
+          return rollA - rollB;
+        });
+
+        // ৩. অনুপস্থিত শিক্ষার্থীদের পূর্ববর্তী রোল (আরোহণ) অনুযায়ী সাজানো
+        absentStudents.sort((a, b) => {
+          const rollA = parseInt(a.roll, 10) || 999999;
+          const rollB = parseInt(b.roll, 10) || 999999;
+          return rollA - rollB;
+        });
+
+        let currentRoll = 1;
+        passedStudents.forEach((s) => {
+          rollUpdates.push({
+            studentId: s.studentId,
+            roll: String(currentRoll++),
+          });
+        });
+
+        failedStudents.forEach((s) => {
+          rollUpdates.push({
+            studentId: s.studentId,
+            roll: String(currentRoll++),
+          });
+        });
+
+        absentStudents.forEach((s) => {
+          rollUpdates.push({
+            studentId: s.studentId,
+            roll: String(currentRoll++),
+          });
+        });
+      }
+
       const res = await fetch(`${API_BASE_URL}/api/results/publish`, {
         method: "PATCH",
         headers: {
@@ -169,6 +273,7 @@ function ClassWiseResultContent() {
           examType: examType,
           year: year,
           isPublished: nextStatus,
+          rollUpdates: nextStatus && rollUpdates.length > 0 ? rollUpdates : undefined,
         }),
       });
 
@@ -328,14 +433,17 @@ function ClassWiseResultContent() {
         const calcA = studentCalculationsMap.get(a.studentId);
         const calcB = studentCalculationsMap.get(b.studentId);
 
-        const gpaDiff = parseFloat(calcB.gpa) - parseFloat(calcA.gpa);
-        if (Math.abs(gpaDiff) > 0.001) return gpaDiff;
-
-        const markDiff = calcB.totalMarks - calcA.totalMarks;
+        // ১ম ধাপ: মোট নম্বর (Total Marks) অনুযায়ী সর্বোচ্চ থেকে সর্বনিম্ন (অবতরণ ক্রম)
+        const markDiff = (calcB?.totalMarks || 0) - (calcA?.totalMarks || 0);
         if (markDiff !== 0) return markDiff;
 
-        const rollA = parseInt(a.roll) || 999999;
-        const rollB = parseInt(b.roll) || 999999;
+        // টাই-ব্রেকিং ১: GPA (অবতরণ ক্রম)
+        const gpaDiff = parseFloat(calcB?.gpa || 0) - parseFloat(calcA?.gpa || 0);
+        if (Math.abs(gpaDiff) > 0.001) return gpaDiff;
+
+        // টাই-ব্রেকিং ২: পূর্ববর্তী রোল (আরোহণ ক্রম)
+        const rollA = parseInt(a.roll, 10) || 999999;
+        const rollB = parseInt(b.roll, 10) || 999999;
         return rollA - rollB;
       });
 
@@ -344,10 +452,8 @@ function ClassWiseResultContent() {
         const prevStudent = passedList[idx - 1];
         const prevCalc = studentCalculationsMap.get(prevStudent.studentId);
         const currCalc = studentCalculationsMap.get(student.studentId);
-        if (
-          parseFloat(currCalc.gpa) === parseFloat(prevCalc.gpa) &&
-          currCalc.totalMarks === prevCalc.totalMarks
-        ) {
+        // যদি মোট নম্বর সমান হয়, তবে তাদের একই মেধাস্থান হবে
+        if ((currCalc?.totalMarks || 0) === (prevCalc?.totalMarks || 0)) {
           rankMap.set(student.studentId, rankMap.get(prevStudent.studentId));
         } else {
           rankMap.set(student.studentId, idx + 1);

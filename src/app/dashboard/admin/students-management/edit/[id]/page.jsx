@@ -126,7 +126,6 @@ export default function EditStudentPage() {
       markOthers: "",
       totalMarks: 0,
       recommendedClass: "",
-      rollNumber: "",
       monthlyFee: "",
       feeCategory: "",
       examinerId1: "",
@@ -226,7 +225,6 @@ export default function EditStudentPage() {
               markOthers: "",
               totalMarks: 0,
               recommendedClass: "",
-              rollNumber: "",
               monthlyFee: "",
               feeCategory: "",
               examinerId1: "",
@@ -301,7 +299,7 @@ export default function EditStudentPage() {
 
       if (data.success) {
         toast.success("🎉 শিক্ষার্থীর তথ্য সফলভাবে আপডেট করা হয়েছে!");
-        router.push("/dashboard/students");
+        router.push("/dashboard/admin/students-management");
       } else {
         toast.error(data.message || "আপডেট করা সম্ভব হয়নি।");
       }
@@ -325,7 +323,7 @@ export default function EditStudentPage() {
     <div className="min-h-screen bg-slate-100 py-4 sm:py-10 px-2 sm:px-4 flex flex-col items-center justify-center font-sans antialiased print:bg-white print:py-0 print:px-0">
       <div className="w-full max-w-[8.27in] flex justify-between items-center mb-4 print:hidden px-2">
         <Link
-          href="/dashboard/students"
+          href="/dashboard/admin/students-management"
           className="text-xs sm:text-sm font-bold text-emerald-800 hover:underline flex items-center gap-1"
         >
           ⬅ তালিকায় ফিরে যান
