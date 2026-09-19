@@ -469,6 +469,11 @@ function ClassWiseResultContent() {
             z-index: 0 !important;
             opacity: 0.06 !important;
             pointer-events: none !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 480px !important;
+            height: 480px !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
@@ -585,6 +590,7 @@ function ClassWiseResultContent() {
             display: flex !important;
             flex-direction: column !important;
             min-height: 185mm !important;
+            position: relative !important;
           }
           .print-footer-container {
             margin-top: auto !important;
@@ -817,7 +823,7 @@ function ClassWiseResultContent() {
                 </div>
               )}
 
-              <div className="watermark-wrapper absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0 opacity-[0.06]">
+              <div className="watermark-wrapper absolute inset-0 m-auto flex items-center justify-center pointer-events-none z-0 opacity-[0.06] overflow-hidden">
                 <div className="w-[480px] h-[480px] rounded-full overflow-hidden flex items-center justify-center">
                   <Image
                     src="/aimlogo1.png"
