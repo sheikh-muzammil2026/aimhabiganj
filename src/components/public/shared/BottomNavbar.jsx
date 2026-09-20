@@ -132,6 +132,7 @@ export default function BottomNavbar() {
         { name: t("menu.notices"), href: "/notices", icon: <FileText className="w-4 h-4" /> },
         { name: t("menu.gallery"), href: "/gallery", icon: <Image className="w-4 h-4" /> },
         { name: t("menu.results"), href: "/results", icon: <GraduationCap className="w-4 h-4" /> },
+        { name: t("menu.fatwa"), href: "/fatwa", icon: <BookOpen className="w-4 h-4 text-emerald-600" /> },
         {
             name: t("menu.contact"),
             icon: <PhoneCall className="w-4 h-4" />,

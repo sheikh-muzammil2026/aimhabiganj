@@ -140,6 +140,7 @@ export default function Navbar() {
     { name: t("menu.notices"), href: "/notices" },
     { name: t("menu.gallery"), href: "/gallery" },
     { name: t("menu.results"), href: "/results" },
+    { name: t("menu.fatwa"), href: "/fatwa" },
     {
       name: t("menu.contact"),
       dropdown: [

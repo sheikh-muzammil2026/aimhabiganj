@@ -1,7 +1,8 @@
 // components/AIChatbot.jsx
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { MessageSquare, X, Send, Bot } from "lucide-react";
+import Link from "next/link";
+import { MessageSquare, X, Send, Bot, BookOpen } from "lucide-react";
 
 export default function AIChatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -107,6 +108,19 @@ export default function AIChatbot() {
               </div>
             )}
             <div ref={chatEndRef} />
+          </div>
+
+          {/* ফাতওয়া জিজ্ঞাসা কুইক লিংক */}
+          <div className="px-3 py-1.5 bg-emerald-50/90 border-t border-emerald-100 flex items-center justify-between text-[11px]">
+            <span className="text-emerald-800 font-medium">মাসআলা ও ফতোয়া জানতে চান?</span>
+            <Link
+              href="/fatwa"
+              onClick={() => setIsOpen(false)}
+              className="inline-flex items-center gap-1 font-bold text-emerald-700 hover:text-emerald-900 underline"
+            >
+              <BookOpen className="w-3 h-3" />
+              <span>ফাতওয়া জিজ্ঞাসা</span>
+            </Link>
           </div>
 
           {/* চ্যাট ইনপুট ফর্ম */}
