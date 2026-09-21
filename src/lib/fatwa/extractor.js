@@ -22,7 +22,7 @@ function decodeHtmlEntities(str) {
  * Fetches page HTML with timeout and security headers.
  * Validates that redirects stay within whitelisted domains.
  */
-export async function fetchArticleHtml(urlStr, timeoutMs = 8000) {
+export async function fetchArticleHtml(urlStr, timeoutMs = 15000) {
   if (!isWhitelistedUrl(urlStr)) {
     throw new Error(`Security Exception: URL '${urlStr}' is not in whitelisted domains.`);
   }
@@ -35,9 +35,11 @@ export async function fetchArticleHtml(urlStr, timeoutMs = 8000) {
       signal: controller.signal,
       headers: {
         "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "bn,ar,en;q=0.9"
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language": "bn-BD,bn;q=0.9,ar;q=0.8,en-US;q=0.7,en;q=0.6",
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache"
       }
     });
 

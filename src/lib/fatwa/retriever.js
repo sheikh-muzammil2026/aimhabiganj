@@ -115,11 +115,12 @@ async function searchWhitelistedSitesDirectly(query) {
     for (const term of searchTerms.slice(0, 3)) {
       try {
         const res = await fetch(`https://www.alkawsar.com/bn/search/?q=${encodeURIComponent(term)}`, {
+          signal: AbortSignal.timeout(10000),
           headers: {
             "User-Agent":
-              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
             Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "bn,en;q=0.9"
+            "Accept-Language": "bn-BD,bn;q=0.9,en;q=0.8"
           }
         });
         if (res.ok) {
@@ -146,9 +147,12 @@ async function searchWhitelistedSitesDirectly(query) {
     for (const term of searchTerms.slice(0, 2)) {
       try {
         const res = await fetch(`https://ahlehaqmedia.com/?s=${encodeURIComponent(term)}`, {
+          signal: AbortSignal.timeout(10000),
           headers: {
             "User-Agent":
-              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+            Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "bn-BD,bn;q=0.9,en;q=0.8"
           }
         });
         if (res.ok) {
@@ -197,11 +201,12 @@ async function searchDirectWeb(query) {
 
   try {
     const res = await fetch(searchUrl, {
+      signal: AbortSignal.timeout(12000),
       headers: {
         "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
         Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "bn,en;q=0.9"
+        "Accept-Language": "bn-BD,bn;q=0.9,en;q=0.8"
       }
     });
 
@@ -279,7 +284,18 @@ export async function retrieveWhitelistedFatwas(query, maxResults = 3) {
     try {
       const parsed = new URL(url);
       const path = parsed.pathname.toLowerCase();
-      if (path === "/" || path === "/bn" || path === "/en" || path === "/bn/" || path === "/en/") {
+      if (
+        path === "/" ||
+        path === "/bn" ||
+        path === "/en" ||
+        path === "/bn/" ||
+        path === "/en/" ||
+        path.includes("/topics") ||
+        path.includes("/category") ||
+        path.includes("/tag") ||
+        path.includes("/author") ||
+        path.includes("/page/")
+      ) {
         return 0;
       }
       if (
@@ -294,13 +310,14 @@ export async function retrieveWhitelistedFatwas(query, maxResults = 3) {
       }
       return 5;
     } catch {
-      return 1;
+      return 0;
     }
   };
 
   // Double-check Whitelist Guard (Zero Tolerance for non-whitelisted domains)
+  // Also filter out root homepages (score 0) so only real fatwa/article pages are fetched
   const validUrls = Array.from(new Set(candidateUrls))
-    .filter(url => isWhitelistedUrl(url))
+    .filter(url => isWhitelistedUrl(url) && scoreUrl(url) > 0)
     .sort((a, b) => scoreUrl(b) - scoreUrl(a))
     .slice(0, maxResults);
 

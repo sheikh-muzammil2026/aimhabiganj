@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 
 export default function TeacherProfileDashboard() {
@@ -257,6 +258,12 @@ export default function TeacherProfileDashboard() {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2 sm:gap-3">
+            <Link
+              href="/dashboard/attendance"
+              className="w-full sm:w-auto justify-center bg-emerald-500/30 hover:bg-emerald-500/50 text-emerald-100 font-bold px-4 py-2.5 rounded-xl border border-emerald-400/30 shadow-md transition-all flex items-center gap-2 text-sm"
+            >
+              📋 হাজিরা (Attendance)
+            </Link>
             <button
               onClick={handlePrint}
               type="button"

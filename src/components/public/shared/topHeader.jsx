@@ -17,14 +17,16 @@ export default function TopHeader() {
 
         {/* লোগো সেকশন:  */}
         <div className="flex-shrink-0 w-[82px] h-[82px] md:w-[130px] md:h-[130px] relative rounded-full overflow-hidden p-[2px] bg-transparent">
-          <Link href={'/'}> <Image
-            src="/aimlogo1.png"
-            alt="As-Salam Ideal Madrasah  (AIM) Logo"
-            fill
-            sizes="(max-width: 768px) 65px, 90px"
-            className="object-cover scale-[1.05] rounded-full"
-            priority
-          /></Link>
+          <Link href="/" className="relative block w-full h-full">
+            <Image
+              src="/aimlogo1.png"
+              alt="As-Salam Ideal Madrasah  (AIM) Logo"
+              fill
+              sizes="(max-width: 768px) 65px, 90px"
+              className="object-cover scale-[1.05] rounded-full"
+              priority
+            />
+          </Link>
         </div>
 
         {/* নাম ও স্লোগান কন্টেইনার: ফুল উইডথ দখল করবে */}

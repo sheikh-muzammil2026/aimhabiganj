@@ -269,6 +269,14 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       roles: ["admin"],
     },
     {
+      id: "teacher-attendance",
+      title: "শিক্ষক হাজিরা (উপস্থিতি)",
+      icon: "📋",
+      lucideIcon: <CalendarCheck className="w-5 h-5" />,
+      href: "/dashboard/attendance",
+      roles: ["admin", "teacher"],
+    },
+    {
       id: "administration",
       title: "প্রশাসনিক বিভাগ",
       icon: "🛡️",
