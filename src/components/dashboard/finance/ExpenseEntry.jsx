@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Plus, Trash2, Loader2 } from 'lucide-react';
+import React, { useEffect, useState, useRef } from 'react';
+import { Plus, Trash2, Loader2, RefreshCw } from 'lucide-react';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL || process.env.NEXT_PUBLIC_SERVER_API || 'http://localhost:8000';
 
@@ -10,51 +10,51 @@ export default function ExpenseEntry({
   loading,
   onSubmit,
   setActiveTab,
-  formatBanglaNumber
+  formatBanglaNumber,
+  isEditing = false
 }) {
+  const [isVoucherLoading, setIsVoucherLoading] = useState(false);
+  const prevDateRef = useRef(expenseForm.date);
 
-  // Auto Voucher ID Generation on date change
-  useEffect(() => {
-    const generateVoucherId = async () => {
-      if (!expenseForm.date) return;
-      const dateParts = expenseForm.date.split('-');
-      if (dateParts.length < 2) return;
-      const yy = dateParts[0].slice(-2);
-      const mm = dateParts[1];
-      const prefix = `EXP-${yy}${mm}`;
+  // Dedicated Auto Voucher ID Generator
+  const fetchNextVoucherNo = async () => {
+    if (isEditing || !expenseForm.date) return;
+    const dateParts = expenseForm.date.split('-');
+    if (dateParts.length < 2) return;
+    const yy = dateParts[0].slice(-2);
+    const mm = dateParts[1];
+    const prefix = `EXP-${yy}${mm}`;
 
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/finance/transactions?limit=100&type=expense`);
-        const data = await res.json();
-        if (data.success && Array.isArray(data.data)) {
-          const matchingIds = data.data
-            .map(tx => tx.voucherNo)
-            .filter(id => id && id.startsWith(prefix));
-
-          if (matchingIds.length > 0) {
-            const counters = matchingIds.map(id => {
-              const suffix = id.substring(prefix.length);
-              const num = parseInt(suffix, 10);
-              return isNaN(num) ? 0 : num;
-            });
-            const maxCounter = Math.max(...counters);
-            const nextCounter = maxCounter + 1;
-            setExpenseForm(prev => ({
-              ...prev,
-              voucherNo: `${prefix}${String(nextCounter).padStart(4, '0')}`
-            }));
-            return;
-          }
-        }
-        setExpenseForm(prev => ({ ...prev, voucherNo: `${prefix}0001` }));
-      } catch (err) {
-        console.error("Error generating dynamic Voucher ID:", err);
-        setExpenseForm(prev => ({ ...prev, voucherNo: `${prefix}0001` }));
+    try {
+      setIsVoucherLoading(true);
+      const res = await fetch(`${API_BASE_URL}/api/finance/next-receipt-no?date=${expenseForm.date}&type=expense`);
+      const data = await res.json();
+      if (data.success && data.nextReceiptNo) {
+        setExpenseForm(prev => ({
+          ...prev,
+          voucherNo: data.nextReceiptNo
+        }));
+        return;
       }
-    };
+      setExpenseForm(prev => ({ ...prev, voucherNo: `${prefix}0001` }));
+    } catch (err) {
+      console.error("Error generating dynamic Voucher ID:", err);
+      setExpenseForm(prev => ({ ...prev, voucherNo: `${prefix}0001` }));
+    } finally {
+      setIsVoucherLoading(false);
+    }
+  };
 
-    generateVoucherId();
-  }, [expenseForm.date, setExpenseForm]);
+  // Auto Voucher ID Generation on date change or initial/reset load
+  useEffect(() => {
+    if (isEditing) return;
+    const dateChanged = prevDateRef.current !== expenseForm.date;
+    prevDateRef.current = expenseForm.date;
+
+    if (!expenseForm.voucherNo || dateChanged) {
+      fetchNextVoucherNo();
+    }
+  }, [expenseForm.date, expenseForm.voucherNo, isEditing]);
 
   // Handlers for Items list
   const handleAddRow = () => {
@@ -94,15 +94,36 @@ export default function ExpenseEntry({
         {/* Voucher Metadata */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <div>
-            <label className="text-[10px] font-bold text-slate-600 block mb-1">ভাউচার নম্বর (Voucher ID)</label>
-            <input
-              type="text"
-              placeholder="স্বয়ংক্রিয় তৈরি হবে"
-              value={expenseForm.voucherNo}
-              onChange={(e) => setExpenseForm({ ...expenseForm, voucherNo: e.target.value })}
-              className="px-3 py-2 border border-slate-200 rounded-xl text-xs w-full focus:outline-none focus:border-emerald-700 font-mono font-bold"
-              required
-            />
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-[10px] font-bold text-slate-600">ভাউচার নম্বর (Voucher ID)</label>
+              {!isEditing && (
+                <button
+                  type="button"
+                  onClick={fetchNextVoucherNo}
+                  disabled={isVoucherLoading}
+                  className="text-[10px] text-emerald-700 hover:text-emerald-900 font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                  title="ভাউচার নম্বর রিফ্রেশ করুন"
+                >
+                  <RefreshCw className={`w-3 h-3 ${isVoucherLoading ? 'animate-spin' : ''}`} />
+                  <span>নতুন কোড</span>
+                </button>
+              )}
+            </div>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder={isVoucherLoading ? "লোড হচ্ছে..." : "স্বয়ংক্রিয় তৈরি হবে"}
+                value={expenseForm.voucherNo}
+                readOnly
+                className="px-3 py-2 bg-slate-100/80 border border-slate-200 rounded-xl text-xs w-full focus:outline-none font-mono font-bold text-slate-700 cursor-not-allowed select-none"
+                required
+              />
+              {isVoucherLoading && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <Loader2 className="w-3.5 h-3.5 text-emerald-700 animate-spin" />
+                </div>
+              )}
+            </div>
           </div>
 
           <div>

@@ -478,11 +478,12 @@ export default function FinanceDashboard() {
       });
       const data = await res.json();
       if (data.success) {
+        const savedReceiptNo = data.data?.receiptNo || incomeForm.receiptNo;
         triggerNotification(
           "success",
           editingId
             ? "আয়ের তথ্য সফলভাবে আপডেট করা হয়েছে!"
-            : "আয়ের তথ্য সফলভাবে সংরক্ষণ করা হয়েছে!",
+            : `আয়ের তথ্য সফলভাবে সংরক্ষণ করা হয়েছে! (রসিদ নং: ${savedReceiptNo})`,
         );
         // Reset form
         setIncomeForm({
@@ -547,11 +548,12 @@ export default function FinanceDashboard() {
       });
       const data = await res.json();
       if (data.success) {
+        const savedVoucherNo = data.data?.voucherNo || expenseForm.voucherNo;
         triggerNotification(
           "success",
           editingId
             ? "ব্যয় ভাউচার সফলভাবে আপডেট করা হয়েছে!"
-            : "ব্যয় ভাউচার সফলভাবে সংরক্ষণ করা হয়েছে!",
+            : `ব্যয় ভাউচার সফলভাবে সংরক্ষণ করা হয়েছে! (ভাউচার নং: ${savedVoucherNo})`,
         );
         // Reset form
         setExpenseForm({
@@ -772,6 +774,7 @@ export default function FinanceDashboard() {
             onSubmit={handleIncomeSubmit}
             setActiveTab={setActiveTab}
             formatBanglaNumber={formatBanglaNumber}
+            isEditing={Boolean(editingId && editingType === "income")}
           />
         )}
 
@@ -784,6 +787,7 @@ export default function FinanceDashboard() {
             onSubmit={handleExpenseSubmit}
             setActiveTab={setActiveTab}
             formatBanglaNumber={formatBanglaNumber}
+            isEditing={Boolean(editingId && editingType === "expense")}
           />
         )}
 
