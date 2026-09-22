@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth-client";
@@ -145,9 +145,14 @@ function TeacherMarkInputContent() {
     user?.role?.toLowerCase() === "admin" ||
     user?.role?.toLowerCase() === "superadmin";
 
+  const userRef = useRef(user);
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
+
   const [selectedClass, setSelectedClass] = useState("প্রথম");
   const [selectedSubject, setSelectedSubject] = useState("কুরআন ও তাজভীদ-০১");
-  const [examType, setExamType] = useState("term1");
+  const [examType, setExamType] = useState("term2");
   const [year, setYear] = useState("২০২৬");
 
   // ডায়নামিক সিলেবাস স্টেট (MongoDB syllabus কালেকশন থেকে)
@@ -274,8 +279,8 @@ function TeacherMarkInputContent() {
         `${API_BASE_URL}/api/marks/get?${markQueryParams.toString()}`,
         {
           headers: {
-            "x-user-email": user?.email || "",
-            "x-user-role": user?.role || "",
+            "x-user-email": userRef.current?.email || "",
+            "x-user-role": userRef.current?.role || "",
           },
         },
       );
@@ -330,7 +335,6 @@ function TeacherMarkInputContent() {
     year,
     currentPage,
     currentLimit,
-    user,
   ]);
 
   useEffect(() => {
@@ -371,17 +375,17 @@ function TeacherMarkInputContent() {
         examType: examType,
         year: year,
         marksData: studentsMarksList,
-        teacher: user?.email || "",
-        teacherEmail: user?.email || "",
-        userRole: user?.role || "",
+        teacher: userRef.current?.email || "",
+        teacherEmail: userRef.current?.email || "",
+        userRole: userRef.current?.role || "",
       };
 
       const response = await fetch(`${API_BASE_URL}/api/marks/input`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-user-email": user?.email || "",
-          "x-user-role": user?.role || "",
+          "x-user-email": userRef.current?.email || "",
+          "x-user-role": userRef.current?.role || "",
         },
         body: JSON.stringify(payload),
       });
@@ -412,16 +416,14 @@ function TeacherMarkInputContent() {
                 শ্রেণিভিত্তিক মার্কস ইনপুট ও আপডেট
               </h1>
               <span
-                className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${
-                  isPublished
+                className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${isPublished
                     ? "bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800"
                     : "bg-slate-100 text-slate-600 border-slate-300 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700"
-                }`}
+                  }`}
               >
                 <span
-                  className={`w-2 h-2 rounded-full ${
-                    isPublished ? "bg-emerald-500" : "bg-slate-400"
-                  }`}
+                  className={`w-2 h-2 rounded-full ${isPublished ? "bg-emerald-500" : "bg-slate-400"
+                    }`}
                 ></span>
                 {isPublished ? "ফলাফল প্রকাশিত" : "অপ্রকাশিত (ড্রাফট)"}
               </span>

@@ -2,10 +2,11 @@
 
 import { Globe, Mail, Phone, Search } from "lucide-react";
 import Image from "next/image";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { BsWhatsapp, BsYoutube } from "react-icons/bs";
 import { FaFacebook } from "react-icons/fa";
 import { authClient } from "@/lib/auth-client";
+import { formatSubjectName } from "@/lib/subjectFormatter";
 
 const toBengaliDigits = (num) => {
   if (num === null || num === undefined) return "";
@@ -16,6 +17,11 @@ const toBengaliDigits = (num) => {
 export default function ResultSheetGenerator() {
   const { data: session } = authClient.useSession();
   const user = session?.user;
+
+  const userRef = useRef(user);
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -164,8 +170,8 @@ export default function ResultSheetGenerator() {
             )}&examType=${encodeURIComponent(examType)}`,
             {
               headers: {
-                "x-user-email": user?.email || "",
-                "x-user-role": user?.role || "",
+                "x-user-email": userRef.current?.email || "",
+                "x-user-role": userRef.current?.role || "",
               },
             },
           );
@@ -200,7 +206,7 @@ export default function ResultSheetGenerator() {
       fetchStudentResults();
     }, 0);
     return () => clearTimeout(timer);
-  }, [selectedIds, targetYear, examType, user?.email, user?.role]);
+  }, [selectedIds, targetYear, examType]);
 
   // বিষয়ভিত্তিক গ্রেড এবং গ্রেড পয়েন্ট নির্ধারণ
   const calculateSubjectGrade = (mark) => {
@@ -1239,7 +1245,7 @@ export default function ResultSheetGenerator() {
                                       className="border-b border-[#C5A059]"
                                     >
                                       <td className="border border-[#C5A059] p-1.5 text-left px-2.5 font-semibold">
-                                        {item.subject}
+                                        {formatSubjectName(item.subject)}
                                       </td>
 
                                       {examType === "বার্ষিক পরীক্ষা" && (

@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth-client";
+import { formatSubjectName } from "@/lib/subjectFormatter";
 import Pagination from "@/components/dashboard/Pagination";
 import { Globe, Mail, Phone } from "lucide-react";
 import { BsWhatsapp, BsYoutube } from "react-icons/bs";
@@ -35,6 +36,11 @@ function ClassWiseResultContent() {
   const isAdmin =
     user?.role?.toLowerCase() === "admin" ||
     user?.role?.toLowerCase() === "superadmin";
+
+  const userRef = useRef(user);
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
 
   const [selectedClass, setSelectedClass] = useState("প্রথম");
   const [examType, setExamType] = useState("term1");
@@ -103,8 +109,8 @@ function ClassWiseResultContent() {
         `${API_BASE_URL}/api/results/class?${queryParams.toString()}`,
         {
           headers: {
-            "x-user-email": user?.email || "",
-            "x-user-role": user?.role || "",
+            "x-user-email": userRef.current?.email || "",
+            "x-user-role": userRef.current?.role || "",
           },
         },
       );
@@ -144,7 +150,7 @@ function ClassWiseResultContent() {
     } finally {
       setLoading(false);
     }
-  }, [selectedClass, year, examType, currentPage, currentLimit, user]);
+  }, [selectedClass, year, examType, currentPage, currentLimit]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -178,8 +184,8 @@ function ClassWiseResultContent() {
           `${API_BASE_URL}/api/results/class?${queryParams.toString()}`,
           {
             headers: {
-              "x-user-email": user?.email || "",
-              "x-user-role": user?.role || "",
+              "x-user-email": userRef.current?.email || "",
+              "x-user-role": userRef.current?.role || "",
             },
           },
         );
@@ -265,8 +271,8 @@ function ClassWiseResultContent() {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          "x-user-email": user?.email || "",
-          "x-user-role": user?.role || "",
+          "x-user-email": userRef.current?.email || "",
+          "x-user-role": userRef.current?.role || "",
         },
         body: JSON.stringify({
           class: selectedClass,
@@ -618,6 +624,15 @@ function ClassWiseResultContent() {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
+          .failed-subject-cell,
+          .tied-row td.failed-subject-cell,
+          .main-result-table td.failed-subject-cell {
+            background-color: #fee2e2 !important;
+            color: #dc2626 !important;
+            font-weight: 700 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
           .grading-box-container {
             width: 7.5rem !important;
             height: 7.5rem !important;
@@ -728,6 +743,13 @@ function ClassWiseResultContent() {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
+        }
+        .failed-subject-cell,
+        .tied-row td.failed-subject-cell,
+        .main-result-table td.failed-subject-cell {
+          background-color: #fee2e2 !important;
+          color: #dc2626 !important;
+          font-weight: 700 !important;
         }
       `}</style>
 
@@ -1151,14 +1173,21 @@ function ClassWiseResultContent() {
                                 const ct = parseFloat(termData.ct) || 0;
                                 const exam = parseFloat(termData.exam) || 0;
                                 const subTotal = isAbsent ? 0 : ct + exam;
+                                const isSubjectFailed = isAbsent || subTotal < 40;
+                                const isFailedCell =
+                                  !isPublished && calc?.hasFailed && isSubjectFailed;
 
                                 return (
                                   <span
                                     key={idx}
-                                    className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs border bg-slate-100 text-slate-800 border-slate-200/60 font-semibold"
+                                    className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs border ${
+                                      isFailedCell
+                                        ? "bg-red-100 text-red-700 border-red-300 font-bold"
+                                        : "bg-slate-100 text-slate-800 border-slate-200/60 font-semibold"
+                                    }`}
                                   >
                                     <span className="font-semibold">
-                                      {sub.subject}:
+                                      {formatSubjectName(sub.subject)}:
                                     </span>
                                     <span>
                                       {isAbsent
@@ -1233,7 +1262,7 @@ function ClassWiseResultContent() {
                               key={i}
                               className="p-1 border border-emerald-900 font-bold text-center whitespace-nowrap"
                             >
-                              {subjectName}
+                              {formatSubjectName(subjectName)}
                             </th>
                           ))}
 
@@ -1317,25 +1346,36 @@ function ClassWiseResultContent() {
                                   termData.ct === "ABS" ||
                                   termData.ct === "অনুঃ";
 
+                                const ct = parseFloat(termData.ct) || 0;
+                                const exam = parseFloat(termData.exam) || 0;
+                                const subTotal = isAbsent ? 0 : ct + exam;
+                                const isSubjectFailed = isAbsent || subTotal < 40;
+                                const isFailedCell =
+                                  !isPublished && calc?.hasFailed && isSubjectFailed;
+
                                 if (isAbsent) {
                                   return (
                                     <td
                                       key={idx}
-                                      className="p-1 border border-slate-300 text-center font-bold text-slate-900"
+                                      className={`p-1 border border-slate-300 text-center font-bold ${
+                                        isFailedCell
+                                          ? "failed-subject-cell"
+                                          : "text-slate-900"
+                                      }`}
                                     >
                                       অনুঃ
                                     </td>
                                   );
                                 }
 
-                                const ct = parseFloat(termData.ct) || 0;
-                                const exam = parseFloat(termData.exam) || 0;
-                                const subTotal = ct + exam;
-
                                 return (
                                   <td
                                     key={idx}
-                                    className="p-1 border border-slate-300 text-center font-semibold text-slate-900"
+                                    className={`p-1 border border-slate-300 text-center font-semibold ${
+                                      isFailedCell
+                                        ? "failed-subject-cell"
+                                        : "text-slate-900"
+                                    }`}
                                   >
                                     {toBengaliDigits(subTotal)}
                                   </td>
