@@ -114,7 +114,7 @@ export default function MonthlyReport({
   const handleLocalPrint = () => {
     let reportTitle = '';
     let reportPeriod = '';
-    
+
     if (subTab === 'daily') {
       reportTitle = 'দৈনিক আয় ও ব্যয় বিবরণী';
       reportPeriod = `তারিখ: ${formatBanglaNumber(dailyDate)}`;
@@ -142,17 +142,16 @@ export default function MonthlyReport({
         <div className="flex bg-slate-100 p-1 rounded-xl w-full xl:w-auto">
           {[
             { id: 'daily', label: '📅 দৈনিক বিবরণী' },
-            { id: 'weekly', label: '📅 साप्ताहिक বিবরণী' },
+            { id: 'weekly', label: '📅 সাপ্তাহিক বিবরণী' },
             { id: 'monthly', label: '📅 মাসিক বিবরণী' }
           ].map(tab => (
             <button
               key={tab.id}
               onClick={() => setSubTab(tab.id)}
-              className={`flex-1 xl:flex-none py-1.5 px-4 text-xs font-bold rounded-lg transition-all ${
-                subTab === tab.id
+              className={`flex-1 xl:flex-none py-1.5 px-4 text-xs font-bold rounded-lg transition-all ${subTab === tab.id
                   ? 'bg-white text-emerald-900 shadow-xs'
                   : 'text-slate-500 hover:text-slate-800'
-              }`}
+                }`}
             >
               {tab.label}
             </button>
@@ -218,7 +217,7 @@ export default function MonthlyReport({
           )}
 
           {/* Refresh Action */}
-          <button 
+          <button
             onClick={() => {
               if (subTab === 'monthly') fetchSummary();
               else fetchAndAggregate(
@@ -246,7 +245,7 @@ export default function MonthlyReport({
 
       {/* Physical Report Sheet Container */}
       <div className="bg-white border border-slate-200 p-4 sm:p-6 md:p-12 rounded-2xl shadow-xs print:border-none print:shadow-none print:p-0 print:m-0 overflow-x-auto relative min-h-[300px]">
-        
+
         {isLoading && (
           <div className="absolute inset-0 bg-white/70 flex items-center justify-center z-10 rounded-2xl">
             <div className="flex flex-col items-center gap-2">
@@ -272,14 +271,14 @@ export default function MonthlyReport({
 
         {/* Dual Column Sheet (Income vs Expense) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-slate-200 border-x border-b border-slate-200 mt-6 print:grid-cols-2">
-          
+
           {/* Income Column */}
           <div className="bg-white p-4 sm:p-5 space-y-4">
             <h4 className="text-xs font-extrabold text-emerald-900 uppercase tracking-widest border-b-2 border-emerald-100 pb-2 flex items-center justify-between">
               <span>📥 আয়ের খাতসমূহ (Income Sector)</span>
               <span className="text-[10px] text-slate-400">টাকা (৳)</span>
             </h4>
-            
+
             {activeData.incomeBreakdown?.length === 0 ? (
               <p className="text-xs text-slate-400 py-6 text-center">কোনো আয়ের এন্ট্রি নেই</p>
             ) : (
