@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
@@ -64,12 +64,81 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   const [activeMobileDrawer, setActiveMobileDrawer] = useState(null); // 'full' (অন্যান্য) অথবা নির্দিষ্ট item object
 
   // Better Auth থেকে সেশন ডেটা
-  const { data: session, isPending } = authClient.useSession();
+  const { data: session, isPending, refetch } = authClient.useSession();
+  const [liveUser, setLiveUser] = useState(null);
 
-  const user = session?.user;
-  const userRole = user?.role?.toLowerCase() || "user";
+  // Sync user role and permissions from DB
+  const syncUserData = useCallback(async () => {
+    try {
+      const res = await fetch("/api/user/me");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.user) {
+          setLiveUser(data.user);
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to sync user data in sidebar:", e);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (session?.user) {
+      syncUserData();
+    }
+  }, [session, syncUserData]);
+
+  // Reactive listener for permission changes across tabs and windows
+  useEffect(() => {
+    let channel;
+    try {
+      channel = new BroadcastChannel("aim-auth-sync");
+      channel.onmessage = (event) => {
+        if (event.data?.type === "PERMISSIONS_UPDATED" || event.data?.type === "ROLE_UPDATED") {
+          syncUserData();
+          if (typeof refetch === "function") refetch();
+        }
+      };
+    } catch (_) {}
+
+    const handleCustomSync = () => {
+      syncUserData();
+      if (typeof refetch === "function") refetch();
+    };
+
+    window.addEventListener("aim-auth-sync", handleCustomSync);
+    window.addEventListener("storage", handleCustomSync);
+
+    const interval = setInterval(syncUserData, 15000);
+
+    return () => {
+      if (channel) channel.close();
+      window.removeEventListener("aim-auth-sync", handleCustomSync);
+      window.removeEventListener("storage", handleCustomSync);
+      clearInterval(interval);
+    };
+  }, [syncUserData, refetch]);
+
+  const user = liveUser || session?.user;
+  const userRole = (user?.role || "user").toLowerCase();
+  const userPermissions = Array.isArray(user?.permissions) ? user.permissions : [];
   const userName = user?.name || "অতিথি ব্যবহারকারী";
   const avatarLetter = user?.name ? user.name.charAt(0) : "ই";
+
+  const getDashboardHref = (role) => {
+    switch (role) {
+      case "admin":
+        return "/dashboard/admin";
+      case "teacher":
+        return "/dashboard/teacher";
+      case "accountant":
+        return "/dashboard/accountant";
+      case "parent":
+        return "/dashboard/parent";
+      default:
+        return "/dashboard/student";
+    }
+  };
 
   const menuConfig = [
     {
@@ -77,8 +146,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       title: "ড্যাশবোর্ড",
       icon: "🕌",
       lucideIcon: <LayoutDashboard className="w-5 h-5" />,
-      href: `/dashboard/${userRole}`,
-      roles: ["admin", "teacher"],
+      href: getDashboardHref(userRole),
+      roles: ["admin", "teacher", "accountant", "parent", "student", "user"],
     },
     {
       id: "academics",
@@ -86,6 +155,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       icon: "📚",
       lucideIcon: <GraduationCap className="w-5 h-5" />,
       roles: ["admin", "teacher"],
+      permissions: ["manage_academics"],
       dropdown: [
         {
           title: "সিলেবাস",
@@ -163,6 +233,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       icon: "📝",
       lucideIcon: <Sparkles className="w-5 h-5" />,
       roles: ["admin"],
+      permissions: ["manage_admissions"],
       dropdown: [
         {
           title: "ভর্তির সময়",
@@ -186,6 +257,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       icon: "🖼️",
       lucideIcon: <Sparkles className="w-5 h-5" />,
       roles: ["admin", "teacher"],
+      permissions: ["manage_gallery"],
       dropdown: [
         { title: "গ্যালারি নিয়ন্ত্রণ", href: "/dashboard/shared/gallery" },
         {
@@ -200,6 +272,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       icon: "💻",
       lucideIcon: <Sparkles className="w-5 h-5" />,
       roles: ["admin", "teacher"],
+      permissions: ["manage_academics", "manage_classroom"],
       dropdown: [
         { title: "লাইভ ক্লাস লিংক", href: "/dashboard/smart-classroom/live" },
         {
@@ -224,6 +297,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       lucideIcon: <CalendarCheck className="w-5 h-5" />,
       href: "/dashboard/attendance",
       roles: ["admin", "teacher"],
+      permissions: ["manage_academics", "manage_attendance"],
     },
     {
       id: "students-management",
@@ -231,6 +305,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       icon: "👥",
       lucideIcon: <Users className="w-5 h-5" />,
       roles: ["admin"],
+      permissions: ["manage_users", "manage_students"],
       dropdown: [
         {
           title: "সকল শিক্ষার্থী তালিকা",
@@ -267,6 +342,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       lucideIcon: <UserCheck className="w-5 h-5" />,
       href: "/dashboard/admin/teachers-management",
       roles: ["admin"],
+      permissions: ["manage_users", "manage_teachers"],
     },
 
 
@@ -277,6 +353,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       lucideIcon: <Shield className="w-5 h-5" />,
       href: "/dashboard/admin/administration",
       roles: ["admin"],
+      permissions: ["manage_roles", "manage_users"],
     },
     {
       id: "finance",
@@ -284,6 +361,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       icon: "💰",
       lucideIcon: <Wallet className="w-5 h-5" />,
       roles: ["admin", "accountant"],
+      permissions: ["manage_finance", "accountant"],
       dropdown: [
         {
           title: "অ্যাকাউন্টিং রিপোর্টস",
@@ -301,6 +379,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       icon: "👨‍👩‍👦",
       lucideIcon: <Users className="w-5 h-5" />,
       roles: ["admin", "parent"],
+      permissions: ["manage_parents"],
       dropdown: [
         { title: "সন্তানের প্রোফাইল", href: "/dashboard/parent/child-profile" },
         { title: "একাডেমিক রেজাল্ট", href: "/dashboard/parent/results" },
@@ -320,10 +399,39 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     },
   ];
 
-  // ইউজার রোল অনুযায়ী ফিল্টার করা মেনুসমূহ
-  const allowedMenuItems = isPending
+  const isItemAllowed = (item) => {
+    // Admin has full access to all menus
+    if (userRole === "admin") return true;
+
+    // Direct role match
+    if (item.roles && item.roles.includes(userRole)) return true;
+
+    // Direct permission match
+    if (item.permissions && item.permissions.some((p) => userPermissions.includes(p))) {
+      return true;
+    }
+
+    // Role-granted-as-permission match (e.g. if user is granted "accountant" permission)
+    if (item.roles && item.roles.some((r) => userPermissions.includes(r))) {
+      return true;
+    }
+
+    // Special aliases
+    if (item.id === "finance" && userPermissions.includes("manage_finance")) return true;
+    if (item.id === "admission" && userPermissions.includes("manage_admissions")) return true;
+    if (item.id === "academics" && userPermissions.includes("manage_academics")) return true;
+    if (item.id === "attendance" && userPermissions.includes("manage_academics")) return true;
+    if (item.id === "students-management" && userPermissions.includes("manage_users")) return true;
+    if (item.id === "teachers-management" && userPermissions.includes("manage_users")) return true;
+    if (item.id === "administration" && (userPermissions.includes("manage_roles") || userPermissions.includes("manage_users"))) return true;
+
+    return false;
+  };
+
+  // ইউজার রোল ও ডাইনামিক পারমিশন অনুযায়ী ফিল্টার করা মেনুসমূহ
+  const allowedMenuItems = isPending && !liveUser
     ? []
-    : menuConfig.filter((item) => item.roles.includes(userRole));
+    : menuConfig.filter(isItemAllowed);
 
   // ডাইনামিকালি রোল অনুযায়ী প্রথম ৪টি পারমিটেড মেনু নিয়ে বটম নেভিগেশন আইটেম তৈরি
   const mobileBottomNavItems = allowedMenuItems.slice(0, 4);

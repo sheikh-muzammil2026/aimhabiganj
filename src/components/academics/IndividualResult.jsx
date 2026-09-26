@@ -14,6 +14,33 @@ const toBengaliDigits = (num) => {
   return String(num).replace(/[0-9]/g, (digit) => bengaliDigits[Number(digit)]);
 };
 
+/**
+ * Grade to remark conversion utility based on institutional academic standards.
+ * @param {string} grade - Letter grade (A+, A, A-, B, C, F)
+ * @param {string} [fallback=""] - Clean fallback string if grade is unmapped
+ * @returns {string} Mapped Bengali remark or fallback
+ */
+export const getGradeRemark = (grade, fallback = "") => {
+  if (!grade || typeof grade !== "string") return fallback;
+  const normalizedGrade = grade.trim().toUpperCase();
+  switch (normalizedGrade) {
+    case "A+":
+      return "মুমতাজ";
+    case "A":
+      return "জায়্যিদ জিদ্দান";
+    case "A-":
+      return "জায়্যিদ";
+    case "B":
+      return "মাকবুল প্লাস";
+    case "C":
+      return "মাকবুল";
+    case "F":
+      return "রাসেব";
+    default:
+      return fallback;
+  }
+};
+
 export default function ResultSheetGenerator() {
   const { data: session } = authClient.useSession();
   const user = session?.user;
@@ -424,6 +451,7 @@ export default function ResultSheetGenerator() {
         grade: "-",
         gpa: "০.০০",
         status: "অনুপস্থিত",
+        remark: "",
       };
     }
 
@@ -476,6 +504,7 @@ export default function ResultSheetGenerator() {
         grade: "অনুঃ",
         gpa: "০.০০",
         status: "অনুপস্থিত",
+        remark: "",
       };
     }
 
@@ -496,6 +525,7 @@ export default function ResultSheetGenerator() {
         grade: "অসম্পূর্ণ",
         gpa: "০.০০",
         status: "অসম্পূর্ণ",
+        remark: "",
       };
     }
 
@@ -517,6 +547,7 @@ export default function ResultSheetGenerator() {
         grade: "F",
         gpa: "০.০০",
         status: "অকৃতকার্য",
+        remark: getGradeRemark("F"),
       };
     }
 
@@ -531,6 +562,7 @@ export default function ResultSheetGenerator() {
       grade: overallGrade,
       gpa: toBengaliDigits(calculatedGPA),
       status: "উত্তীর্ণ",
+      remark: getGradeRemark(overallGrade),
     };
   };
 
@@ -557,8 +589,10 @@ export default function ResultSheetGenerator() {
 
       const sid = String(sheet.studentId || sheet.student?.studentId || "");
       const rollNum =
-        parseInt(sheet.student?.roll || sheet.student?.officeUse?.rollNumber, 10) ||
-        999999;
+        parseInt(
+          sheet.student?.roll || sheet.student?.officeUse?.rollNumber,
+          10,
+        ) || 999999;
       const gpaNum = parseFloat(summary.gpa) || 0;
 
       if (isPassed && sid) {
@@ -783,14 +817,6 @@ export default function ResultSheetGenerator() {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
             overflow: hidden !important;
-          }
-
-          .signature-controller,
-          .signature-principal {
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-            image-rendering: -webkit-optimize-contrast !important;
-            image-rendering: crisp-edges !important;
           }
         }
       `}</style>
@@ -1290,7 +1316,7 @@ export default function ResultSheetGenerator() {
 
                         {/* সামারি সেকশন */}
                         <div className="mt-1 border border-[#C5A059] bg-[#fcf8ed] p-2 rounded-sm flex-shrink-0">
-                          <div className="grid grid-cols-5 gap-2 text-center text-xs font-bold text-gray-800">
+                          <div className="grid grid-cols-6 gap-2 text-center text-xs font-bold text-gray-800">
                             <div>
                               <span className="block text-[10px] text-gray-600 font-normal">
                                 মোট নম্বর
@@ -1315,6 +1341,7 @@ export default function ResultSheetGenerator() {
                               </span>
                               {summary.gpa}
                             </div>
+
                             <div className="bg-[#043e30]/10 rounded-sm py-0.5 border border-[#043e30]/20">
                               <span className="block text-[10px] text-[#043e30] font-bold">
                                 মেধাস্থান
@@ -1325,23 +1352,34 @@ export default function ResultSheetGenerator() {
                                   : "-"}
                               </span>
                             </div>
+                            <div>
+                              <span className="block text-[10px] text-gray-600 font-normal">
+                                মন্তব্য
+                              </span>
+                              <span className="whitespace-nowrap">
+                                {summary.remark ||
+                                  getGradeRemark(summary.grade) ||
+                                  "-"}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
 
                       {/* ফুটার লেআউট (স্বাক্ষর এরিয়া এবং সোশ্যাল ও কন্টাক্ট ইনফো) */}
                       <div className="mt-auto flex-shrink-0 pt-2 relative z-10">
-                        <div className="flex justify-between items-end mb-2 px-4">
+                        {/* ৪. স্বাক্ষর সেকশন */}
+                        <div className="flex justify-between items-end my-1 px-4 flex-shrink-0">
                           {/* পরীক্ষা নিয়ন্ত্রক এর স্বাক্ষর */}
-                          <div className="text-center flex flex-col items-center relative">
-                            <div className="relative w-36 h-10">
+                          <div className="text-center flex flex-col items-center print:mt-auto relative">
+                            <div className="relative w-28 h-5">
                               <Image
                                 src={"/anarul.png"}
                                 alt="Controller Signature"
-                                width={200}
-                                height={60}
+                                width={100}
+                                height={40}
                                 unoptimized
-                                className="signature-controller absolute -top-2 right-8 h-12 w-20 object-contain mix-blend-multiply contrast-[800%] brightness-[60%] grayscale -rotate-90"
+                                className="absolute -top-1 right-6 h-6 w-12 object-contain mix-blend-multiply contrast-[800%] brightness-[60%] grayscale -rotate-90"
                               />
                             </div>
                             <div className="w-28 border-b border-gray-800 mb-0.5"></div>
@@ -1351,15 +1389,15 @@ export default function ResultSheetGenerator() {
                           </div>
 
                           {/* প্রিন্সিপাল এর স্বাক্ষর */}
-                          <div className="text-center flex flex-col items-center relative">
-                            <div className="relative w-36 h-10">
+                          <div className="text-center flex flex-col items-center">
+                            <div className="relative w-28 h-5 print:mt-auto relative">
                               <Image
                                 src={"/principle's_signature.jpg"}
                                 alt="Principal Signature"
                                 width={100}
                                 height={40}
                                 unoptimized
-                                className="signature-principal absolute -top-2 right-8 h-12 w-20 object-contain mix-blend-multiply contrast-[800%] brightness-[85%] grayscale -rotate-45"
+                                className="absolute -top-2 right-6 h-6 w-12 object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45"
                               />
                             </div>
                             <div className="w-28 border-b border-gray-800 mb-0.5"></div>

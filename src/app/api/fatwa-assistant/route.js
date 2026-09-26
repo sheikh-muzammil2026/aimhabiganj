@@ -1,14 +1,11 @@
 // src/app/api/fatwa-assistant/route.js
 import { retrieveWhitelistedFatwas } from "../../../lib/fatwa/retriever.js";
-import {
-  isWhitelistedUrl,
-  getDomainInfo,
-} from "../../../lib/fatwa/whitelist.js";
+import { isWhitelistedUrl, getDomainInfo } from "../../../lib/fatwa/whitelist.js";
 
 export const dynamic = "force-dynamic";
 
 const FALLBACK_MESSAGE =
-  "দুঃখিত, আমাদের অনুমোদিত ফতোয়া ওয়েবসাইটসমূহে আপনার প্রশ্নের সুনির্দিষ্ট উত্তরটি পাওয়া যায়নি। অনুগ্রহ করে সরাসরি বিজ্ঞ কোনো মুফতি সাহেবের সাথে যোগাযোগ করুন।";
+  "দুঃখিত, আমাদের অনুমোদিত ফতোয়া ওয়েবসাইটসমূহে আপনার প্রশ্নের সুনির্দিষ্ট উত্তরটি সরাসরি পাওয়া যায়নি। অনুগ্রহ করে সরাসরি বিজ্ঞ কোনো মুফতি সাহেবের সাথে যোগাযোগ করুন।";
 
 /**
  * Basic input sanitizer
@@ -22,146 +19,11 @@ function sanitizeQuery(str) {
 }
 
 /**
- * Builds the strict LLM system prompt with Query-Adaptive Synthesis instructions
+ * Direct Zero-Hallucination Answer Extractor from Scraped Source Article.
+ * Extracts the real question, answer text, core ruling, and citations directly from the authentic text.
  */
-function buildSystemPrompt() {
-  return `তুমি হলে "আস-সালাম আইডিয়াল মাদরাসা" এর "ফাতওয়া জিজ্ঞাসা" বিশেষজ্ঞ এআই সহকারী।
-তোমার দায়িত্ব হলো নিচে দেওয়া [VERIFIED_CONTEXT] বিশ্লেষণ করে ব্যবহারকারীর প্রশ্নের সুনির্দিষ্ট উত্তর তৈরি করা।
-
-[উপস্থাপনা ও প্রসেসিংয়ের নিয়ম]:
-১. মৌলিকত্ব অক্ষুণ্ণ রাখা: উত্তরের প্রতিটি বক্তব্য অবশ্যই [VERIFIED_CONTEXT]-এ উল্লেখিত তথ্যের ভিত্তিতে হতে হবে। নিজের থেকে কোনো মতামত বা অতিরিক্ত বিধান যুক্ত করবে না।
-২. প্রশ্ন অনুযায়ী বিন্যাস (Query-Adaptive): উত্তরের মূল বক্তব্য অবিকৃত রেখে ব্যবহারকারী যেভাবে প্রশ্ন করেছেন (যেমন: সরাসরি হুকুম, কারণ, বা শর্তাবলি), সেভাবে বাক্যগুলোকে সাজিয়ে উপস্থাপন করবে।
-৩. রেফারেন্স নীতি: কিতাবের নাম, খণ্ড ও পৃষ্ঠা হুবহু [VERIFIED_CONTEXT] থেকে কপি করে "references" লিস্টে রাখবে। কনটেক্সটে রেফারেন্স না থাকলে খালি অ্যারে [] প্রদান করবে।
-৪. ফলব্যাক পলিসি: যদি [VERIFIED_CONTEXT]-এ প্রশ্নের সুস্পষ্ট উত্তর না থাকে, তবে "found": false এবং নির্ধারিত "fallbackMessage" প্রদান করবে। fallbackMessage হবে: "${FALLBACK_MESSAGE}"।
-
-[আউটপুট ফরম্যাট - শুধুমাত্র ভ্যালিড JSON]:
-{
-  "found": true,
-  "summary": "প্রশ্নের ধরন অনুযায়ী  সরাসরি মূল হুকুম/ফতোয়া",
-  "detailedExplanation": "উৎস থেকে সংগৃহীত বিস্তারিত ব্যাখ্যা যা প্রশ্নের সরাসরি উত্তর দেয়",
-  "references": ["উৎস থেকে হুবহু উদ্ধৃত কিতাবের রেফারেন্স"],
-  "sourceTitle": "আর্টিকেলের শিরোনাম",
-  "sourceUrl": "আর্টিকেলের মূল পেজের লিঙ্ক",
-  "publisher": "ওয়েবসাইটের নাম",
-  "fallbackMessage": null
-}`;
-}
-
-/**
- * Calls Gemini Flash with zero temperature and structured JSON response
- */
-async function callGemini(apiKey, systemPrompt, userQuery, contextText) {
-  const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
-  let lastError = null;
-
-  for (const model of models) {
-    try {
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-      const payload = {
-        contents: [
-          {
-            role: "user",
-            parts: [
-              {
-                text: `${systemPrompt}\n\n[VERIFIED_CONTEXT]:\n${contextText}\n\n[USER_QUESTION]:\n${userQuery}`,
-              },
-            ],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.0,
-          maxOutputTokens: 2000,
-          responseMimeType: "application/json",
-        },
-      };
-
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(25000),
-      });
-
-      if (!res.ok) {
-        const errBody = await res.text();
-        lastError = new Error(
-          `Gemini ${model} returned HTTP ${res.status}: ${errBody}`,
-        );
-        continue;
-      }
-
-      const data = await res.json();
-      const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!rawText) continue;
-
-      const cleaned = rawText
-        .replace(/^```json\s*/i, "")
-        .replace(/^```\s*/i, "")
-        .replace(/\s*```$/i, "")
-        .trim();
-
-      return JSON.parse(cleaned);
-    } catch (err) {
-      lastError = err;
-    }
-  }
-
-  throw lastError || new Error("Gemini API generation failed.");
-}
-
-/**
- * Secondary LLM Provider fallback (Moonshot / Kimi / OpenAI compatible)
- */
-async function callKimi(apiKey, systemPrompt, userQuery, contextText) {
-  const endpoint = "https://api.moonshot.cn/v1/chat/completions";
-  const payload = {
-    model: process.env.KIMI_MODEL || "moonshot-v1-8k",
-    messages: [
-      { role: "system", content: systemPrompt },
-      {
-        role: "user",
-        content: `[VERIFIED_CONTEXT]:\n${contextText}\n\n[USER_QUESTION]:\n${userQuery}`,
-      },
-    ],
-    temperature: 0.0,
-    response_format: { type: "json_object" },
-  };
-
-  const res = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify(payload),
-    signal: AbortSignal.timeout(25000),
-  });
-
-  if (!res.ok) {
-    const errBody = await res.text();
-    throw new Error(`Kimi API returned HTTP ${res.status}: ${errBody}`);
-  }
-
-  const data = await res.json();
-  const rawText = data?.choices?.[0]?.message?.content;
-  if (!rawText) throw new Error("Empty response from Kimi API");
-
-  const cleaned = rawText
-    .replace(/^```json\s*/i, "")
-    .replace(/^```\s*/i, "")
-    .replace(/\s*```$/i, "")
-    .trim();
-
-  return JSON.parse(cleaned);
-}
-
-/**
- * Zero-Hallucination Query-Adaptive Extraction directly from Verified Article.
- * Reshapes and arranges the authentic source text according to the user's specific query format
- * when external LLM APIs are unauthorized (401) or temporarily unavailable.
- */
-function extractQueryAdaptiveResponse(article, query) {
-  if (!article || !article.content) {
+function extractDirectFatwaAnswer(article, query) {
+  if (!article || (!article.content && !article.fullContent)) {
     return {
       found: false,
       summary: null,
@@ -174,64 +36,68 @@ function extractQueryAdaptiveResponse(article, query) {
     };
   }
 
-  const queryLower = query.toLowerCase();
-  const rawSentences = article.content
-    .split(/[।!?\n]+/)
-    .map((s) => s.trim())
-    .filter((s) => s.length > 15);
+  const rawText = article.content || article.fullContent;
+  const paragraphs = rawText
+    .split("\n\n")
+    .map((p) => p.trim())
+    .filter((p) => p.length > 20);
 
-  // Identify ruling or conditions intent
-  const isRulingQuery =
-    /হুকুম|বিধান|জায়েয|জায়েয|ভাঙবে|ভাঙ্গে|নষ্ট|বৈধ|হারাম|হালাল|শরীঅত|শরীয়ত|মোনাজাত/.test(
-      queryLower,
-    );
-  const isConditionQuery =
-    /শর্ত|নিয়ম|নিয়ম|পদ্ধতি|কারণ|উপায়|উপায়|কীভাবে|কিভাবে/.test(queryLower);
+  // 1. Check if article has explicit Q&A structure ("প্রশ্ন" / "উত্তর" / "জবাব")
+  let answerParagraphs = [];
+  const ansIdx = paragraphs.findIndex((p) =>
+    /^(?:উত্তর|জবাব|উত্তরঃ|জবাবঃ|আলজবাব)\b/i.test(p) || p.includes("উত্তর وعليكم") || p.includes("وعليكم السلام")
+  );
 
-  let summary = "";
-  if (isRulingQuery) {
-    const rulingSentence = rawSentences.find((s) =>
-      /জায়েয|জায়েয|ভাঙবে না|ভাঙ্গে না|নষ্ট হবে না|মাকরূহ|ওয়াজিব|ফরজ|সুন্নাত|হারাম|হালাল|অনুমোদিত|মুস্তাহাব|বিদআত নয়/.test(
-        s,
-      ),
-    );
-    if (rulingSentence) {
-      summary =
-        rulingSentence.length > 180
-          ? rulingSentence.slice(0, 180) + "।"
-          : rulingSentence + (rulingSentence.endsWith("।") ? "" : "।");
-    }
+  if (ansIdx !== -1) {
+    answerParagraphs = paragraphs.slice(ansIdx);
+  } else {
+    answerParagraphs = paragraphs;
   }
 
-  if (!summary && isConditionQuery) {
-    const conditionSentences = rawSentences
-      .filter((s) => /শর্ত|হলে|যদি|তবে|প্রথমত|দ্বিতীয়ত|নিয়ম|বিধান/.test(s))
-      .slice(0, 2);
-    if (conditionSentences.length > 0) {
-      summary = conditionSentences.join(" ");
+  // 2. Identify core ruling summary sentence
+  const allSentences = answerParagraphs
+    .join(" ")
+    .split(/[।!?\n]+/)
+    .map((s) => s.trim())
+    .filter((s) => s.length >= 15);
+
+  const rulingCues = [
+    /জায়েয|জায়েয|ভাঙবে না|ভাঙ্গে না|নষ্ট হবে না|মাকরূহ|ওয়াজিব|ফরজ|সুন্নাত|হারাম|হালাল|অনুমোদিত|মুস্তাহাব|বিদআত নয়|বিদআত নয়|বৈধ|নাজায়েয|নাজায়েয/i,
+  ];
+
+  let summary = "";
+  for (const sentence of allSentences) {
+    if (rulingCues.some((r) => r.test(sentence))) {
+      summary = sentence.length > 220 ? sentence.slice(0, 220) + "..." : sentence;
+      if (!summary.endsWith("।") && !summary.endsWith("...")) summary += "।";
+      break;
     }
   }
 
   if (!summary) {
-    summary =
-      rawSentences[0] ||
-      `${article.title} - অনুমোদিত ফতোয়া পোর্টাল থেকে সংগৃহীত।`;
+    summary = allSentences[0]
+      ? allSentences[0] + (allSentences[0].endsWith("।") ? "" : "।")
+      : `${article.title} - অনুমোদিত ফতোয়া পোর্টাল থেকে সংগৃহীত।`;
   }
 
-  // Extract clean structured paragraphs
-  const paragraphs = article.content
-    .split("\n\n")
-    .map((p) => p.trim())
-    .filter((p) => p.length > 35 && !p.startsWith("---"));
+  // 3. Assemble detailed explanation text
+  const cleanAnswerParagraphs = answerParagraphs.filter((p) => {
+    // Filter out greeting alone or pure question alone if separate
+    if (/^প্রশ্ন\s*:/i.test(p) && p.length < 100) return false;
+    return true;
+  });
 
   const detailedExplanation =
-    paragraphs.slice(0, 4).join("\n\n") || article.content.slice(0, 800);
+    cleanAnswerParagraphs.slice(0, 5).join("\n\n") || rawText.slice(0, 1000);
+
+  // 4. Verbatim references
+  const references = Array.isArray(article.references) ? article.references : [];
 
   return {
     found: true,
     summary,
     detailedExplanation,
-    references: Array.isArray(article.references) ? article.references : [],
+    references,
     sourceTitle: article.title,
     sourceUrl: article.url,
     publisher: article.domainInfo?.name || "অনুমোদিত ইসলামিক পোর্টাল",
@@ -240,106 +106,75 @@ function extractQueryAdaptiveResponse(article, query) {
 }
 
 /**
- * Synthesizes dynamic fatwa answer using LLM, with zero-hallucination context fallback
+ * Optional Gemini Formatter (only runs if GEMINI_API_KEY is configured).
+ * Formats the already-scraped text into query-adaptive presentation without hallucinating facts.
  */
-async function synthesizeFatwaAnswer(cleanQuery, contextText, topArticle) {
-  const systemPrompt = buildSystemPrompt();
-  const geminiKey = process.env.GEMINI_API_KEY;
-  const kimiKey = process.env.KIMI_API_KEY;
-  let finalResult = null;
-  let lastError = null;
+async function callGeminiFormatter(apiKey, userQuery, sourceArticle) {
+  const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+  const prompt = `তুমি "আস-সালাম আইডিয়াল মাদরাসা" এর "ফাতওয়া জিজ্ঞাসা" সহকারী।
+নিচে একটি অনুমোদিত ফতোয়া ওয়েবসাইট থেকে হুবহু সংগৃহীত পাঠ দেওয়া হলো:
 
-  // 1. Try Gemini API
-  if (geminiKey) {
+[উৎস শিরোনাম]: ${sourceArticle.title}
+[উৎস পাঠ]:
+${sourceArticle.content.slice(0, 3500)}
+
+[ব্যবহারকারীর প্রশ্ন]: ${userQuery}
+
+উৎস পাঠে থাকা তথ্যের ভিত্তিতে ভ্যালিড JSON প্রদান কর:
+{
+  "summary": "উৎস থেকে সরাসরি মূল ফতোয়া বা হুকুম",
+  "detailedExplanation": "উৎস থেকে বিস্তারিত আলোচনা ও দলীলসমূহ",
+  "references": ${JSON.stringify(sourceArticle.references || [])}
+}`;
+
+  for (const model of models) {
     try {
-      finalResult = await callGemini(
-        geminiKey,
-        systemPrompt,
-        cleanQuery,
-        contextText,
-      );
-    } catch (geminiErr) {
-      console.warn("Gemini API call failed:", geminiErr.message);
-      lastError = geminiErr;
-    }
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const payload = {
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.0,
+          responseMimeType: "application/json",
+        },
+      };
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(15000),
+      });
+
+      if (!res.ok) continue;
+
+      const data = await res.json();
+      const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!rawText) continue;
+
+      const cleaned = rawText
+        .replace(/^```json\s*/i, "")
+        .replace(/^```\s*/i, "")
+        .replace(/\s*```$/i, "")
+        .trim();
+
+      const parsed = JSON.parse(cleaned);
+      if (parsed.summary && parsed.detailedExplanation) {
+        return {
+          found: true,
+          summary: parsed.summary,
+          detailedExplanation: parsed.detailedExplanation,
+          references: Array.isArray(parsed.references) && parsed.references.length > 0
+            ? parsed.references
+            : sourceArticle.references || [],
+          sourceTitle: sourceArticle.title,
+          sourceUrl: sourceArticle.url,
+          publisher: sourceArticle.domainInfo?.name || "অনুমোদিত ইসলামিক পোর্টাল",
+          fallbackMessage: null,
+        };
+      }
+    } catch (_) {}
   }
-
-  // 2. Try Secondary LLM (Kimi)
-  if (!finalResult && kimiKey) {
-    try {
-      finalResult = await callKimi(
-        kimiKey,
-        systemPrompt,
-        cleanQuery,
-        contextText,
-      );
-    } catch (kimiErr) {
-      console.warn("Kimi API call failed:", kimiErr.message);
-      lastError = kimiErr;
-    }
-  }
-
-  if (finalResult && typeof finalResult === "object") {
-    return finalResult;
-  }
-
-  // 3. Graceful Fallback: If external LLM API keys return 401 Unauthorized or are unreachable,
-  // adapt the verified source article directly to answer the user query with zero hallucination.
-  if (topArticle) {
-    console.warn(
-      "Notice: External LLM authentication failed or is offline. Using verified context-adaptive extraction from source.",
-    );
-    return extractQueryAdaptiveResponse(topArticle, cleanQuery);
-  }
-
-  throw (
-    lastError ||
-    new Error(
-      "AI Synthesis failed: No working LLM API configured or reachable.",
-    )
-  );
-}
-
-/**
- * Calculates keyword relevance between query and candidate article
- */
-function calculateRelevanceRatio(query, article) {
-  if (!article || !article.content) return 0;
-  const stopWords = [
-    "সম্পর্কে",
-    "বিধান",
-    "কী",
-    "কি",
-    "হুকুম",
-    "বলুন",
-    "জানতে",
-    "চাই",
-    "করার",
-    "নিয়ে",
-    "নিয়ম",
-    "শরীয়তের",
-    "হলে",
-    "কিনা",
-    "এর",
-    "এবং",
-    "ও",
-    "বা",
-    "থেকে",
-    "দিয়ে",
-    "করা",
-    "জন্য",
-    "আছে",
-  ];
-  const queryWords = query
-    .toLowerCase()
-    .split(/\s+/)
-    .filter((w) => w.length > 2 && !stopWords.includes(w));
-
-  if (queryWords.length === 0) return 1;
-
-  const targetText = `${article.title} ${article.content}`.toLowerCase();
-  const matchedWords = queryWords.filter((w) => targetText.includes(w));
-  return matchedWords.length / queryWords.length;
+  return null;
 }
 
 export async function POST(req) {
@@ -352,10 +187,9 @@ export async function POST(req) {
       return Response.json(
         {
           success: false,
-          error:
-            "অনুগ্রহ করে আপনার প্রশ্নটি পরিষ্কারভাবে লিখুন (কমপক্ষে ৩ অক্ষর)।",
+          error: "অনুগ্রহ করে আপনার প্রশ্নটি পরিষ্কারভাবে লিখুন (কমপক্ষে ৩ অক্ষর)।",
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -363,23 +197,17 @@ export async function POST(req) {
       return Response.json(
         {
           success: false,
-          error:
-            "প্রশ্নটি খুব দীর্ঘ। অনুগ্রহ করে ৩০০ অক্ষরের মধ্যে সংক্ষেপে লিখুন।",
+          error: "প্রশ্নটি খুব দীর্ঘ। অনুগ্রহ করে ৩০০ অক্ষরের মধ্যে সংক্ষেপে লিখুন।",
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
-    // 1. Retrieve top matching articles strictly from Whitelisted Domains
-    const retrievedArticles = await retrieveWhitelistedFatwas(cleanQuery, 2);
+    // 1. Fetch real matching fatwa articles strictly from whitelisted authoritative portals
+    const retrievedArticles = await retrieveWhitelistedFatwas(cleanQuery, 3);
 
-    // Filter to ensure retrieved articles contain at least one meaningful keyword from query
-    const relevantArticles = (retrievedArticles || []).filter(
-      (art) => calculateRelevanceRatio(cleanQuery, art) > 0.1,
-    );
-
-    // If no whitelisted articles match, return immediate verified strict fallback
-    if (!relevantArticles || relevantArticles.length === 0) {
+    // If no authentic articles found matching query
+    if (!retrievedArticles || retrievedArticles.length === 0) {
       return Response.json({
         success: true,
         data: {
@@ -395,69 +223,59 @@ export async function POST(req) {
       });
     }
 
-    // 2. Prepare Verified Context for LLM
-    const contextBlocks = relevantArticles.map((art, idx) => {
-      return `--- [উৎস ${idx + 1}] ---
-শিরোনাম: ${art.title}
-ইউআরএল: ${art.url}
-ওয়েবসাইট: ${art.domainInfo?.name || "অনুমোদিত ফতোয়া পোর্টাল"}
-মূল পাঠ:
-${art.content.slice(0, 3500)}
-সরাসরি উল্লেখিত কিতাব ও রেফারেন্সসমূহ:
-${art.references && art.references.length > 0 ? art.references.map((r) => `• ${r}`).join("\n") : "কোনো রেফারেন্স উল্লেখ নেই"}`;
-    });
-
-    const contextText = contextBlocks.join("\n\n");
-
-    // 3. Execute Live Query-Adaptive Synthesis with LLM
-    const finalResult = await synthesizeFatwaAnswer(
-      cleanQuery,
-      contextText,
-      relevantArticles[0],
-    );
-
-    // 4. Final Whitelist Verification Guard
-    if (finalResult.found && finalResult.sourceUrl) {
-      if (!isWhitelistedUrl(finalResult.sourceUrl)) {
-        // Fallback to the retrieved article's guaranteed valid URL
-        finalResult.sourceUrl = relevantArticles[0].url;
-        finalResult.sourceTitle = relevantArticles[0].title;
-        finalResult.publisher = relevantArticles[0].domainInfo?.name;
+    // 2. Select the most relevant article matching the query keywords in title or content
+    let topArticle = retrievedArticles[0];
+    const qTokens = cleanQuery.toLowerCase().split(/\s+/).filter((w) => w.length >= 3);
+    if (retrievedArticles.length > 1 && qTokens.length > 0) {
+      let maxMatches = -1;
+      for (const art of retrievedArticles) {
+        const text = (art.title + " " + (art.content || "")).toLowerCase();
+        let matches = 0;
+        for (const t of qTokens) {
+          if (text.includes(t)) matches += 2;
+        }
+        if (art.title && qTokens.some(t => art.title.toLowerCase().includes(t))) {
+          matches += 3;
+        }
+        if (matches > maxMatches) {
+          maxMatches = matches;
+          topArticle = art;
+        }
       }
     }
 
-    // 5. If found is false or fallbackMessage is present
-    if (!finalResult.found) {
-      return Response.json({
-        success: true,
-        data: {
-          found: false,
-          summary: null,
-          detailedExplanation: null,
-          references: [],
-          sourceTitle: null,
-          sourceUrl: null,
-          publisher: null,
-          fallbackMessage: finalResult.fallbackMessage || FALLBACK_MESSAGE,
-        },
-      });
+    // 3. If Gemini API key is configured, attempt query-adaptive presentation
+    let finalAnswer = null;
+    const geminiKey = process.env.GEMINI_API_KEY;
+    if (geminiKey) {
+      finalAnswer = await callGeminiFormatter(geminiKey, cleanQuery, topArticle);
+    }
+
+    // 3. Guaranteed Direct Authentic Extraction (Zero Hallucination)
+    if (!finalAnswer) {
+      finalAnswer = extractDirectFatwaAnswer(topArticle, cleanQuery);
+    }
+
+    // 4. Strict Whitelist Guard on Source URL
+    if (finalAnswer.sourceUrl && !isWhitelistedUrl(finalAnswer.sourceUrl)) {
+      finalAnswer.sourceUrl = topArticle.url;
+      finalAnswer.sourceTitle = topArticle.title;
+      finalAnswer.publisher = topArticle.domainInfo?.name;
     }
 
     return Response.json({
       success: true,
       data: {
         found: true,
-        summary: finalResult.summary || "",
-        detailedExplanation: finalResult.detailedExplanation || "",
-        references: Array.isArray(finalResult.references)
-          ? finalResult.references
-          : [],
-        sourceTitle: finalResult.sourceTitle || retrievedArticles[0].title,
-        sourceUrl: finalResult.sourceUrl || retrievedArticles[0].url,
+        summary: finalAnswer.summary || "",
+        detailedExplanation: finalAnswer.detailedExplanation || "",
+        references: Array.isArray(finalAnswer.references) ? finalAnswer.references : [],
+        sourceTitle: finalAnswer.sourceTitle || topArticle.title,
+        sourceUrl: finalAnswer.sourceUrl || topArticle.url,
         publisher:
-          finalResult.publisher ||
-          retrievedArticles[0].domainInfo?.name ||
-          "অনুমোদিত ফতোয়া পোর্টাল",
+          finalAnswer.publisher ||
+          topArticle.domainInfo?.name ||
+          "অনুমোদিত ইসলামিক পোর্টাল",
         fallbackMessage: null,
       },
     });
@@ -466,10 +284,9 @@ ${art.references && art.references.length > 0 ? art.references.map((r) => `• $
     return Response.json(
       {
         success: false,
-        error:
-          "সার্ভারে প্রক্রিয়া করতে সমস্যা হচ্ছে। অনুগ্রহ করে একটু পর আবার চেষ্টা করুন।",
+        error: "সার্ভারে প্রক্রিয়া করতে সমস্যা হচ্ছে। অনুগ্রহ করে একটু পর আবার চেষ্টা করুন।",
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

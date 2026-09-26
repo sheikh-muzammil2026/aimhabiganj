@@ -119,6 +119,15 @@ export default function AdministrationPage() {
       setUsers((prev) =>
         prev.map((u) => (u.id === roleModalUser.id ? { ...u, role: selectedRole } : u))
       );
+      try {
+        const bc = new BroadcastChannel("aim-auth-sync");
+        bc.postMessage({ type: "ROLE_UPDATED", userId: roleModalUser.id, role: selectedRole });
+        bc.close();
+      } catch (_) {}
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("aim-auth-sync", { detail: { type: "ROLE_UPDATED" } }));
+        localStorage.setItem("aim-auth-sync-timestamp", String(Date.now()));
+      }
       showToast(data.message || "রোল সফলভাবে পরিবর্তন করা হয়েছে!");
       setRoleModalUser(null);
     } catch (err) {
@@ -160,6 +169,15 @@ export default function AdministrationPage() {
       setUsers((prev) =>
         prev.map((u) => (u.id === permissionModalUser.id ? { ...u, permissions: userPermissions } : u))
       );
+      try {
+        const bc = new BroadcastChannel("aim-auth-sync");
+        bc.postMessage({ type: "PERMISSIONS_UPDATED", userId: permissionModalUser.id, permissions: userPermissions });
+        bc.close();
+      } catch (_) {}
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("aim-auth-sync", { detail: { type: "PERMISSIONS_UPDATED" } }));
+        localStorage.setItem("aim-auth-sync-timestamp", String(Date.now()));
+      }
       showToast(data.message || "পারমিশন সফলভাবে আপডেট করা হয়েছে!");
       setPermissionModalUser(null);
     } catch (err) {

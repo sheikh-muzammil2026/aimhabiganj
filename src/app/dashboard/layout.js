@@ -2,10 +2,142 @@
 import Sidebar from "@/components/dashboard/sidebar";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 const DashboardLayout = ({ children }) => {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { data: session, isPending, refetch } = authClient.useSession();
+  const [isVerifying, setIsVerifying] = useState(false);
+
   const [currentTime, setCurrentTime] = useState("");
   const [theme, setTheme] = useState("light");
+
+  // Client-side Route Guard for SPA transitions
+  useEffect(() => {
+    if (isPending) return;
+
+    // Unauthorized page is always accessible
+    if (pathname === "/dashboard/unauthorized") return;
+
+    if (!session?.user) {
+      let isMounted = true;
+      setIsVerifying(true);
+      authClient
+        .getSession()
+        .then((res) => {
+          if (!isMounted) return;
+          if (!res?.data?.user) {
+            router.replace(`/login?callbackUrl=${encodeURIComponent(pathname)}`);
+          } else if (typeof refetch === "function") {
+            refetch();
+          }
+        })
+        .catch(() => {
+          if (isMounted) {
+            router.replace(`/login?callbackUrl=${encodeURIComponent(pathname)}`);
+          }
+        })
+        .finally(() => {
+          if (isMounted) {
+            setIsVerifying(false);
+          }
+        });
+
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    const user = session.user;
+    if (user.isBanned || user.status === "banned") {
+      router.replace("/login?error=account_banned");
+      return;
+    }
+
+    const userRole = (user.role || "student").toLowerCase();
+    const permissions = Array.isArray(user.permissions) ? user.permissions : [];
+
+    if (pathname === "/dashboard" || pathname === "/dashboard/") {
+      const targetDashboard =
+        userRole === "admin"
+          ? "/dashboard/admin"
+          : userRole === "teacher"
+          ? "/dashboard/teacher"
+          : userRole === "accountant"
+          ? "/dashboard/accountant"
+          : userRole === "parent"
+          ? "/dashboard/parent"
+          : "/dashboard/student";
+      router.replace(targetDashboard);
+      return;
+    }
+
+    if (userRole === "admin") return;
+
+    if (pathname.startsWith("/dashboard/profile-settings")) return;
+
+    if (pathname.startsWith("/dashboard/admin")) {
+      const isAllowedAdminSubpath =
+        (pathname.startsWith("/dashboard/admin/admission") && hasPerm("manage_admissions")) ||
+        (pathname.startsWith("/dashboard/admin/notice") && hasPerm("manage_notices")) ||
+        (pathname.startsWith("/dashboard/admin/students-management") && hasPerm("manage_users")) ||
+        (pathname.startsWith("/dashboard/admin/teachers-management") && hasPerm("manage_users")) ||
+        (pathname.startsWith("/dashboard/admin/administration") && (hasPerm("manage_roles") || hasPerm("manage_users")));
+
+      if (!isAllowedAdminSubpath) {
+        router.replace("/dashboard/unauthorized");
+      }
+      return;
+    }
+
+    if (pathname.startsWith("/dashboard/accountant")) {
+      if (userRole !== "accountant" && !hasPerm("manage_finance")) {
+        router.replace("/dashboard/unauthorized");
+      }
+      return;
+    }
+
+    if (pathname.startsWith("/dashboard/teacher")) {
+      if (userRole !== "teacher") {
+        router.replace("/dashboard/unauthorized");
+      }
+      return;
+    }
+
+    if (pathname.startsWith("/dashboard/student")) {
+      if (userRole !== "student") {
+        router.replace("/dashboard/unauthorized");
+      }
+      return;
+    }
+
+    if (pathname.startsWith("/dashboard/parent")) {
+      if (userRole !== "parent") {
+        router.replace("/dashboard/unauthorized");
+      }
+      return;
+    }
+
+    if (pathname.startsWith("/dashboard/attendance")) {
+      if (userRole !== "teacher" && !hasPerm("manage_academics")) {
+        router.replace("/dashboard/unauthorized");
+      }
+      return;
+    }
+
+    if (pathname.startsWith("/dashboard/shared")) {
+      if (pathname.startsWith("/dashboard/shared/academics") && userRole !== "teacher" && !hasPerm("manage_academics")) {
+        router.replace("/dashboard/unauthorized");
+        return;
+      }
+      if (pathname.startsWith("/dashboard/shared/gallery") && userRole !== "teacher") {
+        router.replace("/dashboard/unauthorized");
+        return;
+      }
+    }
+  }, [pathname, isPending, session, router, refetch]);
 
   // থিম ইনিশিয়ালাইজ ও ডার্ক মোড ক্লাস হ্যান্ডেল করা
   useEffect(() => {
@@ -46,6 +178,25 @@ const DashboardLayout = ({ children }) => {
     const timer = setInterval(updateTime, 60000); // প্রতি মিনিটে আপডেট হবে
     return () => clearInterval(timer);
   }, []);
+
+  if (
+    (isPending || (!session?.user && isVerifying)) &&
+    pathname !== "/dashboard/unauthorized"
+  ) {
+    return (
+      <div className="min-h-screen bg-slate-50/80 flex flex-col justify-center items-center px-6 transition-colors duration-300 dark:bg-slate-900/80 backdrop-blur-sm">
+        <div className="relative flex flex-col items-center">
+          <div className="w-16 h-16 rounded-full border-4 border-t-amber-500 border-r-transparent border-b-emerald-800 border-l-transparent animate-spin dark:border-b-emerald-400"></div>
+          <div className="absolute top-3 bg-white text-emerald-950 font-black text-xs w-10 h-10 rounded-full flex items-center justify-center shadow-md animate-pulse border border-emerald-100 dark:bg-slate-800 dark:text-emerald-400 dark:border-slate-700">
+            AS
+          </div>
+          <p className="mt-5 text-sm font-bold text-emerald-950 tracking-wide dark:text-emerald-400 animate-pulse">
+            অনুগ্রহ করে অপেক্ষা করুন...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-[#f4f6f4] dark:bg-[#09101d] text-slate-800 dark:text-slate-200 antialiased font-sans w-full selection:bg-emerald-800 selection:text-white overflow-hidden">

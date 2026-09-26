@@ -2,9 +2,9 @@
 import { isWhitelistedUrl, getDomainInfo } from "./whitelist.js";
 
 /**
- * Decodes basic HTML entities
+ * Comprehensive HTML entities decoder
  */
-function decodeHtmlEntities(str) {
+export function decodeHtmlEntities(str) {
   if (!str) return "";
   return str
     .replace(/&nbsp;/g, " ")
@@ -13,14 +13,24 @@ function decodeHtmlEntities(str) {
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
+    .replace(/&rsquo;/g, "'")
+    .replace(/&lsquo;/g, "'")
+    .replace(/&rdquo;/g, '"')
+    .replace(/&ldquo;/g, '"')
+    .replace(/&#8220;/g, '"')
+    .replace(/&#8221;/g, '"')
+    .replace(/&#8216;/g, "'")
+    .replace(/&#8217;/g, "'")
+    .replace(/&#8211;/g, "-")
+    .replace(/&#8212;/g, "--")
     .replace(/&zwnj;/g, "")
     .replace(/&zwj;/g, "")
     .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(dec));
 }
 
 /**
- * Fetches page HTML with timeout and security headers.
- * Validates that redirects stay within whitelisted domains.
+ * Fetches page HTML with custom timeout and browser-like headers.
+ * Validates that redirects stay within approved whitelisted domains.
  */
 export async function fetchArticleHtml(urlStr, timeoutMs = 15000) {
   if (!isWhitelistedUrl(urlStr)) {
@@ -35,19 +45,18 @@ export async function fetchArticleHtml(urlStr, timeoutMs = 15000) {
       signal: controller.signal,
       headers: {
         "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
         Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
         "Accept-Language": "bn-BD,bn;q=0.9,ar;q=0.8,en-US;q=0.7,en;q=0.6",
         "Cache-Control": "no-cache",
-        Pragma: "no-cache"
-      }
+        Pragma: "no-cache",
+      },
     });
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: Failed to fetch ${urlStr}`);
     }
 
-    // Check final redirected URL
     if (response.url && !isWhitelistedUrl(response.url)) {
       throw new Error(`Security Exception: Redirected to non-whitelisted URL '${response.url}'`);
     }
@@ -66,8 +75,8 @@ export function extractVerbatimReferences(rawText, html = "") {
   const references = new Set();
 
   // 1. Look for explicit reference / footnote blocks in HTML
-  // Common footnote/reference IDs or classes
-  const footnoteBlockRegex = /<(?:div|section|aside|p)[^>]*(?:class|id)=["'][^"']*(?:reference|footnote|dalil|hawala|source|kitab)[^"']*["'][^>]*>([\s\S]*?)<\/(?:div|section|aside|p)>/gi;
+  const footnoteBlockRegex =
+    /<(?:div|section|aside|p|ul|ol)[^>]*(?:class|id)=["'][^"']*(?:reference|footnote|dalil|hawala|source|kitab|masadir)[^"']*["'][^>]*>([\s\S]*?)<\/(?:div|section|aside|p|ul|ol)>/gi;
   let blockMatch;
   while ((blockMatch = footnoteBlockRegex.exec(html)) !== null) {
     const blockText = blockMatch[1]
@@ -80,34 +89,41 @@ export function extractVerbatimReferences(rawText, html = "") {
     }
   }
 
-  // 2. Scan text lines for verbatim citations
-  const lines = rawText.split("\n").map(l => l.trim()).filter(Boolean);
+  // 2. Scan text lines for numbered or dash-delimited citations
+  const lines = rawText.split("\n").map((l) => l.trim()).filter(Boolean);
 
   const referenceKeywords = [
     "কিতাব", "কিতাবু", "খণ্ড", "খন্ড", "পৃষ্ঠা", "পৃ.", "পৃ-", "হাদীস", "হাদিস",
     "ফাতাওয়া", "ফাতাওয়া", "রদ্দুল মুহতার", "বাদায়েউস সানায়ে", "আল-বাহরুর রায়েক",
     "ফাতাওয়া হিন্দিয়া", "আলমগীরী", "হেদায়া", "হিদায়া", "মুসান্নাফ", "বুখারী",
     "মুসলিম", "তিরমিযী", "আবু দাউদ", "নাসাঈ", "ইবনে মাজাহ", "المراجع", "الردود",
-    "حوالہ", "দলিল", "দলীল", "রেফারেন্স", "তথ্যসূত্র", "সূত্র:"
+    "حوالہ", "দলিল", "দলীল", "রেফারেন্স", "তথ্যসূত্র", "সূত্র:", "ইমদাদুল ফাতওয়া",
+    "ফাতওয়ায়ে মাহমুদিয়া", "ফাতওয়ায়ে হক্কানী", "আহসানুল ফাতওয়া", "আপকি মাসায়িল",
+    "জাদিদ ফিক্বহী", "ফাতওয়া উসমানী", "খাইরুল ফাতওয়া", "ফাতওয়া রহিমিয়া", "তাহাবী",
+    "মুয়াত্তা", "মুসনাদে আহমাদ", "বায়হাকী", "মারকাযুদ দাওয়াহ"
   ];
 
   for (const line of lines) {
-    const lineLower = line.toLowerCase();
-    // Check if line contains citation cues
-    const hasCue = referenceKeywords.some(kw => line.includes(kw));
-    // Check for common citation patterns like (খণ্ড ১, পৃষ্ঠা ১৫০) or [১] বা কিতাব
-    const hasVolumeOrPage = /(?:খণ্ড|খন্ড|পৃষ্ঠা|পৃ\.|পৃ-|হাদীস|হাদিস|নং|جلد|ص|حديث)\s*[:\-]?\s*[\d০-৯]+/i.test(line);
+    const hasCue = referenceKeywords.some((kw) => line.includes(kw));
+    const hasVolumeOrPage =
+      /(?:খণ্ড|খন্ড|পৃষ্ঠা|পৃ\.|পৃ-|হাদীস|হাদিস|নং|جلد|ص|حديث|\/\d+)\s*[:\-]?\s*[\d০-৯]+/i.test(line);
 
-    if (hasCue && (hasVolumeOrPage || line.startsWith("-") || line.startsWith("•") || line.startsWith("১.") || line.startsWith("২.") || line.startsWith("১ ") || line.startsWith("২ "))) {
-      // Keep only reasonably sized citations (avoid whole narrative paragraphs)
-      if (line.length >= 10 && line.length <= 350) {
-        references.add(line);
+    const isCitationFormat =
+      line.startsWith("-") ||
+      line.startsWith("•") ||
+      line.startsWith("*") ||
+      /^[১-৯\d]+[-–.)]/.test(line);
+
+    if (hasCue && (hasVolumeOrPage || isCitationFormat)) {
+      if (line.length >= 8 && line.length <= 350) {
+        references.add(line.replace(/^[•\-\*]\s*/, ""));
       }
     }
   }
 
-  // 3. Scan for inline parenthetical citations e.g. (সহীহ বুখারী, হা. ১২৩৪; ফাতাওয়া শামী ২/১৪৫)
-  const parenRegex = /\(([^)\n]*(?:সহীহ|সুনানে|জামে|কিতাব|ফাতাওয়া|ফাতাওয়া|বুখারী|মুসলিম|তিরমিযী|আবু দাউদ|হাদিস|হাদীস|হা\.|পৃষ্ঠা|খণ্ড|পৃ\.|رواه|أخرجه)[^)\n]*)\)/gi;
+  // 3. Scan for parenthetical citations e.g. (সহীহ বুখারী, হাদীস ১২৩৪; ফাতাওয়া শামী ২/১৪৫)
+  const parenRegex =
+    /\(([^)\n]*(?:সহীহ|সুনানে|জামে|কিতাব|ফাতাওয়া|ফাতাওয়া|বুখারী|মুসলিম|তিরমিযী|আবু দাউদ|হাদিস|হাদীস|হা\.|পৃষ্ঠা|খণ্ড|পৃ\.|রদ্দুল|হিন্দিয়া|আলমগীরী)[^)\n]*)\)/gi;
   let pMatch;
   while ((pMatch = parenRegex.exec(rawText)) !== null) {
     const citation = pMatch[1].trim();
@@ -116,67 +132,149 @@ export function extractVerbatimReferences(rawText, html = "") {
     }
   }
 
-  return Array.from(references).slice(0, 8);
+  return Array.from(references).slice(0, 10);
 }
 
 /**
  * Cleans raw HTML and extracts article title, main body text, and verbatim references.
+ * Strictly isolates article body by target domain to avoid menus, ads, and footers.
  */
-export function cleanAndExtractArticle(html, sourceUrl) {
+export function cleanAndExtractArticle(html, sourceUrl, query = "") {
   const domainInfo = getDomainInfo(sourceUrl);
 
-  // Extract Page Title
+  // 1. Extract Page Title
   let title = "";
   const ogTitleMatch = html.match(/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i);
   if (ogTitleMatch && ogTitleMatch[1]) {
     title = decodeHtmlEntities(ogTitleMatch[1].trim());
   } else {
-    const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-    if (titleMatch && titleMatch[1]) {
-      title = decodeHtmlEntities(titleMatch[1].trim());
+    const h1Match = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+    if (h1Match && h1Match[1]) {
+      title = decodeHtmlEntities(h1Match[1].replace(/<[^>]+>/g, " ").trim());
+    } else {
+      const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+      if (titleMatch && titleMatch[1]) {
+        title = decodeHtmlEntities(titleMatch[1].trim());
+      }
     }
   }
 
-  // Clean noise tags
-  let cleaned = html
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
-    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
-    .replace(/<nav\b[^<]*(?:(?!<\/nav>)<[^<]*)*<\/nav>/gi, "")
-    .replace(/<header\b[^<]*(?:(?!<\/header>)<[^<]*)*<\/header>/gi, "")
-    .replace(/<footer\b[^<]*(?:(?!<\/footer>)<[^<]*)*<\/footer>/gi, "")
-    .replace(/<svg\b[^<]*(?:(?!<\/svg>)<[^<]*)*<\/svg>/gi, "")
-    .replace(/<noscript\b[^<]*(?:(?!<\/noscript>)<[^<]*)*<\/noscript>/gi, "");
+  // Clean trailing website branding from title
+  title = title
+    .replace(/\s*[-–|:]\s*(?:মাসিক আলকাউসার|আহলে হক্ব বাংলা মিডিয়া সার্ভিস|আহলে হক মিডিয়া|ফতোয়াবিডি|Darul Ifta|IslamQA).*$/i, "")
+    .trim();
 
-  // Extract block elements (p, h1-h6, li, blockquote)
-  const blockMatches = cleaned.match(/<(?:p|h[1-6]|li|blockquote)[^>]*>([\s\S]*?)<\/(?:p|h[1-6]|li|blockquote)>/gi);
-  let decodedText = "";
+  // 2. Isolate genuine Article Content container
+  let contentHtml = "";
 
-  if (blockMatches && blockMatches.length > 0) {
-    const navTerms = ["রবিউল", "মুহাররম", "সফর", "যিলহজ্ব", "যিলকদ", "সকল সংখ্যা", "আরও বিভাগ", "সম্পাদকীয়", "লেখকবৃন্দ", "কপিরাইট", "সর্বস্বত্ব"];
-    decodedText = blockMatches
-      .map(b => decodeHtmlEntities(b.replace(/<br\s*[\/]?>/gi, " ").replace(/<[^>]+>/g, " ").trim()))
-      .filter(t => t.length > 20 && !navTerms.some(term => t.startsWith(term) || (t.length < 50 && t.includes(term))))
-      .join("\n\n");
-  } else {
-    // Fallback: strip tags
-    const stripped = cleaned
-      .replace(/<br\s*[\/]?>/gi, "\n")
-      .replace(/<[^>]+>/g, " ")
-      .replace(/[ \t]+/g, " ");
-    decodedText = decodeHtmlEntities(stripped);
+  if (sourceUrl.includes("alkawsar.com")) {
+    // Alkawsar: Content is in <div class="lx-single-post-content">
+    const match = html.match(/<div[^>]*class=["'][^"']*lx-single-post-content[^"']*["'][^>]*>([\s\S]*?)<\/div>\s*(?:<div|<p>&nbsp;<\/p>|\s*<div class="tags")/i);
+    if (match) {
+      contentHtml = match[1];
+    }
+  } else if (sourceUrl.includes("ahlehaqmedia.com")) {
+    // Ahlehaq: Content is in <div class="entry"> or <div class="entry-content">
+    const match = html.match(/<div[^>]*class=["'][^"']*(?:entry-content|entry)[^"']*["'][^>]*>([\s\S]*?)<\/div>\s*<!--/i) ||
+                  html.match(/<div[^>]*class=["'][^"']*(?:entry-content|entry)[^"']*["'][^>]*>([\s\S]*?)<\/div>/i);
+    if (match) {
+      contentHtml = match[1];
+    }
+  } else if (sourceUrl.includes("islamqa.org")) {
+    const match = html.match(/<div[^>]*class=["'][^"']*(?:answer|fatwa-content|entry-content)[^"']*["'][^>]*>([\s\S]*?)<\/div>/i);
+    if (match) {
+      contentHtml = match[1];
+    }
   }
 
-  // Extract verbatim references
-  const references = extractVerbatimReferences(decodedText, html);
+  // Fallback to general container if specific match didn't catch
+  if (!contentHtml) {
+    const generalMatch =
+      html.match(/<article[^>]*>([\s\S]*?)<\/article>/i) ||
+      html.match(/<div[^>]*class=["'][^"']*(?:post-content|main-content|article-content)[^"']*["'][^>]*>([\s\S]*?)<\/div>/i);
+    if (generalMatch) {
+      contentHtml = generalMatch[1];
+    } else {
+      contentHtml = html;
+    }
+  }
 
-  // Limit body text to ~6000 characters to fit context perfectly while preserving substance
-  const trimmedBody = decodedText.slice(0, 6000);
+  // Remove noise elements from content
+  const cleaned = contentHtml
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
+    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, "")
+    .replace(/<div[^>]*class=["'][^"']*(?:share|social|tags|ad|banner|related)[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, "")
+    .replace(/<!--[\s\S]*?-->/g, "");
+
+  // Convert line breaks and paragraph tags into clean newlines
+  const textWithBreaks = cleaned
+    .replace(/<br\s*[\/]?>/gi, "\n")
+    .replace(/<\/(?:p|h[1-6]|li|div|blockquote)>/gi, "\n\n")
+    .replace(/<[^>]+>/g, " ");
+
+  const rawDecoded = decodeHtmlEntities(textWithBreaks);
+
+  // Clean extra whitespace
+  const paragraphs = rawDecoded
+    .split("\n")
+    .map((p) => p.trim())
+    .filter((p) => {
+      if (!p) return false;
+      // Filter out social share or button text
+      if (
+        p.startsWith("ডাউনলোড করতে") ||
+        p.startsWith("Facebook") ||
+        p.startsWith("Twitter") ||
+        p.startsWith("LinkedIn") ||
+        p.startsWith("শেয়ার করুন") ||
+        p.includes("Shares")
+      ) {
+        return false;
+      }
+      return true;
+    });
+
+  const fullCleanText = paragraphs.join("\n\n");
+
+  // 3. Targeted Sub-section Extraction if query keywords are provided
+  let targetedText = "";
+  if (query && query.trim()) {
+    const qTokens = query
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((w) => w.length >= 3 && !["সম্পর্কে", "বিধান", "হুকুম", "কী", "কি", "নিয়ম", "নিয়ে"].includes(w));
+
+    if (qTokens.length > 0) {
+      // Find paragraph where topic appears
+      const pList = fullCleanText.split("\n\n");
+      const matchedIdx = pList.findIndex((p) => {
+        const pLower = p.toLowerCase();
+        return qTokens.some((t) => pLower.includes(t));
+      });
+
+      if (matchedIdx !== -1) {
+        // Collect context around the matched topic (up to 4-6 surrounding paragraphs)
+        const start = Math.max(0, matchedIdx - 1);
+        const end = Math.min(pList.length, matchedIdx + 5);
+        targetedText = pList.slice(start, end).join("\n\n");
+      }
+    }
+  }
+
+  const finalContent = (targetedText && targetedText.length > 150)
+    ? targetedText
+    : fullCleanText.slice(0, 6000);
+
+  // Extract verbatim citations
+  const references = extractVerbatimReferences(fullCleanText, cleaned);
 
   return {
     title: title || "ইসলামিক ফতোয়া ও গবেষণা",
     url: sourceUrl,
     domainInfo,
-    content: trimmedBody,
-    references
+    content: finalContent,
+    fullContent: fullCleanText,
+    references,
   };
 }

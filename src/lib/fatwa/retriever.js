@@ -1,9 +1,230 @@
 // src/lib/fatwa/retriever.js
-import { WHITELISTED_DOMAINS, isWhitelistedUrl, getDomainInfo, getSiteQueryFilter } from "./whitelist.js";
-import { fetchArticleHtml, cleanAndExtractArticle } from "./extractor.js";
+import {
+  WHITELISTED_DOMAINS,
+  isWhitelistedUrl,
+  getDomainInfo,
+  getSiteQueryFilter,
+} from "./whitelist.js";
+import {
+  fetchArticleHtml,
+  cleanAndExtractArticle,
+  decodeHtmlEntities,
+} from "./extractor.js";
 
 /**
- * Unwraps DuckDuckGo redirect URLs (//duckduckgo.com/l/?uddg=https%3A...)
+ * Validates that candidate URL is an actual article or fatwa post, not a category/tag/archive/topic listing
+ */
+function isCandidateArticleUrl(url) {
+  if (!url || typeof url !== "string") return false;
+  const u = url.toLowerCase();
+  if (
+    u.endsWith(".com/") ||
+    u.endsWith(".com") ||
+    u.endsWith(".com/bn") ||
+    u.endsWith(".com/bn/") ||
+    u.includes("/topics/") ||
+    u.includes("/category/") ||
+    u.includes("/tag/") ||
+    u.includes("/author/") ||
+    u.includes("/page/") ||
+    u.includes("?s=") ||
+    u.includes("/search/")
+  ) {
+    return false;
+  }
+  // Alkawsar must be /article/\d+/
+  if (u.includes("alkawsar.com") && !u.includes("/article/")) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Generates Bengali normalized search keyword variants.
+ * Handles common phonetic alternates (মোনাজাত/মুনাজাত, রোজা/রোযা, নামাজ/নামায, ইত্যাদি).
+ */
+export function generateSearchVariants(query) {
+  if (!query || typeof query !== "string") return [];
+  const clean = query.trim();
+
+  const stopWords = [
+    "সম্পর্কে", "বিধান", "কী", "কি", "হুকুম", "বলুন", "জানতে", "চাই", "করার",
+    "নিয়ে", "নিয়ে", "নিয়ম", "নিয়ম", "শরীয়তের", "শরীয়তের", "হলে", "কিনা",
+    "এর", "এবং", "ও", "বা", "থেকে", "দিয়ে", "দিয়ে", "করা", "জন্য", "আছে", "হয়",
+    "অবস্থায়", "অবস্থায়", "পদ্ধতি", "উপায়", "উপায়", "সঠিক", "হিসাব", "আদায়ের", "আদায়ের",
+    "পর", "পরে", "আগে", "মধ্যে", "কোন", "কোনো", "কীভাবে", "কিভাবে", "নেয়া", "নেয়া"
+  ];
+
+  const stripSuffix = (word) => {
+    return word.replace(/(?:ের|দের|গুলো|গুলি|টিতে|টিতেও|তে|কে|র)$/, "");
+  };
+
+  const words = clean.split(/\s+/).filter((w) => w.length >= 2);
+  const meaningfulWords = words
+    .filter((w) => !stopWords.includes(w.toLowerCase()))
+    .map((w) => stripSuffix(w))
+    .filter((w) => w.length >= 2 && !stopWords.includes(w.toLowerCase()));
+
+  const terms = [];
+
+  const getWordVariants = (w) => {
+    const list = [w];
+    if (w.includes("মোনাজাত")) list.push(w.replace(/মোনাজাত/g, "মুনাজাত"));
+    if (w.includes("মুনাজাত")) list.push(w.replace(/মুনাজাত/g, "মোনাজাত"));
+    if (w.includes("রোজা")) list.push(w.replace(/রোজা/g, "রোযা"));
+    if (w.includes("রোযা")) list.push(w.replace(/রোযা/g, "রোজা"));
+    if (w.includes("নামাজ")) list.push(w.replace(/নামাজ/g, "নামায"));
+    if (w.includes("নামায")) list.push(w.replace(/নামায/g, "নামাজ"));
+    if (w.includes("কাজা")) list.push(w.replace(/কাজা/g, "কাযা"));
+    if (w.includes("কাযা")) list.push(w.replace(/কাযা/g, "কাজা"));
+    if (w.includes("ইনজেকশন")) list.push(w.replace(/ইনজেকশন/g, "ইঞ্জেকশন"));
+    if (w.includes("ইঞ্জেকশন")) list.push(w.replace(/ইঞ্জেকশন/g, "ইনজেকশন"));
+    return Array.from(new Set(list));
+  };
+
+  const addTermWithVariants = (term) => {
+    if (!term || term.length < 2) return;
+    const parts = term.split(/\s+/);
+    if (parts.length === 1) {
+      for (const v of getWordVariants(parts[0])) {
+        if (!terms.includes(v)) terms.push(v);
+      }
+      return;
+    }
+
+    if (parts.length === 2) {
+      const v0 = getWordVariants(parts[0]);
+      const v1 = getWordVariants(parts[1]);
+      for (const a of v0) {
+        for (const b of v1) {
+          const combo = `${a} ${b}`;
+          if (!terms.includes(combo)) terms.push(combo);
+        }
+      }
+      return;
+    }
+
+    if (!terms.includes(term)) terms.push(term);
+  };
+
+  // 1. Most targeted: Pair 2 distinct meaningful words with all permutations
+  if (meaningfulWords.length >= 2) {
+    addTermWithVariants(meaningfulWords[0] + " " + meaningfulWords[1]);
+    if (meaningfulWords.length > 2) {
+      addTermWithVariants(meaningfulWords[0] + " " + meaningfulWords[meaningfulWords.length - 1]);
+    }
+  }
+
+  // 2. Individual distinctive keywords (crucial for exact site search hits)
+  for (const w of meaningfulWords) {
+    if (w.length >= 3) {
+      addTermWithVariants(w);
+    }
+  }
+
+  // 3. Full meaningful phrase
+  if (meaningfulWords.length > 2) {
+    addTermWithVariants(meaningfulWords.join(" "));
+  }
+
+  // 4. Raw query
+  addTermWithVariants(clean);
+
+  return terms;
+}
+
+/**
+ * Searches Ahlehaq Media (WordPress)
+ */
+async function searchAhlehaq(searchTerms) {
+  const discovered = new Map();
+  const pairTerms = searchTerms.filter((t) => t.includes(" "));
+  const singleTerms = searchTerms.filter((t) => !t.includes(" "));
+  const topTerms = [...pairTerms.slice(0, 3), ...singleTerms.slice(0, 3)].slice(0, 6);
+
+  const promises = topTerms.map(async (term) => {
+    try {
+      const endpoint = `https://ahlehaqmedia.com/?s=${encodeURIComponent(term)}`;
+      const res = await fetch(endpoint, {
+        signal: AbortSignal.timeout(6000),
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+          Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "Accept-Language": "bn-BD,bn;q=0.9,en;q=0.8",
+        },
+      });
+
+      if (res.ok) {
+        const html = await res.text();
+        const articleMatches = [
+          ...html.matchAll(
+            /<h2[^>]*class=["'][^"']*post-box-title[^"']*["'][^>]*>[\s\S]*?<a\s+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi
+          ),
+        ];
+
+        for (const m of articleMatches) {
+          const url = m[1].trim();
+          const title = decodeHtmlEntities(m[2].replace(/<[^>]+>/g, "").trim());
+          if (isWhitelistedUrl(url) && isCandidateArticleUrl(url)) {
+            discovered.set(url, title);
+          }
+        }
+      }
+    } catch (_) {}
+  });
+
+  await Promise.allSettled(promises);
+  return Array.from(discovered.entries()).map(([url, title]) => ({ url, title }));
+}
+
+/**
+ * Searches Monthly Alkawsar
+ */
+async function searchAlkawsar(searchTerms) {
+  const discovered = new Map();
+  const pairTerms = searchTerms.filter((t) => t.includes(" "));
+  const singleTerms = searchTerms.filter((t) => !t.includes(" "));
+  const topTerms = [...pairTerms.slice(0, 3), ...singleTerms.slice(0, 3)].slice(0, 6);
+
+  const promises = topTerms.map(async (term) => {
+    try {
+      const endpoint = `https://www.alkawsar.com/bn/search/?q=${encodeURIComponent(term)}`;
+      const res = await fetch(endpoint, {
+        signal: AbortSignal.timeout(6000),
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+          Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "Accept-Language": "bn-BD,bn;q=0.9,en;q=0.8",
+        },
+      });
+
+      if (res.ok) {
+        const html = await res.text();
+        const matches = [
+          ...html.matchAll(
+            /<a\s+href=["'](\/bn\/article\/\d+\/)["'][^>]*>([\s\S]*?)<\/a>/gi
+          ),
+        ];
+
+        for (const m of matches) {
+          const fullUrl = `https://www.alkawsar.com${m[1]}`;
+          const title = decodeHtmlEntities(m[2].replace(/<[^>]+>/g, "").trim());
+          if (isWhitelistedUrl(fullUrl) && isCandidateArticleUrl(fullUrl)) {
+            discovered.set(fullUrl, title);
+          }
+        }
+      }
+    } catch (_) {}
+  });
+
+  await Promise.allSettled(promises);
+  return Array.from(discovered.entries()).map(([url, title]) => ({ url, title }));
+}
+
+/**
+ * Unwraps DuckDuckGo redirect URLs
  */
 function unwrapTargetUrl(rawHref) {
   if (!rawHref) return null;
@@ -15,9 +236,7 @@ function unwrapTargetUrl(rawHref) {
     if (cleanHref.includes("duckduckgo.com/l/?") || cleanHref.includes("uddg=")) {
       const urlObj = new URL(cleanHref);
       const uddg = urlObj.searchParams.get("uddg");
-      if (uddg) {
-        return decodeURIComponent(uddg);
-      }
+      if (uddg) return decodeURIComponent(uddg);
     }
     return cleanHref;
   } catch {
@@ -26,228 +245,99 @@ function unwrapTargetUrl(rawHref) {
 }
 
 /**
- * Searches via Google Programmable Search JSON API (if configured in env)
+ * DuckDuckGo Search Fallback strictly for whitelisted domains
  */
-async function searchGoogleCSE(query) {
-  const apiKey = process.env.GOOGLE_SEARCH_API_KEY || process.env.GOOGLE_CSE_API_KEY;
-  const cx = process.env.GOOGLE_SEARCH_CX || process.env.GOOGLE_CSE_CX;
-  if (!apiKey || !cx) return null;
-
+async function searchDuckDuckGoFallback(query) {
+  const discovered = [];
   try {
     const siteFilter = getSiteQueryFilter();
-    const endpoint = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&q=${encodeURIComponent(
-      `${query} ${siteFilter}`
-    )}&num=5`;
+    const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(`${siteFilter} ${query}`)}`;
 
-    const res = await fetch(endpoint, { next: { revalidate: 3600 } });
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (!data.items || !Array.isArray(data.items)) return [];
-
-    return data.items
-      .map(item => item.link)
-      .filter(link => isWhitelistedUrl(link));
-  } catch (err) {
-    console.warn("Google CSE error:", err);
-    return null;
-  }
-}
-
-/**
- * Searches via Tavily API (if configured in env)
- */
-async function searchTavily(query) {
-  const apiKey = process.env.TAVILY_API_KEY;
-  if (!apiKey) return null;
-
-  try {
-    const allowedDomains = WHITELISTED_DOMAINS.map(d => d.domain);
-    const res = await fetch("https://api.tavily.com/search", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        api_key: apiKey,
-        query: query,
-        search_depth: "advanced",
-        include_domains: allowedDomains,
-        max_results: 5
-      })
-    });
-
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (!data.results || !Array.isArray(data.results)) return [];
-
-    return data.results
-      .map(r => r.url)
-      .filter(link => isWhitelistedUrl(link));
-  } catch (err) {
-    console.warn("Tavily error:", err);
-    return null;
-  }
-}
-
-/**
- * Direct search on whitelisted portals (Alkawsar, Ahlehaq Media, etc.)
- * Queries whitelisted sources concurrently for maximum coverage and speed.
- */
-async function searchWhitelistedSitesDirectly(query) {
-  const discovered = new Set();
-  const searchTerms = [query];
-
-  // If query is conversational, extract core Islamic keywords
-  const stopWords = ["সম্পর্কে", "বিধান", "কী", "কি", "হুকুম", "বলুন", "জানতে", "চাই", "করার", "নিয়ে", "নিয়ম", "শরীয়তের", "হলে", "কিনা"];
-  const words = query.split(/\s+/).filter(w => w.length > 2 && !stopWords.includes(w));
-  if (words.length > 0 && words.length < query.split(/\s+/).length) {
-    searchTerms.push(words.slice(0, 3).join(" "));
-  }
-  // Also add key individual religious terms if multiple words exist
-  if (words.length > 1) {
-    for (const w of words) {
-      if (w.length >= 3 && !searchTerms.includes(w)) {
-        searchTerms.push(w);
-      }
-    }
-  }
-
-  // 1. Search Alkawsar
-  const searchAlkawsar = async () => {
-    for (const term of searchTerms.slice(0, 3)) {
-      try {
-        const res = await fetch(`https://www.alkawsar.com/bn/search/?q=${encodeURIComponent(term)}`, {
-          signal: AbortSignal.timeout(10000),
-          headers: {
-            "User-Agent":
-              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-            Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "bn-BD,bn;q=0.9,en;q=0.8"
-          }
-        });
-        if (res.ok) {
-          const text = await res.text();
-          const matches = text.match(/\/bn\/article\/\d+\//g);
-          if (matches) {
-            for (const m of matches) {
-              const fullUrl = `https://www.alkawsar.com${m}`;
-              if (isWhitelistedUrl(fullUrl)) {
-                discovered.add(fullUrl);
-              }
-            }
-          }
-        }
-      } catch (e) {
-        console.warn("Alkawsar search error:", e.message);
-      }
-      if (discovered.size >= 4) break;
-    }
-  };
-
-  // 2. Search Ahlehaq Media
-  const searchAhlehaq = async () => {
-    for (const term of searchTerms.slice(0, 2)) {
-      try {
-        const res = await fetch(`https://ahlehaqmedia.com/?s=${encodeURIComponent(term)}`, {
-          signal: AbortSignal.timeout(10000),
-          headers: {
-            "User-Agent":
-              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-            Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "bn-BD,bn;q=0.9,en;q=0.8"
-          }
-        });
-        if (res.ok) {
-          const text = await res.text();
-          const postMatches = text.match(/href=["'](https:\/\/ahlehaqmedia\.com\/(?:archives\/|\d+|[\w\-%]+)\/?)["']/gi);
-          if (postMatches) {
-            for (const raw of postMatches) {
-              const url = raw.replace(/^href=["']|["']$/gi, "");
-              if (
-                isWhitelistedUrl(url) &&
-                !url.includes("/wp-") &&
-                !url.includes("/feed") &&
-                !url.includes("/category/") &&
-                !url.includes("/tag/") &&
-                !url.includes("/author/") &&
-                url !== "https://ahlehaqmedia.com/"
-              ) {
-                discovered.add(url);
-              }
-            }
-          }
-        }
-      } catch (e) {
-        console.warn("Ahlehaq search error:", e.message);
-      }
-      if (discovered.size >= 6) break;
-    }
-  };
-
-  await Promise.allSettled([searchAlkawsar(), searchAhlehaq()]);
-  return Array.from(discovered);
-}
-
-/**
- * Free Zero-Config Fallback Search strictly restricted to whitelisted sites
- */
-async function searchDirectWeb(query) {
-  // First try direct portal search
-  const directPortalUrls = await searchWhitelistedSitesDirectly(query);
-  if (directPortalUrls && directPortalUrls.length > 0) {
-    return directPortalUrls;
-  }
-
-  const siteFilter = getSiteQueryFilter();
-  const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(`${siteFilter} ${query}`)}`;
-
-  try {
     const res = await fetch(searchUrl, {
-      signal: AbortSignal.timeout(12000),
+      signal: AbortSignal.timeout(9000),
       headers: {
         "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
         Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "bn-BD,bn;q=0.9,en;q=0.8"
-      }
+        "Accept-Language": "bn-BD,bn;q=0.9,en;q=0.8",
+      },
     });
 
-    if (!res.ok) return [];
-    const html = await res.text();
-
-    const linkRegex = /<a[^>]+class=["'][^"']*(?:result__url|result__snippet|result__title)[^"']*["'][^>]+href=["']([^"']+)["']/gi;
-    const discovered = new Set();
-    let match;
-
-    while ((match = linkRegex.exec(html)) !== null) {
-      const unwrapped = unwrapTargetUrl(match[1]);
-      if (unwrapped && isWhitelistedUrl(unwrapped)) {
-        // Strip tracking params
-        try {
-          const u = new URL(unwrapped);
-          u.search = "";
-          u.hash = "";
-          discovered.add(u.toString());
-        } catch {
-          discovered.add(unwrapped);
+    if (res.ok) {
+      const html = await res.text();
+      const linkRegex =
+        /<a[^>]+class=["'][^"']*(?:result__url|result__snippet|result__title)[^"']*["'][^>]+href=["']([^"']+)["']/gi;
+      let match;
+      while ((match = linkRegex.exec(html)) !== null) {
+        const unwrapped = unwrapTargetUrl(match[1]);
+        if (unwrapped && isWhitelistedUrl(unwrapped) && isCandidateArticleUrl(unwrapped)) {
+          discovered.push({ url: unwrapped, title: "" });
         }
       }
     }
-
-    return Array.from(discovered);
   } catch (err) {
-    console.error("Direct web search error:", err);
-    return [];
+    console.warn("DuckDuckGo fallback search error:", err.message);
   }
+  return discovered;
+}
+
+/**
+ * Computes semantic relevance score between user query and an article
+ */
+function scoreCandidate(query, candidate) {
+  const qTokens = query
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(
+      (w) =>
+        w.length >= 2 &&
+        !["সম্পর্কে", "বিধান", "কী", "কি", "হুকুম", "বলুন", "জানতে", "চাই", "নেয়া", "নেয়া", "বা", "ও"].includes(w)
+    );
+
+  if (qTokens.length === 0) return 1;
+
+  let score = 0;
+  const titleLower = (candidate.title || "").toLowerCase();
+  const urlLower = (candidate.url || "").toLowerCase();
+
+  // Score match on tokens and their phonetic variants
+  for (const token of qTokens) {
+    if (token === "ইনজেকশন" && (titleLower.includes("ইনজেকশন") || titleLower.includes("ইঞ্জেকশন"))) {
+      score += 40;
+    } else if (token === "মোনাজাত" && (titleLower.includes("মোনাজাত") || titleLower.includes("মুনাজাত"))) {
+      score += 40;
+    } else if (token === "রোজা" && (titleLower.includes("রোজা") || titleLower.includes("রোযা"))) {
+      score += 25;
+    } else if (token === "নামাজ" && (titleLower.includes("নামাজ") || titleLower.includes("নামায"))) {
+      score += 25;
+    } else if (token === "কাযা" && (titleLower.includes("কাযা") || titleLower.includes("কাজা"))) {
+      score += 35;
+    } else if (token === "যাকাত" && titleLower.includes("যাকাত")) {
+      score += 35;
+    } else if (titleLower.includes(token)) {
+      score += 20;
+    }
+    if (urlLower.includes(encodeURIComponent(token))) {
+      score += 15;
+    }
+  }
+
+  if (urlLower.includes("/article/") || /\/\d+\/?$/.test(urlLower) || urlLower.includes("/fatwa")) {
+    score += 10;
+  }
+
+  return score;
 }
 
 /**
  * Main Strict Retriever:
- * 1. Executes multi-tier search
- * 2. Filters strictly through Domain Whitelist Guard
- * 3. Fetches and extracts clean text & verbatim references
- * 
+ * 1. Generates normalized search variants.
+ * 2. Concurrently queries authoritative whitelisted fatwa portals.
+ * 3. Fetches real HTML and extracts authentic article text & verbatim citations.
+ *
  * @param {string} query User query
- * @param {number} maxResults Max articles to fetch (default: 3)
- * @returns {Promise<Array>} List of extracted article objects
+ * @param {number} maxResults Max articles to return
+ * @returns {Promise<Array>} List of authentic extracted articles
  */
 export async function retrieveWhitelistedFatwas(query, maxResults = 3) {
   if (!query || typeof query !== "string" || query.trim().length < 2) {
@@ -255,96 +345,67 @@ export async function retrieveWhitelistedFatwas(query, maxResults = 3) {
   }
 
   const cleanQuery = query.trim();
-  let candidateUrls = [];
+  const searchTerms = generateSearchVariants(cleanQuery);
 
-  // Tier 1: Google Custom Search
-  const googleUrls = await searchGoogleCSE(cleanQuery);
-  if (googleUrls && googleUrls.length > 0) {
-    candidateUrls = googleUrls;
+  // Concurrently search Ahlehaq and Alkawsar
+  const [ahlehaqResults, alkawsarResults] = await Promise.all([
+    searchAhlehaq(searchTerms),
+    searchAlkawsar(searchTerms),
+  ]);
+
+  let allCandidates = [...ahlehaqResults, ...alkawsarResults];
+
+  // If direct search yielded few results, fallback to DuckDuckGo
+  if (allCandidates.length === 0) {
+    const ddgResults = await searchDuckDuckGoFallback(cleanQuery);
+    allCandidates = ddgResults;
   }
 
-  // Tier 2: Tavily (if Google CSE didn't yield results)
-  if (candidateUrls.length === 0) {
-    const tavilyUrls = await searchTavily(cleanQuery);
-    if (tavilyUrls && tavilyUrls.length > 0) {
-      candidateUrls = tavilyUrls;
+  // Filter unique valid whitelisted URLs
+  const seenUrls = new Set();
+  const scoredCandidates = [];
+
+  for (const item of allCandidates) {
+    if (!item.url || seenUrls.has(item.url)) continue;
+    seenUrls.add(item.url);
+
+    if (!isWhitelistedUrl(item.url) || !isCandidateArticleUrl(item.url)) continue;
+
+    const score = scoreCandidate(cleanQuery, item);
+    if (score > -50) {
+      scoredCandidates.push({ ...item, score });
     }
   }
 
-  // Tier 3: Direct Web Search Fallback
-  if (candidateUrls.length === 0) {
-    const directUrls = await searchDirectWeb(cleanQuery);
-    if (directUrls && directUrls.length > 0) {
-      candidateUrls = directUrls;
-    }
-  }
+  // Sort by score descending
+  scoredCandidates.sort((a, b) => b.score - a.score);
 
-  // Score and sort URLs to prioritize deep fatwa/article pages over root homepages
-  const scoreUrl = url => {
-    try {
-      const parsed = new URL(url);
-      const path = parsed.pathname.toLowerCase();
-      if (
-        path === "/" ||
-        path === "/bn" ||
-        path === "/en" ||
-        path === "/bn/" ||
-        path === "/en/" ||
-        path.includes("/topics") ||
-        path.includes("/category") ||
-        path.includes("/tag") ||
-        path.includes("/author") ||
-        path.includes("/page/")
-      ) {
-        return 0;
-      }
-      if (
-        path.includes("/article/") ||
-        path.includes("/fatwa") ||
-        path.includes("/question/") ||
-        path.includes("/masala") ||
-        path.includes("/archives/") ||
-        /\/\d+\/?$/.test(path)
-      ) {
-        return 10;
-      }
-      return 5;
-    } catch {
-      return 0;
-    }
-  };
+  const topCandidates = scoredCandidates.slice(0, Math.max(maxResults, 3));
 
-  // Double-check Whitelist Guard (Zero Tolerance for non-whitelisted domains)
-  // Also filter out root homepages (score 0) so only real fatwa/article pages are fetched
-  const validUrls = Array.from(new Set(candidateUrls))
-    .filter(url => isWhitelistedUrl(url) && scoreUrl(url) > 0)
-    .sort((a, b) => scoreUrl(b) - scoreUrl(a))
-    .slice(0, maxResults);
-
-  if (validUrls.length === 0) {
+  if (topCandidates.length === 0) {
     return [];
   }
 
-  // Fetch and parse top whitelisted articles concurrently
-  const fetchPromises = validUrls.map(async url => {
+  // Concurrently fetch and extract clean article text
+  const fetchPromises = topCandidates.map(async (item) => {
     try {
-      const { html, finalUrl } = await fetchArticleHtml(url);
-      const article = cleanAndExtractArticle(html, finalUrl);
-      // Ensure there is substantial content
-      if (article.content && article.content.length > 150) {
+      const { html, finalUrl } = await fetchArticleHtml(item.url);
+      const article = cleanAndExtractArticle(html, finalUrl, cleanQuery);
+
+      if (article.content && article.content.length > 80) {
         return article;
       }
       return null;
     } catch (err) {
-      console.warn(`Failed to process article from ${url}:`, err.message);
+      console.warn(`Failed to process article from ${item.url}:`, err.message);
       return null;
     }
   });
 
   const settled = await Promise.allSettled(fetchPromises);
   const articles = settled
-    .filter(s => s.status === "fulfilled" && s.value !== null)
-    .map(s => s.value);
+    .filter((s) => s.status === "fulfilled" && s.value !== null)
+    .map((s) => s.value);
 
   return articles;
 }
