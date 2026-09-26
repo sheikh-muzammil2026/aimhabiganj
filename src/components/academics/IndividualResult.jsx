@@ -53,7 +53,7 @@ export default function ResultSheetGenerator() {
   // ফিল্টারিং স্টেট: Class, Year, Exam Type, Student ID (Search)
   const [selectedClass, setSelectedClass] = useState("all");
   const [targetYear, setTargetYear] = useState("২০২৬");
-  const [examType, setExamType] = useState("বার্ষিক পরীক্ষা");
+  const [examType, setExamType] = useState("২য় সাময়িক পরীক্ষা");
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
