@@ -14,6 +14,23 @@ const toBengaliDigits = (num) => {
   return String(num).replace(/[0-9]/g, (digit) => bengaliDigits[Number(digit)]);
 };
 
+const toEnglishDigits = (str) => {
+  if (!str) return "";
+  const bengaliDigits = {
+    "০": "0",
+    "১": "1",
+    "২": "2",
+    "৩": "3",
+    "৪": "4",
+    "৫": "5",
+    "৬": "6",
+    "৭": "7",
+    "৮": "8",
+    "৯": "9",
+  };
+  return String(str).replace(/[০-৯]/g, (digit) => bengaliDigits[digit] || digit);
+};
+
 export default function ResultSheetGenerator() {
   const { data: session } = authClient.useSession();
   const user = session?.user;
@@ -77,12 +94,14 @@ export default function ResultSheetGenerator() {
       setSelectedIds([]);
       setStudents([]);
       setResultSheets([]);
+      setResultsError(null);
       return;
     }
 
     try {
       setLoading(true);
       setError(null);
+      setResultsError(null);
       const params = new URLSearchParams({
         status: "Approved",
         activity: "active",
@@ -105,31 +124,62 @@ export default function ResultSheetGenerator() {
       const result = await response.json();
 
       if (result.success) {
-        const fetchedStudents = (result.data || []).sort(
+        const rawStudents = (result.data || []).sort(
           (a, b) =>
             (parseInt(a.roll, 10) || Infinity) -
             (parseInt(b.roll, 10) || Infinity),
         );
+
+        // ১. Student ID দিয়ে সার্চ করা হলে অবশ্যই EXACT MATCH ফিল্টারিং হবে
+        let fetchedStudents = rawStudents;
+        if (trimmedTerm) {
+          const normalizedTerm = toEnglishDigits(trimmedTerm);
+          fetchedStudents = rawStudents.filter((item) => {
+            const rawId = item?.studentId ?? item?.id;
+            if (rawId === undefined || rawId === null) return false;
+            const strId = rawId.toString().trim();
+            return (
+              strId === trimmedTerm ||
+              strId === normalizedTerm ||
+              toBengaliDigits(strId) === trimmedTerm
+            );
+          });
+        }
+
         if (fetchedStudents.length > 0) {
           setStudents(fetchedStudents);
-          const matchedIds = fetchedStudents.map((s) => s.studentId);
+          const matchedIds = fetchedStudents.map((s) => {
+            const sid = s.studentId ?? s.id;
+            return sid.toString().trim();
+          });
           setSelectedIds(matchedIds);
         } else {
           if (trimmedTerm) {
             setStudents([]);
-            setSelectedIds([trimmedTerm]);
+            const normalizedId = toEnglishDigits(trimmedTerm);
+            setSelectedIds([normalizedId || trimmedTerm]);
           } else {
             setStudents([]);
             setSelectedIds([]);
+            setResultSheets([]);
             setError("এই শ্রেণীতে কোনো শিক্ষার্থী পাওয়া যায়নি।");
+            setResultsError("কোনো ফলাফল পাওয়া যায়নি (No result found)।");
           }
         }
       } else {
+        setStudents([]);
+        setSelectedIds([]);
+        setResultSheets([]);
         setError(result.message || "শিক্ষার্থীদের তথ্য লোড করা যায়নি।");
+        setResultsError(result.message || "কোনো ফলাফল পাওয়া যায়নি (No result found)।");
       }
     } catch (err) {
       console.error("Error fetching students:", err);
+      setStudents([]);
+      setSelectedIds([]);
+      setResultSheets([]);
       setError("সার্ভারের সাথে সংযোগ স্থাপন করা সম্ভব হয়নি।");
+      setResultsError("সার্ভারের সাথে সংযোগ স্থাপন করা সম্ভব হয়নি।");
     } finally {
       setLoading(false);
     }
@@ -143,9 +193,14 @@ export default function ResultSheetGenerator() {
       setError(
         "অনুগ্রহ করে শিক্ষার্থীর আইডি লিখুন অথবা একটি শ্রেণী নির্বাচন করুন।",
       );
+      setResultSheets([]);
+      setSelectedIds([]);
+      setResultsError(null);
       return;
     }
     setError(null);
+    setResultsError(null);
+    setResultSheets([]);
     setSearchTerm(trimmed);
     fetchStudents(trimmed, selectedClass);
   };
@@ -189,10 +244,34 @@ export default function ResultSheetGenerator() {
 
         const fetchedResults = await Promise.all(fetchPromises);
         const validResults = fetchedResults.filter((item) => item !== null);
-        setResultSheets(validResults);
 
-        if (validResults.length === 0 && unpublishedMsg) {
-          setResultsError(unpublishedMsg);
+        // রেজাল্ট ডাটাতেও যদি সার্চ কুয়েরি থাকে, তবে নিখুঁত EXACT MATCH নিশ্চিত করা
+        let finalResults = validResults;
+        const currentSearch = (searchTerm || searchInput || "").trim();
+        if (currentSearch) {
+          const normalizedQuery = toEnglishDigits(currentSearch);
+          finalResults = validResults.filter((item) => {
+            const resId =
+              item?.studentId ??
+              item?.student?.studentId ??
+              item?.student?.id ??
+              item?.id;
+            if (resId === undefined || resId === null) return false;
+            const strId = resId.toString().trim();
+            return (
+              strId === currentSearch ||
+              strId === normalizedQuery ||
+              toBengaliDigits(strId) === currentSearch
+            );
+          });
+        }
+
+        setResultSheets(finalResults);
+
+        if (finalResults.length === 0) {
+          setResultsError(
+            unpublishedMsg || "কোনো ফলাফল পাওয়া যায়নি (No result found)।",
+          );
         }
       } catch (err) {
         console.error("Error fetching result sheets:", err);
@@ -624,9 +703,9 @@ export default function ResultSheetGenerator() {
             {/* প্রিন্ট বাটন (রয়্যাল গোল্ডেন স্টাইল) */}
             <button
               onClick={handlePrint}
-              disabled={selectedIds.length === 0}
+              disabled={selectedIds.length === 0 || resultSheets.length === 0}
               className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2.5 shadow-lg shrink-0 ${
-                selectedIds.length === 0
+                selectedIds.length === 0 || resultSheets.length === 0
                   ? "bg-emerald-950/80 text-emerald-700 border border-emerald-900/60 cursor-not-allowed"
                   : "bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-emerald-950 shadow-amber-500/20 active:scale-95 cursor-pointer font-black"
               }`}
@@ -800,21 +879,27 @@ export default function ResultSheetGenerator() {
           রেজাল্ট লোড হচ্ছে...
         </div>
       ) : resultsError ? (
-        <div className="print:hidden text-center py-12 text-red-500 font-bold">
-          {resultsError}
+        <div className="print:hidden text-center py-12 bg-white dark:bg-[#0f172a] rounded-2xl p-8 max-w-2xl mx-auto shadow-sm border border-rose-200 dark:border-rose-900/40 text-rose-600 dark:text-rose-400 font-bold text-base flex flex-col items-center gap-3">
+          <span className="text-3xl">⚠️</span>
+          <span>{resultsError}</span>
         </div>
-      ) : (
+      ) : resultSheets.length > 0 ? (
         <div className="print-area-container flex flex-col items-center gap-8">
           {resultSheets.map((resData, index) => {
             // ১. রেজাল্ট ডাটা থেকে স্টুডেন্ট আইডি বের করা
             const currentStudentId =
               resData.studentId ||
               resData.student?.studentId ||
+              resData.student?.id ||
               resData.student;
 
             // ২. 'students' স্টেট থেকে আসল স্টুডেন্টের সব ইনফরমেশন খুঁজে বের করা
             const matchedStudent =
-              students.find((s) => s.studentId === currentStudentId) || {};
+              students.find(
+                (s) =>
+                  (s.studentId ?? s.id)?.toString().trim() ===
+                  String(currentStudentId).trim(),
+              ) || {};
 
             // ৩. ফলব্যাক বা ব্যাকআপ অবজেক্ট তৈরি
             const student = {
@@ -1411,7 +1496,12 @@ export default function ResultSheetGenerator() {
             );
           })}
         </div>
-      )}
+      ) : (searchTerm || searchInput.trim()) ? (
+        <div className="print:hidden text-center py-12 bg-white dark:bg-[#0f172a] rounded-2xl p-8 max-w-2xl mx-auto shadow-sm border border-rose-200 dark:border-rose-900/40 text-rose-600 dark:text-rose-400 font-bold text-base flex flex-col items-center gap-3">
+          <span className="text-3xl">🔍</span>
+          <span>কোনো ফলাফল পাওয়া যায়নি (No result found)। সঠিক আইডি প্রদান করে আবার অনুসন্ধান করুন।</span>
+        </div>
+      ) : null}
     </div>
   );
 }
