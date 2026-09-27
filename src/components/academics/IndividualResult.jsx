@@ -14,33 +14,6 @@ const toBengaliDigits = (num) => {
   return String(num).replace(/[0-9]/g, (digit) => bengaliDigits[Number(digit)]);
 };
 
-<<<<<<< HEAD
-/**
- * Grade to remark conversion utility based on institutional academic standards.
- * @param {string} grade - Letter grade (A+, A, A-, B, C, F)
- * @param {string} [fallback=""] - Clean fallback string if grade is unmapped
- * @returns {string} Mapped Bengali remark or fallback
- */
-export const getGradeRemark = (grade, fallback = "") => {
-  if (!grade || typeof grade !== "string") return fallback;
-  const normalizedGrade = grade.trim().toUpperCase();
-  switch (normalizedGrade) {
-    case "A+":
-      return "মুমতাজ";
-    case "A":
-      return "জায়্যিদ জিদ্দান";
-    case "A-":
-      return "জায়্যিদ";
-    case "B":
-      return "মাকবুল প্লাস";
-    case "C":
-      return "মাকবুল";
-    case "F":
-      return "রাসেব";
-    default:
-      return fallback;
-  }
-=======
 const toEnglishDigits = (str) => {
   if (!str) return "";
   const bengaliDigits = {
@@ -55,8 +28,10 @@ const toEnglishDigits = (str) => {
     "৮": "8",
     "৯": "9",
   };
-  return String(str).replace(/[০-৯]/g, (digit) => bengaliDigits[digit] || digit);
->>>>>>> aae0ce41bf84642da3e2a191414658e1c967eabc
+  return String(str).replace(
+    /[০-৯]/g,
+    (digit) => bengaliDigits[digit] || digit,
+  );
 };
 
 export default function ResultSheetGenerator() {
@@ -199,7 +174,9 @@ export default function ResultSheetGenerator() {
         setSelectedIds([]);
         setResultSheets([]);
         setError(result.message || "শিক্ষার্থীদের তথ্য লোড করা যায়নি।");
-        setResultsError(result.message || "কোনো ফলাফল পাওয়া যায়নি (No result found)।");
+        setResultsError(
+          result.message || "কোনো ফলাফল পাওয়া যায়নি (No result found)।",
+        );
       }
     } catch (err) {
       console.error("Error fetching students:", err);
@@ -1535,10 +1512,13 @@ export default function ResultSheetGenerator() {
             );
           })}
         </div>
-      ) : (searchTerm || searchInput.trim()) ? (
+      ) : searchTerm || searchInput.trim() ? (
         <div className="print:hidden text-center py-12 bg-white dark:bg-[#0f172a] rounded-2xl p-8 max-w-2xl mx-auto shadow-sm border border-rose-200 dark:border-rose-900/40 text-rose-600 dark:text-rose-400 font-bold text-base flex flex-col items-center gap-3">
           <span className="text-3xl">🔍</span>
-          <span>কোনো ফলাফল পাওয়া যায়নি (No result found)। সঠিক আইডি প্রদান করে আবার অনুসন্ধান করুন।</span>
+          <span>
+            কোনো ফলাফল পাওয়া যায়নি (No result found)। সঠিক আইডি প্রদান করে
+            আবার অনুসন্ধান করুন।
+          </span>
         </div>
       ) : null}
     </div>
