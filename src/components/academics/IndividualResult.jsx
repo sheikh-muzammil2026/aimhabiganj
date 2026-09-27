@@ -34,6 +34,33 @@ const toEnglishDigits = (str) => {
   );
 };
 
+/**
+ * Grade to remark conversion utility based on institutional academic standards.
+ * @param {string} grade - Letter grade (A+, A, A-, B, C, F)
+ * @param {string} [fallback=""] - Clean fallback string if grade is unmapped
+ * @returns {string} Mapped Bengali remark or fallback
+ */
+export const getGradeRemark = (grade, fallback = "") => {
+  if (!grade || typeof grade !== "string") return fallback;
+  const normalizedGrade = grade.trim().toUpperCase();
+  switch (normalizedGrade) {
+    case "A+":
+      return "মুমতাজ";
+    case "A":
+      return "জায়্যিদ জিদ্দান";
+    case "A-":
+      return "জায়্যিদ";
+    case "B":
+      return "মাকবুল প্লাস";
+    case "C":
+      return "মাকবুল";
+    case "F":
+      return "রাসেব";
+    default:
+      return fallback;
+  }
+};
+
 export default function ResultSheetGenerator() {
   const { data: session } = authClient.useSession();
   const user = session?.user;
