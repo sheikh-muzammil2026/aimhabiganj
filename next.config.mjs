@@ -11,6 +11,9 @@ const nextConfig = {
     ],
   },
   reactCompiler: true,
+  experimental: {
+    turbopackMemoryLimit: 2048,
+  },
 };
 
 export default nextConfig;
