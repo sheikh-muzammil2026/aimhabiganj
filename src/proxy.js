@@ -68,8 +68,8 @@ export async function proxy(request) {
   }
 
   // 6. Role and Permission access checks
-  // Admins have unrestricted access to all routes
-  if (userRole === "admin") {
+  // Admins and superadmins have unrestricted access to all routes
+  if (userRole === "admin" || userRole === "superadmin") {
     return NextResponse.next();
   }
 

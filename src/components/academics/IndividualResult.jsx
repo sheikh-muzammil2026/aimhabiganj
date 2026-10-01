@@ -1005,6 +1005,7 @@ export default function ResultSheetGenerator() {
                           alt="Watermark Logo"
                           width={420}
                           height={420}
+                          priority
                           className="w-full h-full object-cover scale-[1.05] transform-gpu"
                         />
                       </div>

@@ -58,10 +58,11 @@ const DashboardLayout = ({ children }) => {
 
     const userRole = (user.role || "student").toLowerCase();
     const permissions = Array.isArray(user.permissions) ? user.permissions : [];
+    const hasPerm = (p) => permissions.includes(p);
 
     if (pathname === "/dashboard" || pathname === "/dashboard/") {
       const targetDashboard =
-        userRole === "admin"
+        userRole === "admin" || userRole === "superadmin"
           ? "/dashboard/admin"
           : userRole === "teacher"
           ? "/dashboard/teacher"
@@ -74,7 +75,7 @@ const DashboardLayout = ({ children }) => {
       return;
     }
 
-    if (userRole === "admin") return;
+    if (userRole === "admin" || userRole === "superadmin") return;
 
     if (pathname.startsWith("/dashboard/profile-settings")) return;
 
