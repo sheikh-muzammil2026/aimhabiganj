@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Printer, Calendar, RefreshCw, Loader2 } from 'lucide-react';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL || process.env.NEXT_PUBLIC_SERVER_API || 'http://localhost:8000';
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_SERVER_API ||
+  process.env.NEXT_PUBLIC_SERVER_URL ||
+  "http://localhost:5000";
 
 // Aggregate transactions list into income/expense breakdowns (pure helper defined outside)
 const aggregateTransactions = (txList) => {

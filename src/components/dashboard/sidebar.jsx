@@ -331,9 +331,18 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       title: "শিক্ষক ব্যবস্থাপনা",
       icon: "🕌",
       lucideIcon: <UserCheck className="w-5 h-5" />,
-      href: "/dashboard/admin/teachers-management",
       roles: ["admin"],
       permissions: ["manage_users", "manage_teachers"],
+      dropdown: [
+        {
+          title: "শিক্ষক আইডি কার্ড তৈরি",
+          href: "/dashboard/admin/teachers-management/teachers-id-card",
+        },
+        {
+          title: "শিক্ষক উপস্থিতি ও হাজিরা",
+          href: "/dashboard/admin/teachers-management/attendance",
+        },
+      ],
     },
 
     {

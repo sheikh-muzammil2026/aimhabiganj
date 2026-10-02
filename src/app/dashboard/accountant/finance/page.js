@@ -9,17 +9,20 @@ import {
   Loader2,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 import { MdEmail, MdInstallMobile } from "react-icons/md";
 import Overview from "@/components/dashboard/finance/Overview";
 import IncomeEntry from "@/components/dashboard/finance/IncomeEntry";
 import ExpenseEntry from "@/components/dashboard/finance/ExpenseEntry";
 import MonthlyReport from "@/components/dashboard/finance/MonthlyReport";
+import IncomeVoucherHtmlLayout from "@/components/dashboard/finance/IncomeVoucherHtmlLayout";
+import IncomeVoucherPdfActions from "@/components/dashboard/finance/IncomeVoucherPdfActions";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_SERVER_URL ||
   process.env.NEXT_PUBLIC_SERVER_API ||
-  "http://localhost:8000";
+  process.env.NEXT_PUBLIC_SERVER_URL ||
+  "http://localhost:5000";
 
 const INCOME_HEADS = [
   "জেনারেল ব্যাংক হিসাব-১৫",
@@ -85,6 +88,7 @@ const EXPENSE_HEADS = [
 ];
 
 const BANGAL_MONTHS = [
+  { value: "all", label: "সব মাস (সর্বমোট)" },
   { value: "01", label: "জানুয়ারি" },
   { value: "02", label: "ফেব্রুয়ারি" },
   { value: "03", label: "মার্চ" },
@@ -126,13 +130,17 @@ export default function FinanceDashboard() {
   const currentYear = today.getFullYear().toString();
   const currentMonthNum = String(today.getMonth() + 1).padStart(2, "0");
 
-  // Filter States for Overview & Reports
-  const [reportYear, setReportYear] = useState(currentYear);
-  const [reportMonth, setReportMonth] = useState(currentMonthNum);
+  // Filter States for Overview & Reports (Default to "all" for real-time overall view)
+  const [reportYear, setReportYear] = useState("all");
+  const [reportMonth, setReportMonth] = useState("all");
   const [summaryData, setSummaryData] = useState({
     totalIncome: 0,
     totalExpense: 0,
     netBalance: 0,
+    overallIncome: 0,
+    overallExpense: 0,
+    overallBalance: 0,
+    activeMonths: [],
     incomeBreakdown: [],
     expenseBreakdown: [],
   });
@@ -198,9 +206,12 @@ export default function FinanceDashboard() {
     await Promise.resolve(); // yield to microtask to prevent sync setState in useEffect
     try {
       setLoading(true);
-      const res = await fetch(
-        `${API_BASE_URL}/api/finance/summary?month=${reportMonth}&year=${reportYear}`,
-      );
+      const queryParams = [];
+      if (reportMonth && reportMonth !== "all") queryParams.push(`month=${reportMonth}`);
+      if (reportYear && reportYear !== "all") queryParams.push(`year=${reportYear}`);
+      const queryString = queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
+
+      const res = await fetch(`${API_BASE_URL}/api/finance/summary${queryString}`);
       const data = await res.json();
       if (data.success) {
         setSummaryData(data.data);
@@ -635,8 +646,8 @@ export default function FinanceDashboard() {
             padding: 0 !important;
           }
           @page {
-            size: A5 portrait;
-            margin: 10mm !important;
+            size: ${printData?.type === "income" ? "A4 landscape" : printData?.type === "report" ? "A4 portrait" : "A5 portrait"};
+            margin: ${printData?.type === "income" ? "5mm" : "10mm"} !important;
           }
         }
       `}</style>
@@ -690,6 +701,7 @@ export default function FinanceDashboard() {
                   onChange={(e) => setReportYear(e.target.value)}
                   className="text-xs font-bold text-slate-700 bg-transparent border-none focus:outline-none cursor-pointer"
                 >
+                  <option value="all">সকল বছর</option>
                   {["২০২৫", "২০২৬", "২০২৭", "২০২৮"].map((yr) => {
                     const engYear = yr.replace(/[০-৯]/g, (d) =>
                       "০১২৩৪৫৬৭৮৯".indexOf(d),
@@ -743,6 +755,7 @@ export default function FinanceDashboard() {
           <Overview
             summaryData={summaryData}
             reportMonth={reportMonth}
+            setReportMonth={setReportMonth}
             reportYear={reportYear}
             getMonthLabel={getMonthLabel}
             formatBanglaNumber={formatBanglaNumber}
@@ -921,20 +934,27 @@ export default function FinanceDashboard() {
 
       {/* 2. On-Screen Print Preview Modal (Hidden when printing) */}
       {printData && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 print:hidden">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] animate-slide-in">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 print:hidden">
+          <div
+            className={`bg-white rounded-2xl shadow-2xl border border-slate-200 w-full ${
+              printData.type === "income" ? "max-w-5xl" : "max-w-2xl"
+            } overflow-hidden flex flex-col max-h-[92vh] animate-slide-in`}
+          >
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-              <h3 className="text-xs font-bold text-slate-800">
-                {printData.type === "report"
-                  ? "রিপোর্ট প্রিন্ট প্রিভিউ"
-                  : printData.type === "income"
-                    ? "রসিদ প্রিন্ট প্রিভিউ"
-                    : "ভাউচার প্রিন্ট প্রিভিউ"}
+            <div className="px-6 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+              <h3 className="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-2">
+                <span>🖨️</span>
+                <span>
+                  {printData.type === "report"
+                    ? "রিপোর্ট প্রিন্ট প্রিভিউ"
+                    : printData.type === "income"
+                      ? "আদায় রসিদ প্রিন্ট প্রিভিউ (A4 Landscape - অফিস ও গ্রাহক কপি)"
+                      : "ব্যয় ভাউচার প্রিন্ট প্রিভিউ"}
+                </span>
               </h3>
               <button
                 onClick={() => setPrintData(null)}
-                className="text-slate-400 hover:text-slate-600 text-xl font-bold leading-none p-1 transition-colors"
+                className="text-slate-400 hover:text-slate-600 text-2xl font-bold leading-none p-1 transition-colors"
                 title="বন্ধ করুন"
               >
                 &times;
@@ -942,40 +962,55 @@ export default function FinanceDashboard() {
             </div>
 
             {/* Modal Body (Scrollable preview) */}
-            <div className="p-6 overflow-y-auto flex-1 bg-slate-100/50">
-              <div className="bg-white border border-slate-250 p-8 shadow-sm rounded-xl max-w-xl mx-auto">
-                {printData.type === "report" ? (
-                  <ReportPrintLayout
-                    title={printData.title}
-                    period={printData.period}
-                    data={printData.data}
-                    formatBanglaNumber={formatBanglaNumber}
-                    getMonthLabel={getMonthLabel}
-                  />
-                ) : (
-                  <VoucherPrintLayout
+            <div className="p-4 sm:p-6 overflow-y-auto flex-1 bg-slate-100/60">
+              {printData.type === "income" ? (
+                <div className="bg-white border border-slate-300 p-4 sm:p-6 shadow-sm rounded-xl w-full mx-auto">
+                  <IncomeVoucherHtmlLayout
                     tx={printData}
                     formatBanglaNumber={formatBanglaNumber}
                     parsePayerName={parsePayerName}
                   />
-                )}
-              </div>
+                </div>
+              ) : (
+                <div className="bg-white border border-slate-250 p-6 sm:p-8 shadow-sm rounded-xl max-w-xl mx-auto">
+                  {printData.type === "report" ? (
+                    <ReportPrintLayout
+                      title={printData.title}
+                      period={printData.period}
+                      data={printData.data}
+                      formatBanglaNumber={formatBanglaNumber}
+                      getMonthLabel={getMonthLabel}
+                    />
+                  ) : (
+                    <VoucherPrintLayout
+                      tx={printData}
+                      formatBanglaNumber={formatBanglaNumber}
+                      parsePayerName={parsePayerName}
+                    />
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-2 bg-slate-50">
+            <div className="px-6 py-3.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 bg-slate-50">
               <button
                 onClick={() => setPrintData(null)}
                 className="px-4 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-650 hover:bg-slate-100 transition-colors"
               >
                 বন্ধ করুন
               </button>
-              <button
-                onClick={() => window.print()}
-                className="px-5 py-2 bg-emerald-800 hover:bg-emerald-950 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs"
-              >
-                <Printer className="w-4 h-4" /> প্রিন্ট করুন
-              </button>
+
+              {printData.type === "income" ? (
+                <IncomeVoucherPdfActions tx={printData} />
+              ) : (
+                <button
+                  onClick={() => window.print()}
+                  className="px-5 py-2 bg-emerald-800 hover:bg-emerald-950 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs"
+                >
+                  <Printer className="w-4 h-4" /> প্রিন্ট করুন
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -991,6 +1026,12 @@ export default function FinanceDashboard() {
               data={printData.data}
               formatBanglaNumber={formatBanglaNumber}
               getMonthLabel={getMonthLabel}
+            />
+          ) : printData.type === "income" ? (
+            <IncomeVoucherHtmlLayout
+              tx={printData}
+              formatBanglaNumber={formatBanglaNumber}
+              parsePayerName={parsePayerName}
             />
           ) : (
             <VoucherPrintLayout
@@ -1027,29 +1068,35 @@ function VoucherPrintLayout({ tx, formatBanglaNumber, parsePayerName }) {
 
   return (
     <div className="space-y-4 text-black bg-white w-full max-w-full font-sans leading-relaxed text-xs">
-      {/* Organisation Header */}
-      <div className="text-center border-b-2 border-slate-400 pb-2">
-        <h2 className="text-lg sm:text-xl font-black text-emerald-900">
-          আস-সালাম আইডিয়াল মাদরাসা (এইম)
-        </h2>
-        <p className="text-[10px] text-slate-500 font-bold mt-0.5">
-          হবিগঞ্জ সদর, হবিগঞ্জ
-        </p>
-
-        {/* ফোন ও ইমেইল সেকশন */}
-        <div className="flex items-center justify-center gap-3 text-[10px] text-slate-500 font-medium mt-1">
-          <span className="flex items-center gap-1">
-            <MdInstallMobile className="text-emerald-700 text-xs shrink-0" />
-            ০১৭১২-৩৪৫৬৭৮
-          </span>
-          <span className="text-slate-300">|</span>
-          <span className="flex items-center gap-1">
-            <MdEmail className="text-emerald-700 text-xs shrink-0" />
-            aimhabiganj@gmail.com
-          </span>
+      {/* Organisation Header matching Admit Card Branding */}
+      <div className="flex items-center justify-between gap-3 border-b-2 border-[#C5A059] pb-3 text-center">
+        <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-slate-50 border border-[#C5A059]">
+          <Image src="/aimlogo1.png" alt="Logo" width={40} height={40} className="object-contain" />
         </div>
+        <div className="flex-1 text-center min-w-0">
+          <div className="w-full flex justify-center">
+            <Image src="/banner.png" alt="Banner" width={280} height={40} className="max-h-8 w-auto object-contain mx-auto" priority />
+          </div>
+          <p className="text-[9px] text-slate-600 font-semibold mt-0.5">
+            হবিগঞ্জ সদর, হবিগঞ্জ
+          </p>
+          <div className="flex items-center justify-center gap-2 text-[8.5px] text-emerald-800 font-medium">
+            <span className="flex items-center gap-0.5">
+              <MdInstallMobile className="text-[10px] shrink-0" /> ০১৭১২-৩৪৫৬৭৮
+            </span>
+            <span className="text-slate-300">|</span>
+            <span className="flex items-center gap-0.5">
+              <MdEmail className="text-[10px] shrink-0" /> aimhabiganj@gmail.com
+            </span>
+          </div>
+        </div>
+        <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-slate-50 border border-[#C5A059]">
+          <Image src="/aimlogo1.png" alt="Logo" width={40} height={40} className="object-contain" />
+        </div>
+      </div>
 
-        <div className="inline-block border border-emerald-950 font-black text-[10px] uppercase px-4 py-1 rounded-md mt-2 tracking-wider bg-slate-50">
+      <div className="text-center my-1.5">
+        <div className="inline-block bg-emerald-800 text-white px-4 py-0.5 rounded-full border border-emerald-600 shadow-xs text-[10px] font-bold tracking-wider uppercase">
           {title}
         </div>
       </div>

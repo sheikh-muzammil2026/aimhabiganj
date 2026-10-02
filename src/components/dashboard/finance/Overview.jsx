@@ -43,17 +43,24 @@ export default function Overview({
         <div className="bg-white p-5 sm:p-6 rounded-2xl border border-emerald-900/10 shadow-xs hover:shadow-md transition-all group">
           <div className="flex items-center justify-between gap-2">
             <div>
-              <p className="text-[10px] sm:text-xs font-extrabold text-slate-500 tracking-wider uppercase">মোট আয় ({getMonthLabel(reportMonth)})</p>
+              <p className="text-[10px] sm:text-xs font-extrabold text-slate-500 tracking-wider uppercase">
+                মোট আয় ({getMonthLabel(reportMonth)})
+              </p>
               <h3 className="text-2xl sm:text-3xl font-black text-emerald-900 mt-1.5 sm:mt-2">
-                ৳ {formatBanglaNumber(summaryData.totalIncome.toLocaleString('bn-BD'))}
+                ৳ {formatBanglaNumber((summaryData.totalIncome || 0).toLocaleString('bn-BD'))}
               </h3>
             </div>
             <div className="p-3 sm:p-4 bg-emerald-50 rounded-2xl group-hover:bg-emerald-100 transition-colors shrink-0">
-              <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-705" />
+              <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-700" />
             </div>
           </div>
-          <div className="mt-3 sm:mt-4 text-[11px] sm:text-xs font-bold text-emerald-800 flex items-center gap-1">
-            <span>🎯</span> মোট আয়ের খাত: {formatBanglaNumber(summaryData.incomeBreakdown?.length || 0)} টি
+          <div className="mt-3 sm:mt-4 text-[11px] sm:text-xs font-bold text-emerald-800 flex items-center justify-between flex-wrap gap-1">
+            <span>🎯 খাতের সংখ্যা: {formatBanglaNumber(summaryData.incomeBreakdown?.length || 0)} টি</span>
+            {reportMonth !== "all" && summaryData.overallIncome !== undefined && (
+              <span className="text-[10px] font-semibold text-slate-400">
+                সার্বিক: ৳ {formatBanglaNumber(summaryData.overallIncome.toLocaleString('bn-BD'))}
+              </span>
+            )}
           </div>
         </div>
 
@@ -61,17 +68,24 @@ export default function Overview({
         <div className="bg-white p-5 sm:p-6 rounded-2xl border border-emerald-900/10 shadow-xs hover:shadow-md transition-all group">
           <div className="flex items-center justify-between gap-2">
             <div>
-              <p className="text-[10px] sm:text-xs font-extrabold text-slate-500 tracking-wider uppercase">মোট ব্যয় ({getMonthLabel(reportMonth)})</p>
+              <p className="text-[10px] sm:text-xs font-extrabold text-slate-500 tracking-wider uppercase">
+                মোট ব্যয় ({getMonthLabel(reportMonth)})
+              </p>
               <h3 className="text-2xl sm:text-3xl font-black text-rose-900 mt-1.5 sm:mt-2">
-                ৳ {formatBanglaNumber(summaryData.totalExpense.toLocaleString('bn-BD'))}
+                ৳ {formatBanglaNumber((summaryData.totalExpense || 0).toLocaleString('bn-BD'))}
               </h3>
             </div>
             <div className="p-3 sm:p-4 bg-rose-50 rounded-2xl group-hover:bg-rose-100 transition-colors shrink-0">
               <TrendingDown className="w-5 h-5 sm:w-6 sm:h-6 text-rose-700" />
             </div>
           </div>
-          <div className="mt-3 sm:mt-4 text-[11px] sm:text-xs font-bold text-rose-800 flex items-center gap-1">
-            <span>🎯</span> মোট ব্যয়ের খাত: {formatBanglaNumber(summaryData.expenseBreakdown?.length || 0)} টি
+          <div className="mt-3 sm:mt-4 text-[11px] sm:text-xs font-bold text-rose-800 flex items-center justify-between flex-wrap gap-1">
+            <span>🎯 খাতের সংখ্যা: {formatBanglaNumber(summaryData.expenseBreakdown?.length || 0)} টি</span>
+            {reportMonth !== "all" && summaryData.overallExpense !== undefined && (
+              <span className="text-[10px] font-semibold text-slate-400">
+                সার্বিক: ৳ {formatBanglaNumber(summaryData.overallExpense.toLocaleString('bn-BD'))}
+              </span>
+            )}
           </div>
         </div>
 
@@ -79,24 +93,52 @@ export default function Overview({
         <div className="bg-white p-5 sm:p-6 rounded-2xl border border-emerald-900/10 shadow-xs hover:shadow-md transition-all group sm:col-span-2 lg:col-span-1">
           <div className="flex items-center justify-between gap-2">
             <div>
-              <p className="text-[10px] sm:text-xs font-extrabold text-slate-500 tracking-wider uppercase">উদ্বৃত্ত/চলতি ব্যালেন্স</p>
-              <h3 className={`text-2xl sm:text-3xl font-black mt-1.5 sm:mt-2 ${summaryData.netBalance >= 0 ? 'text-blue-900' : 'text-amber-900'}`}>
-                ৳ {formatBanglaNumber(summaryData.netBalance.toLocaleString('bn-BD'))}
+              <p className="text-[10px] sm:text-xs font-extrabold text-slate-500 tracking-wider uppercase">
+                {reportMonth === "all" ? "সার্বিক উদ্বৃত্ত / চলতি ব্যালেন্স" : `উদ্বৃত্ত (${getMonthLabel(reportMonth)})`}
+              </p>
+              <h3 className={`text-2xl sm:text-3xl font-black mt-1.5 sm:mt-2 ${(summaryData.netBalance || 0) >= 0 ? 'text-blue-900' : 'text-amber-900'}`}>
+                ৳ {formatBanglaNumber((summaryData.netBalance || 0).toLocaleString('bn-BD'))}
               </h3>
             </div>
-            <div className={`p-3 sm:p-4 rounded-2xl transition-colors shrink-0 ${summaryData.netBalance >= 0 ? 'bg-blue-50 group-hover:bg-blue-100' : 'bg-amber-50 group-hover:bg-amber-100'}`}>
-              <Scale className={`w-5 h-5 sm:w-6 sm:h-6 ${summaryData.netBalance >= 0 ? 'text-blue-700' : 'text-amber-700'}`} />
+            <div className={`p-3 sm:p-4 rounded-2xl transition-colors shrink-0 ${(summaryData.netBalance || 0) >= 0 ? 'bg-blue-50 group-hover:bg-blue-100' : 'bg-amber-50 group-hover:bg-amber-100'}`}>
+              <Scale className={`w-5 h-5 sm:w-6 sm:h-6 ${(summaryData.netBalance || 0) >= 0 ? 'text-blue-700' : 'text-amber-700'}`} />
             </div>
           </div>
-          <div className="mt-3 sm:mt-4 text-[11px] sm:text-xs font-bold flex items-center gap-1">
-            {summaryData.netBalance >= 0 ? (
+          <div className="mt-3 sm:mt-4 text-[11px] sm:text-xs font-bold flex items-center justify-between flex-wrap gap-1">
+            {(summaryData.netBalance || 0) >= 0 ? (
               <span className="text-blue-700">🟢 উদ্বৃত্ত তহবিল রয়েছে</span>
             ) : (
               <span className="text-amber-700">🔴 ঘাটতি রয়েছে</span>
             )}
+            {reportMonth !== "all" && summaryData.overallBalance !== undefined && (
+              <span className="text-[10px] font-semibold text-slate-500">
+                সার্বিক তহবিল: ৳ {formatBanglaNumber(summaryData.overallBalance.toLocaleString('bn-BD'))}
+              </span>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Zero data notification banner when selected month has no entries but DB has entries */}
+      {summaryData.totalIncome === 0 &&
+        summaryData.totalExpense === 0 &&
+        (summaryData.overallIncome > 0 || summaryData.overallExpense > 0) && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-amber-900">
+            <span>
+              💡 নির্বাচিত মাস (<strong>{getMonthLabel(reportMonth)}</strong>)-এ এখনো কোনো আয় বা ব্যয়ের তথ্য এন্ট্রি হয়নি।
+              ডাটাবেজে সংরক্ষিত মোট <strong>৳ {formatBanglaNumber((summaryData.overallIncome || 0).toLocaleString('bn-BD'))}</strong> আয় ও 
+              <strong> ৳ {formatBanglaNumber((summaryData.overallExpense || 0).toLocaleString('bn-BD'))}</strong> ব্যয় দেখতে সব মাস নির্বাচন করুন।
+            </span>
+            {setReportMonth && (
+              <button
+                onClick={() => setReportMonth("all")}
+                className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg shrink-0 transition-colors shadow-xs"
+              >
+                সব মাস (সর্বমোট) দেখুন
+              </button>
+            )}
+          </div>
+        )}
 
       {/* Transactions History and Search */}
       <div className="bg-white rounded-2xl border border-emerald-900/10 shadow-xs p-4 sm:p-6 space-y-4 sm:space-y-6">

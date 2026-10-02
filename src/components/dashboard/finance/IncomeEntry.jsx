@@ -1,7 +1,10 @@
-import React, { useEffect, useState, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { TrendingUp, Plus, Trash2, Loader2, RefreshCw } from 'lucide-react';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL || process.env.NEXT_PUBLIC_SERVER_API || 'http://localhost:8000';
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_SERVER_API ||
+  process.env.NEXT_PUBLIC_SERVER_URL ||
+  "http://localhost:5000";
 
 export default function IncomeEntry({
   incomeForm,
@@ -41,13 +44,13 @@ export default function IncomeEntry({
   }, [dbCategories, INCOME_HEADS]);
 
   // Dedicated Auto Receipt ID Generator
-  const fetchNextReceiptNo = async () => {
+  const fetchNextReceiptNo = useCallback(async () => {
     if (isEditing || !incomeForm.date) return;
     const dateParts = incomeForm.date.split('-');
     if (dateParts.length < 2) return;
     const yy = dateParts[0].slice(-2);
     const mm = dateParts[1];
-    const prefix = `INC-${yy}${mm}`;
+    const prefix = `INC-${mm}${yy}`;
 
     try {
       setIsReceiptLoading(true);
@@ -67,7 +70,7 @@ export default function IncomeEntry({
     } finally {
       setIsReceiptLoading(false);
     }
-  };
+  }, [incomeForm.date, isEditing, setIncomeForm]);
 
   // Auto Receipt ID Generation on date change or initial/reset load
   useEffect(() => {
@@ -78,7 +81,7 @@ export default function IncomeEntry({
     if (!incomeForm.receiptNo || dateChanged) {
       fetchNextReceiptNo();
     }
-  }, [incomeForm.date, incomeForm.receiptNo, isEditing]);
+  }, [incomeForm.date, incomeForm.receiptNo, isEditing, fetchNextReceiptNo]);
 
   // Debounced Student Auto-fill
   useEffect(() => {

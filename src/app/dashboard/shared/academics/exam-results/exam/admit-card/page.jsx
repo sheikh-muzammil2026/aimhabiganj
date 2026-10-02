@@ -619,11 +619,29 @@ export default function AdmitCardGenerator() {
                           />
                         </td>
                         <td className="p-3">
-                          <img
-                            src={student?.studentImage}
-                            alt={student.studentNameEnglish || "Student"}
-                            className="w-8 h-8 rounded-full object-cover border dark:border-slate-700"
-                          />
+                          {student?.studentImage &&
+                          typeof student.studentImage === "string" &&
+                          student.studentImage.trim() !== "" ? (
+                            <div className="w-8 h-8 rounded-full overflow-hidden relative border dark:border-slate-700">
+                              <Image
+                                src={student.studentImage}
+                                alt={student.studentNameEnglish || "Student"}
+                                fill
+                                className="object-cover"
+                                sizes="32px"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-xs font-bold text-slate-500">
+                              {(
+                                student?.studentNameBangla ||
+                                student?.studentNameEnglish ||
+                                "S"
+                              )
+                                .trim()
+                                .charAt(0) || "S"}
+                            </div>
+                          )}
                         </td>
                         <td className="p-3 font-medium text-gray-700 dark:text-gray-300">
                           {student.studentId || student.roll || "N/A"}
@@ -794,9 +812,11 @@ export default function AdmitCardGenerator() {
 
                       {/* ৩. ডানে স্টুডেন্ট ফটো */}
                       <div className="w-16 h-20 border border-[#C5A059] rounded-lg bg-white p-0.5 shadow-sm relative overflow-hidden flex-shrink-0 flex items-center justify-center mt-1">
-                        {card.studentImage ? (
+                        {card?.studentImage &&
+                        typeof card.studentImage === "string" &&
+                        card.studentImage.trim() !== "" ? (
                           <Image
-                            src={card?.studentImage}
+                            src={card.studentImage}
                             alt={card.studentNameEnglish || "Student Photo"}
                             fill
                             className="object-cover rounded"

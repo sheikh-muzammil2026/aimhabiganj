@@ -3,7 +3,10 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Plus, Trash2, Loader2, Coins, Edit } from 'lucide-react';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL || process.env.NEXT_PUBLIC_SERVER_API || 'http://localhost:8000';
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_SERVER_API ||
+  process.env.NEXT_PUBLIC_SERVER_URL ||
+  "http://localhost:5000";
 
 const INCOME_HEADS = [
   "জেনারেল ব্যাংক হিসাব-১৫",

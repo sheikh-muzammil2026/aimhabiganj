@@ -1,7 +1,10 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Plus, Trash2, Loader2, RefreshCw } from 'lucide-react';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL || process.env.NEXT_PUBLIC_SERVER_API || 'http://localhost:8000';
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_SERVER_API ||
+  process.env.NEXT_PUBLIC_SERVER_URL ||
+  "http://localhost:5000";
 
 export default function ExpenseEntry({
   expenseForm,
@@ -17,13 +20,13 @@ export default function ExpenseEntry({
   const prevDateRef = useRef(expenseForm.date);
 
   // Dedicated Auto Voucher ID Generator
-  const fetchNextVoucherNo = async () => {
+  const fetchNextVoucherNo = useCallback(async () => {
     if (isEditing || !expenseForm.date) return;
     const dateParts = expenseForm.date.split('-');
     if (dateParts.length < 2) return;
     const yy = dateParts[0].slice(-2);
     const mm = dateParts[1];
-    const prefix = `EXP-${yy}${mm}`;
+    const prefix = `EXP-${mm}${yy}`;
 
     try {
       setIsVoucherLoading(true);
@@ -43,7 +46,7 @@ export default function ExpenseEntry({
     } finally {
       setIsVoucherLoading(false);
     }
-  };
+  }, [expenseForm.date, isEditing, setExpenseForm]);
 
   // Auto Voucher ID Generation on date change or initial/reset load
   useEffect(() => {
@@ -54,7 +57,7 @@ export default function ExpenseEntry({
     if (!expenseForm.voucherNo || dateChanged) {
       fetchNextVoucherNo();
     }
-  }, [expenseForm.date, expenseForm.voucherNo, isEditing]);
+  }, [expenseForm.date, expenseForm.voucherNo, isEditing, fetchNextVoucherNo]);
 
   // Handlers for Items list
   const handleAddRow = () => {

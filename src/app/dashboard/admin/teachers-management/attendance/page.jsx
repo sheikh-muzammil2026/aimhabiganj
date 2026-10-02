@@ -14,15 +14,15 @@ import {
   MapPin,
   ExternalLink,
   Shield,
-  Download,
   Filter,
   CheckCircle2,
   XCircle,
   Clock3,
+  CreditCard,
 } from "lucide-react";
 import { getDhakaTime } from "@/lib/attendance-config";
 
-export default function AdminTeachersManagementPage() {
+export default function AdminTeachersAttendancePage() {
   const [selectedDate, setSelectedDate] = useState(() => {
     return getDhakaTime().dateStr;
   });
@@ -73,7 +73,10 @@ export default function AdminTeachersManagementPage() {
   }, [selectedDate, searchQuery, statusFilter]);
 
   useEffect(() => {
-    fetchData();
+    const timer = setTimeout(() => {
+      fetchData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchData]);
 
   // Format Bangladesh time for display (e.g., "08:04 AM")
@@ -105,6 +108,21 @@ export default function AdminTeachersManagementPage() {
 
   return (
     <div className="space-y-6 pb-12">
+      {/* Navigation Tabs between ID Card and Attendance */}
+      <div className="flex items-center gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-2xl w-fit border border-slate-200/80 dark:border-slate-700/60">
+        <Link
+          href="/dashboard/admin/teachers-management"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-white dark:hover:bg-slate-700 transition-all"
+        >
+          <CreditCard className="w-4 h-4" />
+          <span>শিক্ষক আইডি কার্ড তৈরি (ID Card)</span>
+        </Link>
+        <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-300 shadow-xs border border-slate-200/60 dark:border-slate-600">
+          <UserCheck className="w-4 h-4 text-emerald-600" />
+          <span>শিক্ষক হাজিরা (Attendance)</span>
+        </span>
+      </div>
+
       {/* 1. Page Header & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-800/80 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-700/60 shadow-xs">
         <div>
