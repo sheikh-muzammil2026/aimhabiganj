@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'react-toastify';
 import Link from 'next/link';
 
-export default function AdminAdmissionDashboard() {
+function AdminAdmissionDashboardContent() {
     const searchParams = useSearchParams();
     const sectionParam = searchParams.get('section');
 
@@ -394,5 +394,13 @@ export default function AdminAdmissionDashboard() {
                 </form>
             )}
         </div>
+    );
+}
+
+export default function AdminAdmissionDashboard() {
+    return (
+        <Suspense fallback={<div className="p-8 text-center text-slate-500 font-medium">লোড হচ্ছে...</div>}>
+            <AdminAdmissionDashboardContent />
+        </Suspense>
     );
 }
