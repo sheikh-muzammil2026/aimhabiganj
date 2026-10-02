@@ -11,7 +11,9 @@ import { Globe, Mail, Phone } from "lucide-react";
 import { BsWhatsapp, BsYoutube } from "react-icons/bs";
 import { FaFacebook } from "react-icons/fa";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_API;
+const API_BASE_URL = (
+  process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000"
+).replace(/\/$/, "");
 
 const toBengaliDigits = (num) => {
   if (num === null || num === undefined) return "";
@@ -51,11 +53,15 @@ function ClassWiseResultContent() {
   const [syllabusMap, setSyllabusMap] = useState({});
 
   useEffect(() => {
+    let isMounted = true;
     const fetchSyllabus = async () => {
       try {
         const res = await fetch(`${API_BASE_URL}/api/syllabus`);
+        if (!res.ok) {
+          throw new Error(`Failed to fetch syllabus: ${res.status} ${res.statusText}`);
+        }
         const data = await res.json();
-        if (data.success && data.classSubjects) {
+        if (isMounted && data?.success && data?.classSubjects) {
           setSyllabusMap(data.classSubjects);
           if (data.categories) setSyllabusCategories(data.categories);
         }
@@ -64,6 +70,9 @@ function ClassWiseResultContent() {
       }
     };
     fetchSyllabus();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const [results, setResults] = useState([]);
@@ -114,7 +123,6 @@ function ClassWiseResultContent() {
           },
         },
       );
-      const data = await res.json();
 
       if (res.status === 403) {
         setResults([]);
@@ -124,7 +132,13 @@ function ClassWiseResultContent() {
         return;
       }
 
-      if (data.success && Array.isArray(data.data)) {
+      if (!res.ok) {
+        throw new Error(`Failed to fetch results: ${res.status} ${res.statusText}`);
+      }
+
+      const data = await res.json();
+
+      if (data && data.success && Array.isArray(data.data)) {
         const sorted = [...data.data].sort(
           (a, b) =>
             (parseInt(a.roll, 10) || Infinity) -
@@ -140,12 +154,16 @@ function ClassWiseResultContent() {
         );
       } else {
         setResults([]);
-        setIsPublished(Boolean(data.isPublished));
+        setIsPublished(Boolean(data?.isPublished));
         setTotalPages(1);
         setTotalResults(0);
       }
     } catch (error) {
       console.error("Fetch Class Results Error:", error);
+      setResults([]);
+      setIsPublished(false);
+      setTotalPages(1);
+      setTotalResults(0);
       toast.error("ফলাফলের তথ্য লোড করতে সমস্যা হয়েছে!");
     } finally {
       setLoading(false);
@@ -189,9 +207,12 @@ function ClassWiseResultContent() {
             },
           },
         );
+        if (!resAll.ok) {
+          throw new Error(`Failed to fetch records: ${resAll.status}`);
+        }
         const dataAll = await resAll.json();
         const fullResults =
-          dataAll.success && Array.isArray(dataAll.data) ? dataAll.data : results;
+          dataAll?.success && Array.isArray(dataAll?.data) ? dataAll.data : results;
 
         const allCalcs = new Map();
         fullResults.forEach((s) => {
@@ -282,6 +303,10 @@ function ClassWiseResultContent() {
           rollUpdates: nextStatus && rollUpdates.length > 0 ? rollUpdates : undefined,
         }),
       });
+
+      if (!res.ok) {
+        throw new Error(`Failed to update publish status: ${res.status}`);
+      }
 
       const data = await res.json();
       if (data.success) {

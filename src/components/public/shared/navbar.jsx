@@ -142,12 +142,12 @@ export default function Navbar() {
 
   return (
     <>
-      {/* ডেস্কটপ নেভবার (মোবাইলে হাইড করার জন্য hidden lg:block যোগ করা হয়েছে) */}
+      {/* ডেস্কটপ নেভবার */}
       <nav
         className={`hidden lg:block left-0 w-full print:hidden text-white z-50 transition-all duration-300 ${
           isScrolled
             ? "fixed top-0 bg-emerald-900/95 shadow-md border-b border-emerald-800 dark:bg-slate-900/95 dark:border-slate-800 backdrop-blur-sm bg-opacity-100 pointer-events-auto"
-            : "absolute top-57 bg-transparent lg:bg-transparent"
+            : "absolute top-55 bg-transparent lg:bg-transparent"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

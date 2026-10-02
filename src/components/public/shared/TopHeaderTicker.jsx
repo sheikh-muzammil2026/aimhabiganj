@@ -4,8 +4,9 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Megaphone, ExternalLink, X, ChevronRight } from "lucide-react";
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
+const API_BASE = (
+  process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000"
+).replace(/\/$/, "");
 
 export default function TopHeaderTicker() {
   const [tickerNotices, setTickerNotices] = useState([]);
@@ -17,10 +18,13 @@ export default function TopHeaderTicker() {
       const res = await fetch(`${API_BASE}/api/notices/ticker`, {
         cache: "no-store",
       });
+      if (!res.ok) {
+        throw new Error(`Failed to fetch ticker: ${res.status}`);
+      }
       const data = await res.json();
-      if (data.success && data.tickerNotices && data.tickerNotices.length > 0) {
+      if (data?.success && data.tickerNotices && data.tickerNotices.length > 0) {
         setTickerNotices(data.tickerNotices);
-      } else if (data.latestNotice) {
+      } else if (data?.latestNotice) {
         setTickerNotices([data.latestNotice]);
       } else {
         setTickerNotices([]);

@@ -124,7 +124,9 @@ const CLASS_SUBJECTS = {
   শুনানি: ["কুরআন", "তাজভীদ ও দোয়া"],
 };
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_API;
+const API_BASE_URL = (
+  process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000"
+).replace(/\/$/, "");
 
 function TeacherMarkInputContent() {
   const router = useRouter();

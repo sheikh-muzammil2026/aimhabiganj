@@ -4,7 +4,8 @@
 /* --- কাস্টম ফন্ট ডিক্লেয়ারেশন --- */
 @font-face {
   font-family: "ShaldaMJ";
-  src: url("/shaldaMJ.ttf") format("truetype");
+  src: url("/ShaldaMJ.ttf") format("truetype"),
+       url("/shaldaMJ.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;

@@ -12,6 +12,14 @@ const nextConfig = {
   },
 
   output: "standalone",
+  async rewrites() {
+    return [
+      {
+        source: "/shaldaMJ.ttf",
+        destination: "/ShaldaMJ.ttf",
+      },
+    ];
+  },
 };
 
 export default nextConfig;
