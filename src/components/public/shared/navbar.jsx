@@ -127,16 +127,6 @@ export default function Navbar() {
         { name: t("menu.hostel_routine"), href: "/hostel#routine" },
       ],
     },
-    {
-      name: t("menu.smart_classroom"),
-      dropdown: [
-        { name: t("menu.live_class"), href: "/smart-classroom/live" },
-        { name: t("menu.recorded_class"), href: "/smart-classroom/recorded" },
-        { name: t("menu.ebooks"), href: "/smart-classroom/ebooks" },
-        { name: t("menu.exam"), href: "/smart-classroom/exam" },
-        { name: t("menu.quiz"), href: "/smart-classroom/quiz" },
-      ],
-    },
     { name: t("menu.notices"), href: "/notices" },
     { name: t("menu.gallery"), href: "/gallery" },
     { name: t("menu.results"), href: "/results" },

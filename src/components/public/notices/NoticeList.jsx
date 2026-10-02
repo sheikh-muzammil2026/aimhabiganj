@@ -60,15 +60,29 @@ export default function NoticeList({ data }) {
               </div>
               <div>
                 <h4 className="text-sm sm:text-base font-bold text-gray-800 dark:text-gray-200 leading-snug">{notice.title}</h4>
+                {notice.description && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{notice.description}</p>
+                )}
                 <div className="flex items-center gap-3 mt-1.5 text-[11px] font-medium text-gray-400">
                   <span>📅 প্রকাশিত: {notice.date}</span>
-                  <span>💾 সাইজ: {notice.size}</span>
+                  <span>💾 {notice.size}</span>
                 </div>
               </div>
             </div>
-            <button className="bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all flex items-center justify-center gap-1.5 self-end sm:self-center">
-              📥 ডাউনলোড
-            </button>
+            {notice.attachmentUrl ? (
+              <a
+                href={notice.attachmentUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all flex items-center justify-center gap-1.5 self-end sm:self-center whitespace-nowrap"
+              >
+                📥 ডাউনলোড / দেখুন
+              </a>
+            ) : (
+              <span className="text-xs text-gray-400 self-end sm:self-center italic px-3 py-1">
+                বিজ্ঞপ্তি
+              </span>
+            )}
           </div>
         ))}
         {filteredList?.length === 0 && (

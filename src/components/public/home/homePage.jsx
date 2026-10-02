@@ -35,20 +35,7 @@ export default function HomePage() {
 
     return (
         <div className="bg-slate-50 min-h-screen text-gray-800 font-sans">
-
-            {/* ১. নোটিশবোর্ড স্ক্রোলার (Notice Ticker) */}
-            <div className="bg-amber-500 text-slate-900 font-medium py-2 px-4 shadow-sm flex items-center overflow-hidden border-b border-amber-600">
-                <div className="bg-red-600 text-white px-3 py-1 text-xs font-bold rounded uppercase tracking-wider z-10 whitespace-nowrap mr-3 animate-pulse">
-                    জরুরী নোটিশ:
-                </div>
-                <div className="relative w-full overflow-hidden flex items-center">
-                    <p className="animate-marquee whitespace-nowrap text-sm md:text-base font-semibold">
-                        📢 আস-সালাম আইডিয়াল মাদরাসা (এইম)-এ ২০২৬ শিক্ষাবর্ষে হিফজ ও একাডেমিক বিভাগে ভর্তি চলছে! আসন সংখ্যা সীমিত। বিস্তারিত জানতে ভর্তি মেনু ভিজিট করুন। 🌟 আগামী ১৫ই জুলাই থেকে প্রথম সাময়িক পরীক্ষা শুরু হতে যাচ্ছে। সকল ছাত্রদের যথাসময়ে উপস্থিত থাকার নির্দেশ দেওয়া হলো।
-                    </p>
-                </div>
-            </div>
-
-            {/* ২. ব্যানার ক্যারোসল (Hero Banner Carousel) */}
+            {/* ব্যানার ক্যারোসল (Hero Banner Carousel) */}
             <div className="relative h-[400px] md:h-[550px] w-full overflow-hidden bg-slate-900">
                 {carouselImages.map((slide, index) => (
                     <div

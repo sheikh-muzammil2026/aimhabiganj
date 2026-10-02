@@ -56,19 +56,8 @@ export default function HeroSection() {
 
   return (
     <div className="relative w-full select-none">
-      <div className="bg-amber-500 dark:bg-amber-400 text-slate-900 font-medium py-2 px-4 shadow-sm flex items-center overflow-hidden border-b border-amber-600 dark:border-amber-500 transition-colors duration-300 relative z-30">
-        <div className="bg-red-600 text-white px-3 py-1 text-xs font-bold rounded uppercase tracking-wider z-10 whitespace-nowrap mr-3 animate-pulse">
-          {t("hero.notice_label")}
-        </div>
-        <div className="relative w-full overflow-hidden flex items-center">
-          <p className="animate-marquee whitespace-nowrap text-sm md:text-base font-semibold">
-            {t("hero.notice_text")}
-          </p>
-        </div>
-      </div>
-
-      {/* ২. ব্যানার ক্যারোসল (Hero Banner Carousel) */}
-      <div className="relative  h-[450px] md:h-[700px]  w-full overflow-hidden bg-slate-900">
+      {/* ব্যানার ক্যারোসল (Hero Banner Carousel) */}
+      <div className="relative h-[450px] md:h-[700px] w-full overflow-hidden bg-slate-900">
         {/* মোবাইল কন্ট্রোল বাটনসমূহ: নোটিসের নিচে এবং ইমেজের টপ রাইট অংশে প্লেস করা হয়েছে */}
         <div className="absolute top-4 right-4 z-40 flex lg:hidden items-center gap-2 bg-slate-950/30 backdrop-blur-md p-1.5 rounded-full border border-white/10">
           {/* ৫. ভাষা পরিবর্তনকারী (Language Switcher) */}

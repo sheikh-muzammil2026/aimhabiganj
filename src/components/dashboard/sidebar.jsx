@@ -18,6 +18,8 @@ import {
   Shield,
   Settings,
 } from "lucide-react";
+import { MdOutlineNotListedLocation } from "react-icons/md";
+import { IoNotificationsCircle } from "react-icons/io5";
 
 export default function Sidebar({ isOpen, setIsOpen }) {
   const pathname = usePathname();
@@ -94,7 +96,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     try {
       channel = new BroadcastChannel("aim-auth-sync");
       channel.onmessage = (event) => {
-        if (event.data?.type === "PERMISSIONS_UPDATED" || event.data?.type === "ROLE_UPDATED") {
+        if (
+          event.data?.type === "PERMISSIONS_UPDATED" ||
+          event.data?.type === "ROLE_UPDATED"
+        ) {
           syncUserData();
           if (typeof refetch === "function") refetch();
         }
@@ -121,7 +126,9 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
   const user = liveUser || session?.user;
   const userRole = (user?.role || "user").toLowerCase();
-  const userPermissions = Array.isArray(user?.permissions) ? user.permissions : [];
+  const userPermissions = Array.isArray(user?.permissions)
+    ? user.permissions
+    : [];
   const userName = user?.name || "অতিথি ব্যবহারকারী";
   const avatarLetter = user?.name ? user.name.charAt(0) : "ই";
 
@@ -266,30 +273,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         },
       ],
     },
-    {
-      id: "smart-classroom",
-      title: "স্মার্ট ক্লাসরুম",
-      icon: "💻",
-      lucideIcon: <Sparkles className="w-5 h-5" />,
-      roles: ["admin", "teacher"],
-      permissions: ["manage_academics", "manage_classroom"],
-      dropdown: [
-        { title: "লাইভ ক্লাস লিংক", href: "/dashboard/smart-classroom/live" },
-        {
-          title: "রেকর্ডেড ক্লাস আপলোড",
-          href: "/dashboard/smart-classroom/recorded",
-        },
-        {
-          title: "ই-বুক / লেকচার শিট",
-          href: "/dashboard/smart-classroom/ebooks",
-        },
-        {
-          title: "অনলাইন এক্সাম কন্ট্রোল",
-          href: "/dashboard/smart-classroom/exam",
-        },
-        { title: "একাডেমিক ক্যালেন্ডার", href: "/dashboard/calendar" },
-      ],
-    },
+
     {
       id: "attendance",
       title: "ডিজিটাল হাজিরা",
@@ -298,6 +282,13 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       href: "/dashboard/attendance",
       roles: ["admin", "teacher"],
       permissions: ["manage_academics", "manage_attendance"],
+    },
+    {
+      id: "notice-board",
+      title: "নোটিশ বোর্ড",
+      icon: <IoNotificationsCircle />,
+      href: "/dashboard/admin/notice",
+      roles: ["admin"],
     },
     {
       id: "students-management",
@@ -345,7 +336,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       permissions: ["manage_users", "manage_teachers"],
     },
 
-
     {
       id: "administration",
       title: "প্রশাসনিক বিভাগ",
@@ -381,6 +371,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       roles: ["admin", "parent"],
       permissions: ["manage_parents"],
       dropdown: [
+        { title: "অভিভাবক ড্যাশবোর্ড", href: "/dashboard/parent" },
         { title: "সন্তানের প্রোফাইল", href: "/dashboard/parent/child-profile" },
         { title: "একাডেমিক রেজাল্ট", href: "/dashboard/parent/results" },
         { title: "হাজিরা রিপোর্ট", href: "/dashboard/parent/attendance" },
@@ -407,7 +398,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     if (item.roles && item.roles.includes(userRole)) return true;
 
     // Direct permission match
-    if (item.permissions && item.permissions.some((p) => userPermissions.includes(p))) {
+    if (
+      item.permissions &&
+      item.permissions.some((p) => userPermissions.includes(p))
+    ) {
       return true;
     }
 
@@ -417,21 +411,43 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     }
 
     // Special aliases
-    if (item.id === "finance" && userPermissions.includes("manage_finance")) return true;
-    if (item.id === "admission" && userPermissions.includes("manage_admissions")) return true;
-    if (item.id === "academics" && userPermissions.includes("manage_academics")) return true;
-    if (item.id === "attendance" && userPermissions.includes("manage_academics")) return true;
-    if (item.id === "students-management" && userPermissions.includes("manage_users")) return true;
-    if (item.id === "teachers-management" && userPermissions.includes("manage_users")) return true;
-    if (item.id === "administration" && (userPermissions.includes("manage_roles") || userPermissions.includes("manage_users"))) return true;
+    if (item.id === "finance" && userPermissions.includes("manage_finance"))
+      return true;
+    if (
+      item.id === "admission" &&
+      userPermissions.includes("manage_admissions")
+    )
+      return true;
+    if (item.id === "academics" && userPermissions.includes("manage_academics"))
+      return true;
+    if (
+      item.id === "attendance" &&
+      userPermissions.includes("manage_academics")
+    )
+      return true;
+    if (
+      item.id === "students-management" &&
+      userPermissions.includes("manage_users")
+    )
+      return true;
+    if (
+      item.id === "teachers-management" &&
+      userPermissions.includes("manage_users")
+    )
+      return true;
+    if (
+      item.id === "administration" &&
+      (userPermissions.includes("manage_roles") ||
+        userPermissions.includes("manage_users"))
+    )
+      return true;
 
     return false;
   };
 
   // ইউজার রোল ও ডাইনামিক পারমিশন অনুযায়ী ফিল্টার করা মেনুসমূহ
-  const allowedMenuItems = isPending && !liveUser
-    ? []
-    : menuConfig.filter(isItemAllowed);
+  const allowedMenuItems =
+    isPending && !liveUser ? [] : menuConfig.filter(isItemAllowed);
 
   // ডাইনামিকালি রোল অনুযায়ী প্রথম ৪টি পারমিটেড মেনু নিয়ে বটম নেভিগেশন আইটেম তৈরি
   const mobileBottomNavItems = allowedMenuItems.slice(0, 4);
@@ -457,16 +473,18 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           <button
             type="button"
             onClick={() => toggleNestedSubmenu(node.title, node)}
-            className={`w-full flex items-center justify-between py-2 px-3 text-[11px] sm:text-xs rounded-lg transition-all duration-200 font-semibold ${isOpen || isActive
+            className={`w-full flex items-center justify-between py-2 px-3 text-[11px] sm:text-xs rounded-lg transition-all duration-200 font-semibold ${
+              isOpen || isActive
                 ? "text-amber-350 bg-emerald-900/40 text-amber-300"
                 : "text-emerald-200/80 hover:text-white hover:bg-emerald-800/20"
-              }`}
+            }`}
             style={{ paddingLeft: `${12 + level * 8}px` }}
           >
             <span className="truncate">📂 {node.title}</span>
             <span
-              className={`text-[8px] transition-transform duration-200 ml-1 ${isOpen ? "rotate-180" : ""
-                }`}
+              className={`text-[8px] transition-transform duration-200 ml-1 ${
+                isOpen ? "rotate-180" : ""
+              }`}
             >
               ▼
             </span>
@@ -488,10 +506,11 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       <Link
         key={node.href || index}
         href={node.href || "#"}
-        className={`block py-1.5 px-3 text-[10px] sm:text-[11px] rounded-md transition-all duration-200 font-medium ${isChildActive
+        className={`block py-1.5 px-3 text-[10px] sm:text-[11px] rounded-md transition-all duration-200 font-medium ${
+          isChildActive
             ? "text-amber-400 font-bold bg-emerald-900/60 border-l-2 border-amber-400 pl-2"
             : "text-emerald-300/70 hover:text-white hover:bg-emerald-800/10 hover:pl-4"
-          }`}
+        }`}
         style={{ paddingLeft: `${12 + level * 6}px` }}
       >
         {level === 0 ? "✨" : "✦"} {node.title}
@@ -510,10 +529,11 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           <button
             type="button"
             onClick={() => toggleNestedSubmenu(node.title, node)}
-            className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs font-bold transition-all ${isOpen || isAnyChildActive
+            className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs font-bold transition-all ${
+              isOpen || isAnyChildActive
                 ? "bg-emerald-900 text-amber-300 border-amber-400"
                 : "bg-emerald-950/50 text-emerald-100 border-emerald-800/40"
-              }`}
+            }`}
             style={{ paddingLeft: `${12 + level * 8}px` }}
           >
             <div className="flex items-center gap-3 truncate">
@@ -521,8 +541,9 @@ export default function Sidebar({ isOpen, setIsOpen }) {
               <span className="truncate">📂 {node.title}</span>
             </div>
             <span
-              className={`text-[8px] transition-transform duration-200 ml-1 ${isOpen ? "rotate-180" : ""
-                }`}
+              className={`text-[8px] transition-transform duration-200 ml-1 ${
+                isOpen ? "rotate-180" : ""
+              }`}
             >
               ▼
             </span>
@@ -545,10 +566,11 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         key={node.href || index}
         href={node.href || "#"}
         onClick={() => setActiveMobileDrawer(null)}
-        className={`flex items-center gap-3 p-2.5 rounded-lg border text-[11px] font-semibold transition-all ${isChildActive
+        className={`flex items-center gap-3 p-2.5 rounded-lg border text-[11px] font-semibold transition-all ${
+          isChildActive
             ? "bg-amber-400 text-[#043e30] border-amber-400 font-bold"
             : "bg-emerald-950/30 text-emerald-200 border-emerald-800/30 hover:bg-emerald-900/40"
-          }`}
+        }`}
         style={{ paddingLeft: `${12 + level * 8}px` }}
       >
         <span>✦ {node.title}</span>
@@ -571,15 +593,17 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           <button
             type="button"
             onClick={() => toggleNestedSubmenu(node.title, node)}
-            className={`w-full flex items-center justify-between p-2 text-xs font-bold transition-colors ${isOpen || isAnyChildActive ? "text-amber-300" : "text-emerald-200"
-              }`}
+            className={`w-full flex items-center justify-between p-2 text-xs font-bold transition-colors ${
+              isOpen || isAnyChildActive ? "text-amber-300" : "text-emerald-200"
+            }`}
           >
             <div className="flex items-center gap-2 truncate">
               <span className="truncate">📂 {node.title}</span>
             </div>
             <span
-              className={`text-[8px] transition-transform duration-200 ml-1 ${isOpen ? "rotate-180" : ""
-                }`}
+              className={`text-[8px] transition-transform duration-200 ml-1 ${
+                isOpen ? "rotate-180" : ""
+              }`}
             >
               ▼
             </span>
@@ -602,10 +626,11 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         key={node.href || index}
         href={node.href || "#"}
         onClick={() => setActiveMobileDrawer(null)}
-        className={`flex items-center gap-2 p-2 text-[11px] font-medium transition-colors ${isChildActive
+        className={`flex items-center gap-2 p-2 text-[11px] font-medium transition-colors ${
+          isChildActive
             ? "text-amber-400 font-bold bg-emerald-900/30"
             : "text-emerald-300/80 hover:text-white"
-          }`}
+        }`}
         style={{ paddingLeft: `${16 + level * 8}px` }}
       >
         <Sparkles className="w-2.5 h-2.5 text-amber-400 flex-shrink-0" />
@@ -694,10 +719,11 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                       onClick={() =>
                         setOpenDropdown(isDropdownOpen ? null : item.id)
                       }
-                      className={`w-full flex items-center justify-between px-3 py-2.5 text-xs sm:text-sm rounded-xl transition-all duration-300 group/btn ${isDropdownOpen
+                      className={`w-full flex items-center justify-between px-3 py-2.5 text-xs sm:text-sm rounded-xl transition-all duration-300 group/btn ${
+                        isDropdownOpen
                           ? "bg-emerald-900/80 text-amber-300 shadow-inner border-l-4 border-amber-400 pl-2"
                           : "text-emerald-100/90 hover:bg-emerald-800/40 hover:text-white hover:translate-x-1"
-                        }`}
+                      }`}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-base group-hover/btn:scale-110 transition-transform">
@@ -716,10 +742,11 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                   ) : (
                     <Link
                       href={item.href || "#"}
-                      className={`flex items-center gap-3 px-3 py-2.5 text-xs sm:text-sm rounded-xl transition-all duration-300 group/link ${isActive
+                      className={`flex items-center gap-3 px-3 py-2.5 text-xs sm:text-sm rounded-xl transition-all duration-300 group/link ${
+                        isActive
                           ? "bg-amber-400 text-[#043e30] font-black shadow-md border-r-4 border-emerald-900 scale-[1.02]"
                           : "text-emerald-100/90 hover:bg-emerald-800/40 hover:text-white hover:translate-x-1"
-                        }`}
+                      }`}
                     >
                       <span className="text-base transform group-hover/link:scale-110 transition-transform">
                         {item.icon}
@@ -733,10 +760,11 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                   {/* ড্রপডাউন মেনু */}
                   {hasDropdown && (
                     <div
-                      className={`pl-4 space-y-1 border-l-2 border-emerald-800/50 ml-5 transition-all duration-300 ${isDropdownOpen
+                      className={`pl-4 space-y-1 border-l-2 border-emerald-800/50 ml-5 transition-all duration-300 ${
+                        isDropdownOpen
                           ? "max-h-[2000px] opacity-100 py-1"
                           : "max-h-0 opacity-0 overflow-hidden"
-                        }`}
+                      }`}
                     >
                       {item.dropdown.map((sub, subIdx) =>
                         renderDesktopSubmenu(sub, subIdx, 0),
@@ -795,18 +823,18 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             const isRouteActive = item.href
               ? pathname === item.href
               : item.dropdown?.some((sub) => {
-                if (sub.href) {
-                  return pathname.startsWith(sub.href.split("?")[0]);
-                }
-                if (sub.submenu) {
-                  return sub.submenu.some(
-                    (child) =>
-                      child.href &&
-                      pathname.startsWith(child.href.split("?")[0]),
-                  );
-                }
-                return false;
-              });
+                  if (sub.href) {
+                    return pathname.startsWith(sub.href.split("?")[0]);
+                  }
+                  if (sub.submenu) {
+                    return sub.submenu.some(
+                      (child) =>
+                        child.href &&
+                        pathname.startsWith(child.href.split("?")[0]),
+                    );
+                  }
+                  return false;
+                });
 
             const Content = (
               <>
@@ -829,10 +857,11 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 <button
                   key={item.id}
                   onClick={() => handleBottomNavItemClick(item)}
-                  className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative ${isDrawerActive || isRouteActive
+                  className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative ${
+                    isDrawerActive || isRouteActive
                       ? "text-amber-400 font-bold"
                       : "text-emerald-200/70 hover:text-white"
-                    }`}
+                  }`}
                 >
                   {Content}
                 </button>
@@ -844,10 +873,11 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 key={item.id}
                 href={item.href || "#"}
                 onClick={() => setActiveMobileDrawer(null)}
-                className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative ${isRouteActive
+                className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative ${
+                  isRouteActive
                     ? "text-amber-400 font-bold"
                     : "text-emerald-200/70 hover:text-white"
-                  }`}
+                }`}
               >
                 {Content}
               </Link>
@@ -861,10 +891,11 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 activeMobileDrawer === "full" ? null : "full",
               )
             }
-            className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative ${activeMobileDrawer === "full"
+            className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative ${
+              activeMobileDrawer === "full"
                 ? "text-amber-400 font-bold"
                 : "text-emerald-200/70 hover:text-white"
-              }`}
+            }`}
           >
             {activeMobileDrawer === "full" && (
               <span className="absolute top-0 w-8 h-1 bg-amber-400 rounded-full" />
@@ -968,10 +999,11 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                               onClick={() =>
                                 setOpenDropdown(isDropdownOpen ? null : item.id)
                               }
-                              className={`w-full flex justify-between items-center p-3 text-left font-medium transition-colors ${isDropdownOpen
+                              className={`w-full flex justify-between items-center p-3 text-left font-medium transition-colors ${
+                                isDropdownOpen
                                   ? "bg-emerald-900/60 text-amber-300"
                                   : "text-emerald-100"
-                                }`}
+                              }`}
                             >
                               <div className="flex items-center gap-3">
                                 <span className="text-base">{item.icon}</span>
@@ -996,10 +1028,11 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                           <Link
                             href={item.href || "#"}
                             onClick={() => setActiveMobileDrawer(null)}
-                            className={`flex items-center gap-3 p-3 text-xs font-semibold transition-colors ${isActive
+                            className={`flex items-center gap-3 p-3 text-xs font-semibold transition-colors ${
+                              isActive
                                 ? "text-amber-400 bg-emerald-900/60"
                                 : "text-emerald-100 hover:text-white"
-                              }`}
+                            }`}
                           >
                             <span className="text-base">{item.icon}</span>
                             {item.title}

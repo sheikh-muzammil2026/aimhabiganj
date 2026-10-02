@@ -3,12 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
+import TopHeaderTicker from "./TopHeaderTicker";
 
 export default function TopHeader() {
   const { t } = useLanguage();
 
   return (
-    <div className="w-full print:hidden bg-gradient-to-r from-emerald-900 via-emerald-850 to-emerald-900 text-white py-3 px-4 md:px-6 border-b border-amber-500/30 relative overflow-hidden transition-colors duration-300 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 dark:border-emerald-800">
+    <div className="w-full print:hidden">
+      <div className="w-full bg-gradient-to-r from-emerald-900 via-emerald-850 to-emerald-900 text-white py-3 px-4 md:px-6 border-b border-amber-500/30 relative overflow-hidden transition-colors duration-300 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 dark:border-emerald-800">
 
 
 
@@ -57,6 +59,8 @@ export default function TopHeader() {
         </div>
 
       </div>
+      </div>
+      <TopHeaderTicker />
     </div>
   );
 }
