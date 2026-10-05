@@ -280,7 +280,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       icon: "📅",
       lucideIcon: <CalendarCheck className="w-5 h-5" />,
       href: "/dashboard/attendance",
-      roles: ["admin", "teacher"],
+      roles: ["admin", "teacher","accountant"],
       permissions: ["manage_academics", "manage_attendance"],
     },
     {
