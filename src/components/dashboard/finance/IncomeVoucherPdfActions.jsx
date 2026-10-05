@@ -1,15 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Printer, Download, RefreshCw, ExternalLink } from "lucide-react";
-import dynamic from "next/dynamic";
+import { pdf, PDFDownloadLink } from "@react-pdf/renderer";
 import IncomeVoucherPdfDocument from "./IncomeVoucherPdfDocument";
-
-// Dynamically import PDFDownloadLink to prevent SSR hydration issues
-const PDFDownloadLink = dynamic(
-  () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
-  { ssr: false }
-);
 
 export default function IncomeVoucherPdfActions({ tx }) {
   const isClient = React.useSyncExternalStore(
@@ -23,7 +17,6 @@ export default function IncomeVoucherPdfActions({ tx }) {
     if (!tx) return;
     setIsGeneratingPdf(true);
     try {
-      const { pdf } = await import("@react-pdf/renderer");
       const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
       const doc = <IncomeVoucherPdfDocument tx={tx} baseUrl={baseUrl} />;
       const blob = await pdf(doc).toBlob();

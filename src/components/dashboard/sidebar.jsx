@@ -339,7 +339,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           href: "/dashboard/admin/teachers-management/teachers-id-card",
         },
         {
-          title: "শিক্ষক উপস্থিতি ও হাজিরা",
+          title: "শিক্ষক উপস্থিতি রিপোর্ট",
           href: "/dashboard/admin/teachers-management/attendance",
         },
       ],

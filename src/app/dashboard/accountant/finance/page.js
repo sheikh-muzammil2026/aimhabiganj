@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 
 import { MdEmail, MdInstallMobile } from "react-icons/md";
 import Overview from "@/components/dashboard/finance/Overview";
@@ -17,7 +18,23 @@ import IncomeEntry from "@/components/dashboard/finance/IncomeEntry";
 import ExpenseEntry from "@/components/dashboard/finance/ExpenseEntry";
 import MonthlyReport from "@/components/dashboard/finance/MonthlyReport";
 import IncomeVoucherHtmlLayout from "@/components/dashboard/finance/IncomeVoucherHtmlLayout";
-import IncomeVoucherPdfActions from "@/components/dashboard/finance/IncomeVoucherPdfActions";
+
+const IncomeVoucherPdfActions = dynamic(
+  () => import("@/components/dashboard/finance/IncomeVoucherPdfActions"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center gap-2">
+        <button
+          disabled
+          className="px-4 py-2 bg-emerald-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 opacity-60 cursor-not-allowed shadow-xs"
+        >
+          <Printer className="w-4 h-4 animate-spin" /> ভাউচার লোড হচ্ছে...
+        </button>
+      </div>
+    ),
+  }
+);
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_SERVER_API ||
