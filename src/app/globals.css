@@ -54,6 +54,28 @@ html {
   animation-play-state: paused;
 }
 
+/* --- Continuous Loop Marquee Animation --- */
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100% - 1.5rem));
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 40s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee:hover,
+.group-marquee:hover .animate-marquee {
+  animation-play-state: paused;
+}
+
 /* কাস্টম রিমি কুফিক ক্লাস */
 .kufi-custom {
   font-family: var(--font-reem-kufi), sans-serif;
