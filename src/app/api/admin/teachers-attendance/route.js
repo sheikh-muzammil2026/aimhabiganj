@@ -17,12 +17,38 @@ export async function GET(request) {
     const targetDate = dateParam || todayStr;
 
     const db = await getDb();
-    const teachersCollection = db.collection("teachers");
     const attendanceCollection = db.collection("teacherattendance");
 
-    // 1. Fetch total teachers from 'teachers' collection
-    const teachersList = await teachersCollection.find({}).toArray();
-    const totalTeachersCount = teachersList.length;
+    // 1. Fetch teachers from 'user' / 'users' collection who have role === 'teacher'
+    let teacherUsers = await db
+      .collection("user")
+      .find({ role: { $regex: /^teacher$/i } })
+      .toArray()
+      .catch(() => []);
+
+    if (!teacherUsers.length) {
+      teacherUsers = await db
+        .collection("users")
+        .find({ role: { $regex: /^teacher$/i } })
+        .toArray()
+        .catch(() => []);
+    }
+
+    // Optional profile enrichment from 'teachers' collection
+    const teachersProfileList = await db
+      .collection("teachers")
+      .find({})
+      .toArray()
+      .catch(() => []);
+
+    const teacherProfileByEmail = new Map();
+    teachersProfileList.forEach((t) => {
+      if (t.email) {
+        teacherProfileByEmail.set(t.email.toLowerCase(), t);
+      }
+    });
+
+    const totalTeachersCount = teacherUsers.length;
 
     // 2. Fetch all attendance logs for the target date
     const attendanceLogs = await attendanceCollection
@@ -30,7 +56,7 @@ export async function GET(request) {
       .toArray();
 
     // 3. Compute summary metrics as requested:
-    // - Total Teachers: Fetch count dynamically from teachersCollection
+    // - Total Teachers: Fetch count dynamically from users collection (role: 'teacher')
     // - Present Today: Count of unique teachers who checked in today
     // - Absent Today: (Total Teachers - Present Today)
     // - On Time Today: Count of teachers with checkInStatus === 'On Time'
@@ -60,34 +86,37 @@ export async function GET(request) {
     const unifiedList = [];
     const processedEmails = new Set();
 
-    // First, process all teachers from 'teachers' collection
-    for (const teacher of teachersList) {
+    // First, process all teachers from 'user' / 'users' collection
+    for (const teacher of teacherUsers) {
       const emailLower = (teacher.email || "").toLowerCase();
       processedEmails.add(emailLower);
 
+      const profile = teacherProfileByEmail.get(emailLower);
       const attendance = attendanceByEmail.get(emailLower);
 
       unifiedList.push({
         teacherId: teacher._id.toString(),
-        teacherName: teacher.fullName || teacher.name || "নাম পাওয়া যায়নি",
+        teacherName: teacher.name || profile?.fullName || profile?.name || "নাম পাওয়া যায়নি",
         teacherEmail: teacher.email || "",
-        designation: teacher.designation || "শিক্ষক",
-        phone: teacher.phone || "",
-        profileImage: teacher.profileImage || "",
+        designation: profile?.designation || teacher.designation || "শিক্ষক",
+        phone: profile?.phone || teacher.phone || "",
+        profileImage: teacher.image || profile?.profileImage || "",
         date: targetDate,
         hasCheckedIn: !!attendance?.checkInTime,
         checkInTime: attendance?.checkInTime || null,
         checkInStatus: attendance?.checkInStatus || "Absent",
         checkInLocation: attendance?.checkInLocation || null,
+        checkInComment: attendance?.checkInComment || null,
         hasCheckedOut: !!attendance?.checkOutTime,
         checkOutTime: attendance?.checkOutTime || null,
         checkOutStatus: attendance?.checkOutStatus || null,
         checkOutLocation: attendance?.checkOutLocation || null,
+        checkOutComment: attendance?.checkOutComment || null,
         attendanceId: attendance?._id?.toString() || null,
       });
     }
 
-    // Second, process any attendance records for teachers not yet in 'teachers' collection
+    // Second, process any attendance records for teachers not yet in 'users' collection
     for (const attendance of attendanceLogs) {
       const emailLower = (attendance.teacherEmail || "").toLowerCase();
       if (!processedEmails.has(emailLower)) {
@@ -103,10 +132,12 @@ export async function GET(request) {
           checkInTime: attendance.checkInTime || null,
           checkInStatus: attendance.checkInStatus || "On Time",
           checkInLocation: attendance.checkInLocation || null,
+          checkInComment: attendance.checkInComment || null,
           hasCheckedOut: !!attendance.checkOutTime,
           checkOutTime: attendance.checkOutTime || null,
           checkOutStatus: attendance.checkOutStatus || null,
           checkOutLocation: attendance.checkOutLocation || null,
+          checkOutComment: attendance.checkOutComment || null,
           attendanceId: attendance._id.toString(),
         });
       }

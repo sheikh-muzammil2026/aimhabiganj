@@ -38,13 +38,8 @@ export async function POST(request) {
     }
 
     // Geofence check using Haversine formula
-    let effectiveLat = Number(lat);
-    let effectiveLng = Number(lng);
-
-    if (mockInPremises) {
-      effectiveLat = MADRASA_LOCATION.LATITUDE;
-      effectiveLng = MADRASA_LOCATION.LONGITUDE;
-    }
+    const effectiveLat = Number(lat);
+    const effectiveLng = Number(lng);
 
     const geofenceResult = isWithinMadrasaGeofence(effectiveLat, effectiveLng);
 
@@ -94,6 +89,8 @@ export async function POST(request) {
       );
     }
 
+    const checkOutComment = (body.checkOutComment || body.comment || "").trim();
+
     const checkOutLocation = {
       lat: effectiveLat,
       lng: effectiveLng,
@@ -105,6 +102,7 @@ export async function POST(request) {
         $set: {
           checkOutTime: now.toISOString(),
           checkOutStatus: checkOutStatus, // 'On Time' | 'Early'
+          checkOutComment: checkOutComment || null,
           checkOutLocation: checkOutLocation,
           updatedAt: now,
         },
@@ -115,6 +113,7 @@ export async function POST(request) {
       ...existing,
       checkOutTime: now.toISOString(),
       checkOutStatus,
+      checkOutComment: checkOutComment || null,
       checkOutLocation,
       updatedAt: now,
     };

@@ -3,6 +3,8 @@ import {
   TrendingUp, 
   TrendingDown, 
   Scale, 
+  Wallet,
+  Coins,
   Search, 
   Printer, 
   Calendar, 
@@ -38,86 +40,179 @@ export default function Overview({
   return (
     <div className="space-y-6 print:hidden">
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        {/* Total Income */}
-        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-emerald-900/10 shadow-xs hover:shadow-md transition-all group">
-          <div className="flex items-center justify-between gap-2">
-            <div>
-              <p className="text-[10px] sm:text-xs font-extrabold text-slate-500 tracking-wider uppercase">
-                মোট আয় ({getMonthLabel(reportMonth)})
-              </p>
-              <h3 className="text-2xl sm:text-3xl font-black text-emerald-900 mt-1.5 sm:mt-2">
-                ৳ {formatBanglaNumber((summaryData.totalIncome || 0).toLocaleString('bn-BD'))}
-              </h3>
+      {reportMonth !== "all" ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          {/* 1. Opening Balance */}
+          <div className="bg-white p-5 rounded-2xl border border-indigo-900/10 shadow-xs hover:shadow-md transition-all group">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <p className="text-[10px] font-extrabold text-indigo-700 tracking-wider uppercase">
+                  প্রারম্ভিক ব্যালেন্স
+                </p>
+                <h3 className="text-xl sm:text-2xl font-black text-indigo-950 mt-1.5">
+                  ৳ {formatBanglaNumber((summaryData.openingBalance || 0).toLocaleString('bn-BD'))}
+                </h3>
+              </div>
+              <div className="p-3 bg-indigo-50 rounded-2xl group-hover:bg-indigo-100 transition-colors shrink-0">
+                <Wallet className="w-5 h-5 text-indigo-700" />
+              </div>
             </div>
-            <div className="p-3 sm:p-4 bg-emerald-50 rounded-2xl group-hover:bg-emerald-100 transition-colors shrink-0">
-              <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-700" />
+            <div className="mt-3 text-[10px] sm:text-[11px] font-bold text-indigo-600 flex items-center justify-between">
+              <span>📅 পূর্ববর্তী মাসের উদ্বৃত্ত</span>
             </div>
           </div>
-          <div className="mt-3 sm:mt-4 text-[11px] sm:text-xs font-bold text-emerald-800 flex items-center justify-between flex-wrap gap-1">
-            <span>🎯 খাতের সংখ্যা: {formatBanglaNumber(summaryData.incomeBreakdown?.length || 0)} টি</span>
-            {reportMonth !== "all" && summaryData.overallIncome !== undefined && (
-              <span className="text-[10px] font-semibold text-slate-400">
-                সার্বিক: ৳ {formatBanglaNumber(summaryData.overallIncome.toLocaleString('bn-BD'))}
-              </span>
-            )}
-          </div>
-        </div>
 
-        {/* Total Expense */}
-        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-emerald-900/10 shadow-xs hover:shadow-md transition-all group">
-          <div className="flex items-center justify-between gap-2">
-            <div>
-              <p className="text-[10px] sm:text-xs font-extrabold text-slate-500 tracking-wider uppercase">
-                মোট ব্যয় ({getMonthLabel(reportMonth)})
-              </p>
-              <h3 className="text-2xl sm:text-3xl font-black text-rose-900 mt-1.5 sm:mt-2">
-                ৳ {formatBanglaNumber((summaryData.totalExpense || 0).toLocaleString('bn-BD'))}
-              </h3>
+          {/* 2. Total Income */}
+          <div className="bg-white p-5 rounded-2xl border border-emerald-900/10 shadow-xs hover:shadow-md transition-all group">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <p className="text-[10px] font-extrabold text-slate-500 tracking-wider uppercase">
+                  চলতি আয় ({getMonthLabel(reportMonth)})
+                </p>
+                <h3 className="text-xl sm:text-2xl font-black text-emerald-900 mt-1.5">
+                  ৳ {formatBanglaNumber((summaryData.totalIncome || 0).toLocaleString('bn-BD'))}
+                </h3>
+              </div>
+              <div className="p-3 bg-emerald-50 rounded-2xl group-hover:bg-emerald-100 transition-colors shrink-0">
+                <TrendingUp className="w-5 h-5 text-emerald-700" />
+              </div>
             </div>
-            <div className="p-3 sm:p-4 bg-rose-50 rounded-2xl group-hover:bg-rose-100 transition-colors shrink-0">
-              <TrendingDown className="w-5 h-5 sm:w-6 sm:h-6 text-rose-700" />
+            <div className="mt-3 text-[10px] sm:text-[11px] font-bold text-emerald-800 flex items-center justify-between flex-wrap gap-1">
+              <span>🎯 খাত: {formatBanglaNumber(summaryData.incomeBreakdown?.length || 0)} টি</span>
             </div>
           </div>
-          <div className="mt-3 sm:mt-4 text-[11px] sm:text-xs font-bold text-rose-800 flex items-center justify-between flex-wrap gap-1">
-            <span>🎯 খাতের সংখ্যা: {formatBanglaNumber(summaryData.expenseBreakdown?.length || 0)} টি</span>
-            {reportMonth !== "all" && summaryData.overallExpense !== undefined && (
-              <span className="text-[10px] font-semibold text-slate-400">
-                সার্বিক: ৳ {formatBanglaNumber(summaryData.overallExpense.toLocaleString('bn-BD'))}
-              </span>
-            )}
-          </div>
-        </div>
 
-        {/* Net Balance */}
-        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-emerald-900/10 shadow-xs hover:shadow-md transition-all group sm:col-span-2 lg:col-span-1">
-          <div className="flex items-center justify-between gap-2">
-            <div>
-              <p className="text-[10px] sm:text-xs font-extrabold text-slate-500 tracking-wider uppercase">
-                {reportMonth === "all" ? "সার্বিক উদ্বৃত্ত / চলতি ব্যালেন্স" : `উদ্বৃত্ত (${getMonthLabel(reportMonth)})`}
-              </p>
-              <h3 className={`text-2xl sm:text-3xl font-black mt-1.5 sm:mt-2 ${(summaryData.netBalance || 0) >= 0 ? 'text-blue-900' : 'text-amber-900'}`}>
-                ৳ {formatBanglaNumber((summaryData.netBalance || 0).toLocaleString('bn-BD'))}
-              </h3>
+          {/* 3. Total Usable Fund (Opening Balance + Income) */}
+          <div className="bg-white p-5 rounded-2xl border border-teal-900/10 shadow-xs hover:shadow-md transition-all group">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <p className="text-[10px] font-extrabold text-teal-700 tracking-wider uppercase">
+                  মোট ব্যয়যোগ্য তহবিল
+                </p>
+                <h3 className="text-xl sm:text-2xl font-black text-teal-950 mt-1.5">
+                  ৳ {formatBanglaNumber(((summaryData.totalUsableFund ?? ((summaryData.openingBalance || 0) + (summaryData.totalIncome || 0))) || 0).toLocaleString('bn-BD'))}
+                </h3>
+              </div>
+              <div className="p-3 bg-teal-50 rounded-2xl group-hover:bg-teal-100 transition-colors shrink-0">
+                <Coins className="w-5 h-5 text-teal-700" />
+              </div>
             </div>
-            <div className={`p-3 sm:p-4 rounded-2xl transition-colors shrink-0 ${(summaryData.netBalance || 0) >= 0 ? 'bg-blue-50 group-hover:bg-blue-100' : 'bg-amber-50 group-hover:bg-amber-100'}`}>
-              <Scale className={`w-5 h-5 sm:w-6 sm:h-6 ${(summaryData.netBalance || 0) >= 0 ? 'text-blue-700' : 'text-amber-700'}`} />
+            <div className="mt-3 text-[10px] sm:text-[11px] font-bold text-teal-700 flex items-center justify-between">
+              <span>💡 প্রারম্ভিক + চলতি আয়</span>
             </div>
           </div>
-          <div className="mt-3 sm:mt-4 text-[11px] sm:text-xs font-bold flex items-center justify-between flex-wrap gap-1">
-            {(summaryData.netBalance || 0) >= 0 ? (
-              <span className="text-blue-700">🟢 উদ্বৃত্ত তহবিল রয়েছে</span>
-            ) : (
-              <span className="text-amber-700">🔴 ঘাটতি রয়েছে</span>
-            )}
-            {reportMonth !== "all" && summaryData.overallBalance !== undefined && (
-              <span className="text-[10px] font-semibold text-slate-500">
-                সার্বিক তহবিল: ৳ {formatBanglaNumber(summaryData.overallBalance.toLocaleString('bn-BD'))}
-              </span>
-            )}
+
+          {/* 4. Total Expense */}
+          <div className="bg-white p-5 rounded-2xl border border-rose-900/10 shadow-xs hover:shadow-md transition-all group">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <p className="text-[10px] font-extrabold text-slate-500 tracking-wider uppercase">
+                  চলতি ব্যয় ({getMonthLabel(reportMonth)})
+                </p>
+                <h3 className="text-xl sm:text-2xl font-black text-rose-900 mt-1.5">
+                  ৳ {formatBanglaNumber((summaryData.totalExpense || 0).toLocaleString('bn-BD'))}
+                </h3>
+              </div>
+              <div className="p-3 bg-rose-50 rounded-2xl group-hover:bg-rose-100 transition-colors shrink-0">
+                <TrendingDown className="w-5 h-5 text-rose-700" />
+              </div>
+            </div>
+            <div className="mt-3 text-[10px] sm:text-[11px] font-bold text-rose-800 flex items-center justify-between flex-wrap gap-1">
+              <span>🎯 খাত: {formatBanglaNumber(summaryData.expenseBreakdown?.length || 0)} টি</span>
+            </div>
+          </div>
+
+          {/* 5. Net/Closing Balance */}
+          <div className="bg-white p-5 rounded-2xl border border-emerald-900/10 shadow-xs hover:shadow-md transition-all group sm:col-span-2 lg:col-span-1 xl:col-span-1">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <p className="text-[10px] font-extrabold text-slate-500 tracking-wider uppercase">
+                  সমাপনী উদ্বৃত্ত ({getMonthLabel(reportMonth)})
+                </p>
+                <h3 className={`text-xl sm:text-2xl font-black mt-1.5 ${(summaryData.netBalance || 0) >= 0 ? 'text-blue-900' : 'text-amber-900'}`}>
+                  ৳ {formatBanglaNumber((summaryData.netBalance || 0).toLocaleString('bn-BD'))}
+                </h3>
+              </div>
+              <div className={`p-3 rounded-2xl transition-colors shrink-0 ${(summaryData.netBalance || 0) >= 0 ? 'bg-blue-50 group-hover:bg-blue-100' : 'bg-amber-50 group-hover:bg-amber-100'}`}>
+                <Scale className={`w-5 h-5 ${(summaryData.netBalance || 0) >= 0 ? 'text-blue-700' : 'text-amber-700'}`} />
+              </div>
+            </div>
+            <div className="mt-3 text-[10px] sm:text-[11px] font-bold flex items-center justify-between flex-wrap gap-1">
+              {(summaryData.netBalance || 0) >= 0 ? (
+                <span className="text-blue-700">🟢 তহবিলে উদ্বৃত্ত</span>
+              ) : (
+                <span className="text-amber-700">🔴 ঘাটতি</span>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {/* Total Income */}
+          <div className="bg-white p-5 sm:p-6 rounded-2xl border border-emerald-900/10 shadow-xs hover:shadow-md transition-all group">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <p className="text-[10px] sm:text-xs font-extrabold text-slate-500 tracking-wider uppercase">
+                  সর্বমোট আয় (সার্বিক)
+                </p>
+                <h3 className="text-2xl sm:text-3xl font-black text-emerald-900 mt-1.5 sm:mt-2">
+                  ৳ {formatBanglaNumber((summaryData.totalIncome || 0).toLocaleString('bn-BD'))}
+                </h3>
+              </div>
+              <div className="p-3 sm:p-4 bg-emerald-50 rounded-2xl group-hover:bg-emerald-100 transition-colors shrink-0">
+                <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-700" />
+              </div>
+            </div>
+            <div className="mt-3 sm:mt-4 text-[11px] sm:text-xs font-bold text-emerald-800 flex items-center justify-between flex-wrap gap-1">
+              <span>🎯 খাতের সংখ্যা: {formatBanglaNumber(summaryData.incomeBreakdown?.length || 0)} টি</span>
+            </div>
+          </div>
+
+          {/* Total Expense */}
+          <div className="bg-white p-5 sm:p-6 rounded-2xl border border-emerald-900/10 shadow-xs hover:shadow-md transition-all group">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <p className="text-[10px] sm:text-xs font-extrabold text-slate-500 tracking-wider uppercase">
+                  সর্বমোট ব্যয় (সার্বিক)
+                </p>
+                <h3 className="text-2xl sm:text-3xl font-black text-rose-900 mt-1.5 sm:mt-2">
+                  ৳ {formatBanglaNumber((summaryData.totalExpense || 0).toLocaleString('bn-BD'))}
+                </h3>
+              </div>
+              <div className="p-3 sm:p-4 bg-rose-50 rounded-2xl group-hover:bg-rose-100 transition-colors shrink-0">
+                <TrendingDown className="w-5 h-5 sm:w-6 sm:h-6 text-rose-700" />
+              </div>
+            </div>
+            <div className="mt-3 sm:mt-4 text-[11px] sm:text-xs font-bold text-rose-800 flex items-center justify-between flex-wrap gap-1">
+              <span>🎯 খাতের সংখ্যা: {formatBanglaNumber(summaryData.expenseBreakdown?.length || 0)} টি</span>
+            </div>
+          </div>
+
+          {/* Net Balance */}
+          <div className="bg-white p-5 sm:p-6 rounded-2xl border border-emerald-900/10 shadow-xs hover:shadow-md transition-all group sm:col-span-2 lg:col-span-1">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <p className="text-[10px] sm:text-xs font-extrabold text-slate-500 tracking-wider uppercase">
+                  সার্বিক উদ্বৃত্ত / চলতি ব্যালেন্স
+                </p>
+                <h3 className={`text-2xl sm:text-3xl font-black mt-1.5 sm:mt-2 ${(summaryData.netBalance || 0) >= 0 ? 'text-blue-900' : 'text-amber-900'}`}>
+                  ৳ {formatBanglaNumber((summaryData.netBalance || 0).toLocaleString('bn-BD'))}
+                </h3>
+              </div>
+              <div className={`p-3 sm:p-4 rounded-2xl transition-colors shrink-0 ${(summaryData.netBalance || 0) >= 0 ? 'bg-blue-50 group-hover:bg-blue-100' : 'bg-amber-50 group-hover:bg-amber-100'}`}>
+                <Scale className={`w-5 h-5 sm:w-6 sm:h-6 ${(summaryData.netBalance || 0) >= 0 ? 'text-blue-700' : 'text-amber-700'}`} />
+              </div>
+            </div>
+            <div className="mt-3 sm:mt-4 text-[11px] sm:text-xs font-bold flex items-center justify-between flex-wrap gap-1">
+              {(summaryData.netBalance || 0) >= 0 ? (
+                <span className="text-blue-700">🟢 সার্বিক উদ্বৃত্ত তহবিল রয়েছে</span>
+              ) : (
+                <span className="text-amber-700">🔴 সার্বিক ঘাটতি রয়েছে</span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Zero data notification banner when selected month has no entries but DB has entries */}
       {summaryData.totalIncome === 0 &&

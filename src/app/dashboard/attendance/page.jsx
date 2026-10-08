@@ -20,12 +20,17 @@ import {
   Info,
   History,
   Sparkles,
+  MessageSquare,
+  X,
+  Send,
 } from "lucide-react";
 import {
   MADRASA_LOCATION,
   ATTENDANCE_RULES,
   isWithinMadrasaGeofence,
   calculateDistanceMeters,
+  evaluateCheckInStatus,
+  evaluateCheckOutStatus,
 } from "@/lib/attendance-config";
 
 export default function TeacherAttendancePage() {
@@ -50,8 +55,10 @@ export default function TeacherAttendancePage() {
   const [isLocating, setIsLocating] = useState(false);
   const [geofenceStatus, setGeofenceStatus] = useState(null);
 
-  // Dev simulation toggle (allows testing check-in from non-Madrasa locations)
-  const [simulateInside, setSimulateInside] = useState(false);
+  // Late / Early exit comment modal state
+  const [commentModalOpen, setCommentModalOpen] = useState(false);
+  const [commentModalType, setCommentModalType] = useState("late"); // "late" | "early"
+  const [attendanceComment, setAttendanceComment] = useState("");
 
   // Action loading states
   const [submittingCheckIn, setSubmittingCheckIn] = useState(false);
@@ -196,24 +203,15 @@ export default function TeacherAttendancePage() {
     requestLocation();
   }, [requestLocation]);
 
-  // 5. Handle Check-In
-  const handleCheckIn = async () => {
-    // If not located yet and not in simulation, request location first
-    if (!currentCoords && !simulateInside) {
+  // 5. Execute Check-In API call
+  const executeCheckIn = async (comment = "") => {
+    if (!currentCoords) {
       toast.info("আপনার অবস্থান যাচাই করা হচ্ছে...");
       requestLocation();
       return;
     }
 
-    const latToUse = simulateInside
-      ? MADRASA_LOCATION.LATITUDE
-      : currentCoords?.lat;
-    const lngToUse = simulateInside
-      ? MADRASA_LOCATION.LONGITUDE
-      : currentCoords?.lng;
-
-    // Client-side geofence verification
-    const verification = isWithinMadrasaGeofence(latToUse, lngToUse);
+    const verification = isWithinMadrasaGeofence(currentCoords.lat, currentCoords.lng);
     if (!verification.isInside) {
       toast.error(
         "You must be inside the madrasa premises to submit attendance."
@@ -227,9 +225,9 @@ export default function TeacherAttendancePage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          lat: latToUse,
-          lng: lngToUse,
-          mockInPremises: simulateInside,
+          lat: currentCoords.lat,
+          lng: currentCoords.lng,
+          checkInComment: comment,
           teacherEmail,
           teacherName,
           teacherId: currentUser?.id || "teacher-id",
@@ -246,6 +244,8 @@ export default function TeacherAttendancePage() {
       toast.success(data.message || "প্রবেশ হাজিরা সফলভাবে নিশ্চিত হয়েছে!");
       setTodayData(data.attendance);
       fetchHistory();
+      setCommentModalOpen(false);
+      setAttendanceComment("");
     } catch (err) {
       console.error("Check-in error:", err);
       toast.error("সার্ভারের সাথে যোগাযোগে সমস্যা হয়েছে।");
@@ -254,32 +254,42 @@ export default function TeacherAttendancePage() {
     }
   };
 
-  // 6. Handle Check-Out
-  const handleCheckOut = async () => {
-    if (!todayData || !todayData.checkInTime) {
-      toast.error("আজকের কোনো প্রবেশ হাজিরা পাওয়া যায়নি। আগে চেক-ইন সম্পন্ন করুন।");
-      return;
-    }
-
-    if (todayData.checkOutTime) {
-      toast.info("আপনি ইতিমধ্যে প্রস্থান হাজিরা সম্পন্ন করেছেন।");
-      return;
-    }
-
-    if (!currentCoords && !simulateInside) {
+  // Handle Check-In Trigger
+  const handleCheckIn = async () => {
+    if (!currentCoords) {
       toast.info("আপনার অবস্থান যাচাই করা হচ্ছে...");
       requestLocation();
       return;
     }
 
-    const latToUse = simulateInside
-      ? MADRASA_LOCATION.LATITUDE
-      : currentCoords?.lat;
-    const lngToUse = simulateInside
-      ? MADRASA_LOCATION.LONGITUDE
-      : currentCoords?.lng;
+    const verification = isWithinMadrasaGeofence(currentCoords.lat, currentCoords.lng);
+    if (!verification.isInside) {
+      toast.error(
+        "You must be inside the madrasa premises to submit attendance."
+      );
+      return;
+    }
 
-    const verification = isWithinMadrasaGeofence(latToUse, lngToUse);
+    // If late (after 8:05 AM), open comment modal
+    const status = evaluateCheckInStatus(new Date());
+    if (status === "Late") {
+      setCommentModalType("late");
+      setAttendanceComment("");
+      setCommentModalOpen(true);
+    } else {
+      await executeCheckIn("");
+    }
+  };
+
+  // 6. Execute Check-Out API call
+  const executeCheckOut = async (comment = "") => {
+    if (!currentCoords) {
+      toast.info("আপনার অবস্থান যাচাই করা হচ্ছে...");
+      requestLocation();
+      return;
+    }
+
+    const verification = isWithinMadrasaGeofence(currentCoords.lat, currentCoords.lng);
     if (!verification.isInside) {
       toast.error(
         "You must be inside the madrasa premises to submit attendance."
@@ -293,9 +303,9 @@ export default function TeacherAttendancePage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          lat: latToUse,
-          lng: lngToUse,
-          mockInPremises: simulateInside,
+          lat: currentCoords.lat,
+          lng: currentCoords.lng,
+          checkOutComment: comment,
           teacherEmail,
           teacherName,
           teacherId: currentUser?.id || "teacher-id",
@@ -312,6 +322,8 @@ export default function TeacherAttendancePage() {
       toast.success(data.message || "প্রস্থান হাজিরা সফলভাবে নিশ্চিত হয়েছে!");
       setTodayData(data.attendance);
       fetchHistory();
+      setCommentModalOpen(false);
+      setAttendanceComment("");
     } catch (err) {
       console.error("Check-out error:", err);
       toast.error("সার্ভারের সাথে যোগাযোগে সমস্যা হয়েছে।");
@@ -320,16 +332,49 @@ export default function TeacherAttendancePage() {
     }
   };
 
+  // Handle Check-Out Trigger
+  const handleCheckOut = async () => {
+    if (!todayData || !todayData.checkInTime) {
+      toast.error("আজকের কোনো প্রবেশ হাজিরা পাওয়া যায়নি। আগে চেক-ইন সম্পন্ন করুন।");
+      return;
+    }
+
+    if (todayData.checkOutTime) {
+      toast.info("আপনি ইতিমধ্যে প্রস্থান হাজিরা সম্পন্ন করেছেন।");
+      return;
+    }
+
+    if (!currentCoords) {
+      toast.info("আপনার অবস্থান যাচাই করা হচ্ছে...");
+      requestLocation();
+      return;
+    }
+
+    const verification = isWithinMadrasaGeofence(currentCoords.lat, currentCoords.lng);
+    if (!verification.isInside) {
+      toast.error(
+        "You must be inside the madrasa premises to submit attendance."
+      );
+      return;
+    }
+
+    // If early (before 1:10 PM), open comment modal
+    const status = evaluateCheckOutStatus(new Date());
+    if (status === "Early") {
+      setCommentModalType("early");
+      setAttendanceComment("");
+      setCommentModalOpen(true);
+    } else {
+      await executeCheckOut("");
+    }
+  };
+
   const isCheckedIn = !!todayData?.checkInTime;
   const isCheckedOut = !!todayData?.checkOutTime;
 
   // Compute effective distance
-  const effectiveDistance = simulateInside
-    ? 0
-    : geofenceStatus?.distance ?? null;
-  const isInsideEffective = simulateInside
-    ? true
-    : geofenceStatus?.isInside ?? false;
+  const effectiveDistance = geofenceStatus?.distance ?? null;
+  const isInsideEffective = geofenceStatus?.isInside ?? false;
 
   return (
     <div className="space-y-6 pb-12">
@@ -421,7 +466,7 @@ export default function TeacherAttendancePage() {
             </div>
           </div>
 
-          {/* Location Action & Dev Testing Toggle */}
+          {/* Location Action */}
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={requestLocation}
@@ -431,23 +476,6 @@ export default function TeacherAttendancePage() {
               <RefreshCw className={`w-3.5 h-3.5 ${isLocating ? "animate-spin" : ""}`} />
               অবস্থান রিফ্রেশ করুন
             </button>
-
-            {/* Dev Mode Simulation Switch */}
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/40">
-              <label
-                htmlFor="simulate-toggle"
-                className="text-xs font-bold text-amber-900 dark:text-amber-300 cursor-pointer flex items-center gap-1.5 select-none"
-              >
-                <span>🧪 টেস্ট মোড (Inside Geofence)</span>
-              </label>
-              <input
-                id="simulate-toggle"
-                type="checkbox"
-                checked={simulateInside}
-                onChange={(e) => setSimulateInside(e.target.checked)}
-                className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500 cursor-pointer"
-              />
-            </div>
           </div>
         </div>
 
@@ -751,6 +779,7 @@ export default function TeacherAttendancePage() {
                   <th className="py-3 px-4 font-bold">প্রবেশ স্ট্যাটাস</th>
                   <th className="py-3 px-4 font-bold">প্রস্থানের সময়</th>
                   <th className="py-3 px-4 font-bold">প্রস্থান স্ট্যাটাস</th>
+                  <th className="py-3 px-4 font-bold">দেরি/পূর্বে প্রস্থানের কারণ</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-700/30">
@@ -794,6 +823,24 @@ export default function TeacherAttendancePage() {
                         <span className="text-slate-400 text-xs">অপেক্ষমান</span>
                       )}
                     </td>
+                    <td className="py-3.5 px-4 text-xs text-slate-600 dark:text-slate-300 max-w-xs">
+                      {item.checkInComment || item.checkOutComment ? (
+                        <div className="flex flex-col gap-0.5">
+                          {item.checkInComment && (
+                            <span title={item.checkInComment} className="truncate">
+                              <strong className="text-rose-600 font-semibold">দেরি:</strong> {item.checkInComment}
+                            </span>
+                          )}
+                          {item.checkOutComment && (
+                            <span title={item.checkOutComment} className="truncate">
+                              <strong className="text-amber-600 font-semibold">আর্লি:</strong> {item.checkOutComment}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-slate-400">-</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -801,6 +848,101 @@ export default function TeacherAttendancePage() {
           </div>
         )}
       </div>
+
+      {/* 6. Late / Early Exit Comment Modal */}
+      {commentModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 dark:border-slate-700 p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div
+                  className={`p-2.5 rounded-2xl ${
+                    commentModalType === "late"
+                      ? "bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400"
+                      : "bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400"
+                  }`}
+                >
+                  <MessageSquare className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                    {commentModalType === "late"
+                      ? "দেরিতে উপস্থিতির কারণ"
+                      : "সময়ের পূর্বে প্রস্থানের কারণ"}
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {commentModalType === "late"
+                      ? "নির্ধারিত সময় (সকাল ৮:০৫) এর পরে প্রবেশ করছেন"
+                      : "নির্ধারিত সময় (দুপুর ১:১০) এর পূর্বে প্রস্থান করছেন"}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setCommentModalOpen(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/70 dark:border-slate-700/60 text-xs text-slate-600 dark:text-slate-300">
+              {commentModalType === "late"
+                ? "অনুগ্রহ করে দেরিতে আসার সুনির্দিষ্ট কারণ উল্লেখ করুন। এটি প্রশাসন প্যানেলে সংরক্ষিত হবে।"
+                : "অনুগ্রহ করে নির্ধারিত সময়ের পূর্বে মাদ্রাসা ত্যাগের কারণ উল্লেখ করুন। এটি প্রশাসন প্যানেলে সংরক্ষিত হবে।"}
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                মন্তব্য / কারণ লিখুন:
+              </label>
+              <textarea
+                rows={3}
+                value={attendanceComment}
+                onChange={(e) => setAttendanceComment(e.target.value)}
+                placeholder={
+                  commentModalType === "late"
+                    ? "যেমন: রাস্তায় যানজটের কারণে অথবা শারীরিক অসুস্থতা..."
+                    : "যেমন: জরুরি পারিবারিক প্রয়োজন অথবা শারীরিক অসুস্থতা..."
+                }
+                className="w-full rounded-2xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-3.5 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setCommentModalOpen(false)}
+                disabled={submittingCheckIn || submittingCheckOut}
+                className="px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
+              >
+                বাতিল করুন
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  commentModalType === "late"
+                    ? executeCheckIn(attendanceComment)
+                    : executeCheckOut(attendanceComment)
+                }
+                disabled={submittingCheckIn || submittingCheckOut}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white shadow-md shadow-emerald-600/20 active:scale-[0.98] transition disabled:opacity-50"
+              >
+                {submittingCheckIn || submittingCheckOut ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>জমা হচ্ছে...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-3.5 h-3.5" />
+                    <span>জমা দিন ও নিশ্চিত করুন</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

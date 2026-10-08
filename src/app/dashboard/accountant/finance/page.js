@@ -154,6 +154,8 @@ export default function FinanceDashboard() {
     totalIncome: 0,
     totalExpense: 0,
     netBalance: 0,
+    openingBalance: 0,
+    totalUsableFund: 0,
     overallIncome: 0,
     overallExpense: 0,
     overallBalance: 0,

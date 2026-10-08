@@ -275,22 +275,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     },
 
     {
-      id: "attendance",
-      title: "ডিজিটাল হাজিরা",
-      icon: "📅",
-      lucideIcon: <CalendarCheck className="w-5 h-5" />,
-      href: "/dashboard/attendance",
-      roles: ["admin", "teacher","accountant"],
-      permissions: ["manage_academics", "manage_attendance"],
-    },
-    {
-      id: "notice-board",
-      title: "নোটিশ বোর্ড",
-      icon: <IoNotificationsCircle />,
-      href: "/dashboard/admin/notice",
-      roles: ["admin"],
-    },
-    {
       id: "students-management",
       title: "শিক্ষার্থী ব্যবস্থাপনা",
       icon: "👥",
@@ -332,7 +316,12 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       icon: "🕌",
       lucideIcon: <UserCheck className="w-5 h-5" />,
       roles: ["admin"],
-      permissions: ["manage_users", "manage_teachers"],
+      permissions: [
+        "manage_users",
+        "manage_teachers",
+        "manage_attendance",
+        "teacher_attendance",
+      ],
       dropdown: [
         {
           title: "শিক্ষক আইডি কার্ড তৈরি",
@@ -344,23 +333,32 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         },
       ],
     },
-
     {
-      id: "administration",
-      title: "প্রশাসনিক বিভাগ",
-      icon: "🛡️",
-      lucideIcon: <Shield className="w-5 h-5" />,
-      href: "/dashboard/admin/administration",
+      id: "staff-management",
+      title: "স্টাফ ব্যবস্থাপনা",
+      icon: "👥",
+      lucideIcon: <Users className="w-5 h-5" />,
       roles: ["admin"],
-      permissions: ["manage_roles", "manage_users"],
+      permissions: ["manage_users", "manage_staff", "manage_attendance"],
+      dropdown: [
+        {
+          title: "স্টাফ আইডি কার্ড তৈরি",
+          href: "/dashboard/admin/staff-management/staff-id-card",
+        },
+        {
+          title: "স্টাফ উপস্থিতি রিপোর্ট",
+          href: "/dashboard/admin/staff-management/attendance",
+        },
+      ],
     },
+
     {
       id: "finance",
       title: "হিসাব ও অর্থ বিভাগ",
       icon: "💰",
       lucideIcon: <Wallet className="w-5 h-5" />,
       roles: ["admin", "accountant"],
-      permissions: ["manage_finance", "accountant"],
+      permissions: ["manage_finance", "accountant", "accounts", "finance"],
       dropdown: [
         {
           title: "অ্যাকাউন্টিং রিপোর্টস",
@@ -390,12 +388,38 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       ],
     },
     {
+      id: "notice-board",
+      title: "নোটিশ বোর্ড",
+      icon: <IoNotificationsCircle />,
+      href: "/dashboard/admin/notice",
+      roles: ["admin"],
+    },
+    {
       id: "profile-settings",
       title: "প্রোফাইল সেটিংস",
       icon: "⚙️",
       lucideIcon: <Settings className="w-5 h-5" />,
       href: "/dashboard/profile-settings",
       roles: ["admin", "teacher", "accountant", "parent", "student", "user"],
+    },
+    {
+      id: "attendance",
+      title: "ডিজিটাল হাজিরা",
+      icon: "📅",
+      lucideIcon: <CalendarCheck className="w-5 h-5" />,
+      href: "/dashboard/attendance",
+      roles: ["admin", "teacher", "accountant"],
+      permissions: ["manage_academics", "manage_attendance"],
+    },
+
+    {
+      id: "administration",
+      title: "প্রশাসনিক বিভাগ",
+      icon: "🛡️",
+      lucideIcon: <Shield className="w-5 h-5" />,
+      href: "/dashboard/admin/administration",
+      roles: ["admin"],
+      permissions: ["manage_roles", "manage_users"],
     },
   ];
 
@@ -420,28 +444,51 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     }
 
     // Special aliases
-    if (item.id === "finance" && userPermissions.includes("manage_finance"))
+    if (
+      item.id === "finance" &&
+      (userPermissions.includes("manage_finance") ||
+        userPermissions.includes("accountant") ||
+        userPermissions.includes("accounts") ||
+        userPermissions.includes("finance"))
+    )
       return true;
     if (
       item.id === "admission" &&
       userPermissions.includes("manage_admissions")
     )
       return true;
-    if (item.id === "academics" && userPermissions.includes("manage_academics"))
+    if (
+      item.id === "academics" &&
+      (userPermissions.includes("manage_academics") ||
+        userPermissions.includes("manage_teachers"))
+    )
       return true;
     if (
       item.id === "attendance" &&
-      userPermissions.includes("manage_academics")
+      (userPermissions.includes("manage_academics") ||
+        userPermissions.includes("manage_attendance") ||
+        userPermissions.includes("manage_teachers"))
     )
       return true;
     if (
       item.id === "students-management" &&
-      userPermissions.includes("manage_users")
+      (userPermissions.includes("manage_users") ||
+        userPermissions.includes("manage_students"))
     )
       return true;
     if (
       item.id === "teachers-management" &&
-      userPermissions.includes("manage_users")
+      (userPermissions.includes("manage_users") ||
+        userPermissions.includes("manage_teachers") ||
+        userPermissions.includes("manage_attendance") ||
+        userPermissions.includes("teacher_attendance"))
+    )
+      return true;
+    if (
+      item.id === "staff-management" &&
+      (userPermissions.includes("manage_users") ||
+        userPermissions.includes("manage_staff") ||
+        userPermissions.includes("manage_attendance"))
     )
       return true;
     if (

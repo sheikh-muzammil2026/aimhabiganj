@@ -9,10 +9,71 @@ const DashboardLayout = ({ children }) => {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, isPending, refetch } = authClient.useSession();
+  const [liveUser, setLiveUser] = useState(null);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isSyncingLive, setIsSyncingLive] = useState(true);
 
   const [currentTime, setCurrentTime] = useState("");
   const [theme, setTheme] = useState("light");
+
+  // Live user & permissions sync from DB
+  const syncUserData = React.useCallback(async () => {
+    try {
+      const res = await fetch("/api/user/me");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.user) {
+          setLiveUser(data.user);
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to sync live user in layout:", e);
+    } finally {
+      setIsSyncingLive(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (session?.user) {
+      syncUserData();
+    } else if (!isPending) {
+      setIsSyncingLive(false);
+    }
+  }, [session, isPending, syncUserData]);
+
+  // Reactive listener for permission changes across tabs and windows
+  useEffect(() => {
+    let channel;
+    try {
+      channel = new BroadcastChannel("aim-auth-sync");
+      channel.onmessage = (event) => {
+        if (
+          event.data?.type === "PERMISSIONS_UPDATED" ||
+          event.data?.type === "ROLE_UPDATED"
+        ) {
+          syncUserData();
+          if (typeof refetch === "function") refetch();
+        }
+      };
+    } catch (_) {}
+
+    const handleCustomSync = () => {
+      syncUserData();
+      if (typeof refetch === "function") refetch();
+    };
+
+    window.addEventListener("aim-auth-sync", handleCustomSync);
+    window.addEventListener("storage", handleCustomSync);
+
+    const interval = setInterval(syncUserData, 15000);
+
+    return () => {
+      if (channel) channel.close();
+      window.removeEventListener("aim-auth-sync", handleCustomSync);
+      window.removeEventListener("storage", handleCustomSync);
+      clearInterval(interval);
+    };
+  }, [syncUserData, refetch]);
 
   // Client-side Route Guard for SPA transitions
   useEffect(() => {
@@ -50,15 +111,49 @@ const DashboardLayout = ({ children }) => {
       };
     }
 
-    const user = session.user;
-    if (user.isBanned || user.status === "banned") {
+    const activeUser = liveUser || session.user;
+    if (activeUser.isBanned || activeUser.status === "banned") {
       router.replace("/login?error=account_banned");
       return;
     }
 
-    const userRole = (user.role || "student").toLowerCase();
-    const permissions = Array.isArray(user.permissions) ? user.permissions : [];
-    const hasPerm = (p) => permissions.includes(p);
+    const userRole = (activeUser.role || "student").toLowerCase();
+    const permissions = Array.isArray(activeUser.permissions)
+      ? activeUser.permissions
+      : [];
+
+    const hasPerm = (p) => {
+      if (permissions.includes(p)) return true;
+      if (
+        p === "manage_finance" &&
+        (permissions.includes("accounts") ||
+          permissions.includes("accountant") ||
+          permissions.includes("finance"))
+      )
+        return true;
+      if (
+        p === "manage_teachers" &&
+        (permissions.includes("manage_attendance") ||
+          permissions.includes("teacher_attendance") ||
+          permissions.includes("manage_users"))
+      )
+        return true;
+      if (
+        p === "manage_attendance" &&
+        (permissions.includes("manage_teachers") ||
+          permissions.includes("teacher_attendance") ||
+          permissions.includes("manage_academics") ||
+          permissions.includes("manage_users"))
+      )
+        return true;
+      if (
+        p === "manage_staff" &&
+        (permissions.includes("manage_users") ||
+          permissions.includes("staff"))
+      )
+        return true;
+      return false;
+    };
 
     if (pathname === "/dashboard" || pathname === "/dashboard/") {
       const targetDashboard =
@@ -81,11 +176,22 @@ const DashboardLayout = ({ children }) => {
 
     if (pathname.startsWith("/dashboard/admin")) {
       const isAllowedAdminSubpath =
-        (pathname.startsWith("/dashboard/admin/admission") && hasPerm("manage_admissions")) ||
-        (pathname.startsWith("/dashboard/admin/notice") && hasPerm("manage_notices")) ||
-        (pathname.startsWith("/dashboard/admin/students-management") && hasPerm("manage_users")) ||
-        (pathname.startsWith("/dashboard/admin/teachers-management") && hasPerm("manage_users")) ||
-        (pathname.startsWith("/dashboard/admin/administration") && (hasPerm("manage_roles") || hasPerm("manage_users")));
+        (pathname.startsWith("/dashboard/admin/admission") &&
+          hasPerm("manage_admissions")) ||
+        (pathname.startsWith("/dashboard/admin/notice") &&
+          hasPerm("manage_notices")) ||
+        (pathname.startsWith("/dashboard/admin/students-management") &&
+          hasPerm("manage_users")) ||
+        (pathname.startsWith("/dashboard/admin/teachers-management") &&
+          (hasPerm("manage_users") ||
+            hasPerm("manage_teachers") ||
+            hasPerm("manage_attendance"))) ||
+        (pathname.startsWith("/dashboard/admin/staff-management") &&
+          (hasPerm("manage_users") ||
+            hasPerm("manage_staff") ||
+            hasPerm("manage_attendance"))) ||
+        (pathname.startsWith("/dashboard/admin/administration") &&
+          (hasPerm("manage_roles") || hasPerm("manage_users")));
 
       if (!isAllowedAdminSubpath) {
         router.replace("/dashboard/unauthorized");
@@ -101,7 +207,7 @@ const DashboardLayout = ({ children }) => {
     }
 
     if (pathname.startsWith("/dashboard/teacher")) {
-      if (userRole !== "teacher") {
+      if (userRole !== "teacher" && !hasPerm("manage_teachers") && !hasPerm("manage_academics")) {
         router.replace("/dashboard/unauthorized");
       }
       return;
@@ -122,23 +228,35 @@ const DashboardLayout = ({ children }) => {
     }
 
     if (pathname.startsWith("/dashboard/attendance")) {
-      if (userRole !== "teacher" && !hasPerm("manage_academics")) {
+      if (
+        userRole !== "teacher" &&
+        !hasPerm("manage_academics") &&
+        !hasPerm("manage_attendance") &&
+        !hasPerm("manage_teachers")
+      ) {
         router.replace("/dashboard/unauthorized");
       }
       return;
     }
 
     if (pathname.startsWith("/dashboard/shared")) {
-      if (pathname.startsWith("/dashboard/shared/academics") && userRole !== "teacher" && !hasPerm("manage_academics")) {
+      if (
+        pathname.startsWith("/dashboard/shared/academics") &&
+        userRole !== "teacher" &&
+        !hasPerm("manage_academics")
+      ) {
         router.replace("/dashboard/unauthorized");
         return;
       }
-      if (pathname.startsWith("/dashboard/shared/gallery") && userRole !== "teacher") {
+      if (
+        pathname.startsWith("/dashboard/shared/gallery") &&
+        userRole !== "teacher"
+      ) {
         router.replace("/dashboard/unauthorized");
         return;
       }
     }
-  }, [pathname, isPending, session, router, refetch]);
+  }, [pathname, isPending, session, liveUser, router, refetch]);
 
   // থিম ইনিশিয়ালাইজ ও ডার্ক মোড ক্লাস হ্যান্ডেল করা
   useEffect(() => {
