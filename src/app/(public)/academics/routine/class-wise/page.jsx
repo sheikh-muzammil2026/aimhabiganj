@@ -15,7 +15,9 @@ export default function ClassWiseRoutinePage() {
   useEffect(() => {
     async function fetchExams() {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/admit-cards/exams`);
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_SERVER_API}/api/admit-cards/exams`,
+        );
         const result = await res.json();
         if (result.success && result.data?.length > 0) {
           setExams(result.data);
@@ -41,8 +43,8 @@ export default function ClassWiseRoutinePage() {
         setError(null);
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_SERVER_API}/api/admin/routine?examTitle=${encodeURIComponent(
-            selectedExam
-          )}&division=all`
+            selectedExam,
+          )}&division=all`,
         );
         const result = await res.json();
         if (result.success) {
@@ -70,18 +72,18 @@ export default function ClassWiseRoutinePage() {
   const availableClasses = routine?.routineData?.map((r) => r.class) || [];
 
   // ক্লাস অনুযায়ী ফিল্টার করা রুটিন ডেটা
-  const filteredRoutineData = routine?.routineData?.filter((r) => {
-    // শুধুমাত্র সেই ক্লাসগুলোই দেখাবো যেগুলোর অন্তত একটি বিষয়ও রুটিনে আছে
-    const hasSubjects = Object.values(r.subjects || {}).some(Boolean);
-    if (!hasSubjects) return false;
+  const filteredRoutineData =
+    routine?.routineData?.filter((r) => {
+      // শুধুমাত্র সেই ক্লাসগুলোই দেখাবো যেগুলোর অন্তত একটি বিষয়ও রুটিনে আছে
+      const hasSubjects = Object.values(r.subjects || {}).some(Boolean);
+      if (!hasSubjects) return false;
 
-    if (selectedClass === "all") return true;
-    return r.class === selectedClass;
-  }) || [];
+      if (selectedClass === "all") return true;
+      return r.class === selectedClass;
+    }) || [];
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-8 px-4 sm:px-6 lg:px-8 text-slate-800 dark:text-slate-100">
-      
       {/* ========================================== */}
       {/* স্ক্রিন কন্ট্রোল সেকশন (প্রিন্ট করার সময় দেখা যাবে না) */}
       {/* ========================================== */}
@@ -92,7 +94,8 @@ export default function ClassWiseRoutinePage() {
               শ্রেণি-ভিত্তিক পরীক্ষার রুটিন 🖨️
             </h1>
             <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
-              পরীক্ষার নাম ও শ্রেণি অনুযায়ী ফিল্টার করে রুটিন প্রিন্ট বা ডাউনলোড করুন
+              পরীক্ষার নাম ও শ্রেণি অনুযায়ী ফিল্টার করে রুটিন প্রিন্ট বা ডাউনলোড
+              করুন
             </p>
           </div>
           <div className="flex gap-2">
@@ -115,7 +118,9 @@ export default function ClassWiseRoutinePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* পরীক্ষা সিলেকশন ড্রপডাউন */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-gray-600 dark:text-gray-400">পরীক্ষা নির্বাচন করুন:</label>
+            <label className="text-xs font-bold text-gray-600 dark:text-gray-400">
+              পরীক্ষা নির্বাচন করুন:
+            </label>
             <select
               value={selectedExam}
               onChange={(e) => {
@@ -134,7 +139,9 @@ export default function ClassWiseRoutinePage() {
 
           {/* শ্রেণি সিলেকশন ড্রপডাউন */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-gray-600 dark:text-gray-400">শ্রেণি ফিল্টার করুন:</label>
+            <label className="text-xs font-bold text-gray-600 dark:text-gray-400">
+              শ্রেণি ফিল্টার করুন:
+            </label>
             <select
               value={selectedClass}
               onChange={(e) => setSelectedClass(e.target.value)}
@@ -156,7 +163,9 @@ export default function ClassWiseRoutinePage() {
       {loading && (
         <div className="no-print text-center py-12">
           <div className="w-10 h-10 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-          <p className="text-sm font-semibold text-slate-500">রুটিন ডাটা লোড হচ্ছে...</p>
+          <p className="text-sm font-semibold text-slate-500">
+            রুটিন ডাটা লোড হচ্ছে...
+          </p>
         </div>
       )}
 
@@ -192,16 +201,45 @@ export default function ClassWiseRoutinePage() {
               {/* রুটিন ইনফো সেকশন */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
                 <div className="space-y-1.5">
-                  <p>📂 <span className="font-semibold text-slate-500 dark:text-slate-400">পরীক্ষার নাম:</span> {routine.examTitle}</p>
-                  <p>🏫 <span className="font-semibold text-slate-500 dark:text-slate-400">শ্রেণি:</span> {clsData.class}</p>
+                  <p>
+                    📂{" "}
+                    <span className="font-semibold text-slate-500 dark:text-slate-400">
+                      পরীক্ষার নাম:
+                    </span>{" "}
+                    {routine.examTitle}
+                  </p>
+                  <p>
+                    🏫{" "}
+                    <span className="font-semibold text-slate-500 dark:text-slate-400">
+                      শ্রেণি:
+                    </span>{" "}
+                    {clsData.class}
+                  </p>
                 </div>
                 <div className="space-y-1.5 sm:text-right">
-                  <p>🌙 <span className="font-semibold text-slate-500 dark:text-slate-400">হিজরী বর্ষ:</span> {routine.hijriYear ? String(routine.hijriYear).split(/[-–/]/)[0].trim() : "N/A"}</p>
-                  <p>📅 <span className="font-semibold text-slate-500 dark:text-slate-400">ঈসায়ী বর্ষ:</span> {routine.gregorianYear ? String(routine.gregorianYear).split(/[-–/]/)[0].trim() : "N/A"}</p>
+                  <p>
+                    🌙{" "}
+                    <span className="font-semibold text-slate-500 dark:text-slate-400">
+                      হিজরী বর্ষ:
+                    </span>{" "}
+                    {routine.hijriYear
+                      ? String(routine.hijriYear).split(/[-–/]/)[0].trim()
+                      : "N/A"}
+                  </p>
+                  <p>
+                    📅{" "}
+                    <span className="font-semibold text-slate-500 dark:text-slate-400">
+                      ঈসায়ী বর্ষ:
+                    </span>{" "}
+                    {routine.gregorianYear
+                      ? String(routine.gregorianYear).split(/[-–/]/)[0].trim()
+                      : "N/A"}
+                  </p>
                 </div>
                 {routine.note && (
                   <div className="col-span-1 sm:col-span-2 bg-amber-50 dark:bg-slate-900/60 p-2.5 rounded-lg border border-amber-200/50 dark:border-slate-800 text-[11px] sm:text-xs text-amber-900 dark:text-amber-300 mt-2 font-medium">
-                    📝 <span className="font-bold">বিশেষ নির্দেশিকা:</span> {routine.note}
+                    📝 <span className="font-bold">বিশেষ নির্দেশিকা:</span>{" "}
+                    {routine.note}
                   </div>
                 )}
               </div>
@@ -211,9 +249,13 @@ export default function ClassWiseRoutinePage() {
                 <table className="w-full border-collapse text-left">
                   <thead>
                     <tr className="bg-[#043e30] text-emerald-100 text-xs sm:text-sm uppercase tracking-wider font-bold">
-                      <th className="py-3 px-4 border-r border-[#05503e]/40">তারিখ (Date)</th>
-                      <th className="py-3 px-4 border-r border-[#05503e]/40">দিন (Day)</th>
-                      <th className="py-3 px-4">বিষয় (Subject)</th>
+                      <th className="py-3 px-4 border-r border-[#05503e]/40">
+                        তারিখ
+                      </th>
+                      <th className="py-3 px-4 border-r border-[#05503e]/40">
+                        দিন
+                      </th>
+                      <th className="py-3 px-4">বিষয় </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200 dark:divide-slate-700 text-xs sm:text-sm text-slate-800 dark:text-slate-200">
@@ -222,10 +264,19 @@ export default function ClassWiseRoutinePage() {
                       if (!subjectName) return null; // বিষয় না থাকলে সেই তারিখ রুটিনে দেখাব না
 
                       return (
-                        <tr key={d.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
-                          <td className="py-2.5 px-4 font-bold border-r border-slate-200 dark:border-slate-700">{d.date}</td>
-                          <td className="py-2.5 px-4 border-r border-slate-200 dark:border-slate-700 font-semibold">{d.day}</td>
-                          <td className="py-2.5 px-4 font-extrabold text-emerald-800 dark:text-emerald-400">{subjectName}</td>
+                        <tr
+                          key={d.id}
+                          className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
+                        >
+                          <td className="py-2.5 px-4 font-bold border-r border-slate-200 dark:border-slate-700">
+                            {d.gregorian}
+                          </td>
+                          <td className="py-2.5 px-4 border-r border-slate-200 dark:border-slate-700 font-semibold">
+                            {d.day}
+                          </td>
+                          <td className="py-2.5 px-4 font-extrabold text-emerald-800 dark:text-emerald-400">
+                            {subjectName}
+                          </td>
                         </tr>
                       );
                     })}
@@ -237,16 +288,23 @@ export default function ClassWiseRoutinePage() {
               <div className="mt-12 flex justify-between text-[11px] sm:text-xs text-slate-700 dark:text-slate-300 pt-8 border-t border-dashed border-slate-200 dark:border-slate-700">
                 <div className="text-center w-28 sm:w-36 space-y-1">
                   <div className="h-6"></div>
-                  <p className="border-t border-slate-400 dark:border-slate-600 pt-1 font-bold">অধ্যক্ষ / মোহতামিম</p>
-                  <p className="text-[9px] text-slate-400">আস-সালাম আইডিয়াল মাদরাসা</p>
+                  <p className="border-t border-slate-400 dark:border-slate-600 pt-1 font-bold">
+                    অধ্যক্ষ / মোহতামিম
+                  </p>
+                  <p className="text-[9px] text-slate-400">
+                    আস-সালাম আইডিয়াল মাদরাসা
+                  </p>
                 </div>
                 <div className="text-center w-28 sm:w-36 space-y-1">
                   <div className="h-6"></div>
-                  <p className="border-t border-slate-400 dark:border-slate-600 pt-1 font-bold">পরীক্ষা নিয়ন্ত্রক</p>
-                  <p className="text-[9px] text-slate-400">পরীক্ষা কমিটি (AIM)</p>
+                  <p className="border-t border-slate-400 dark:border-slate-600 pt-1 font-bold">
+                    পরীক্ষা নিয়ন্ত্রক
+                  </p>
+                  <p className="text-[9px] text-slate-400">
+                    পরীক্ষা কমিটি (AIM)
+                  </p>
                 </div>
               </div>
-
             </div>
           ))}
         </div>
@@ -294,7 +352,6 @@ export default function ClassWiseRoutinePage() {
           }
         }
       `}</style>
-      
     </div>
   );
 }

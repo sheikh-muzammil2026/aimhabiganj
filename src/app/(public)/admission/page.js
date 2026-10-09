@@ -27,6 +27,27 @@ export default function AdmissionGuidelinePage() {
         fetchSettings();
     }, []);
 
+    useEffect(() => {
+        if (!isLoading && guideSettings) {
+            const scrollToHash = () => {
+                const hash = window.location.hash;
+                if (hash) {
+                    const id = hash.replace("#", "");
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }
+                }
+            };
+            const timer = setTimeout(scrollToHash, 250);
+            window.addEventListener("hashchange", scrollToHash);
+            return () => {
+                clearTimeout(timer);
+                window.removeEventListener("hashchange", scrollToHash);
+            };
+        }
+    }, [isLoading, guideSettings]);
+
     // টেক্সট এরিয়া-র নিউলাইন (\n) থেকে লিস্ট আইটেম তৈরি করার হেল্পার ফাংশন
     const renderListFromText = (text) => {
         if (!text) return null;

@@ -8,35 +8,34 @@ import { Syllabus, CoCurricular } from "@/components/public/academics/SyllabusAn
 import RoutineSection from "@/components/public/academics/RoutineSection";
 
 export default function AcademicsPage() {
-  const [academicData, setAcademicData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [academicData] = useState({
+    teachers: null,
+    levels: null,
+    syllabus: null,
+    coCurricular: null,
+  });
 
   useEffect(() => {
-    async function fetchAcademicData() {
-      try {
-        // ডাটাবেজ/এপিআই কানেক্ট হলে এখানে স্টেট সেট হবে
-        setAcademicData({
-          teachers: null,
-          levels: null,
-          syllabus: null,
-          coCurricular: null,
-        });
-      } catch (error) {
-        console.error("Data fetching error:", error);
-      } finally {
-        setLoading(false);
+    const scrollToHash = () => {
+      const hash = window.location.hash;
+      if (hash) {
+        const id = hash.replace("#", "");
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
       }
-    }
-    fetchAcademicData();
-  }, []);
+    };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-emerald-800"></div>
-      </div>
-    );
-  }
+    scrollToHash();
+    const timer = setTimeout(scrollToHash, 250);
+    window.addEventListener("hashchange", scrollToHash);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("hashchange", scrollToHash);
+    };
+  }, []);
 
   return (
     <div className="scroll-smooth min-h-screen bg-gray-50 dark:bg-slate-900">

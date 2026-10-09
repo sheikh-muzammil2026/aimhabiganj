@@ -5,15 +5,57 @@ import { mongodbAdapter } from "better-auth/adapters/mongodb";
 const uri =
   process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/aimhabiganj";
 
-const client = new MongoClient(uri, {
-  serverSelectionTimeoutMS: 5000,
-  connectTimeoutMS: 10000,
+const options = {
+  serverSelectionTimeoutMS: 15000,
+  connectTimeoutMS: 15000,
+  socketTimeoutMS: 45000,
+  maxPoolSize: 10,
+  minPoolSize: 1,
+};
+
+function isClientClosed(client) {
+  if (!client) return true;
+  if (client.s?.hasBeenClosed) return true;
+  if (
+    client.topology &&
+    (client.topology.isClosed?.() || client.topology.s?.state === "closed")
+  ) {
+    return true;
+  }
+  return false;
+}
+
+function getMongoClient() {
+  if (isClientClosed(global._betterAuthMongoClient)) {
+    global._betterAuthMongoClient = new MongoClient(uri, options);
+  }
+  return global._betterAuthMongoClient;
+}
+
+const clientProxy = new Proxy({}, {
+  get(target, prop, receiver) {
+    const client = getMongoClient();
+    const val = Reflect.get(client, prop, receiver);
+    return typeof val === "function" ? val.bind(client) : val;
+  },
 });
-const db = client.db("aimhabiganj");
+
+const dbProxy = new Proxy({}, {
+  get(target, prop, receiver) {
+    const client = getMongoClient();
+    const db = client.db("aimhabiganj");
+    const val = Reflect.get(db, prop, receiver);
+    return typeof val === "function" ? val.bind(db) : val;
+  },
+});
+
+const isReplicaSet =
+  uri.includes("replicaSet") || uri.includes("mongodb+srv");
 
 export const auth = betterAuth({
-  database: mongodbAdapter(db, {
-    client,
+  database: mongodbAdapter(dbProxy, {
+    client: clientProxy,
+    transaction: isReplicaSet,
   }),
   secret:
     process.env.BETTER_AUTH_SECRET ||

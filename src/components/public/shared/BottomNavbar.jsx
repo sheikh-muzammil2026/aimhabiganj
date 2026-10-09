@@ -55,6 +55,25 @@ export default function BottomNavbar() {
         });
     };
 
+    const handleSubmenuClick = (e, href) => {
+        setIsMenuOpen(false);
+        setActiveDropdown(null);
+
+        if (href && href.includes("#")) {
+            const [targetPath, hash] = href.split("#");
+            const currentPath = typeof window !== "undefined" ? window.location.pathname : "";
+
+            if (currentPath === targetPath || (targetPath === "" && currentPath === "/")) {
+                const element = document.getElementById(hash);
+                if (element) {
+                    e.preventDefault();
+                    element.scrollIntoView({ behavior: "smooth", block: "start" });
+                    window.history.pushState(null, "", href);
+                }
+            }
+        }
+    };
+
     const menuItems = [
         { name: t("menu.home"), href: "/", icon: <Home className="w-4 h-4" /> },
         {
@@ -265,7 +284,7 @@ export default function BottomNavbar() {
                                                             <Link
                                                                 key={subIdx}
                                                                 href={subItem.href}
-                                                                onClick={() => setIsMenuOpen(false)}
+                                                                onClick={(e) => handleSubmenuClick(e, subItem.href)}
                                                                 className="flex items-center gap-2 p-3.5 pl-12 text-xs font-medium text-gray-600 hover:text-emerald-700 hover:bg-emerald-50/50 transition-colors"
                                                             >
                                                                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
@@ -278,7 +297,7 @@ export default function BottomNavbar() {
                                         ) : (
                                             <Link
                                                 href={item.href || "#"}
-                                                onClick={() => setIsMenuOpen(false)}
+                                                onClick={(e) => handleSubmenuClick(e, item.href)}
                                                 className="flex items-center gap-3 p-3.5 text-sm font-semibold text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
                                             >
                                                 <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700">

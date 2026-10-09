@@ -54,7 +54,7 @@ html {
   animation-play-state: paused;
 }
 
-/* --- Continuous Loop Marquee Animation --- */
+/* --- Continuous Loop Marquee Animation (Right to Left) --- */
 @keyframes marquee-scroll {
   from {
     transform: translateX(0);
@@ -73,6 +73,28 @@ html {
 
 .animate-marquee:hover,
 .group-marquee:hover .animate-marquee {
+  animation-play-state: paused;
+}
+
+/* --- Continuous Loop Marquee Animation (Left to Right / Reverse) --- */
+@keyframes marquee-scroll-reverse {
+  from {
+    transform: translateX(calc(-100% - 1.5rem));
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-marquee-reverse {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll-reverse 40s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-reverse:hover,
+.group-marquee:hover .animate-marquee-reverse {
   animation-play-state: paused;
 }
 

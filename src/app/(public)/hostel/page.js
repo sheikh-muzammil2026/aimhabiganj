@@ -8,36 +8,35 @@ import HostelRules from "@/components/public/hostel/HostelRules";
 import HostelRoutine from "@/components/public/hostel/HostelRoutine";
 
 export default function HostelPage() {
-  const [hostelData, setHostelData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [hostelData] = useState({
+    about: null,
+    directors: null,
+    rules: null,
+    chart: null,
+    routine: null,
+  });
 
   useEffect(() => {
-    async function fetchHostelData() {
-      try {
-        // ফিউচার এপিআই ইন্টিগ্রেশনের জন্য স্টেট প্লেসহোল্ডার
-        setHostelData({
-          about: null,
-          directors: null,
-          rules: null,
-          chart: null,
-          routine: null,
-        });
-      } catch (error) {
-        console.error("Hostel data fetch error:", error);
-      } finally {
-        setLoading(false);
+    const scrollToHash = () => {
+      const hash = window.location.hash;
+      if (hash) {
+        const id = hash.replace("#", "");
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
       }
-    }
-    fetchHostelData();
-  }, []);
+    };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-emerald-800"></div>
-      </div>
-    );
-  }
+    scrollToHash();
+    const timer = setTimeout(scrollToHash, 250);
+    window.addEventListener("hashchange", scrollToHash);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("hashchange", scrollToHash);
+    };
+  }, []);
 
   return (
     <div className="scroll-smooth min-h-screen bg-gray-50 dark:bg-slate-900">

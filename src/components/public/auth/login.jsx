@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "react-toastify";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, X } from "lucide-react";
 
-export default function LoginPage() {
+export default function LoginPage({ onClose }) {
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
 
@@ -142,12 +143,41 @@ export default function LoginPage() {
       className="min-h-screen flex items-center justify-center md:bg-cover lg:bg-[length:100%_100%] bg-no-repeat bg-center transition-colors duration-200 px-4 py-12 sm:px-6 lg:px-8"
       style={{ backgroundImage: `url('/loginBackground.png')` }}
     >
-      <div className="max-w-md w-full space-y-8 bg-white dark:bg-slate-900 p-8 rounded-xl shadow-xl border border-gray-100 dark:border-slate-800">
+      <div className="relative max-w-md w-full space-y-8 bg-white dark:bg-slate-900 p-8 rounded-xl shadow-xl border border-gray-100 dark:border-slate-800">
+        {/* হোম / ক্লোজ বাটন */}
+        <Link
+          href="/"
+          onClick={() => {
+            if (typeof onClose === "function") onClose();
+          }}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 cursor-pointer"
+          title="হোম পেজে ফিরে যান"
+          aria-label="হোম পেজে ফিরে যান"
+        >
+          <X className="w-5 h-5" />
+        </Link>
+
         {/* হেডার ও লোগো */}
         <div className="text-center">
-          <div className="mx-auto h-12 w-12 rounded-full bg-emerald-800 text-white font-black flex items-center justify-center shadow-md border border-amber-400 text-lg">
-            AS
-          </div>
+          <Link
+            href="/"
+            onClick={() => {
+              if (typeof onClose === "function") onClose();
+            }}
+            className="inline-block group focus:outline-none"
+            title="হোম পেজে ফিরে যান"
+          >
+            <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-full p-1 bg-white dark:bg-slate-800 shadow-md border-2 border-emerald-700 dark:border-amber-400 flex items-center justify-center transition-transform duration-200 group-hover:scale-105 group-hover:shadow-lg">
+              <Image
+                src="/aimlogo1.png"
+                alt="As-Salam Ideal Madrasah (AIM) Logo"
+                width={72}
+                height={72}
+                className="object-contain rounded-full"
+                priority
+              />
+            </div>
+          </Link>
           <h2 className="mt-4 text-2xl font-extrabold text-gray-900 dark:text-amber-400">
             অ্যাকাউন্টে লগইন করুন
           </h2>

@@ -65,13 +65,23 @@ export async function GET() {
       faculty.push({
         id: user._id?.toString() || profile?._id?.toString() || `faculty-${index + 1}`,
         name: profile?.fullName?.trim() || user.name?.trim() || "সম্মানিত শিক্ষক",
+        fullName: profile?.fullName?.trim() || user.name?.trim() || "সম্মানিত শিক্ষক",
         designation: profile?.designation?.trim() || user.designation?.trim() || "শিক্ষক",
         department: profile?.department?.trim() || profile?.subject?.trim() || "",
         subject: profile?.subject?.trim() || profile?.department?.trim() || "",
         education: education || "উচ্চতর ইসলামী ও সাধারণ শিক্ষা",
+        teacherId: profile?.teacherId || profile?.idNo || "",
+        bloodGroup: profile?.bloodGroup || profile?.blood || "",
+        dateOfBirth: profile?.dateOfBirth || profile?.dob || "",
+        address: profile?.address || "",
+        joiningDate: profile?.joiningDate || "",
+        academic: profile?.academic || [],
+        experience: profile?.experience || [],
         image: profile?.profileImage || profile?.image || user.image || "",
+        profileImage: profile?.profileImage || profile?.image || user.image || "",
         email: user.email || profile?.email || "",
         phone: profile?.phone || profile?.mobile || user.phone || "",
+        contact: profile?.phone || profile?.mobile || user.phone || "",
         socialLinks: profile?.socialLinks || {},
         bio: profile?.bio || "",
       });
@@ -85,7 +95,7 @@ export async function GET() {
           let education = "";
           if (typeof profile.education === "string" && profile.education.trim()) {
             education = profile.education.trim();
-          } else if (Array.isArray(profile.academic) && profile.academic.length > 0) {
+          } else if (Array.isArray(profile?.academic) && profile.academic.length > 0) {
             education = profile.academic
               .map((a) => a.degree || a.title || a.name || "")
               .filter(Boolean)
@@ -95,13 +105,23 @@ export async function GET() {
           faculty.push({
             id: profile._id?.toString() || `faculty-ext-${index + 1}`,
             name: profile.fullName?.trim() || profile.name?.trim() || "সম্মানিত শিক্ষক",
+            fullName: profile.fullName?.trim() || profile.name?.trim() || "সম্মানিত শিক্ষক",
             designation: profile.designation?.trim() || "শিক্ষক",
             department: profile.department?.trim() || profile.subject?.trim() || "",
             subject: profile.subject?.trim() || profile.department?.trim() || "",
             education: education || "উচ্চতর ইসলামী ও সাধারণ শিক্ষা",
+            teacherId: profile.teacherId || profile.idNo || "",
+            bloodGroup: profile.bloodGroup || profile.blood || "",
+            dateOfBirth: profile.dateOfBirth || profile.dob || "",
+            address: profile.address || "",
+            joiningDate: profile.joiningDate || "",
+            academic: profile.academic || [],
+            experience: profile.experience || [],
             image: profile.profileImage || profile.image || "",
+            profileImage: profile.profileImage || profile.image || "",
             email: profile.email || "",
             phone: profile.phone || profile.mobile || "",
+            contact: profile.phone || profile.mobile || "",
             socialLinks: profile.socialLinks || {},
             bio: profile.bio || "",
           });

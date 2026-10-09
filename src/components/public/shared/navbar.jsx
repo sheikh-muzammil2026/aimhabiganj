@@ -19,7 +19,6 @@ export default function Navbar() {
 
   const isLoggedIn = !!session?.user;
   const userRole = session?.user?.role;
-  const userPhoto = session?.user?.image;
 
   useEffect(() => {
     const isDark =
@@ -53,6 +52,30 @@ export default function Navbar() {
     setActiveDropdown(null);
   };
 
+  const handleSubmenuClick = (e, href) => {
+    setActiveDropdown(null);
+    closeMenu();
+
+    if (href && href.includes("#")) {
+      const [targetPath, hash] = href.split("#");
+      const currentPath =
+        typeof window !== "undefined" ? window.location.pathname : "";
+
+      // If already on the target page (e.g., /about or /)
+      if (
+        currentPath === targetPath ||
+        (targetPath === "" && currentPath === "/")
+      ) {
+        const element = document.getElementById(hash);
+        if (element) {
+          e.preventDefault();
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+          window.history.pushState(null, "", href);
+        }
+      }
+    }
+  };
+
   const handleLogout = async () => {
     await authClient.signOut({
       fetchOptions: {
@@ -80,7 +103,6 @@ export default function Navbar() {
         { name: t("menu.committee"), href: "/about#committee" },
         { name: t("menu.features"), href: "/about#features" },
         { name: t("menu.roadmap"), href: "/about#roadmap" },
-        { name: t("menu.testimonials"), href: "/about#testimonials" },
         { name: t("menu.policies"), href: "/about#policies" },
         { name: t("menu.faculty"), href: "/about#faculty" },
         { name: t("menu.staff"), href: "/about#staff" },
@@ -192,6 +214,7 @@ export default function Navbar() {
                             <Link
                               key={i}
                               href={sub.href}
+                              onClick={(e) => handleSubmenuClick(e, sub.href)}
                               className="block px-4 py-2 text-xs xl:text-sm text-gray-700 dark:text-gray-200 hover:bg-emerald-50 dark:hover:bg-slate-700/50 hover:text-emerald-900 dark:hover:text-emerald-400 transition-colors border-b border-gray-100 dark:border-slate-700 last:border-0"
                             >
                               {sub.name}
@@ -203,6 +226,7 @@ export default function Navbar() {
                   ) : (
                     <Link
                       href={item.href}
+                      onClick={(e) => handleSubmenuClick(e, item.href)}
                       className="px-2 py-2 rounded-md text-[13px] xl:text-sm font-medium hover:bg-emerald-800/80 dark:hover:bg-slate-800/80 transition block text-white"
                     >
                       {item.name}
