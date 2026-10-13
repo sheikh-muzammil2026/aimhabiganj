@@ -23,27 +23,27 @@ export default function TeacherProfileDashboard() {
     phone: "",
     address: "",
     profileImage: "",
-    socialLinks: { linkedin: "", researchgate: "", website: "" },
-    // ২. সামারি / অবজেক্টিভ
+    bankAccount,
+
     bio: "",
-    // ৩. শিক্ষাগত যোগ্যতা (Array of Object)
+
     academic: [{ degree: "", institution: "", passingYear: "", result: "" }],
-    // ৪. শিক্ষাদানের অভিজ্ঞতা (Array of Object)
+
     experience: [
       { title: "", institution: "", duration: "", responsibilities: "" },
     ],
-    // ৫. দক্ষতা (Skills)
-    hardSkills: "", // যেমন: Lesson Planning, Curriculum Development
-    softSkills: "", // যেমন: Communication, Leadership
-    // ৬. টেকনোলজি ও সফটওয়্যার স্কিল (EdTech Skills)
-    edTechSkills: "", // যেমন: Google Classroom, MS PowerPoint, Zoom
-    // ৭. সার্টিফিকেট ও ট্রেনিং
+
+    hardSkills: "",
+    softSkills: "",
+
+    edTechSkills: "",
+
     certifications: [{ title: "", organization: "", year: "" }],
-    // ৮. গবেষণা ও পাবলিকেশন
+
     publications: [{ title: "", journal: "", year: "", link: "" }],
-    // ৯. অর্জন ও পুরস্কার
+
     awards: [{ title: "", organization: "", year: "" }],
-    // ১০. রেফারেন্স
+
     references: [
       { name: "", designation: "", institution: "", email: "", phone: "" },
     ],
@@ -346,12 +346,16 @@ export default function TeacherProfileDashboard() {
                 <label className="text-xs font-bold text-slate-600 block mb-1">
                   প্রফেশনাল টাইটেল / পদবী
                 </label>
-                <input
-                  type="text"
+                <select
                   value={profile.designation}
                   onChange={(e) => handleChange("designation", e.target.value)}
                   className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600"
-                />
+                >
+                  <option value="">পদবী নির্বাচন করুন</option>
+                  <option value="residential_teacher">আবাসিক শিক্ষক</option>
+                  <option value="hifz_teacher">হিফজ শিক্ষক</option>
+                  <option value="teacher">অনাবাসিক শিক্ষক</option>
+                </select>
               </div>
               <div>
                 <label className="text-xs font-bold text-slate-600 block mb-1">
@@ -388,11 +392,11 @@ export default function TeacherProfileDashboard() {
               </div>
               <div>
                 <label className="text-xs font-bold text-slate-600 block mb-1">
-                  LinkedIn Profile Link
+                  Bank Account
                 </label>
                 <input
                   type="url"
-                  value={profile.socialLinks.linkedin}
+                  value={profile.bankAccount}
                   onChange={(e) =>
                     handleNestedChange(
                       "socialLinks",
@@ -1190,43 +1194,43 @@ export default function TeacherProfileDashboard() {
         {/* ৭. সার্টিফিকেট ও অ্যাওয়ার্ড */}
         {(profile.certifications.some((c) => c.title) ||
           profile.awards.some((a) => a.title)) && (
-          <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {profile.certifications.some((c) => c.title) && (
-              <div>
-                <h2 className="text-sm font-bold uppercase border-b border-slate-400 pb-1 mb-2 text-slate-800">
-                  Certifications
-                </h2>
-                <div className="text-xs space-y-1 text-slate-700">
-                  {profile.certifications.map(
-                    (c, i) =>
-                      c.title && (
-                        <p key={i}>
-                          • {c.title} ({c.organization}, {c.year})
-                        </p>
-                      ),
-                  )}
+            <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {profile.certifications.some((c) => c.title) && (
+                <div>
+                  <h2 className="text-sm font-bold uppercase border-b border-slate-400 pb-1 mb-2 text-slate-800">
+                    Certifications
+                  </h2>
+                  <div className="text-xs space-y-1 text-slate-700">
+                    {profile.certifications.map(
+                      (c, i) =>
+                        c.title && (
+                          <p key={i}>
+                            • {c.title} ({c.organization}, {c.year})
+                          </p>
+                        ),
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
-            {profile.awards.some((a) => a.title) && (
-              <div>
-                <h2 className="text-sm font-bold uppercase border-b border-slate-400 pb-1 mb-2 text-slate-800">
-                  Honors & Awards
-                </h2>
-                <div className="text-xs space-y-1 text-slate-700">
-                  {profile.awards.map(
-                    (a, i) =>
-                      a.title && (
-                        <p key={i}>
-                          • {a.title} ({a.organization}, {a.year})
-                        </p>
-                      ),
-                  )}
+              )}
+              {profile.awards.some((a) => a.title) && (
+                <div>
+                  <h2 className="text-sm font-bold uppercase border-b border-slate-400 pb-1 mb-2 text-slate-800">
+                    Honors & Awards
+                  </h2>
+                  <div className="text-xs space-y-1 text-slate-700">
+                    {profile.awards.map(
+                      (a, i) =>
+                        a.title && (
+                          <p key={i}>
+                            • {a.title} ({a.organization}, {a.year})
+                          </p>
+                        ),
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        )}
+              )}
+            </div>
+          )}
 
         {/* ৮. রেফারেন্স */}
         {profile.references.some((r) => r.name) && (
