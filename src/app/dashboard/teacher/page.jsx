@@ -23,7 +23,7 @@ export default function TeacherProfileDashboard() {
     phone: "",
     address: "",
     profileImage: "",
-    bankAccount,
+    bankAccount: "",
 
     bio: "",
 
@@ -108,7 +108,7 @@ export default function TeacherProfileDashboard() {
     setProfile((prev) => ({
       ...prev,
       [parent]: { ...prev[parent], [field]: value },
-    }));
+    })); `1`
   };
 
   // ডায়নামিক অ্যারে আপডেট হ্যান্ডলার
@@ -399,8 +399,7 @@ export default function TeacherProfileDashboard() {
                   value={profile.bankAccount}
                   onChange={(e) =>
                     handleNestedChange(
-                      "socialLinks",
-                      "linkedin",
+
                       e.target.value,
                     )
                   }
@@ -1063,8 +1062,8 @@ export default function TeacherProfileDashboard() {
               </p>
               <p>
                 ✉️ {profile.email}{" "}
-                {profile.socialLinks.linkedin &&
-                  `| 🔗 ${profile.socialLinks.linkedin}`}
+                {profile?.socialLinks?.linkedin &&
+                  `| 🔗 ${profile?.socialLinks?.linkedin}`}
               </p>
             </div>
           </div>
