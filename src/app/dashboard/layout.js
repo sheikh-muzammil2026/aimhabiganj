@@ -179,6 +179,21 @@ const DashboardLayout = ({ children }) => {
       return;
     }
 
+    // Strict role-specific corner dashboard access checks (runs before admin bypass)
+    if (pathname.startsWith("/dashboard/parent")) {
+      if (userRole !== "parent") {
+        router.replace("/dashboard/unauthorized");
+      }
+      return;
+    }
+
+    if (pathname.startsWith("/dashboard/staff")) {
+      if (userRole !== "staff") {
+        router.replace("/dashboard/unauthorized");
+      }
+      return;
+    }
+
     if (userRole === "admin" || userRole === "superadmin") return;
 
     if (pathname.startsWith("/dashboard/profile-settings")) return;
@@ -224,24 +239,6 @@ const DashboardLayout = ({ children }) => {
 
     if (pathname.startsWith("/dashboard/student")) {
       if (userRole !== "student") {
-        router.replace("/dashboard/unauthorized");
-      }
-      return;
-    }
-
-    if (pathname.startsWith("/dashboard/parent")) {
-      if (userRole !== "parent") {
-        router.replace("/dashboard/unauthorized");
-      }
-      return;
-    }
-
-    if (pathname.startsWith("/dashboard/staff")) {
-      if (
-        userRole !== "staff" &&
-        !hasPerm("manage_staff") &&
-        !hasPerm("manage_users")
-      ) {
         router.replace("/dashboard/unauthorized");
       }
       return;

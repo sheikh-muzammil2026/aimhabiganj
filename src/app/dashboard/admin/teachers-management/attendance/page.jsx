@@ -22,8 +22,15 @@ import {
   Printer,
   X,
   FileText,
+  ChevronDown,
+  Layers,
+  Info,
 } from "lucide-react";
-import { getDhakaTime } from "@/lib/attendance-config";
+import {
+  getDhakaTime,
+  RESIDENTIAL_ATTENDANCE_RULES,
+  HIFZ_ATTENDANCE_RULES,
+} from "@/lib/attendance-config";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
@@ -37,6 +44,7 @@ export default function AdminTeachersAttendancePage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [expandedTeacherId, setExpandedTeacherId] = useState(null);
 
   // Monthly summary modal & report states
   const [monthlyModalOpen, setMonthlyModalOpen] = useState(false);
@@ -433,163 +441,394 @@ export default function AdminTeachersAttendancePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-700/30">
-                {attendanceList.map((item) => (
-                  <tr
-                    key={item.teacherId || item.teacherEmail}
-                    className="hover:bg-slate-50/70 dark:hover:bg-slate-700/20 transition-colors"
-                  >
-                    {/* Teacher Profile Column */}
-                    <td className="py-4 px-5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 font-bold flex items-center justify-center flex-shrink-0 text-sm border border-emerald-200 dark:border-emerald-800">
-                          {item.profileImage ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={item.profileImage}
-                              alt={item.teacherName}
-                              className="w-full h-full object-cover rounded-2xl"
-                            />
+                {attendanceList.map((item) => {
+                  const teacherKey = item.teacherId || item.teacherEmail;
+                  const isExpanded = expandedTeacherId === teacherKey;
+                  const isMultiShiftTeacher =
+                    item.category === "residential" ||
+                    item.category === "hifz" ||
+                    (item.shifts && Object.keys(item.shifts).length > 0);
+
+                  // Extract all shift-level comments
+                  const allComments = [];
+                  if (item.shifts) {
+                    Object.values(item.shifts).forEach((s) => {
+                      if (s?.checkInComment) {
+                        allComments.push({
+                          type: "late",
+                          label: `${s.name || s.shiftId} (দেরি)`,
+                          comment: s.checkInComment,
+                        });
+                      }
+                      if (s?.checkOutComment) {
+                        allComments.push({
+                          type: "early",
+                          label: `${s.name || s.shiftId} (আর্লি)`,
+                          comment: s.checkOutComment,
+                        });
+                      }
+                    });
+                  }
+                  if (allComments.length === 0) {
+                    if (item.checkInComment) {
+                      allComments.push({
+                        type: "late",
+                        label: "দেরি",
+                        comment: item.checkInComment,
+                      });
+                    }
+                    if (item.checkOutComment) {
+                      allComments.push({
+                        type: "early",
+                        label: "আর্লি",
+                        comment: item.checkOutComment,
+                      });
+                    }
+                  }
+
+                  const completedShiftsCount = item.shifts
+                    ? Object.values(item.shifts).filter((s) => !!s?.checkInTime).length
+                    : 0;
+
+                  return (
+                    <React.Fragment key={teacherKey}>
+                      <tr className="hover:bg-slate-50/70 dark:hover:bg-slate-700/20 transition-colors">
+                        {/* Teacher Profile Column */}
+                        <td className="py-4 px-5">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 font-bold flex items-center justify-center flex-shrink-0 text-sm border border-emerald-200 dark:border-emerald-800">
+                              {item.profileImage ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={item.profileImage}
+                                  alt={item.teacherName}
+                                  className="w-full h-full object-cover rounded-2xl"
+                                />
+                              ) : (
+                                item.teacherName.charAt(0)
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-bold text-slate-900 dark:text-white leading-snug">
+                                {item.teacherName}
+                              </p>
+                              <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                                {item.teacherEmail}
+                              </p>
+                              <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                                <span className="inline-block text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.2 rounded">
+                                  {item.designation}
+                                </span>
+                                {isMultiShiftTeacher && (
+                                  <span className="inline-block text-[10px] font-bold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/70 px-2 py-0.2 rounded-full border border-amber-300/80 dark:border-amber-700">
+                                    {item.category === "residential"
+                                      ? "আবাসিক (৩ শিফট)"
+                                      : item.category === "hifz"
+                                      ? "হিফজ (৩ শিফট)"
+                                      : "৩ শিফট"}
+                                  </span>
+                                )}
+                              </div>
+                              {isMultiShiftTeacher && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setExpandedTeacherId(isExpanded ? null : teacherKey)
+                                  }
+                                  className="mt-1.5 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 dark:hover:bg-amber-900 border border-amber-200 dark:border-amber-800 transition-colors"
+                                >
+                                  <Layers className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                                  <span>
+                                    শিফট তথ্য ({completedShiftsCount}/৩)
+                                  </span>
+                                  <ChevronDown
+                                    className={`w-3 h-3 transition-transform ${
+                                      isExpanded ? "rotate-180" : ""
+                                    }`}
+                                  />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Check-In Time */}
+                        <td className="py-4 px-4 font-mono text-xs whitespace-nowrap">
+                          {item.hasCheckedIn ? (
+                            <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
+                              <Clock3 className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>{formatTime(item.checkInTime)}</span>
+                            </div>
                           ) : (
-                            item.teacherName.charAt(0)
+                            <span className="text-slate-400">অনুপস্থিত</span>
                           )}
-                        </div>
-                        <div>
-                          <p className="font-bold text-slate-900 dark:text-white leading-snug">
-                            {item.teacherName}
-                          </p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-                            {item.teacherEmail}
-                          </p>
-                          <span className="inline-block mt-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.2 rounded">
-                            {item.designation}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
+                        </td>
 
-                    {/* Check-In Time */}
-                    <td className="py-4 px-4 font-mono text-xs whitespace-nowrap">
-                      {item.hasCheckedIn ? (
-                        <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
-                          <Clock3 className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>{formatTime(item.checkInTime)}</span>
-                        </div>
-                      ) : (
-                        <span className="text-slate-400">অনুপস্থিত</span>
-                      )}
-                    </td>
-
-                    {/* Check-In Status Badge */}
-                    <td className="py-4 px-4 whitespace-nowrap">
-                      {item.hasCheckedIn ? (
-                        <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${
-                            item.checkInStatus === "On Time"
-                              ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300"
-                              : "bg-rose-100 text-rose-800 dark:bg-rose-950/70 dark:text-rose-300 border border-rose-300"
-                          }`}
-                        >
-                          {item.checkInStatus === "On Time" ? (
-                            <CheckCircle2 className="w-3.5 h-3.5" />
+                        {/* Check-In Status Badge */}
+                        <td className="py-4 px-4 whitespace-nowrap">
+                          {item.hasCheckedIn ? (
+                            <span
+                              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${
+                                item.checkInStatus === "On Time"
+                                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300"
+                                  : "bg-rose-100 text-rose-800 dark:bg-rose-950/70 dark:text-rose-300 border border-rose-300"
+                              }`}
+                            >
+                              {item.checkInStatus === "On Time" ? (
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                              ) : (
+                                <AlertCircle className="w-3.5 h-3.5" />
+                              )}
+                              {item.checkInStatus === "On Time" ? "On Time" : "Late"}
+                            </span>
                           ) : (
-                            <AlertCircle className="w-3.5 h-3.5" />
-                          )}
-                          {item.checkInStatus === "On Time" ? "On Time" : "Late"}
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-600">
-                          <XCircle className="w-3.5 h-3.5 text-slate-400" />
-                          Absent
-                        </span>
-                      )}
-                    </td>
-
-                    {/* Check-Out Time */}
-                    <td className="py-4 px-4 font-mono text-xs whitespace-nowrap">
-                      {item.hasCheckedOut ? (
-                        <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
-                          <Clock3 className="w-3.5 h-3.5 text-teal-600" />
-                          <span>{formatTime(item.checkOutTime)}</span>
-                        </div>
-                      ) : (
-                        <span className="text-slate-400">--:--</span>
-                      )}
-                    </td>
-
-                    {/* Check-Out Status Badge */}
-                    <td className="py-4 px-4 whitespace-nowrap">
-                      {item.hasCheckedOut ? (
-                        <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${
-                            item.checkOutStatus === "On Time"
-                              ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300"
-                              : "bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-300"
-                          }`}
-                        >
-                          {item.checkOutStatus === "On Time" ? (
-                            <CheckCircle2 className="w-3.5 h-3.5" />
-                          ) : (
-                            <AlertCircle className="w-3.5 h-3.5" />
-                          )}
-                          {item.checkOutStatus === "On Time"
-                            ? "On Time"
-                            : "Early"}
-                        </span>
-                      ) : (
-                        <span className="text-xs text-slate-400">অপেক্ষমান</span>
-                      )}
-                    </td>
-
-                    {/* Duration */}
-                    <td className="py-4 px-4 text-xs font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">
-                      {calculateWorkDuration(item.checkInTime, item.checkOutTime) || (
-                        <span className="text-slate-400">--</span>
-                      )}
-                    </td>
-
-                    {/* Reason / Comments Column */}
-                    <td className="py-4 px-4 text-xs text-slate-600 dark:text-slate-300 max-w-xs">
-                      {item.checkInComment || item.checkOutComment ? (
-                        <div className="flex flex-col gap-1">
-                          {item.checkInComment && (
-                            <span title={item.checkInComment} className="truncate">
-                              <strong className="text-rose-600 font-semibold">দেরি:</strong> {item.checkInComment}
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-600">
+                              <XCircle className="w-3.5 h-3.5 text-slate-400" />
+                              Absent
                             </span>
                           )}
-                          {item.checkOutComment && (
-                            <span title={item.checkOutComment} className="truncate">
-                              <strong className="text-amber-600 font-semibold">আর্লি:</strong> {item.checkOutComment}
-                            </span>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-slate-400">--</span>
-                      )}
-                    </td>
+                        </td>
 
-                    {/* Location Link */}
-                    <td className="py-4 px-4 whitespace-nowrap text-xs">
-                      {item.checkInLocation ? (
-                        <a
-                          href={`https://maps.google.com/?q=${item.checkInLocation.lat},${item.checkInLocation.lng}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 hover:underline font-mono"
-                          title="ম্যাপে অবস্থান দেখুন"
-                        >
-                          <MapPin className="w-3.5 h-3.5" />
-                          <span>
-                            {item.checkInLocation.lat.toFixed(4)},{" "}
-                            {item.checkInLocation.lng.toFixed(4)}
-                          </span>
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
-                      ) : (
-                        <span className="text-slate-400">--</span>
+                        {/* Check-Out Time */}
+                        <td className="py-4 px-4 font-mono text-xs whitespace-nowrap">
+                          {item.hasCheckedOut ? (
+                            <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
+                              <Clock3 className="w-3.5 h-3.5 text-teal-600" />
+                              <span>{formatTime(item.checkOutTime)}</span>
+                            </div>
+                          ) : (
+                            <span className="text-slate-400">--:--</span>
+                          )}
+                        </td>
+
+                        {/* Check-Out Status Badge */}
+                        <td className="py-4 px-4 whitespace-nowrap">
+                          {item.hasCheckedOut ? (
+                            <span
+                              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${
+                                item.checkOutStatus === "On Time"
+                                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300"
+                                  : "bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-300"
+                              }`}
+                            >
+                              {item.checkOutStatus === "On Time" ? (
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                              ) : (
+                                <AlertCircle className="w-3.5 h-3.5" />
+                              )}
+                              {item.checkOutStatus === "On Time"
+                                ? "On Time"
+                                : "Early"}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-slate-400">অপেক্ষমান</span>
+                          )}
+                        </td>
+
+                        {/* Duration */}
+                        <td className="py-4 px-4 text-xs font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">
+                          {calculateWorkDuration(item.checkInTime, item.checkOutTime) || (
+                            <span className="text-slate-400">--</span>
+                          )}
+                        </td>
+
+                        {/* Reason / Comments Column */}
+                        <td className="py-4 px-4 text-xs text-slate-600 dark:text-slate-300 max-w-xs">
+                          {allComments.length > 0 ? (
+                            <div className="flex flex-col gap-1">
+                              {allComments.map((c, i) => (
+                                <span key={i} title={c.comment} className="truncate">
+                                  <strong
+                                    className={
+                                      c.type === "late"
+                                        ? "text-rose-600 font-semibold"
+                                        : "text-amber-600 font-semibold"
+                                    }
+                                  >
+                                    {c.label}:
+                                  </strong>{" "}
+                                  {c.comment}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-slate-400">--</span>
+                          )}
+                        </td>
+
+                        {/* Location Link */}
+                        <td className="py-4 px-4 whitespace-nowrap text-xs">
+                          {item.checkInLocation ? (
+                            <a
+                              href={`https://maps.google.com/?q=${item.checkInLocation.lat},${item.checkInLocation.lng}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 hover:underline font-mono"
+                              title="ম্যাপে অবস্থান দেখুন"
+                            >
+                              <MapPin className="w-3.5 h-3.5" />
+                              <span>
+                                {item.checkInLocation.lat.toFixed(4)},{" "}
+                                {item.checkInLocation.lng.toFixed(4)}
+                              </span>
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          ) : (
+                            <span className="text-slate-400">--</span>
+                          )}
+                        </td>
+                      </tr>
+
+                      {/* Expandable 3-Shift Breakdown Sub-Row */}
+                      {isExpanded && (
+                        <tr className="bg-slate-50/90 dark:bg-slate-900/80 border-y border-amber-200/60 dark:border-amber-900/40">
+                          <td colSpan={8} className="p-4 sm:p-5">
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <Layers className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                                  <h4 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-white">
+                                    {item.teacherName} — দৈনিক ৩ শিফট বিস্তারিত বিবরণ
+                                  </h4>
+                                  <span className="text-[10px] px-2 py-0.5 rounded-md font-semibold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300">
+                                    {item.category === "residential"
+                                      ? "আবাসিক শিক্ষক"
+                                      : item.category === "hifz"
+                                      ? "হিফজ শিক্ষক"
+                                      : item.designation}
+                                  </span>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => setExpandedTeacherId(null)}
+                                  className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold"
+                                >
+                                  বন্ধ করুন ✕
+                                </button>
+                              </div>
+
+                              {/* 3 Shifts Grid */}
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                {["shift1", "shift2", "shift3"].map((shiftKey, sIdx) => {
+                                  const rules =
+                                    item.category === "hifz"
+                                      ? HIFZ_ATTENDANCE_RULES[shiftKey]
+                                      : RESIDENTIAL_ATTENDANCE_RULES[shiftKey];
+                                  const sRecord = item.shifts?.[shiftKey];
+                                  const hasIn = !!sRecord?.checkInTime;
+                                  const hasOut = !!sRecord?.checkOutTime;
+
+                                  return (
+                                    <div
+                                      key={shiftKey}
+                                      className={`p-3.5 rounded-2xl border text-xs space-y-2 ${
+                                        hasIn
+                                          ? "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-xs"
+                                          : "bg-slate-100/60 dark:bg-slate-800/40 border-slate-200/60 dark:border-slate-700/30 opacity-80"
+                                      }`}
+                                    >
+                                      <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
+                                        <span className="font-bold text-slate-900 dark:text-white">
+                                          {rules?.name || `শিফট ${sIdx + 1}`}
+                                        </span>
+                                        <span className="text-[10px] font-medium text-slate-400">
+                                          {rules?.nameEnglish}
+                                        </span>
+                                      </div>
+
+                                      {/* Window Rules */}
+                                      <div className="text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5">
+                                        <p>প্রবেশ: {rules?.checkInWindowLabel || "--"}</p>
+                                        <p>প্রস্থান: {rules?.checkOutWindowLabel || "--"}</p>
+                                      </div>
+
+                                      {/* Check-In Details */}
+                                      <div className="pt-1 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between">
+                                        <span className="text-slate-500">প্রবেশ (In):</span>
+                                        {hasIn ? (
+                                          <div className="flex items-center gap-1.5 font-mono font-bold">
+                                            <span>{formatTime(sRecord.checkInTime)}</span>
+                                            <span
+                                              className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
+                                                sRecord.checkInStatus === "On Time"
+                                                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                                                  : "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300"
+                                              }`}
+                                            >
+                                              {sRecord.checkInStatus}
+                                            </span>
+                                          </div>
+                                        ) : (
+                                          <span className="text-slate-400">অনুপস্থিত</span>
+                                        )}
+                                      </div>
+
+                                      {/* Check-Out Details */}
+                                      <div className="flex items-center justify-between">
+                                        <span className="text-slate-500">প্রস্থান (Out):</span>
+                                        {hasOut ? (
+                                          <div className="flex items-center gap-1.5 font-mono font-bold">
+                                            <span>{formatTime(sRecord.checkOutTime)}</span>
+                                            <span
+                                              className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
+                                                sRecord.checkOutStatus === "On Time"
+                                                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                                                  : "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                                              }`}
+                                            >
+                                              {sRecord.checkOutStatus}
+                                            </span>
+                                          </div>
+                                        ) : (
+                                          <span className="text-slate-400">অপেক্ষমান</span>
+                                        )}
+                                      </div>
+
+                                      {/* Shift Comments */}
+                                      {(sRecord?.checkInComment || sRecord?.checkOutComment) && (
+                                        <div className="pt-2 border-t border-slate-100 dark:border-slate-700/60 space-y-1">
+                                          {sRecord.checkInComment && (
+                                            <div className="p-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 text-[11px]">
+                                              <span className="font-bold">দেরির কারণ:</span> {sRecord.checkInComment}
+                                            </div>
+                                          )}
+                                          {sRecord.checkOutComment && (
+                                            <div className="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 text-[11px]">
+                                              <span className="font-bold">আর্লি কারণ:</span> {sRecord.checkOutComment}
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
+
+                                      {/* Location Link */}
+                                      {sRecord?.checkInLocation && (
+                                        <div className="pt-1 text-[10px] text-slate-400 font-mono flex items-center justify-between">
+                                          <span>অবস্থান:</span>
+                                          <a
+                                            href={`https://maps.google.com/?q=${sRecord.checkInLocation.lat},${sRecord.checkInLocation.lng}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-0.5"
+                                          >
+                                            <MapPin className="w-3 h-3" />
+                                            <span>
+                                              {sRecord.checkInLocation.lat.toFixed(4)},{" "}
+                                              {sRecord.checkInLocation.lng.toFixed(4)}
+                                            </span>
+                                          </a>
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
                       )}
-                    </td>
-                  </tr>
-                ))}
+                    </React.Fragment>
+                  );
+                })}
               </tbody>
             </table>
           </div>

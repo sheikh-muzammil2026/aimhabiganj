@@ -249,6 +249,10 @@ export default function StaffAttendancePage() {
 
       const data = await res.json();
       if (!res.ok || !data.success) {
+        if (data.requiresComment) {
+          setCommentModalType("late");
+          setCommentModalOpen(true);
+        }
         toast.error(data.message || "১ম টার্ম হাজিরা ব্যর্থ হয়েছে।");
         return;
       }
@@ -296,6 +300,10 @@ export default function StaffAttendancePage() {
 
       const data = await res.json();
       if (!res.ok || !data.success) {
+        if (data.requiresComment) {
+          setCommentModalType("early");
+          setCommentModalOpen(true);
+        }
         toast.error(data.message || "২য় টার্ম হাজিরা ব্যর্থ হয়েছে।");
         return;
       }
@@ -315,10 +323,15 @@ export default function StaffAttendancePage() {
 
   const handleModalSubmit = (e) => {
     e.preventDefault();
+    const trimmed = attendanceComment.trim();
+    if (!trimmed) {
+      toast.warning("অনুগ্রহ করে কারণ উল্লেখ করুন।");
+      return;
+    }
     if (commentModalType === "late") {
-      executeCheckIn(attendanceComment);
+      executeCheckIn(trimmed);
     } else {
-      executeCheckOut(attendanceComment);
+      executeCheckOut(trimmed);
     }
   };
 

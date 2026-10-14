@@ -68,7 +68,27 @@ export async function proxy(request) {
   }
 
   // 6. Role and Permission access checks
-  // Admins and superadmins have unrestricted access to all routes
+  // Check /dashboard/parent routes (strictly accessible only to parent role)
+  if (pathname.startsWith("/dashboard/parent")) {
+    if (userRole === "parent") {
+      return NextResponse.next();
+    }
+    return NextResponse.redirect(
+      new URL("/dashboard/unauthorized", request.url),
+    );
+  }
+
+  // Check /dashboard/staff routes (strictly accessible only to staff role)
+  if (pathname.startsWith("/dashboard/staff")) {
+    if (userRole === "staff") {
+      return NextResponse.next();
+    }
+    return NextResponse.redirect(
+      new URL("/dashboard/unauthorized", request.url),
+    );
+  }
+
+  // Admins and superadmins have unrestricted access to all remaining routes
   if (userRole === "admin" || userRole === "superadmin") {
     return NextResponse.next();
   }
@@ -145,26 +165,6 @@ export async function proxy(request) {
   // Check /dashboard/student routes
   if (pathname.startsWith("/dashboard/student")) {
     if (userRole === "student") {
-      return NextResponse.next();
-    }
-    return NextResponse.redirect(
-      new URL("/dashboard/unauthorized", request.url),
-    );
-  }
-
-  // Check /dashboard/parent routes
-  if (pathname.startsWith("/dashboard/parent")) {
-    if (userRole === "parent") {
-      return NextResponse.next();
-    }
-    return NextResponse.redirect(
-      new URL("/dashboard/unauthorized", request.url),
-    );
-  }
-
-  // Check /dashboard/staff routes
-  if (pathname.startsWith("/dashboard/staff")) {
-    if (userRole === "staff" || hasPerm("manage_staff") || hasPerm("manage_users")) {
       return NextResponse.next();
     }
     return NextResponse.redirect(

@@ -16,6 +16,8 @@ export default function UnauthorizedPage() {
         return "/dashboard/admin";
       case "teacher":
         return "/dashboard/teacher";
+      case "staff":
+        return "/dashboard/staff";
       case "accountant":
         return "/dashboard/accountant";
       case "parent":
@@ -33,6 +35,8 @@ export default function UnauthorizedPage() {
         return "অ্যাডমিন (Admin)";
       case "teacher":
         return "শিক্ষক (Teacher)";
+      case "staff":
+        return "স্টাফ (Staff)";
       case "accountant":
         return "হিসাবরক্ষক (Accountant)";
       case "parent":

@@ -23,14 +23,23 @@ import {
   MessageSquare,
   X,
   Send,
+  ChevronDown,
+  Layers,
 } from "lucide-react";
 import {
   MADRASA_LOCATION,
   ATTENDANCE_RULES,
+  RESIDENTIAL_ATTENDANCE_RULES,
+  HIFZ_ATTENDANCE_RULES,
   isWithinMadrasaGeofence,
   calculateDistanceMeters,
   evaluateCheckInStatus,
   evaluateCheckOutStatus,
+  getTeacherCategory,
+  getTeacherShiftRules,
+  evaluateTeacherShiftCheckIn,
+  evaluateTeacherShiftCheckOut,
+  getActiveTeacherShift,
 } from "@/lib/attendance-config";
 
 const API_BASE =
@@ -44,6 +53,14 @@ export default function TeacherAttendancePage() {
   const teacherEmail = currentUser?.email || "tanim@gmail.com";
   const teacherName = currentUser?.name || "শিক্ষক";
   const teacherRole = currentUser?.role || "teacher";
+
+  // Teacher category & shift configuration state
+  const [teacherProfile, setTeacherProfile] = useState(null);
+  const [teacherCategory, setTeacherCategory] = useState("regular"); // "regular" | "residential" | "hifz"
+  const [shiftRules, setShiftRules] = useState(null);
+  const [activeShiftId, setActiveShiftId] = useState(null);
+  const [targetShiftId, setTargetShiftId] = useState(null); // Used when opening comment modal for a specific shift
+  const [submittingShiftId, setSubmittingShiftId] = useState(null);
 
   // Real-time state
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -66,6 +83,7 @@ export default function TeacherAttendancePage() {
   // Action loading states
   const [submittingCheckIn, setSubmittingCheckIn] = useState(false);
   const [submittingCheckOut, setSubmittingCheckOut] = useState(false);
+  const [expandedHistoryId, setExpandedHistoryId] = useState(null);
 
   // 1. Live Clock updating every second
   useEffect(() => {
@@ -123,6 +141,13 @@ export default function TeacherAttendancePage() {
       const json = await res.json();
       if (json.success) {
         setTodayData(json.attendance);
+        if (json.user) {
+          setTeacherProfile(json.user);
+        }
+        const category = json.category || getTeacherCategory(json.user?.designation);
+        setTeacherCategory(category);
+        setShiftRules(json.shiftRules || getTeacherShiftRules(category));
+        setActiveShiftId(json.activeShiftId || getActiveTeacherShift(category));
       }
     } catch (err) {
       console.error("Failed to load today's attendance:", err);
@@ -372,6 +397,171 @@ export default function TeacherAttendancePage() {
     }
   };
 
+  // 5.b Execute Multi-Shift Check-In API call
+  const executeShiftCheckIn = async (shiftKey, comment = "") => {
+    if (!currentCoords) {
+      toast.info("আপনার অবস্থান যাচাই করা হচ্ছে...");
+      requestLocation();
+      return;
+    }
+
+    const verification = isWithinMadrasaGeofence(currentCoords.lat, currentCoords.lng);
+    if (!verification.isInside) {
+      toast.error("You must be inside the madrasa premises to submit attendance.");
+      return;
+    }
+
+    try {
+      setSubmittingShiftId(shiftKey);
+      const res = await fetch(`${API_BASE}/api/attendance/check-in`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lat: currentCoords.lat,
+          lng: currentCoords.lng,
+          checkInComment: comment,
+          shiftId: shiftKey,
+          teacherEmail,
+          teacherName,
+          teacherId: currentUser?.id || "teacher-id",
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        toast.error(data.message || "শিফট প্রবেশ হাজিরা ব্যর্থ হয়েছে।");
+        return;
+      }
+
+      toast.success(data.message || "শিফট প্রবেশ হাজিরা সফলভাবে নিশ্চিত হয়েছে!");
+      setTodayData(data.attendance);
+      fetchHistory();
+      setCommentModalOpen(false);
+      setAttendanceComment("");
+      setTargetShiftId(null);
+    } catch (err) {
+      console.error("Shift check-in error:", err);
+      toast.error("সার্ভারের সাথে যোগাযোগে সমস্যা হয়েছে।");
+    } finally {
+      setSubmittingShiftId(null);
+    }
+  };
+
+  // Handle Shift Check-In Trigger
+  const handleShiftCheckIn = async (shiftKey) => {
+    if (!currentCoords) {
+      toast.info("আপনার অবস্থান যাচাই করা হচ্ছে...");
+      requestLocation();
+      return;
+    }
+
+    const verification = isWithinMadrasaGeofence(currentCoords.lat, currentCoords.lng);
+    if (!verification.isInside) {
+      toast.error("You must be inside the madrasa premises to submit attendance.");
+      return;
+    }
+
+    const evalResult = evaluateTeacherShiftCheckIn(teacherCategory, shiftKey, new Date());
+    if (evalResult.isLate) {
+      setTargetShiftId(shiftKey);
+      setCommentModalType("late");
+      setAttendanceComment("");
+      setCommentModalOpen(true);
+    } else {
+      await executeShiftCheckIn(shiftKey, "");
+    }
+  };
+
+  // 6.b Execute Multi-Shift Check-Out API call
+  const executeShiftCheckOut = async (shiftKey, comment = "") => {
+    if (!currentCoords) {
+      toast.info("আপনার অবস্থান যাচাই করা হচ্ছে...");
+      requestLocation();
+      return;
+    }
+
+    const verification = isWithinMadrasaGeofence(currentCoords.lat, currentCoords.lng);
+    if (!verification.isInside) {
+      toast.error("You must be inside the madrasa premises to submit attendance.");
+      return;
+    }
+
+    try {
+      setSubmittingShiftId(shiftKey);
+      const res = await fetch(`${API_BASE}/api/attendance/check-out`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lat: currentCoords.lat,
+          lng: currentCoords.lng,
+          checkOutComment: comment,
+          shiftId: shiftKey,
+          teacherEmail,
+          teacherName,
+          teacherId: currentUser?.id || "teacher-id",
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        toast.error(data.message || "শিফট প্রস্থান হাজিরা ব্যর্থ হয়েছে।");
+        return;
+      }
+
+      toast.success(data.message || "শিফট প্রস্থান হাজিরা সফলভাবে নিশ্চিত হয়েছে!");
+      setTodayData(data.attendance);
+      fetchHistory();
+      setCommentModalOpen(false);
+      setAttendanceComment("");
+      setTargetShiftId(null);
+    } catch (err) {
+      console.error("Shift check-out error:", err);
+      toast.error("সার্ভারের সাথে যোগাযোগে সমস্যা হয়েছে।");
+    } finally {
+      setSubmittingShiftId(null);
+    }
+  };
+
+  // Handle Shift Check-Out Trigger
+  const handleShiftCheckOut = async (shiftKey) => {
+    const shiftLog = todayData?.shifts?.[shiftKey];
+    if (!shiftLog || !shiftLog.checkInTime) {
+      toast.error("আজকের এই শিফটের কোনো প্রবেশ হাজিরা পাওয়া যায়নি। আগে Check-In সম্পন্ন করুন।");
+      return;
+    }
+
+    if (shiftLog.checkOutTime) {
+      toast.info("আপনি ইতিমধ্যে এই শিফটের প্রস্থান হাজিরা সম্পন্ন করেছেন।");
+      return;
+    }
+
+    if (!currentCoords) {
+      toast.info("আপনার অবস্থান যাচাই করা হচ্ছে...");
+      requestLocation();
+      return;
+    }
+
+    const verification = isWithinMadrasaGeofence(currentCoords.lat, currentCoords.lng);
+    if (!verification.isInside) {
+      toast.error("You must be inside the madrasa premises to submit attendance.");
+      return;
+    }
+
+    const evalResult = evaluateTeacherShiftCheckOut(teacherCategory, shiftKey, new Date());
+    if (evalResult.isEarly) {
+      setTargetShiftId(shiftKey);
+      setCommentModalType("early");
+      setAttendanceComment("");
+      setCommentModalOpen(true);
+    } else {
+      await executeShiftCheckOut(shiftKey, "");
+    }
+  };
+
+  const isMultiShift = teacherCategory === "residential" || teacherCategory === "hifz";
+  const activeShiftRules = shiftRules || (isMultiShift ? getTeacherShiftRules(teacherCategory) : null);
+  const currentActiveShift = activeShiftId || (isMultiShift ? getActiveTeacherShift(teacherCategory) : null);
+
   const isCheckedIn = !!todayData?.checkInTime;
   const isCheckedOut = !!todayData?.checkOutTime;
 
@@ -401,9 +591,23 @@ export default function TeacherAttendancePage() {
               <span>দৈনিক শিক্ষক হাজিরা ও প্রস্থান</span>
             </h1>
             <p className="text-sm text-emerald-100/80 max-w-xl leading-relaxed">
-              স্বাগতম, <strong>{teacherName}</strong> ({teacherEmail})।
+              স্বাগতম, <strong>{teacherProfile?.name || teacherName}</strong> ({teacherEmail})।
               মাদরাসা প্রাঙ্গণে অবস্থানকালীন সময়মতো প্রবেশ ও প্রস্থান হাজিরা নিশ্চিত করুন।
             </p>
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              {teacherProfile?.designation && (
+                <span className="px-2.5 py-0.5 text-xs font-semibold rounded-md bg-white/20 text-white border border-white/20">
+                  পদবি: {teacherProfile.designation}
+                </span>
+              )}
+              {isMultiShift && (
+                <span className="px-2.5 py-0.5 text-xs font-bold rounded-md bg-amber-400 text-slate-900 shadow-xs">
+                  {teacherCategory === "residential"
+                    ? "আবাসিক শিক্ষক (৩ শিফট)"
+                    : "হিফজ বিভাগীয় শিক্ষক (৩ শিফট)"}
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Live Clock & Islamic Date Widget */}
@@ -491,7 +695,218 @@ export default function TeacherAttendancePage() {
       </div>
 
       {/* 3. Action Cards Grid: Check-In & Check-Out */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {isMultiShift ? (
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 p-4 rounded-2xl">
+            <div className="flex items-center gap-3">
+              <span className="p-2 rounded-xl bg-emerald-600 text-white font-bold text-xs">
+                ৩ শিফট
+              </span>
+              <div>
+                <h3 className="text-sm font-bold text-emerald-950 dark:text-emerald-200">
+                  {teacherCategory === "residential"
+                    ? "আবাসিক শিক্ষক হাজিরা সূচি (দৈনিক ৩ শিফট)"
+                    : "হিফজ বিভাগীয় শিক্ষক হাজিরা সূচি (দৈনিক ৩ শিফট)"}
+                </h3>
+                <p className="text-xs text-emerald-800/80 dark:text-emerald-300/80">
+                  প্রতিটি শিফটে সময়মতো প্রবেশ ও প্রস্থান হাজিরা নিশ্চিত করুন। দেরিতে প্রবেশ বা নির্ধারিত সময়ের পূর্বে প্রস্থান করলে কারণ উল্লেখ করা বাধ্যতামূলক।
+                </p>
+              </div>
+            </div>
+            {currentActiveShift && (
+              <span className="self-start sm:self-center px-3 py-1 text-xs font-extrabold rounded-full bg-emerald-600 text-white flex items-center gap-1.5 shadow-xs whitespace-nowrap">
+                <span className="w-2 h-2 rounded-full bg-amber-300 animate-ping" />
+                বর্তমান সক্রিয়: {activeShiftRules?.[currentActiveShift]?.name || currentActiveShift}
+              </span>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {["shift1", "shift2", "shift3"].map((shiftKey) => {
+              const rule = activeShiftRules?.[shiftKey];
+              if (!rule) return null;
+              const shiftLog = todayData?.shifts?.[shiftKey];
+              const hasCheckedIn = !!shiftLog?.checkInTime;
+              const hasCheckedOut = !!shiftLog?.checkOutTime;
+              const isActive = currentActiveShift === shiftKey;
+              const isSubmitting = submittingShiftId === shiftKey;
+
+              return (
+                <div
+                  key={shiftKey}
+                  className={`relative overflow-hidden bg-white dark:bg-slate-800/80 rounded-3xl border p-6 shadow-sm transition-all hover:shadow-md flex flex-col justify-between ${
+                    isActive
+                      ? "border-emerald-500 dark:border-emerald-500/80 ring-2 ring-emerald-500/20"
+                      : "border-slate-200/80 dark:border-slate-700/60"
+                  }`}
+                >
+                  <div className="space-y-4">
+                    {/* Shift Header */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`p-2 rounded-xl text-xs font-bold ${
+                              isActive
+                                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400"
+                                : "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
+                            }`}
+                          >
+                            <Clock className="w-4 h-4" />
+                          </span>
+                          <h4 className="text-lg font-bold text-slate-800 dark:text-white">
+                            {rule.name}
+                          </h4>
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                          {rule.nameEnglish}
+                        </p>
+                      </div>
+
+                      {/* Status Badges */}
+                      <div className="flex flex-col items-end gap-1">
+                        {hasCheckedOut ? (
+                          <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 flex items-center gap-1">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                            সম্পন্ন
+                          </span>
+                        ) : hasCheckedIn ? (
+                          <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-300 flex items-center gap-1">
+                            <LogIn className="w-3.5 h-3.5 text-blue-600" />
+                            চলমান
+                          </span>
+                        ) : (
+                          <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                            অপেক্ষমান
+                          </span>
+                        )}
+                        {isActive && (
+                          <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-600 text-white">
+                            বর্তমান সময়
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Schedule Time Window Guide */}
+                    <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 space-y-1.5 text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-500 dark:text-slate-400">প্রবেশ সময়:</span>
+                        <span className="font-semibold text-slate-800 dark:text-slate-200">
+                          {rule.checkInWindowLabel}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-500 dark:text-slate-400">প্রস্থান সময়:</span>
+                        <span className="font-semibold text-slate-800 dark:text-slate-200">
+                          {rule.checkOutWindowLabel}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Logged Information */}
+                    <div className="p-3.5 rounded-2xl bg-slate-50/70 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 space-y-2 text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-500 dark:text-slate-400">প্রবেশ রেকর্ড:</span>
+                        <span className="font-mono font-bold text-slate-800 dark:text-white">
+                          {hasCheckedIn ? formatDisplayTime(shiftLog.checkInTime) : "--:--"}
+                        </span>
+                      </div>
+                      {hasCheckedIn && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-500 dark:text-slate-400">প্রবেশ স্ট্যাটাস:</span>
+                          <span
+                            className={`font-semibold ${
+                              shiftLog.checkInStatus === "On Time"
+                                ? "text-emerald-600 dark:text-emerald-400"
+                                : "text-rose-600 dark:text-rose-400"
+                            }`}
+                          >
+                            {shiftLog.checkInStatus === "On Time" ? "সময়মতো" : "দেরিতে (Late)"}
+                          </span>
+                        </div>
+                      )}
+                      {shiftLog?.checkInComment && (
+                        <div className="text-[11px] text-rose-600 dark:text-rose-400 italic bg-rose-50 dark:bg-rose-950/30 p-2 rounded-xl">
+                          <strong>দেরির কারণ:</strong> {shiftLog.checkInComment}
+                        </div>
+                      )}
+
+                      <div className="pt-1.5 border-t border-slate-200/50 dark:border-slate-800 flex items-center justify-between">
+                        <span className="text-slate-500 dark:text-slate-400">প্রস্থান রেকর্ড:</span>
+                        <span className="font-mono font-bold text-slate-800 dark:text-white">
+                          {hasCheckedOut ? formatDisplayTime(shiftLog.checkOutTime) : "--:--"}
+                        </span>
+                      </div>
+                      {hasCheckedOut && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-500 dark:text-slate-400">প্রস্থান স্ট্যাটাস:</span>
+                          <span
+                            className={`font-semibold ${
+                              shiftLog.checkOutStatus === "On Time"
+                                ? "text-emerald-600 dark:text-emerald-400"
+                                : "text-amber-600 dark:text-amber-400"
+                            }`}
+                          >
+                            {shiftLog.checkOutStatus === "On Time" ? "অন-টাইম প্রস্থান" : "সময়ের পূর্বে (Early)"}
+                          </span>
+                        </div>
+                      )}
+                      {shiftLog?.checkOutComment && (
+                        <div className="text-[11px] text-amber-700 dark:text-amber-400 italic bg-amber-50 dark:bg-amber-950/30 p-2 rounded-xl">
+                          <strong>পূর্বে প্রস্থানের কারণ:</strong> {shiftLog.checkOutComment}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Actions for this Shift */}
+                  <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700/60 grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => handleShiftCheckIn(shiftKey)}
+                      disabled={hasCheckedIn || isSubmitting}
+                      className={`py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
+                        hasCheckedIn
+                          ? "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed"
+                          : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs active:scale-[0.98]"
+                      }`}
+                    >
+                      {isSubmitting ? (
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      ) : hasCheckedIn ? (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                      ) : (
+                        <LogIn className="w-3.5 h-3.5" />
+                      )}
+                      <span>{hasCheckedIn ? "প্রবেশ সম্পন্ন" : "প্রবেশ (Check In)"}</span>
+                    </button>
+
+                    <button
+                      onClick={() => handleShiftCheckOut(shiftKey)}
+                      disabled={!hasCheckedIn || hasCheckedOut || isSubmitting}
+                      className={`py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
+                        !hasCheckedIn || hasCheckedOut
+                          ? "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed"
+                          : "bg-teal-700 hover:bg-teal-800 text-white shadow-xs active:scale-[0.98]"
+                      }`}
+                    >
+                      {isSubmitting ? (
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      ) : hasCheckedOut ? (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                      ) : (
+                        <LogOut className="w-3.5 h-3.5" />
+                      )}
+                      <span>{hasCheckedOut ? "প্রস্থান সম্পন্ন" : "প্রস্থান (Check Out)"}</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* CHECK-IN CARD */}
         <div className="relative overflow-hidden bg-white dark:bg-slate-800/80 rounded-3xl border border-slate-200/80 dark:border-slate-700/60 p-6 sm:p-7 shadow-sm transition-all hover:shadow-md">
           <div className="flex items-start justify-between">
@@ -693,57 +1108,100 @@ export default function TeacherAttendancePage() {
           </button>
         </div>
       </div>
+      )}
 
       {/* 4. Office Hours & Attendance Rules Card */}
-      <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60 rounded-3xl p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Info className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-          <h3 className="text-base font-bold text-slate-800 dark:text-white">
-            মাদরাসা অফিস সময় ও হাজিরা নির্দেশিকা
-          </h3>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/70 dark:border-slate-700/40 space-y-1">
-            <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
-              অফিস কার্যকাল
-            </span>
-            <p className="text-sm font-bold text-slate-800 dark:text-white">
-              সকাল ৮:০০ - দুপুর ১:১০
-            </p>
-            <p className="text-xs text-slate-400">দৈনিক মোট ৫ ঘণ্টা ১০ মিনিট</p>
+      {isMultiShift ? (
+        <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60 rounded-3xl p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Info className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+            <h3 className="text-base font-bold text-slate-800 dark:text-white">
+              {teacherCategory === "residential"
+                ? "আবাসিক শিক্ষক (৩ শিফট) হাজিরা নির্দেশিকা ও সময়সূচি"
+                : "হিফজ বিভাগীয় শিক্ষক (৩ শিফট) হাজিরা নির্দেশিকা ও সময়সূচি"}
+            </h3>
           </div>
-
-          <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/70 dark:border-slate-700/40 space-y-1">
-            <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
-              অন-টাইম প্রবেশ (Arrival)
-            </span>
-            <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-              সকাল ৮:০৫ বা পূর্বে
-            </p>
-            <p className="text-xs text-slate-400">সকাল ৮:০৫ এর পর প্রবেশ করলে Late</p>
-          </div>
-
-          <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/70 dark:border-slate-700/40 space-y-1">
-            <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
-              অন-টাইম প্রস্থান (Departure)
-            </span>
-            <p className="text-sm font-bold text-teal-600 dark:text-teal-400">
-              দুপুর ১:১০ বা পরে
-            </p>
-            <p className="text-xs text-slate-400">দুপুর ১:১০ এর পূর্বে প্রস্থান Early</p>
-          </div>
-
-          <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/70 dark:border-slate-700/40 space-y-1">
-            <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
-              লোকেশন বাধ্যবাধকতা
-            </span>
-            <p className="text-sm font-bold text-amber-600 dark:text-amber-400">
-              সর্বোচ্চ {MADRASA_LOCATION.RADIUS_METERS} মিটার
-            </p>
-            <p className="text-xs text-slate-400">মাদরাসা প্রাঙ্গণের বাইরে সাবমিট হবে না</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {["shift1", "shift2", "shift3"].map((shiftKey) => {
+              const rule = activeShiftRules?.[shiftKey];
+              if (!rule) return null;
+              return (
+                <div
+                  key={shiftKey}
+                  className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/70 dark:border-slate-700/40 space-y-2"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-slate-800 dark:text-white text-sm">
+                      {rule.name}
+                    </span>
+                    <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                      {rule.nameEnglish}
+                    </span>
+                  </div>
+                  <div className="space-y-1 text-xs text-slate-600 dark:text-slate-300">
+                    <p>
+                      <strong>প্রবেশ সময়:</strong> {rule.checkInWindowLabel}
+                    </p>
+                    <p>
+                      <strong>প্রস্থান সময়:</strong> {rule.checkOutWindowLabel}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60 rounded-3xl p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Info className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+            <h3 className="text-base font-bold text-slate-800 dark:text-white">
+              মাদরাসা অফিস সময় ও হাজিরা নির্দেশিকা
+            </h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/70 dark:border-slate-700/40 space-y-1">
+              <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                অফিস কার্যকাল
+              </span>
+              <p className="text-sm font-bold text-slate-800 dark:text-white">
+                সকাল ৮:০০ - দুপুর ১:১০
+              </p>
+              <p className="text-xs text-slate-400">দৈনিক মোট ৫ ঘণ্টা ১০ মিনিট</p>
+            </div>
+
+            <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/70 dark:border-slate-700/40 space-y-1">
+              <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                অন-টাইম প্রবেশ (Arrival)
+              </span>
+              <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                সকাল ৮:০৫ বা পূর্বে
+              </p>
+              <p className="text-xs text-slate-400">সকাল ৮:০৫ এর পর প্রবেশ করলে Late</p>
+            </div>
+
+            <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/70 dark:border-slate-700/40 space-y-1">
+              <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                অন-টাইম প্রস্থান (Departure)
+              </span>
+              <p className="text-sm font-bold text-teal-600 dark:text-teal-400">
+                দুপুর ১:১০ বা পরে
+              </p>
+              <p className="text-xs text-slate-400">দুপুর ১:১০ এর পূর্বে প্রস্থান Early</p>
+            </div>
+
+            <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/70 dark:border-slate-700/40 space-y-1">
+              <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                লোকেশন বাধ্যবাধকতা
+              </span>
+              <p className="text-sm font-bold text-amber-600 dark:text-amber-400">
+                সর্বোচ্চ {MADRASA_LOCATION.RADIUS_METERS} মিটার
+              </p>
+              <p className="text-xs text-slate-400">মাদরাসা প্রাঙ্গণের বাইরে সাবমিট হবে না</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 5. Personal Attendance History Table */}
       <div className="bg-white dark:bg-slate-800/80 rounded-3xl border border-slate-200/80 dark:border-slate-700/60 p-6 sm:p-7 shadow-sm">
@@ -786,66 +1244,240 @@ export default function TeacherAttendancePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-700/30">
-                {historyList.map((item) => (
-                  <tr
-                    key={item._id}
-                    className="hover:bg-slate-50/80 dark:hover:bg-slate-700/20 transition-colors"
-                  >
-                    <td className="py-3.5 px-4 font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap">
-                      {item.date}
-                    </td>
-                    <td className="py-3.5 px-4 font-mono text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                      {formatDisplayTime(item.checkInTime)}
-                    </td>
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                          item.checkInStatus === "On Time"
-                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
-                            : "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300"
-                        }`}
-                      >
-                        {item.checkInStatus === "On Time" ? "On Time" : "Late"}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 font-mono text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                      {formatDisplayTime(item.checkOutTime)}
-                    </td>
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      {item.checkOutStatus ? (
-                        <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                            item.checkOutStatus === "On Time"
-                              ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
-                              : "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
-                          }`}
-                        >
-                          {item.checkOutStatus === "On Time" ? "On Time" : "Early"}
-                        </span>
-                      ) : (
-                        <span className="text-slate-400 text-xs">অপেক্ষমান</span>
-                      )}
-                    </td>
-                    <td className="py-3.5 px-4 text-xs text-slate-600 dark:text-slate-300 max-w-xs">
-                      {item.checkInComment || item.checkOutComment ? (
-                        <div className="flex flex-col gap-0.5">
-                          {item.checkInComment && (
-                            <span title={item.checkInComment} className="truncate">
-                              <strong className="text-rose-600 font-semibold">দেরি:</strong> {item.checkInComment}
-                            </span>
+                {historyList.map((item) => {
+                  const isExpanded = expandedHistoryId === item._id;
+                  const hasShifts = item.shifts && Object.keys(item.shifts).length > 0;
+
+                  // Collect all comments across shifts
+                  const historyComments = [];
+                  if (item.shifts) {
+                    Object.values(item.shifts).forEach((s) => {
+                      if (s?.checkInComment) {
+                        historyComments.push({
+                          type: "late",
+                          label: `${s.name || s.shiftId} (দেরি)`,
+                          comment: s.checkInComment,
+                        });
+                      }
+                      if (s?.checkOutComment) {
+                        historyComments.push({
+                          type: "early",
+                          label: `${s.name || s.shiftId} (আর্লি)`,
+                          comment: s.checkOutComment,
+                        });
+                      }
+                    });
+                  }
+                  if (historyComments.length === 0) {
+                    if (item.checkInComment) {
+                      historyComments.push({
+                        type: "late",
+                        label: "দেরি",
+                        comment: item.checkInComment,
+                      });
+                    }
+                    if (item.checkOutComment) {
+                      historyComments.push({
+                        type: "early",
+                        label: "আর্লি",
+                        comment: item.checkOutComment,
+                      });
+                    }
+                  }
+
+                  const completedCount = hasShifts
+                    ? Object.values(item.shifts).filter((s) => !!s?.checkInTime).length
+                    : 0;
+
+                  return (
+                    <React.Fragment key={item._id}>
+                      <tr className="hover:bg-slate-50/80 dark:hover:bg-slate-700/20 transition-colors">
+                        <td className="py-3.5 px-4 font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap">
+                          <div>{item.date}</div>
+                          {hasShifts && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setExpandedHistoryId(isExpanded ? null : item._id)
+                              }
+                              className="mt-1 inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 dark:text-amber-400 hover:underline"
+                            >
+                              <Layers className="w-3 h-3" />
+                              <span>শিফট বিবরণ ({completedCount}/৩)</span>
+                              <ChevronDown
+                                className={`w-3 h-3 transition-transform ${
+                                  isExpanded ? "rotate-180" : ""
+                                }`}
+                              />
+                            </button>
                           )}
-                          {item.checkOutComment && (
-                            <span title={item.checkOutComment} className="truncate">
-                              <strong className="text-amber-600 font-semibold">আর্লি:</strong> {item.checkOutComment}
+                        </td>
+                        <td className="py-3.5 px-4 font-mono text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                          {formatDisplayTime(item.checkInTime)}
+                        </td>
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                              item.checkInStatus === "On Time"
+                                ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                                : "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300"
+                            }`}
+                          >
+                            {item.checkInStatus === "On Time" ? "On Time" : "Late"}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 font-mono text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                          {formatDisplayTime(item.checkOutTime)}
+                        </td>
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          {item.checkOutStatus ? (
+                            <span
+                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                                item.checkOutStatus === "On Time"
+                                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                                  : "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
+                              }`}
+                            >
+                              {item.checkOutStatus === "On Time" ? "On Time" : "Early"}
                             </span>
+                          ) : (
+                            <span className="text-slate-400 text-xs">অপেক্ষমান</span>
                           )}
-                        </div>
-                      ) : (
-                        <span className="text-slate-400">-</span>
+                        </td>
+                        <td className="py-3.5 px-4 text-xs text-slate-600 dark:text-slate-300 max-w-xs">
+                          {historyComments.length > 0 ? (
+                            <div className="flex flex-col gap-0.5">
+                              {historyComments.map((hc, i) => (
+                                <span key={i} title={hc.comment} className="truncate">
+                                  <strong
+                                    className={
+                                      hc.type === "late"
+                                        ? "text-rose-600 font-semibold"
+                                        : "text-amber-600 font-semibold"
+                                    }
+                                  >
+                                    {hc.label}:
+                                  </strong>{" "}
+                                  {hc.comment}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-slate-400">-</span>
+                          )}
+                        </td>
+                      </tr>
+
+                      {/* Expandable Shifts Row in History */}
+                      {isExpanded && hasShifts && (
+                        <tr className="bg-slate-50/90 dark:bg-slate-900/80 border-y border-amber-200/60 dark:border-amber-900/40">
+                          <td colSpan={6} className="p-4">
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs font-bold text-slate-800 dark:text-white flex items-center gap-1.5">
+                                  <Layers className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                                  <span>{item.date} — ৩ শিফট বিবরণ</span>
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => setExpandedHistoryId(null)}
+                                  className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+                                {["shift1", "shift2", "shift3"].map((shiftKey, sIdx) => {
+                                  const sRecord = item.shifts?.[shiftKey];
+                                  const rules =
+                                    item.category === "hifz"
+                                      ? HIFZ_ATTENDANCE_RULES[shiftKey]
+                                      : RESIDENTIAL_ATTENDANCE_RULES[shiftKey];
+                                  const hasIn = !!sRecord?.checkInTime;
+                                  const hasOut = !!sRecord?.checkOutTime;
+
+                                  return (
+                                    <div
+                                      key={shiftKey}
+                                      className={`p-3 rounded-xl border text-xs space-y-1.5 ${
+                                        hasIn
+                                          ? "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-xs"
+                                          : "bg-slate-100/60 dark:bg-slate-800/40 border-slate-200/60 dark:border-slate-700/30 opacity-70"
+                                      }`}
+                                    >
+                                      <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-1 font-bold text-slate-800 dark:text-white">
+                                        <span>{rules?.name || `শিফট ${sIdx + 1}`}</span>
+                                        <span className="text-[10px] text-slate-400">
+                                          {rules?.nameEnglish}
+                                        </span>
+                                      </div>
+
+                                      <div className="flex items-center justify-between text-[11px]">
+                                        <span className="text-slate-500">প্রবেশ:</span>
+                                        {hasIn ? (
+                                          <span className="font-mono font-bold">
+                                            {formatDisplayTime(sRecord.checkInTime)}{" "}
+                                            <span
+                                              className={`px-1 py-0.2 rounded text-[9px] font-bold ${
+                                                sRecord.checkInStatus === "On Time"
+                                                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                                                  : "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300"
+                                              }`}
+                                            >
+                                              {sRecord.checkInStatus}
+                                            </span>
+                                          </span>
+                                        ) : (
+                                          <span className="text-slate-400">অনুপস্থিত</span>
+                                        )}
+                                      </div>
+
+                                      <div className="flex items-center justify-between text-[11px]">
+                                        <span className="text-slate-500">প্রস্থান:</span>
+                                        {hasOut ? (
+                                          <span className="font-mono font-bold">
+                                            {formatDisplayTime(sRecord.checkOutTime)}{" "}
+                                            <span
+                                              className={`px-1 py-0.2 rounded text-[9px] font-bold ${
+                                                sRecord.checkOutStatus === "On Time"
+                                                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                                                  : "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                                              }`}
+                                            >
+                                              {sRecord.checkOutStatus}
+                                            </span>
+                                          </span>
+                                        ) : (
+                                          <span className="text-slate-400">অপেক্ষমান</span>
+                                        )}
+                                      </div>
+
+                                      {(sRecord?.checkInComment || sRecord?.checkOutComment) && (
+                                        <div className="pt-1 border-t border-slate-100 dark:border-slate-700/60 text-[10px] space-y-0.5">
+                                          {sRecord.checkInComment && (
+                                            <div className="text-rose-700 dark:text-rose-300 truncate">
+                                              <strong>দেরি:</strong> {sRecord.checkInComment}
+                                            </div>
+                                          )}
+                                          {sRecord.checkOutComment && (
+                                            <div className="text-amber-700 dark:text-amber-300 truncate">
+                                              <strong>আর্লি:</strong> {sRecord.checkOutComment}
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
                       )}
-                    </td>
-                  </tr>
-                ))}
+                    </React.Fragment>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -869,19 +1501,32 @@ export default function TeacherAttendancePage() {
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                    {commentModalType === "late"
+                    {targetShiftId && activeShiftRules?.[targetShiftId]
+                      ? `${activeShiftRules[targetShiftId].name}: ${
+                          commentModalType === "late"
+                            ? "দেরিতে উপস্থিতির কারণ"
+                            : "সময়ের পূর্বে প্রস্থানের কারণ"
+                        }`
+                      : commentModalType === "late"
                       ? "দেরিতে উপস্থিতির কারণ"
                       : "সময়ের পূর্বে প্রস্থানের কারণ"}
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {commentModalType === "late"
+                    {targetShiftId && activeShiftRules?.[targetShiftId]
+                      ? commentModalType === "late"
+                        ? `নির্ধারিত সময় (${activeShiftRules[targetShiftId].checkInWindowLabel}) অতিক্রান্ত হয়েছে`
+                        : `নির্ধারিত সময় (${activeShiftRules[targetShiftId].checkOutWindowLabel}) এর পূর্বে প্রস্থান করছেন`
+                      : commentModalType === "late"
                       ? "নির্ধারিত সময় (সকাল ৮:০৫) এর পরে প্রবেশ করছেন"
                       : "নির্ধারিত সময় (দুপুর ১:১০) এর পূর্বে প্রস্থান করছেন"}
                   </p>
                 </div>
               </div>
               <button
-                onClick={() => setCommentModalOpen(false)}
+                onClick={() => {
+                  setCommentModalOpen(false);
+                  setTargetShiftId(null);
+                }}
                 className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition"
               >
                 <X className="w-5 h-5" />
@@ -914,23 +1559,36 @@ export default function TeacherAttendancePage() {
             <div className="flex items-center justify-end gap-2.5 pt-2">
               <button
                 type="button"
-                onClick={() => setCommentModalOpen(false)}
-                disabled={submittingCheckIn || submittingCheckOut}
+                onClick={() => {
+                  setCommentModalOpen(false);
+                  setTargetShiftId(null);
+                }}
+                disabled={submittingCheckIn || submittingCheckOut || !!submittingShiftId}
                 className="px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
               >
                 বাতিল করুন
               </button>
               <button
                 type="button"
-                onClick={() =>
-                  commentModalType === "late"
-                    ? executeCheckIn(attendanceComment)
-                    : executeCheckOut(attendanceComment)
-                }
-                disabled={submittingCheckIn || submittingCheckOut}
+                onClick={() => {
+                  if (targetShiftId) {
+                    if (commentModalType === "late") {
+                      executeShiftCheckIn(targetShiftId, attendanceComment);
+                    } else {
+                      executeShiftCheckOut(targetShiftId, attendanceComment);
+                    }
+                  } else {
+                    if (commentModalType === "late") {
+                      executeCheckIn(attendanceComment);
+                    } else {
+                      executeCheckOut(attendanceComment);
+                    }
+                  }
+                }}
+                disabled={submittingCheckIn || submittingCheckOut || !!submittingShiftId}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white shadow-md shadow-emerald-600/20 active:scale-[0.98] transition disabled:opacity-50"
               >
-                {submittingCheckIn || submittingCheckOut ? (
+                {submittingCheckIn || submittingCheckOut || !!submittingShiftId ? (
                   <>
                     <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                     <span>জমা হচ্ছে...</span>

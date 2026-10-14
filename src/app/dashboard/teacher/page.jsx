@@ -7,6 +7,13 @@ import { authClient } from "@/lib/auth-client";
 const API_BASE =
   process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
 
+const DESIGNATION_OPTIONS = [
+  "শিক্ষক",
+  "অনাবাসিক শিক্ষক",
+  "আবাসিক শিক্ষক",
+  "হিফজ শিক্ষক",
+];
+
 export default function TeacherProfileDashboard() {
   const { data: session, isPending: sessionPending } = authClient.useSession();
   const teacherEmail = session?.user?.email || "yousuf.hasani@madrasah.edu";
@@ -22,11 +29,24 @@ export default function TeacherProfileDashboard() {
     email: teacherEmail,
     // ১. হেডার ও ব্যক্তিগত তথ্য
     fullName: "",
+    nameEnglish: "",
     designation: "",
     phone: "",
     address: "",
+    addressDetails: {
+      district: "",
+      thana: "",
+      postOffice: "",
+      village: "",
+    },
+    bankAccount: {
+      bankName: "",
+      accountNumber: "",
+      branchName: "",
+      routingNumber: "",
+      accountType: "সঞ্চয়ী (Savings)",
+    },
     profileImage: "",
-    bankAccount: "",
 
     bio: "",
 
@@ -72,11 +92,51 @@ export default function TeacherProfileDashboard() {
       const result = await res.json();
 
       if (result.success && result.data) {
+        const rawBank = result.data.bankAccount;
+        let parsedBank = {
+          bankName: "",
+          accountNumber: "",
+          branchName: "",
+          routingNumber: "",
+          accountType: "সঞ্চয়ী (Savings)",
+        };
+        if (typeof rawBank === "object" && rawBank !== null) {
+          parsedBank = { ...parsedBank, ...rawBank };
+        } else if (typeof rawBank === "string") {
+          parsedBank.accountNumber = rawBank;
+        }
+
+        // Map legacy English designation slug if present
+        let parsedDesignation = result.data.designation || "";
+        if (parsedDesignation === "residential_teacher") {
+          parsedDesignation = "আবাসিক শিক্ষক";
+        } else if (parsedDesignation === "hifz_teacher") {
+          parsedDesignation = "হিফজ শিক্ষক";
+        } else if (parsedDesignation === "teacher") {
+          parsedDesignation = "অনাবাসিক শিক্ষক";
+        }
+
+        const rawAddrDetails = result.data.addressDetails;
+        let parsedAddrDetails = {
+          district: "",
+          thana: "",
+          postOffice: "",
+          village: "",
+        };
+        if (typeof rawAddrDetails === "object" && rawAddrDetails !== null) {
+          parsedAddrDetails = { ...parsedAddrDetails, ...rawAddrDetails };
+        }
+
         setProfile((prev) => ({
           ...prev,
           ...result.data,
+          designation: parsedDesignation,
+          nameEnglish: result.data.nameEnglish || prev.nameEnglish || "",
+          bankAccount: parsedBank,
+          addressDetails: parsedAddrDetails,
+          address: result.data.address || prev.address || "",
           email: email,
-          socialLinks: { ...prev.socialLinks, ...result.data.socialLinks },
+          socialLinks: { ...(prev.socialLinks || {}), ...(result.data.socialLinks || {}) },
           // অ্যারে ভ্যালুগুলো না থাকলে ডিফল্ট বজায় রাখা
           academic: result.data.academic?.length
             ? result.data.academic
@@ -125,8 +185,35 @@ export default function TeacherProfileDashboard() {
   const handleNestedChange = (parent, field, value) => {
     setProfile((prev) => ({
       ...prev,
-      [parent]: { ...prev[parent], [field]: value },
-    })); `1`
+      [parent]: {
+        ...(prev[parent] || {}),
+        [field]: value,
+      },
+    }));
+  };
+
+  const handleAddressDetailChange = (field, value) => {
+    setProfile((prev) => {
+      const updatedDetails = {
+        ...(prev.addressDetails || {}),
+        [field]: value,
+      };
+      // Format combined address string
+      const parts = [
+        updatedDetails.village,
+        updatedDetails.postOffice ? `ডাকঘর: ${updatedDetails.postOffice}` : "",
+        updatedDetails.thana,
+        updatedDetails.district,
+      ]
+        .map((p) => (p || "").trim())
+        .filter(Boolean);
+
+      return {
+        ...prev,
+        addressDetails: updatedDetails,
+        address: parts.length > 0 ? parts.join(", ") : prev.address,
+      };
+    });
   };
 
   // ডায়নামিক অ্যারে আপডেট হ্যান্ডলার
@@ -310,10 +397,17 @@ export default function TeacherProfileDashboard() {
 
         <form onSubmit={handleSaveProfile} className="space-y-6">
           {/* ১. হেডার ও ব্যক্তিগত তথ্য */}
-          <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-            <h2 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-2">
-              ১. হেডার ও ব্যক্তিগত তথ্য (Contact Info)
-            </h2>
+          <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+            <div className="border-b pb-3">
+              <h2 className="text-base sm:text-lg font-bold text-slate-900">
+                ১. হেডার ও ব্যক্তিগত তথ্য (Profile & Personal Details)
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                শিক্ষকের নাম, পদবি, যোগাযোগ, ঠিকানা এবং ব্যাংক হিসাব সংক্রান্ত তথ্য
+              </p>
+            </div>
+
+            {/* প্রোফাইল ছবি আপলোড */}
             <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
               <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-4 border-emerald-700 shadow-md bg-slate-200 flex justify-center items-center shrink-0">
                 {profile.profileImage ? (
@@ -335,7 +429,7 @@ export default function TeacherProfileDashboard() {
                   accept="image/*"
                   onChange={handleImageUpload}
                   disabled={uploadingImage}
-                  className="text-xs w-full max-w-xs mx-auto sm:mx-0"
+                  className="text-xs w-full max-w-xs mx-auto sm:mx-0 cursor-pointer"
                 />
                 {uploadingImage && (
                   <p className="text-xs text-amber-600 font-semibold animate-pulse">
@@ -345,81 +439,230 @@ export default function TeacherProfileDashboard() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* ১.১ নাম ও পরিচিতি (Personal Information) */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-xs font-bold text-emerald-800 uppercase tracking-wide bg-emerald-50/70 border border-emerald-200 px-3 py-1.5 rounded-lg w-fit">
+                <span>👤</span>
+                <span>নাম ও পদবি সংক্রান্ত তথ্য (Identity)</span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                    পূর্ণ নাম (বাংলায়) <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="যেমন: মুহাম্মদ ইউসুফ হাসানী"
+                    value={profile.fullName}
+                    onChange={(e) => handleChange("fullName", e.target.value)}
+                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                    পূর্ণ নাম (ইংরেজিতে / Full Name)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Muhammad Yousuf Hasani"
+                    value={profile.nameEnglish}
+                    onChange={(e) => handleChange("nameEnglish", e.target.value)}
+                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                    প্রফেশনাল টাইটেল / পদবি <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={profile.designation}
+                    onChange={(e) => handleChange("designation", e.target.value)}
+                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all font-medium text-slate-800"
+                  >
+                    <option value="">পদবি নির্বাচন করুন</option>
+                    <option value="শিক্ষক">শিক্ষক</option>
+                    <option value="অনাবাসিক শিক্ষক">অনাবাসিক শিক্ষক</option>
+                    <option value="আবাসিক শিক্ষক">আবাসিক শিক্ষক</option>
+                    <option value="হিফজ শিক্ষক">হিফজ শিক্ষক</option>
+                    {profile.designation &&
+                      !DESIGNATION_OPTIONS.includes(profile.designation) && (
+                        <option value={profile.designation}>{profile.designation}</option>
+                      )}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                    মোবাইল নম্বর (Phone)
+                  </label>
+                  <input
+                    type="tel"
+                    placeholder="০১৭১২-৩৪৫৬৭৮"
+                    value={profile.phone}
+                    onChange={(e) => handleChange("phone", e.target.value)}
+                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all font-mono"
+                  />
+                </div>
+                <div className="md:col-span-1 lg:col-span-2">
+                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                    ইমেইল এড্রেস (Read-only)
+                  </label>
+                  <input
+                    type="email"
+                    value={profile.email}
+                    disabled
+                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-100 text-slate-500 cursor-not-allowed font-mono"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* ১.২ বর্তমান ঠিকানা (Address Details) */}
+            <div className="space-y-3 pt-3 border-t border-slate-100">
+              <div className="flex items-center gap-2 text-xs font-bold text-emerald-800 uppercase tracking-wide bg-emerald-50/70 border border-emerald-200 px-3 py-1.5 rounded-lg w-fit">
+                <span>📍</span>
+                <span>বর্তমান ঠিকানা (Address Details)</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                    জেলা (District)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="যেমন: হবিগঞ্জ"
+                    value={profile.addressDetails?.district || ""}
+                    onChange={(e) => handleAddressDetailChange("district", e.target.value)}
+                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                    থানা / উপজেলা (Thana/Upazila)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="যেমন: হবিগঞ্জ সদর"
+                    value={profile.addressDetails?.thana || ""}
+                    onChange={(e) => handleAddressDetailChange("thana", e.target.value)}
+                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                    ডাকঘর (Post Office)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="যেমন: হবিগঞ্জ - ৩৩০০"
+                    value={profile.addressDetails?.postOffice || ""}
+                    onChange={(e) => handleAddressDetailChange("postOffice", e.target.value)}
+                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                    গ্রাম / এলাকা / হোল্ডিং (Village/Area)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="যেমন: রাজনগর (জজ বাড়ি সংলগ্ন)"
+                    value={profile.addressDetails?.village || ""}
+                    onChange={(e) => handleAddressDetailChange("village", e.target.value)}
+                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all"
+                  />
+                </div>
+              </div>
+
               <div>
-                <label className="text-xs font-bold text-slate-600 block mb-1">
-                  পূর্ণ নাম (Full Name)
+                <label className="text-xs font-bold text-slate-700 block mb-1">
+                  পূর্ণাঙ্গ ঠিকানা (Full Address - সিভিতে প্রদর্শনের জন্য)
                 </label>
                 <input
                   type="text"
-                  value={profile.fullName}
-                  onChange={(e) => handleChange("fullName", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-600 block mb-1">
-                  প্রফেশনাল টাইটেল / পদবী
-                </label>
-                <select
-                  value={profile.designation}
-                  onChange={(e) => handleChange("designation", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600"
-                >
-                  <option value="">পদবী নির্বাচন করুন</option>
-                  <option value="residential_teacher">আবাসিক শিক্ষক</option>
-                  <option value="hifz_teacher">হিফজ শিক্ষক</option>
-                  <option value="teacher">অনাবাসিক শিক্ষক</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-600 block mb-1">
-                  ফোন নম্বর
-                </label>
-                <input
-                  type="text"
-                  value={profile.phone}
-                  onChange={(e) => handleChange("phone", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-600 block mb-1">
-                  ইমেইল (Read-only)
-                </label>
-                <input
-                  type="email"
-                  value={profile.email}
-                  disabled
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-100 text-slate-500 cursor-not-allowed"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-600 block mb-1">
-                  বর্তমান ঠিকানা (Address)
-                </label>
-                <input
-                  type="text"
+                  placeholder="যেমন: রাজনগর, ডাকঘর: হবিগঞ্জ, হবিগঞ্জ সদর, হবিগঞ্জ"
                   value={profile.address}
                   onChange={(e) => handleChange("address", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all"
                 />
               </div>
-              <div>
-                <label className="text-xs font-bold text-slate-600 block mb-1">
-                  Bank Account
-                </label>
-                <input
-                  type="url"
-                  value={profile.bankAccount}
-                  onChange={(e) =>
-                    handleNestedChange(
+            </div>
 
-                      e.target.value,
-                    )
-                  }
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600"
-                />
+            {/* ১.৩ ব্যাংক অ্যাকাউন্ট ও আর্থিক তথ্য (Bank Account Details) */}
+            <div className="space-y-3 pt-3 border-t border-slate-100">
+              <div className="flex items-center gap-2 text-xs font-bold text-emerald-800 uppercase tracking-wide bg-emerald-50/70 border border-emerald-200 px-3 py-1.5 rounded-lg w-fit">
+                <span>🏦</span>
+                <span>ব্যাংক অ্যাকাউন্ট সংক্রান্ত তথ্য (Bank Account Details)</span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-slate-50/70 p-4 rounded-xl border border-slate-200">
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                    ব্যাংকের নাম (Bank Name)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="যেমন: ইসলামী ব্যাংক বাংলাদেশ পিএলসি"
+                    value={profile.bankAccount?.bankName || ""}
+                    onChange={(e) => handleNestedChange("bankAccount", "bankName", e.target.value)}
+                    className="w-full p-2.5 border rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                    হিসাব নম্বর (Account Number)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="যেমন: 20501234567890"
+                    value={profile.bankAccount?.accountNumber || ""}
+                    onChange={(e) => handleNestedChange("bankAccount", "accountNumber", e.target.value)}
+                    className="w-full p-2.5 border rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 font-mono tracking-wider transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                    শাখার নাম (Branch Name)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="যেমন: হবিগঞ্জ শাখা"
+                    value={profile.bankAccount?.branchName || ""}
+                    onChange={(e) => handleNestedChange("bankAccount", "branchName", e.target.value)}
+                    className="w-full p-2.5 border rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                    রাউটিং নম্বর (Routing Number)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="যেমন: 125360789"
+                    value={profile.bankAccount?.routingNumber || ""}
+                    onChange={(e) => handleNestedChange("bankAccount", "routingNumber", e.target.value)}
+                    className="w-full p-2.5 border rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 font-mono transition-all"
+                  />
+                </div>
+
+                <div className="md:col-span-1 lg:col-span-2">
+                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                    অ্যাকাউন্টের ধরন (Account Type)
+                  </label>
+                  <select
+                    value={profile.bankAccount?.accountType || "সঞ্চয়ী (Savings)"}
+                    onChange={(e) => handleNestedChange("bankAccount", "accountType", e.target.value)}
+                    className="w-full p-2.5 border rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all font-medium text-slate-800"
+                  >
+                    <option value="সঞ্চয়ী (Savings)">সঞ্চয়ী হিসাব (Savings Account)</option>
+                    <option value="চলতি (Current)">চলতি হিসাব (Current Account)</option>
+                    <option value="বেতন (Salary)">বেতন হিসাব (Salary Account)</option>
+                    <option value="অন্যান্য">অন্যান্য (Other)</option>
+                  </select>
+                </div>
               </div>
             </div>
           </div>
@@ -1068,6 +1311,11 @@ export default function TeacherProfileDashboard() {
             <h1 className="text-2xl sm:text-3xl font-bold uppercase tracking-wide text-slate-900">
               {profile.fullName || "Your Full Name"}
             </h1>
+            {profile.nameEnglish && profile.nameEnglish !== profile.fullName && (
+              <p className="text-xs sm:text-sm font-semibold text-slate-600 uppercase tracking-wider mt-0.5">
+                {profile.nameEnglish}
+              </p>
+            )}
             <p className="text-sm sm:text-md font-semibold text-slate-700 mt-1">
               {profile.designation || "Professional Title"}
             </p>

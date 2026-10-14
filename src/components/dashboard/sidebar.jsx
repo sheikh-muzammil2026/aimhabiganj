@@ -393,7 +393,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       icon: "👨‍👩‍👦",
       lucideIcon: <Users className="w-5 h-5" />,
       roles: ["parent"],
-      permissions: ["manage_parents"],
       dropdown: [
         { title: "অভিভাবক ড্যাশবোর্ড", href: "/dashboard/parent" },
         { title: "সন্তানের প্রোফাইল", href: "/dashboard/parent/child-profile" },
@@ -417,7 +416,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       icon: "👤",
       lucideIcon: <Users className="w-5 h-5" />,
       roles: ["staff"],
-      permissions: ["manage_staff"],
       dropdown: [
         { title: "স্টাফ ড্যাশবোর্ড", href: "/dashboard/staff" },
         {
@@ -466,8 +464,16 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   ];
 
   const isItemAllowed = (item) => {
-    // Admin has full access to all menus
-    if (userRole === "admin") return true;
+    // Parent Corner and Staff Corner are strictly isolated to their respective roles
+    if (item.id === "parent-corner") {
+      return userRole === "parent";
+    }
+    if (item.id === "staff-corner") {
+      return userRole === "staff";
+    }
+
+    // Admin has full access to all admin and shared menus
+    if (userRole === "admin" || userRole === "superadmin") return true;
 
     // Direct role match
     if (item.roles && item.roles.includes(userRole)) return true;

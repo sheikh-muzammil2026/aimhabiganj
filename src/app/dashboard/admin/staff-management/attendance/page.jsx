@@ -19,6 +19,10 @@ import {
   Plus,
   X,
   Save,
+  Printer,
+  FileText,
+  MapPin,
+  ExternalLink,
 } from "lucide-react";
 import { toast } from "react-toastify";
 import { getDhakaTime } from "@/lib/attendance-config";
@@ -36,6 +40,14 @@ export default function StaffAttendancePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Monthly summary modal & report states
+  const [monthlyModalOpen, setMonthlyModalOpen] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    return getDhakaTime().dateStr.slice(0, 7);
+  });
+  const [monthlyData, setMonthlyData] = useState(null);
+  const [loadingMonthly, setLoadingMonthly] = useState(false);
+
   const [metrics, setMetrics] = useState({
     totalStaff: 0,
     presentToday: 0,
@@ -52,6 +64,8 @@ export default function StaffAttendancePage() {
   const [selectedStaffToRecord, setSelectedStaffToRecord] = useState(null);
   const [recordStatus, setRecordStatus] = useState("On Time");
   const [recordComment, setRecordComment] = useState("");
+  const [recordCheckOutStatus, setRecordCheckOutStatus] = useState("On Time");
+  const [recordCheckOutComment, setRecordCheckOutComment] = useState("");
   const [isSavingRecord, setIsSavingRecord] = useState(false);
 
   // Fetch Staff Attendance
@@ -117,11 +131,62 @@ export default function StaffAttendancePage() {
     return `${hours} ঘণ্টা ${mins} মি.`;
   };
 
+  // Fetch Monthly Attendance Summary
+  const fetchMonthlyData = async (monthToFetch) => {
+    const targetMonth = monthToFetch || selectedMonth;
+    try {
+      setLoadingMonthly(true);
+      const res = await fetch(
+        `${API_BASE}/api/admin/staff-attendance?month=${targetMonth}`
+      );
+      const json = await res.json();
+      if (json.success) {
+        setMonthlyData(json);
+      }
+    } catch (err) {
+      console.error("Failed to fetch monthly staff attendance:", err);
+    } finally {
+      setLoadingMonthly(false);
+    }
+  };
+
+  const handleOpenMonthlySummary = () => {
+    setMonthlyModalOpen(true);
+    fetchMonthlyData(selectedMonth);
+  };
+
+  const handlePrintMonthly = () => {
+    window.print();
+  };
+
+  const formatMonthBangla = (monthStr) => {
+    if (!monthStr) return "";
+    const [year, month] = monthStr.split("-");
+    const monthNames = [
+      "জানুয়ারি",
+      "ফেব্রুয়ারি",
+      "মার্চ",
+      "এপ্রিল",
+      "মে",
+      "জুন",
+      "জুলাই",
+      "আগস্ট",
+      "সেপ্টেম্বর",
+      "অক্টোবর",
+      "নভেম্বর",
+      "ডিসেম্বর",
+    ];
+    const monthIndex = parseInt(month, 10) - 1;
+    return `${monthNames[monthIndex] || month} ${year}`;
+  };
+
   // Open Record Modal
   const handleOpenRecord = (staff) => {
     setSelectedStaffToRecord(staff);
     setRecordStatus(staff.checkInStatus === "Late" ? "Late" : "On Time");
     setRecordComment(staff.checkInComment || "");
+    setRecordCheckOutStatus(staff.checkOutStatus || "On Time");
+    setRecordCheckOutComment(staff.checkOutComment || "");
     setRecordModalOpen(true);
   };
 
@@ -142,6 +207,8 @@ export default function StaffAttendancePage() {
           date: selectedDate,
           checkInStatus: recordStatus,
           checkInComment: recordComment.trim() || null,
+          checkOutStatus: recordCheckOutStatus,
+          checkOutComment: recordCheckOutComment.trim() || null,
         }),
       });
 
@@ -190,7 +257,15 @@ export default function StaffAttendancePage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={handleOpenMonthlySummary}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white text-xs font-bold shadow-md transition-all active:scale-95"
+          >
+            <Printer className="w-4 h-4 text-teal-400" />
+            <span>মাসিক সারাংশ প্রিন্ট / ডাউনলোড</span>
+          </button>
+
           <button
             onClick={fetchData}
             disabled={loading}
@@ -408,6 +483,7 @@ export default function StaffAttendancePage() {
                   <th className="py-3.5 px-4 font-bold">প্রবেশ হাজিরা (Check-In)</th>
                   <th className="py-3.5 px-4 font-bold">প্রবেশ স্ট্যাটাস</th>
                   <th className="py-3.5 px-4 font-bold">প্রস্থান হাজিরা (Check-Out)</th>
+                  <th className="py-3.5 px-4 font-bold">প্রস্থান স্ট্যাটাস</th>
                   <th className="py-3.5 px-4 font-bold">কর্মঘণ্টা</th>
                   <th className="py-3.5 px-4 font-bold">দেরি/পূর্বে প্রস্থানের কারণ</th>
                   <th className="py-3.5 px-4 font-bold text-center">হাজিরা পরিবর্তন</th>
@@ -481,6 +557,30 @@ export default function StaffAttendancePage() {
                       )}
                     </td>
 
+                    {/* Check-Out Status Badge */}
+                    <td className="py-4 px-4 whitespace-nowrap">
+                      {item.hasCheckedOut ? (
+                        <span
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${
+                            item.checkOutStatus === "On Time"
+                              ? "bg-teal-100 text-teal-800 dark:bg-teal-950/70 dark:text-teal-300 border border-teal-300"
+                              : item.checkOutStatus === "Early"
+                              ? "bg-rose-100 text-rose-800 dark:bg-rose-950/70 dark:text-rose-300 border border-rose-300"
+                              : "bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-300"
+                          }`}
+                        >
+                          {item.checkOutStatus === "On Time" ? (
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                          ) : (
+                            <AlertCircle className="w-3.5 h-3.5" />
+                          )}
+                          {item.checkOutStatus}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-slate-400">অপেক্ষমান</span>
+                      )}
+                    </td>
+
                     <td className="py-4 px-4 text-xs font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">
                       {calculateWorkDuration(item.checkInTime, item.checkOutTime) || (
                         <span className="text-slate-400">--</span>
@@ -551,29 +651,59 @@ export default function StaffAttendancePage() {
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  প্রবেশ স্ট্যাটাস (Status)
-                </label>
-                <select
-                  value={recordStatus}
-                  onChange={(e) => setRecordStatus(e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 font-bold"
-                >
-                  <option value="On Time">সময়মতো (On Time)</option>
-                  <option value="Late">দেরিতে (Late)</option>
-                </select>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    ১ম টার্ম (প্রবেশ স্ট্যাটাস)
+                  </label>
+                  <select
+                    value={recordStatus}
+                    onChange={(e) => setRecordStatus(e.target.value)}
+                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 font-bold"
+                  >
+                    <option value="On Time">সময়মতো (On Time)</option>
+                    <option value="Late">দেরিতে (Late)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    ২য় টার্ম (প্রস্থান স্ট্যাটাস)
+                  </label>
+                  <select
+                    value={recordCheckOutStatus}
+                    onChange={(e) => setRecordCheckOutStatus(e.target.value)}
+                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 font-bold"
+                  >
+                    <option value="On Time">সময়মতো (On Time)</option>
+                    <option value="Early">পূর্বে প্রস্থান (Early)</option>
+                    <option value="Overtime">অতিরিক্ত সময় (Overtime)</option>
+                  </select>
+                </div>
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  দেরি বা বিশেষ কারণ (মন্তব্য)
+                  ১ম টার্ম দেরির কারণ (মন্তব্য)
                 </label>
                 <textarea
-                  rows={3}
+                  rows={2}
                   value={recordComment}
                   onChange={(e) => setRecordComment(e.target.value)}
-                  placeholder="দেরি বা ছুটির কারণ লিখুন..."
+                  placeholder="সকালের দেরির কারণ লিখুন..."
+                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  ২য় টার্ম প্রস্থান বা বিশেষ মন্তব্য
+                </label>
+                <textarea
+                  rows={2}
+                  value={recordCheckOutComment}
+                  onChange={(e) => setRecordCheckOutComment(e.target.value)}
+                  placeholder="রাতের প্রস্থান বা বিশেষ কারণ লিখুন..."
                   className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
                 />
               </div>
@@ -603,6 +733,214 @@ export default function StaffAttendancePage() {
           </div>
         </div>
       )}
+
+      {/* Monthly Summary Modal (A4 Landscape Layout) */}
+      {monthlyModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/70 backdrop-blur-xs overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-5xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+            {/* Non-Printable Header Bar */}
+            <div className="p-4 sm:p-5 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-3 print:hidden">
+              <div className="flex items-center gap-3">
+                <Printer className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                    মাসিক কর্মচারী উপস্থিতি সারাংশ (A4 Landscape)
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    প্রিন্ট বা পিডিএফ ডাউনলোডের পূর্বে প্রিভিউ যাচাই করুন
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Month Selector */}
+                <div className="flex items-center gap-2 bg-white dark:bg-slate-700 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-600">
+                  <Calendar className="w-4 h-4 text-teal-600" />
+                  <input
+                    type="month"
+                    value={selectedMonth}
+                    onChange={(e) => {
+                      setSelectedMonth(e.target.value);
+                      fetchMonthlyData(e.target.value);
+                    }}
+                    className="text-xs font-bold bg-transparent text-slate-800 dark:text-white focus:outline-none cursor-pointer"
+                  />
+                </div>
+
+                <button
+                  onClick={handlePrintMonthly}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-md transition-all active:scale-95"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>প্রিন্ট / ডাউনলোড (Print)</span>
+                </button>
+
+                <button
+                  onClick={() => setMonthlyModalOpen(false)}
+                  className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Printable Container */}
+            <div
+              className="p-4 sm:p-6 overflow-y-auto flex-1 bg-white text-slate-900"
+              id="printable-staff-monthly-summary"
+            >
+              {loadingMonthly ? (
+                <div className="py-20 text-center text-slate-400 text-sm flex flex-col items-center justify-center gap-3">
+                  <RefreshCw className="w-6 h-6 animate-spin text-teal-600" />
+                  <span>মাসিক সারাংশ লোড হচ্ছে...</span>
+                </div>
+              ) : !monthlyData ? (
+                <div className="py-16 text-center text-slate-400 text-sm">
+                  কোনো তথ্য পাওয়া যায়নি।
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Header with separate Logo and Banner matching exam routine page */}
+                  <div className="flex items-center justify-center gap-0 mb-2 border-b-4 border-double border-gray-800 pb-1 pl-2">
+                    <div className="w-20 h-20 md:w-28 md:h-28 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-3">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src="/aimlogo1.png"
+                        alt="Institution Logo"
+                        className="w-full h-full object-cover scale-[1.05]"
+                      />
+                    </div>
+                    <div className="flex-grow text-center">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src="/banner_routine.png"
+                        alt="Institution Banner"
+                        className="w-full h-auto max-h-45 object-fill mx-auto print:max-h-45"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Title Header */}
+                  <div className="text-center mb-3 space-y-0.5">
+                    <h3 className="text-xs md:text-sm font-bold text-gray-800">
+                      কর্মচারী (স্টাফ) মাসিক উপস্থিতি সারাংশ রেজিস্টার
+                    </h3>
+                    <h2 className="text-xl md:text-2xl font-black text-gray-900 leading-tight">
+                      {formatMonthBangla(selectedMonth)}
+                    </h2>
+                    <p className="text-xs text-gray-600 font-semibold">
+                      মোট কার্যদিবস: {monthlyData.totalWorkingDays} দিন | মোট স্টাফ: {monthlyData.totalStaff} জন
+                    </p>
+                  </div>
+
+                  {/* Table Matrix */}
+                  <div className="w-full overflow-x-auto">
+                    <table className="w-full border-collapse border border-gray-800 text-gray-900 text-xs">
+                      <thead>
+                        <tr className="bg-gray-100 text-center font-bold">
+                          <th className="border border-gray-800 py-2 px-1 w-10">ক্র.</th>
+                          <th className="border border-gray-800 py-2 px-3 text-left">স্টাফের নাম</th>
+                          <th className="border border-gray-800 py-2 px-2 text-left">পদবি</th>
+                          <th className="border border-gray-800 py-2 px-2">উপস্থিত</th>
+                          <th className="border border-gray-800 py-2 px-2">১ম টার্ম অন-টাইম</th>
+                          <th className="border border-gray-800 py-2 px-2">১ম টার্ম লেট</th>
+                          <th className="border border-gray-800 py-2 px-2">পূর্বে প্রস্থান</th>
+                          <th className="border border-gray-800 py-2 px-2">অনুপস্থিত</th>
+                          <th className="border border-gray-800 py-2 px-2">শতকরা হার</th>
+                          <th className="border border-gray-800 py-2 px-3 text-left">দেরি বা আগাম প্রস্থানের কারণসমূহ</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(monthlyData.summary || monthlyData.staffSummary)?.map((staff, index) => (
+                          <tr key={staff.staffId || index} className="text-center hover:bg-gray-50">
+                            <td className="border border-gray-800 py-1.5 px-1 font-mono">{index + 1}</td>
+                            <td className="border border-gray-800 py-1.5 px-3 text-left font-bold">{staff.fullName}</td>
+                            <td className="border border-gray-800 py-1.5 px-2 text-left text-gray-700">{staff.designation}</td>
+                            <td className="border border-gray-800 py-1.5 px-2 font-bold text-teal-800">{staff.presentDays} দিন</td>
+                            <td className="border border-gray-800 py-1.5 px-2 text-emerald-700">{staff.onTimeDays}</td>
+                            <td className="border border-gray-800 py-1.5 px-2 text-rose-700 font-semibold">{staff.lateDays}</td>
+                            <td className="border border-gray-800 py-1.5 px-2 text-amber-700">{staff.earlyExitDays}</td>
+                            <td className="border border-gray-800 py-1.5 px-2 text-red-600 font-semibold">{staff.absentDays} দিন</td>
+                            <td className="border border-gray-800 py-1.5 px-2 font-bold">{staff.attendanceRate}%</td>
+                            <td className="border border-gray-800 py-1.5 px-3 text-left text-[11px] text-gray-600">
+                              {staff.lateComments?.length > 0 || staff.earlyComments?.length > 0 ? (
+                                <div className="space-y-0.5">
+                                  {staff.lateComments?.slice(0, 2).map((c, i) => (
+                                    <div key={`l-${i}`} className="truncate">
+                                      <span className="font-semibold text-rose-700">[{c.date.slice(8)} তারিখ (লেট)]:</span> {c.comment}
+                                    </div>
+                                  ))}
+                                  {staff.earlyComments?.slice(0, 2).map((c, i) => (
+                                    <div key={`e-${i}`} className="truncate">
+                                      <span className="font-semibold text-amber-700">[{c.date.slice(8)} তারিখ (আর্লি)]:</span> {c.comment}
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <span className="text-gray-400">—</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Principal Signature & Footer Section */}
+                  <div className="mt-12 pt-6 flex justify-between items-end px-4">
+                    <div className="text-center w-44 border-t border-gray-800 pt-1 text-xs font-bold text-gray-800">
+                      হাজিরা তত্ত্বাবধায়ক
+                    </div>
+                    <div className="text-center w-44 border-t border-gray-800 pt-1 text-xs font-bold text-gray-800">
+                      নাজেমে তালিমাত
+                    </div>
+                    <div className="text-center w-48 border-t border-gray-800 pt-1 text-xs font-bold text-gray-800">
+                      <div className="h-10 flex items-center justify-center -mt-8 mb-1">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src="/principle's_signature.jpg"
+                          alt="Principal Signature"
+                          className="h-10 object-contain mx-auto"
+                        />
+                      </div>
+                      মুহতামিম / অধ্যক্ষ
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* A4 Landscape Print Styling */}
+      <style jsx global>{`
+        @media print {
+          @page {
+            size: A4 landscape;
+            margin: 8mm 10mm;
+          }
+          body * {
+            visibility: hidden;
+          }
+          #printable-staff-monthly-summary,
+          #printable-staff-monthly-summary * {
+            visibility: visible;
+          }
+          #printable-staff-monthly-summary {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100vw;
+            min-height: 100vh;
+            margin: 0;
+            padding: 8mm 10mm;
+            background: white !important;
+            color: #111827 !important;
+            z-index: 999999;
+          }
+        }
+      `}</style>
     </div>
   );
 }
