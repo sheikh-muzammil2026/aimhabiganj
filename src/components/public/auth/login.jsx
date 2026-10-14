@@ -28,6 +28,8 @@ export default function LoginPage({ onClose }) {
           ? "/dashboard/admin"
           : userRole === "teacher"
           ? "/dashboard/teacher"
+          : userRole === "staff"
+          ? "/dashboard/staff"
           : userRole === "accountant"
           ? "/dashboard/accountant"
           : userRole === "parent"
@@ -91,6 +93,8 @@ export default function LoginPage({ onClose }) {
             targetUrl = "/dashboard/admin";
           } else if (userRole === "teacher") {
             targetUrl = "/dashboard/teacher";
+          } else if (userRole === "staff") {
+            targetUrl = "/dashboard/staff";
           } else if (userRole === "accountant") {
             targetUrl = "/dashboard/accountant";
           } else if (userRole === "parent") {

@@ -1,8 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
+
+const API_BASE =
+  process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
 
 export default function TeacherProfileDashboard() {
   const { data: session, isPending: sessionPending } = authClient.useSession();
@@ -49,21 +52,23 @@ export default function TeacherProfileDashboard() {
     ],
   });
 
-  useEffect(() => {
-    if (!sessionPending) {
-      setProfile((prev) => ({ ...prev, email: teacherEmail }));
-      fetchTeacherProfile(teacherEmail);
-    }
-  }, [sessionPending, teacherEmail]);
-
-  const fetchTeacherProfile = async (email) => {
+  const fetchTeacherProfile = useCallback(async (email) => {
     if (!email) return;
     try {
       setLoading(true);
       setError(null);
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_API}/api/teacher/profile/${email}`,
+        `${API_BASE}/api/teacher/profile/${encodeURIComponent(email)}`,
       );
+
+      if (!res.ok) {
+        if (res.status === 404) {
+          // নতুন শিক্ষক, ডাটাবেজে এখনো প্রোফাইল নেই
+          return;
+        }
+        throw new Error(`সার্ভার কোড: ${res.status}`);
+      }
+
       const result = await res.json();
 
       if (result.success && result.data) {
@@ -92,12 +97,25 @@ export default function TeacherProfileDashboard() {
         }));
       }
     } catch (err) {
-      console.error("Error fetching profile:", err);
-      setError("প্রোফাইল লোড করতে ব্যর্থ হয়েছে।");
+      console.warn("Notice loading teacher profile:", err);
+      if (err instanceof TypeError || (err.message && err.message.includes("fetch"))) {
+        setError(
+          "ব্যাকএন্ড সার্ভারের (port 5000) সাথে সংযোগ করা যায়নি। অনুগ্রহ করে ব্যাকএন্ড সার্ভার চালু রয়েছে কিনা যাচাই করুন।"
+        );
+      } else {
+        setError("প্রোফাইল লোড করতে ব্যর্থ হয়েছে।");
+      }
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (!sessionPending) {
+      setProfile((prev) => ({ ...prev, email: teacherEmail }));
+      fetchTeacherProfile(teacherEmail);
+    }
+  }, [sessionPending, teacherEmail, fetchTeacherProfile]);
 
   // ইনপুট পরিবর্তন হ্যান্ডলার
   const handleChange = (field, value) => {
@@ -178,14 +196,11 @@ export default function TeacherProfileDashboard() {
       setError(null);
       setSuccessMsg("");
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_API}/api/teacher/profile`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(profile),
-        },
-      );
+      const response = await fetch(`${API_BASE}/api/teacher/profile`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(profile),
+      });
 
       const result = await response.json();
 

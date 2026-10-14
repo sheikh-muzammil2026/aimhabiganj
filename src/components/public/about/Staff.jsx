@@ -6,6 +6,9 @@ import Link from "next/link";
 import { Phone, Mail, Eye, ArrowRight, Pause, Play, Users } from "lucide-react";
 import PersonDetailsModal from "@/components/public/shared/PersonDetailsModal";
 
+const API_BASE =
+  process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
+
 export default function Staff({ data }) {
   const fallbackData = {
     title: "কর্মকর্তা ও কর্মচারী",
@@ -34,7 +37,7 @@ export default function Staff({ data }) {
     async function fetchStaff() {
       try {
         setLoading(true);
-        const res = await fetch("/api/staff", {
+        const res = await fetch(`${API_BASE}/api/staff`, {
           cache: "no-store",
         });
 

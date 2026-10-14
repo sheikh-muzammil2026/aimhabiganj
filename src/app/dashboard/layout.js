@@ -5,6 +5,9 @@ import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 
+const API_BASE =
+  process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
+
 const DashboardLayout = ({ children }) => {
   const pathname = usePathname();
   const router = useRouter();
@@ -19,7 +22,11 @@ const DashboardLayout = ({ children }) => {
   // Live user & permissions sync from DB
   const syncUserData = React.useCallback(async () => {
     try {
-      const res = await fetch("/api/user/me");
+      const email = session?.user?.email || "";
+      const query = email ? `?email=${encodeURIComponent(email)}` : "";
+      const res = await fetch(`${API_BASE}/api/user/me${query}`, {
+        headers: email ? { "x-user-email": email } : {},
+      });
       if (res.ok) {
         const data = await res.json();
         if (data.success && data.user) {
@@ -31,7 +38,7 @@ const DashboardLayout = ({ children }) => {
     } finally {
       setIsSyncingLive(false);
     }
-  }, []);
+  }, [session?.user?.email]);
 
   useEffect(() => {
     if (session?.user) {
@@ -161,6 +168,8 @@ const DashboardLayout = ({ children }) => {
           ? "/dashboard/admin"
           : userRole === "teacher"
           ? "/dashboard/teacher"
+          : userRole === "staff"
+          ? "/dashboard/staff"
           : userRole === "accountant"
           ? "/dashboard/accountant"
           : userRole === "parent"
@@ -222,6 +231,17 @@ const DashboardLayout = ({ children }) => {
 
     if (pathname.startsWith("/dashboard/parent")) {
       if (userRole !== "parent") {
+        router.replace("/dashboard/unauthorized");
+      }
+      return;
+    }
+
+    if (pathname.startsWith("/dashboard/staff")) {
+      if (
+        userRole !== "staff" &&
+        !hasPerm("manage_staff") &&
+        !hasPerm("manage_users")
+      ) {
         router.replace("/dashboard/unauthorized");
       }
       return;

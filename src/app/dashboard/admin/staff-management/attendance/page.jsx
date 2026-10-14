@@ -23,6 +23,9 @@ import {
 import { toast } from "react-toastify";
 import { getDhakaTime } from "@/lib/attendance-config";
 
+const API_BASE =
+  process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
+
 export default function StaffAttendancePage() {
   const [selectedDate, setSelectedDate] = useState(() => {
     return getDhakaTime().dateStr;
@@ -62,7 +65,7 @@ export default function StaffAttendancePage() {
         status: statusFilter,
       });
 
-      const res = await fetch(`/api/admin/staff-attendance?${query.toString()}`);
+      const res = await fetch(`${API_BASE}/api/admin/staff-attendance?${query.toString()}`);
       const data = await res.json();
 
       if (!res.ok || !data.success) {
@@ -129,7 +132,7 @@ export default function StaffAttendancePage() {
 
     try {
       setIsSavingRecord(true);
-      const res = await fetch("/api/admin/staff-attendance", {
+      const res = await fetch(`${API_BASE}/api/admin/staff-attendance`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -283,6 +286,22 @@ export default function StaffAttendancePage() {
             <p className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">
               দেরিতে উপস্থিতি
             </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ২ টার্ম হাজিরা শিডিউল ব্যানার */}
+      <div className="bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-amber-500/10 dark:from-emerald-950/30 dark:via-teal-950/30 dark:to-amber-950/30 border border-teal-600/30 rounded-2xl p-4 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-teal-600 text-white flex items-center justify-center shrink-0">
+            <Clock className="w-5 h-5" />
+          </div>
+          <div className="text-xs">
+            <span className="font-black text-slate-900 dark:text-white">স্টাফদের দৈনিক ২ টার্ম হাজিরা সময়সূচী:</span>{" "}
+            <span className="text-slate-600 dark:text-slate-300">
+              ১ম টার্ম (সকালের চেক-ইন): শেষ সময় <strong className="text-emerald-700 dark:text-emerald-400">ভোর ৫:৩০ টা</strong> (এরপর লেট) •{" "}
+              ২য় টার্ম (রাতের চেক-আউট): সময় <strong className="text-teal-700 dark:text-teal-400">রাত ১০:০০ টা থেকে ১০:১০ টা</strong> (পূর্বে আর্লি, পরে ওভারটাইম)।
+            </span>
           </div>
         </div>
       </div>

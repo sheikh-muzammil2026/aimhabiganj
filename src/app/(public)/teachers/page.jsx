@@ -17,6 +17,9 @@ import {
 } from "lucide-react";
 import PersonDetailsModal from "@/components/public/shared/PersonDetailsModal";
 
+const API_BASE =
+  process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
+
 export default function TeachersPage() {
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,7 +33,7 @@ export default function TeachersPage() {
     async function fetchTeachers() {
       try {
         setLoading(true);
-        const res = await fetch("/api/faculty", { cache: "no-store" });
+        const res = await fetch(`${API_BASE}/api/faculty`, { cache: "no-store" });
         if (!res.ok) throw new Error("Failed to fetch teachers");
         const json = await res.json();
         if (isMounted && json?.success && Array.isArray(json?.data)) {

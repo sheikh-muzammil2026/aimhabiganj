@@ -47,6 +47,9 @@ const TeacherIdCardPdfActions = dynamic(
   },
 );
 
+const API_BASE =
+  process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
+
 export default function teacherIdCardManagePage() {
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -81,7 +84,7 @@ export default function teacherIdCardManagePage() {
         params.append("search", searchQuery.trim());
       }
 
-      const res = await fetch(`/api/admin/teachers?${params.toString()}`);
+      const res = await fetch(`${API_BASE}/api/admin/teachers?${params.toString()}`);
       const result = await res.json();
 
       if (!res.ok || !result.success) {
@@ -162,7 +165,7 @@ export default function teacherIdCardManagePage() {
 
     try {
       setSavingEdit(true);
-      const res = await fetch("/api/admin/teachers", {
+      const res = await fetch(`${API_BASE}/api/admin/teachers`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

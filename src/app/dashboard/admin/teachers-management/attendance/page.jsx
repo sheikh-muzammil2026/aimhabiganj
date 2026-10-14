@@ -25,6 +25,9 @@ import {
 } from "lucide-react";
 import { getDhakaTime } from "@/lib/attendance-config";
 
+const API_BASE =
+  process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
+
 export default function AdminTeachersAttendancePage() {
   const [selectedDate, setSelectedDate] = useState(() => {
     return getDhakaTime().dateStr;
@@ -60,7 +63,7 @@ export default function AdminTeachersAttendancePage() {
     try {
       setLoadingMonthly(true);
       const res = await fetch(
-        `/api/admin/teachers-attendance/monthly?month=${targetMonth}`
+        `${API_BASE}/api/admin/teachers-attendance/monthly?month=${targetMonth}`
       );
       const json = await res.json();
       if (json.success) {
@@ -114,7 +117,7 @@ export default function AdminTeachersAttendancePage() {
         status: statusFilter,
       });
 
-      const res = await fetch(`/api/admin/teachers-attendance?${query.toString()}`);
+      const res = await fetch(`${API_BASE}/api/admin/teachers-attendance?${query.toString()}`);
       const data = await res.json();
 
       if (!res.ok || !data.success) {

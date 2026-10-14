@@ -104,6 +104,12 @@ export async function proxy(request) {
       return NextResponse.next();
     }
     if (
+      pathname.startsWith("/dashboard/admin/staff-management") &&
+      (hasPerm("manage_users") || hasPerm("manage_staff"))
+    ) {
+      return NextResponse.next();
+    }
+    if (
       pathname.startsWith("/dashboard/admin/administration") &&
       (hasPerm("manage_roles") || hasPerm("manage_users"))
     ) {
@@ -149,6 +155,16 @@ export async function proxy(request) {
   // Check /dashboard/parent routes
   if (pathname.startsWith("/dashboard/parent")) {
     if (userRole === "parent") {
+      return NextResponse.next();
+    }
+    return NextResponse.redirect(
+      new URL("/dashboard/unauthorized", request.url),
+    );
+  }
+
+  // Check /dashboard/staff routes
+  if (pathname.startsWith("/dashboard/staff")) {
+    if (userRole === "staff" || hasPerm("manage_staff") || hasPerm("manage_users")) {
       return NextResponse.next();
     }
     return NextResponse.redirect(

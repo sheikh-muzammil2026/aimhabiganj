@@ -33,6 +33,9 @@ import {
   evaluateCheckOutStatus,
 } from "@/lib/attendance-config";
 
+const API_BASE =
+  process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
+
 export default function TeacherAttendancePage() {
   const { data: session, isPending: sessionLoading } = authClient.useSession();
   const currentUser = session?.user;
@@ -115,7 +118,7 @@ export default function TeacherAttendancePage() {
     try {
       setLoadingToday(true);
       const res = await fetch(
-        `/api/attendance/today?email=${encodeURIComponent(teacherEmail)}`
+        `${API_BASE}/api/attendance/today?email=${encodeURIComponent(teacherEmail)}`
       );
       const json = await res.json();
       if (json.success) {
@@ -133,7 +136,7 @@ export default function TeacherAttendancePage() {
     try {
       setLoadingHistory(true);
       const res = await fetch(
-        `/api/attendance/history?email=${encodeURIComponent(teacherEmail)}&limit=15`
+        `${API_BASE}/api/attendance/history?email=${encodeURIComponent(teacherEmail)}&limit=15`
       );
       const json = await res.json();
       if (json.success) {
@@ -221,7 +224,7 @@ export default function TeacherAttendancePage() {
 
     try {
       setSubmittingCheckIn(true);
-      const res = await fetch("/api/attendance/check-in", {
+      const res = await fetch(`${API_BASE}/api/attendance/check-in`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -299,7 +302,7 @@ export default function TeacherAttendancePage() {
 
     try {
       setSubmittingCheckOut(true);
-      const res = await fetch("/api/attendance/check-out", {
+      const res = await fetch(`${API_BASE}/api/attendance/check-out`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

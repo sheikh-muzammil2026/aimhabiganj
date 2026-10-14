@@ -39,7 +39,9 @@ const ROLES = [
   { value: "all", label: "সকল রোল" },
   { value: "admin", label: "Admin" },
   { value: "teacher", label: "Teacher" },
+  { value: "staff", label: "Staff (স্টাফ)" },
   { value: "accountant", label: "Accountant" },
+  { value: "parent", label: "Parent (অভিভাবক)" },
   { value: "student", label: "Student" },
 ];
 
@@ -250,8 +252,12 @@ export default function AdministrationPage() {
         return "bg-rose-50 text-rose-700 border-rose-200";
       case "teacher":
         return "bg-emerald-50 text-emerald-700 border-emerald-200";
+      case "staff":
+        return "bg-teal-50 text-teal-700 border-teal-200";
       case "accountant":
         return "bg-amber-50 text-amber-700 border-amber-200";
+      case "parent":
+        return "bg-purple-50 text-purple-700 border-purple-200";
       case "student":
         return "bg-sky-50 text-sky-700 border-sky-200";
       default:

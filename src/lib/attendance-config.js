@@ -8,7 +8,7 @@ export const MADRASA_LOCATION = {
   ADDRESS: "হবিগঞ্জ সদর, হবিগঞ্জ, বাংলাদেশ",
 };
 
-// Attendance Schedule & Rules
+// Attendance Schedule & Rules (Teachers)
 // Office Hours: Morning 8:00 AM to 1:10 PM (13:10)
 export const ATTENDANCE_RULES = {
   OFFICE_START_HOUR: 8,
@@ -17,6 +17,25 @@ export const ATTENDANCE_RULES = {
   ON_TIME_CHECKIN_CUTOFF_MINUTE: 5, // <= 8:05 AM is 'On Time', > 8:05 AM is 'Late'
   OFFICE_END_HOUR: 13,
   OFFICE_END_MINUTE: 10, // >= 1:10 PM is 'On Time' departure, < 1:10 PM is 'Early'
+};
+
+// Staff Attendance Schedule & Rules (2 Terms Per Day)
+// Term 1 (Morning Check-in): Last time is 5:30 AM
+// Term 2 (Night Check-out): Window is 10:00 PM to 10:10 PM (22:00 to 22:10)
+export const STAFF_ATTENDANCE_RULES = {
+  // টার্ম ১: সকালের হাজিরা / চেক-ইন (সর্বশেষ সময় ভোর ৫:৩০)
+  TERM_1_TITLE: "১ম টার্ম (সকালের প্রবেশ হাজিরা)",
+  TERM_1_CUTOFF_HOUR: 5,
+  TERM_1_CUTOFF_MINUTE: 30, // <= 05:30 AM 'On Time', > 05:30 AM 'Late'
+  TERM_1_CUTOFF_LABEL: "ভোর ০৫:৩০ টা",
+
+  // টার্ম ২: রাতের হাজিরা / চেক-আউট (রাত ১০:০০ থেকে ১০:১০)
+  TERM_2_TITLE: "২য় টার্ম (রাতের প্রস্থান হাজিরা)",
+  TERM_2_START_HOUR: 22,
+  TERM_2_START_MINUTE: 0,
+  TERM_2_END_HOUR: 22,
+  TERM_2_END_MINUTE: 10,
+  TERM_2_WINDOW_LABEL: "রাত ১০:০০ টা - ১০:১০ টা",
 };
 
 /**
@@ -162,4 +181,75 @@ export function evaluateCheckOutStatus(date = new Date()) {
     ATTENDANCE_RULES.OFFICE_END_MINUTE; // 13 * 60 + 10 = 790
 
   return minutesSinceMidnight >= cutoffMinutes ? "On Time" : "Early";
+}
+
+/**
+ * Evaluates Staff Term 1 Check-In (Morning):
+ * Last time is 5:30 AM (05:30)
+ * On or before 5:30 AM: 'On Time' (সময়মতো)
+ * After 5:30 AM: 'Late' (দেরিতে)
+ * @param {Date|string|number} date
+ * @returns {'On Time'|'Late'}
+ */
+export function evaluateStaffCheckInStatus(date = new Date()) {
+  const { minutesSinceMidnight } = getDhakaTime(date);
+  const cutoffMinutes =
+    STAFF_ATTENDANCE_RULES.TERM_1_CUTOFF_HOUR * 60 +
+    STAFF_ATTENDANCE_RULES.TERM_1_CUTOFF_MINUTE; // 5 * 60 + 30 = 330 (05:30 AM)
+
+  return minutesSinceMidnight <= cutoffMinutes ? "On Time" : "Late";
+}
+
+/**
+ * Evaluates Staff Term 2 Check-Out (Night):
+ * Official window is 10:00 PM to 10:10 PM (22:00 to 22:10)
+ * Before 10:00 PM (< 22:00): 'Early' (সময়ের পূর্বে প্রস্থান)
+ * Between 10:00 PM and 10:10 PM (22:00 - 22:10): 'On Time' (নির্ধারিত সময়ে প্রস্থান)
+ * After 10:10 PM (> 22:10): 'Overtime' (বিলম্বিত প্রস্থান / ওভারটাইম)
+ * @param {Date|string|number} date
+ * @returns {'On Time'|'Early'|'Overtime'}
+ */
+export function evaluateStaffCheckOutStatus(date = new Date()) {
+  const { minutesSinceMidnight } = getDhakaTime(date);
+  const startWindowMinutes =
+    STAFF_ATTENDANCE_RULES.TERM_2_START_HOUR * 60 +
+    STAFF_ATTENDANCE_RULES.TERM_2_START_MINUTE; // 22 * 60 + 0 = 1320 (10:00 PM)
+  const endWindowMinutes =
+    STAFF_ATTENDANCE_RULES.TERM_2_END_HOUR * 60 +
+    STAFF_ATTENDANCE_RULES.TERM_2_END_MINUTE; // 22 * 60 + 10 = 1330 (10:10 PM)
+
+  if (minutesSinceMidnight < startWindowMinutes) {
+    return "Early";
+  }
+  if (minutesSinceMidnight <= endWindowMinutes) {
+    return "On Time";
+  }
+  return "Overtime";
+}
+
+/**
+ * Returns current phase information for Staff 2-term attendance
+ * @param {Date|string|number} date
+ */
+export function getStaffShiftPhase(date = new Date()) {
+  const { minutesSinceMidnight, formattedTime } = getDhakaTime(date);
+  const t1Cutoff =
+    STAFF_ATTENDANCE_RULES.TERM_1_CUTOFF_HOUR * 60 +
+    STAFF_ATTENDANCE_RULES.TERM_1_CUTOFF_MINUTE; // 330
+  const t2Start =
+    STAFF_ATTENDANCE_RULES.TERM_2_START_HOUR * 60 +
+    STAFF_ATTENDANCE_RULES.TERM_2_START_MINUTE; // 1320
+  const t2End =
+    STAFF_ATTENDANCE_RULES.TERM_2_END_HOUR * 60 +
+    STAFF_ATTENDANCE_RULES.TERM_2_END_MINUTE; // 1330
+
+  return {
+    currentTime: formattedTime,
+    isTerm1OnTime: minutesSinceMidnight <= t1Cutoff,
+    isTerm2Open: minutesSinceMidnight >= t2Start && minutesSinceMidnight <= t2End,
+    isTerm2Early: minutesSinceMidnight < t2Start,
+    isTerm2Overtime: minutesSinceMidnight > t2End,
+    term1CutoffTime: "05:30 AM",
+    term2Window: "10:00 PM - 10:10 PM",
+  };
 }

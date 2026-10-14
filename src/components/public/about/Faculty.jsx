@@ -6,6 +6,9 @@ import Link from "next/link";
 import { GraduationCap, Phone, Mail, Pause, Play, BookOpen, Eye, ArrowRight } from "lucide-react";
 import PersonDetailsModal from "@/components/public/shared/PersonDetailsModal";
 
+const API_BASE =
+  process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
+
 export default function Faculty({ data }) {
   const fallbackData = {
     title: "আমাদের শিক্ষকমণ্ডলী",
@@ -56,7 +59,7 @@ export default function Faculty({ data }) {
     async function fetchFaculty() {
       try {
         setLoading(true);
-        const res = await fetch("/api/faculty", {
+        const res = await fetch(`${API_BASE}/api/faculty`, {
           cache: "no-store",
         });
 

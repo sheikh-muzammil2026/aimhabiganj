@@ -21,6 +21,9 @@ import {
 import { MdOutlineNotListedLocation } from "react-icons/md";
 import { IoNotificationsCircle } from "react-icons/io5";
 
+const API_BASE =
+  process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
+
 export default function Sidebar({ isOpen, setIsOpen }) {
   const pathname = usePathname();
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -72,7 +75,11 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   // Sync user role and permissions from DB
   const syncUserData = useCallback(async () => {
     try {
-      const res = await fetch("/api/user/me");
+      const email = session?.user?.email || "";
+      const query = email ? `?email=${encodeURIComponent(email)}` : "";
+      const res = await fetch(`${API_BASE}/api/user/me${query}`, {
+        headers: email ? { "x-user-email": email } : {},
+      });
       if (res.ok) {
         const data = await res.json();
         if (data.success && data.user) {
@@ -82,7 +89,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     } catch (e) {
       console.warn("Failed to sync user data in sidebar:", e);
     }
-  }, []);
+  }, [session?.user?.email]);
 
   useEffect(() => {
     if (session?.user) {
@@ -138,6 +145,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         return "/dashboard/admin";
       case "teacher":
         return "/dashboard/teacher";
+      case "staff":
+        return "/dashboard/staff";
       case "accountant":
         return "/dashboard/accountant";
       case "parent":
@@ -154,7 +163,15 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       icon: "🕌",
       lucideIcon: <LayoutDashboard className="w-5 h-5" />,
       href: getDashboardHref(userRole),
-      roles: ["admin", "teacher", "accountant", "parent", "student", "user"],
+      roles: [
+        "admin",
+        "teacher",
+        "staff",
+        "accountant",
+        "parent",
+        "student",
+        "user",
+      ],
     },
     {
       id: "academics",
@@ -375,7 +392,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       title: "অভিভাবক কর্নার",
       icon: "👨‍👩‍👦",
       lucideIcon: <Users className="w-5 h-5" />,
-      roles: ["admin", "parent"],
+      roles: ["parent"],
       permissions: ["manage_parents"],
       dropdown: [
         { title: "অভিভাবক ড্যাশবোর্ড", href: "/dashboard/parent" },
@@ -395,12 +412,37 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       roles: ["admin"],
     },
     {
+      id: "staff-corner",
+      title: "স্টাফ কর্নার",
+      icon: "👤",
+      lucideIcon: <Users className="w-5 h-5" />,
+      roles: ["staff"],
+      permissions: ["manage_staff"],
+      dropdown: [
+        { title: "স্টাফ ড্যাশবোর্ড", href: "/dashboard/staff" },
+        {
+          title: "ডিজিটাল হাজিরা (২ টার্ম)",
+          href: "/dashboard/staff/attendance",
+        },
+        { title: "স্টাফ আইডি কার্ড", href: "/dashboard/staff/id-card" },
+        { title: "স্টাফ নোটিশ ও সার্কুলার", href: "/dashboard/staff/notices" },
+      ],
+    },
+    {
       id: "profile-settings",
       title: "প্রোফাইল সেটিংস",
       icon: "⚙️",
       lucideIcon: <Settings className="w-5 h-5" />,
       href: "/dashboard/profile-settings",
-      roles: ["admin", "teacher", "accountant", "parent", "student", "user"],
+      roles: [
+        "admin",
+        "teacher",
+        "staff",
+        "accountant",
+        "parent",
+        "student",
+        "user",
+      ],
     },
     {
       id: "attendance",
@@ -712,6 +754,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         return "Admin";
       case "teacher":
         return "Teacher";
+      case "staff":
+        return "Staff";
       case "accountant":
         return "Accountant";
       case "parent":

@@ -27,6 +27,9 @@ import { toast } from "react-toastify";
 import StaffIdFront from "@/components/dashboard/staff/id-card/StaffIdFront";
 import StaffIdBack from "@/components/dashboard/staff/id-card/StaffIdBack";
 
+const API_BASE =
+  process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
+
 export default function StaffIdCardManagePage() {
   const [staffList, setStaffList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -64,7 +67,7 @@ export default function StaffIdCardManagePage() {
         params.append("search", searchQuery.trim());
       }
 
-      const res = await fetch(`/api/admin/staff?${params.toString()}`);
+      const res = await fetch(`${API_BASE}/api/admin/staff?${params.toString()}`);
       const result = await res.json();
 
       if (!res.ok || !result.success) {
@@ -164,7 +167,7 @@ export default function StaffIdCardManagePage() {
     try {
       setIsSaving(true);
       if (modalMode === "add") {
-        const res = await fetch("/api/admin/staff", {
+        const res = await fetch(`${API_BASE}/api/admin/staff`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
@@ -173,7 +176,7 @@ export default function StaffIdCardManagePage() {
         if (!res.ok || !result.success) throw new Error(result.message);
         toast.success("নতুন স্টাফ সফলভাবে যুক্ত হয়েছে!");
       } else {
-        const res = await fetch("/api/admin/staff", {
+        const res = await fetch(`${API_BASE}/api/admin/staff`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id: editingStaff._id, ...formData }),
@@ -196,7 +199,7 @@ export default function StaffIdCardManagePage() {
   const handleDeleteStaff = async (id) => {
     if (!confirm("আপনি কি নিশ্চিতভাবে এই স্টাফের তথ্য মুছে ফেলতে চান?")) return;
     try {
-      const res = await fetch(`/api/admin/staff?id=${id}`, { method: "DELETE" });
+      const res = await fetch(`${API_BASE}/api/admin/staff?id=${id}`, { method: "DELETE" });
       const result = await res.json();
       if (!res.ok || !result.success) throw new Error(result.message);
       toast.success("স্টাফ সফলভাবে ডিলিট করা হয়েছে!");
