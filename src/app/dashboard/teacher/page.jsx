@@ -23,6 +23,69 @@ export default function TeacherProfileDashboard() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState(null);
   const [successMsg, setSuccessMsg] = useState("");
+  const [currentUserPermissions, setCurrentUserPermissions] = useState([]);
+
+  const syncPermissions = useCallback(async () => {
+    const email = session?.user?.email;
+    if (!email) return;
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/user/me?email=${encodeURIComponent(email)}`,
+        {
+          headers: { "x-user-email": email },
+        }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.user) {
+          setCurrentUserPermissions(
+            Array.isArray(data.user.permissions) ? data.user.permissions : []
+          );
+        }
+      }
+    } catch (_) {}
+  }, [session?.user?.email]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    syncPermissions();
+  }, [syncPermissions]);
+
+  useEffect(() => {
+    let channel;
+    try {
+      channel = new BroadcastChannel("aim-auth-sync");
+      channel.onmessage = (event) => {
+        if (event.data?.type === "PERMISSIONS_UPDATED") {
+          syncPermissions();
+        }
+      };
+    } catch (_) {}
+
+    const handleCustomSync = () => {
+      syncPermissions();
+    };
+
+    window.addEventListener("aim-auth-sync", handleCustomSync);
+    window.addEventListener("storage", handleCustomSync);
+
+    return () => {
+      if (channel) channel.close();
+      window.removeEventListener("aim-auth-sync", handleCustomSync);
+      window.removeEventListener("storage", handleCustomSync);
+    };
+  }, [syncPermissions]);
+
+  const hasFinancePermission =
+    currentUserPermissions.includes("manage_finance") ||
+    currentUserPermissions.includes("accountant") ||
+    currentUserPermissions.includes("accounts") ||
+    currentUserPermissions.includes("finance") ||
+    (Array.isArray(session?.user?.permissions) &&
+      (session.user.permissions.includes("manage_finance") ||
+        session.user.permissions.includes("accountant") ||
+        session.user.permissions.includes("accounts") ||
+        session.user.permissions.includes("finance")));
 
   // সিভির ১০টি পয়েন্ট অনুযায়ী পূর্ণাঙ্গ স্টেট
   const [profile, setProfile] = useState({
@@ -360,6 +423,14 @@ export default function TeacherProfileDashboard() {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2 sm:gap-3">
+            {hasFinancePermission && (
+              <Link
+                href="/dashboard/accountant/finance"
+                className="w-full sm:w-auto justify-center bg-amber-400 hover:bg-amber-500 text-emerald-950 font-bold px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 text-sm"
+              >
+                💰 হিসাব বিভাগ (Accounts)
+              </Link>
+            )}
             <Link
               href="/dashboard/attendance"
               className="w-full sm:w-auto justify-center bg-emerald-500/30 hover:bg-emerald-500/50 text-emerald-100 font-bold px-4 py-2.5 rounded-xl border border-emerald-400/30 shadow-md transition-all flex items-center gap-2 text-sm"
@@ -382,6 +453,45 @@ export default function TeacherProfileDashboard() {
             </button>
           </div>
         </div>
+
+        {/* হিসাব ও অর্থ বিভাগ অ্যাক্সেস নোটিফিকেশন ব্যানার */}
+        {hasFinancePermission && (
+          <div className="bg-[#032e24] text-white p-4 sm:p-5 rounded-2xl shadow-sm border border-emerald-700/60 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl p-2.5 bg-emerald-800/80 rounded-xl border border-emerald-600/50">
+                💰
+              </span>
+              <div>
+                <h3 className="font-bold text-sm sm:text-base text-amber-300">
+                  হিসাব ও অর্থ বিভাগের দায়িত্ব অর্পিত হয়েছে
+                </h3>
+                <p className="text-xs text-emerald-100 mt-0.5">
+                  আপনাকে মাদরাসার হিসাব ও অর্থ (Finance & Accounts) বিভাগ পরিচালনার অনুমতি দেওয়া হয়েছে।
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+              <Link
+                href="/dashboard/accountant"
+                className="flex-1 md:flex-none text-center bg-emerald-800 hover:bg-emerald-700 text-emerald-100 font-semibold px-3.5 py-2 rounded-xl text-xs border border-emerald-600/60 shadow-xs transition-all"
+              >
+                হিসাব ওভারভিউ
+              </Link>
+              <Link
+                href="/dashboard/accountant/finance"
+                className="flex-1 md:flex-none text-center bg-amber-400 hover:bg-amber-500 text-emerald-950 font-bold px-4 py-2 rounded-xl text-xs shadow-xs transition-all"
+              >
+                অ্যাকাউন্টিং রিপোর্টস ↗
+              </Link>
+              <Link
+                href="/dashboard/accountant/finance/category-management"
+                className="flex-1 md:flex-none text-center bg-emerald-800 hover:bg-emerald-700 text-emerald-100 font-semibold px-3.5 py-2 rounded-xl text-xs border border-emerald-600/60 shadow-xs transition-all"
+              >
+                খাত তৈরি ↗
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* মেসেজ নোটিফিকেশন */}
         {successMsg && (

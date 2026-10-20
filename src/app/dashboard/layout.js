@@ -124,10 +124,15 @@ const DashboardLayout = ({ children }) => {
       return;
     }
 
-    const userRole = (activeUser.role || "student").toLowerCase();
-    const permissions = Array.isArray(activeUser.permissions)
-      ? activeUser.permissions
-      : [];
+    const userRole = (liveUser?.role || session.user?.role || "student").toLowerCase();
+    const permissions =
+      Array.isArray(liveUser?.permissions) && liveUser.permissions.length > 0
+        ? liveUser.permissions
+        : Array.isArray(session.user?.permissions)
+        ? session.user.permissions
+        : Array.isArray(liveUser?.permissions)
+        ? liveUser.permissions
+        : [];
 
     const hasPerm = (p) => {
       if (permissions.includes(p)) return true;
