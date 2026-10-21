@@ -31,7 +31,7 @@ export default function StaffsPage() {
     async function fetchStaff() {
       try {
         setLoading(true);
-        const res = await fetch(`${API_BASE}/api/staff`, { cache: "no-store" });
+        const res = await fetch(`${API_BASE}/api/staffs`, { cache: "no-store" });
         if (!res.ok) throw new Error("Failed to fetch staff");
         const json = await res.json();
         if (isMounted && json?.success && Array.isArray(json?.data)) {

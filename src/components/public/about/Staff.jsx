@@ -9,27 +9,22 @@ import PersonDetailsModal from "@/components/public/shared/PersonDetailsModal";
 const API_BASE =
   process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
 
-export default function Staff({ data }) {
+export default function Staff({ data, onLoaded }) {
   const fallbackData = {
     title: "কর্মকর্তা ও কর্মচারী",
     subtitle: "মাদরাসার প্রশাসনিক ও সার্বিক ব্যবস্থাপনায় নিয়োজিত টিম",
-    list: [
-      { id: 1, name: "জনাব হাফেজ মো: নোমান", role: "অফিস সহকারী ও হিসাবরক্ষক", contact: "017XXXXXXXX" },
-      { id: 2, name: "জনাব মো: আব্দুল করিম", role: "আবাসিক তত্ত্বাবধায়ক (নাযেম-এ-লিল্লাহ)", contact: "018XXXXXXXX" },
-      { id: 3, name: "জনাব মো: সোলায়মান", role: "প্রধান বাবুর্চি", contact: "নন-পাবলিক" },
-    ],
   };
 
-  const [staffList, setStaffList] = useState(data?.list || null);
-  const [loading, setLoading] = useState(!data?.list);
+  const hasPropData = Boolean(data?.list && data.list.length > 0);
+  const [staffList, setStaffList] = useState(hasPropData ? data.list : null);
+  const [loading, setLoading] = useState(!hasPropData);
   const [isPaused, setIsPaused] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
-    if (data?.list && data.list.length > 0) {
-      setStaffList(data.list);
-      setLoading(false);
+    if (hasPropData) {
+      onLoaded?.("staff");
       return;
     }
 
@@ -37,7 +32,7 @@ export default function Staff({ data }) {
     async function fetchStaff() {
       try {
         setLoading(true);
-        const res = await fetch(`${API_BASE}/api/staff`, {
+        const res = await fetch(`${API_BASE}/api/staffs`, {
           cache: "no-store",
         });
 
@@ -47,20 +42,21 @@ export default function Staff({ data }) {
 
         const json = await res.json();
         if (isMounted) {
-          if (json?.success && Array.isArray(json?.data) && json.data.length > 0) {
+          if (json?.success && Array.isArray(json?.data)) {
             setStaffList(json.data);
           } else {
-            setStaffList(fallbackData.list);
+            setStaffList([]);
           }
         }
       } catch (err) {
-        console.warn("Staff fetch error, using fallback:", err.message);
+        console.warn("Staff fetch error:", err.message);
         if (isMounted) {
-          setStaffList(fallbackData.list);
+          setStaffList([]);
         }
       } finally {
         if (isMounted) {
           setLoading(false);
+          onLoaded?.("staff");
         }
       }
     }
@@ -70,14 +66,14 @@ export default function Staff({ data }) {
     return () => {
       isMounted = false;
     };
-  }, [data]);
+  }, [data, onLoaded, hasPropData]);
 
   const activeTitle = data?.title || fallbackData.title;
   const activeSubtitle = data?.subtitle || fallbackData.subtitle;
 
   // অবিচ্ছিন্ন লুপের জন্য মিনিমাম ৮টি আইটেম নিশ্চিত করা
   const trackItems = useMemo(() => {
-    const source = staffList && staffList.length > 0 ? staffList : fallbackData.list;
+    const source = staffList && staffList.length > 0 ? staffList : [];
     if (!source || source.length === 0) return [];
     let items = [...source];
     while (items.length < 8) {

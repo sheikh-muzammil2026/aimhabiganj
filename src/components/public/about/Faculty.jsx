@@ -9,49 +9,22 @@ import PersonDetailsModal from "@/components/public/shared/PersonDetailsModal";
 const API_BASE =
   process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
 
-export default function Faculty({ data }) {
+export default function Faculty({ data, onLoaded }) {
   const fallbackData = {
     title: "আমাদের শিক্ষকমণ্ডলী",
     subtitle: "দ্বীন ও আধুনিক শিক্ষার সমন্বয়ে শিক্ষার্থীদের গড়ে তুলছেন যাঁরা",
-    list: [
-      {
-        id: 1,
-        name: "মাওলানা কারী ওবায়দুল্লাহ",
-        designation: "প্রধান শিক্ষক (হিফজ বিভাগ)",
-        department: "হিফজ বিভাগ",
-        education: "হাফেজ, ক্বারী, দাওরায়ে হাদীস",
-        image: "",
-      },
-      {
-        id: 2,
-        name: "মুফতি তারিক জামিল",
-        designation: "সিনিয়র শিক্ষক (কিতাব বিভাগ)",
-        department: "কিতাব বিভাগ",
-        education: "ইফতা (উচ্চতর ফিকহ), এম.এ",
-        image: "",
-      },
-      {
-        id: 3,
-        name: "জনাব আশরাফুল ইসলাম",
-        designation: "সহকারী শিক্ষক (জেনারেল বিভাগ)",
-        department: "জেনারেল বিভাগ",
-        education: "বি.এস.সি (গণিত), ঢাবি",
-        image: "",
-      },
-    ],
   };
 
-  const [facultyList, setFacultyList] = useState(data?.list || null);
-  const [loading, setLoading] = useState(!data?.list);
+  const hasPropData = Boolean(data?.list && data.list.length > 0);
+  const [facultyList, setFacultyList] = useState(hasPropData ? data.list : null);
+  const [loading, setLoading] = useState(!hasPropData);
   const [isPaused, setIsPaused] = useState(false);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
-    // If data was already supplied via props, use it
-    if (data?.list && data.list.length > 0) {
-      setFacultyList(data.list);
-      setLoading(false);
+    if (hasPropData) {
+      onLoaded?.("faculty");
       return;
     }
 
@@ -59,7 +32,7 @@ export default function Faculty({ data }) {
     async function fetchFaculty() {
       try {
         setLoading(true);
-        const res = await fetch(`${API_BASE}/api/faculty`, {
+        const res = await fetch(`${API_BASE}/api/teachers`, {
           cache: "no-store",
         });
 
@@ -69,21 +42,21 @@ export default function Faculty({ data }) {
 
         const json = await res.json();
         if (isMounted) {
-          if (json?.success && Array.isArray(json?.data) && json.data.length > 0) {
+          if (json?.success && Array.isArray(json?.data)) {
             setFacultyList(json.data);
           } else {
-            // Graceful fallback if empty
-            setFacultyList(fallbackData.list);
+            setFacultyList([]);
           }
         }
       } catch (err) {
-        console.warn("Faculty fetch error, using fallback:", err.message);
+        console.warn("Faculty fetch error:", err.message);
         if (isMounted) {
-          setFacultyList(fallbackData.list);
+          setFacultyList([]);
         }
       } finally {
         if (isMounted) {
           setLoading(false);
+          onLoaded?.("faculty");
         }
       }
     }
@@ -93,14 +66,14 @@ export default function Faculty({ data }) {
     return () => {
       isMounted = false;
     };
-  }, [data]);
+  }, [data, onLoaded, hasPropData]);
 
   const activeTitle = data?.title || fallbackData.title;
   const activeSubtitle = data?.subtitle || fallbackData.subtitle;
 
   // Build a seamless looping list: ensure at least 8 items before duplicating for infinite track
   const trackItems = useMemo(() => {
-    const source = facultyList && facultyList.length > 0 ? facultyList : fallbackData.list;
+    const source = facultyList && facultyList.length > 0 ? facultyList : [];
     if (!source || source.length === 0) return [];
     let items = [...source];
     while (items.length < 8) {

@@ -27,19 +27,33 @@ export default function AboutPage() {
     roster: null,
   });
 
-  useEffect(() => {
-    const scrollToHash = () => {
-      const hash = window.location.hash;
-      if (hash) {
-        const id = hash.replace("#", "");
-        const element = document.getElementById(id);
-        if (element) {
+  const scrollToHash = (targetHash) => {
+    if (typeof window === "undefined") return;
+    const hash = targetHash || window.location.hash;
+    if (hash) {
+      const id = hash.replace("#", "");
+      const element = document.getElementById(id);
+      if (element) {
+        requestAnimationFrame(() => {
           element.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
+        });
       }
-    };
+    }
+  };
 
-    // Scroll immediately on mount and after sub-components render
+  const handleSectionLoaded = (sectionId) => {
+    if (typeof window === "undefined") return;
+    const currentHash = window.location.hash?.replace("#", "");
+    if (currentHash === sectionId) {
+      // Allow slight delay for DOM heights and child components to settle
+      setTimeout(() => {
+        scrollToHash();
+      }, 50);
+    }
+  };
+
+  useEffect(() => {
+    // Scroll immediately on mount and after initial mount
     scrollToHash();
     const timer = setTimeout(scrollToHash, 250);
     window.addEventListener("hashchange", scrollToHash);
@@ -107,14 +121,14 @@ export default function AboutPage() {
         id="faculty"
         className="py-16 scroll-mt-24 border-b border-gray-100 dark:border-slate-800/60"
       >
-        <Faculty data={aboutData?.faculty} />
+        <Faculty data={aboutData?.faculty} onLoaded={handleSectionLoaded} />
       </section>
 
       <section
         id="staff"
         className="py-16 scroll-mt-24 border-b border-gray-100 dark:border-slate-800/60 bg-emerald-50/10 dark:bg-slate-900/40"
       >
-        <Staff data={aboutData?.staff} />
+        <Staff data={aboutData?.staff} onLoaded={handleSectionLoaded} />
       </section>
 
       <section id="roster" className="py-16 scroll-mt-24">
