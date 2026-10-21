@@ -4,13 +4,13 @@ import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
+const API_BASE = process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
 
 const DESIGNATION_OPTIONS = [
-  "শিক্ষক",
-  "অনাবাসিক শিক্ষক",
+  "প্রিন্সিপাল",
+  "ভাইস প্রিন্সিপাল",
   "আবাসিক শিক্ষক",
+  "অনাবাসিক শিক্ষক",
   "হিফজ শিক্ষক",
 ];
 
@@ -33,13 +33,13 @@ export default function TeacherProfileDashboard() {
         `${API_BASE}/api/user/me?email=${encodeURIComponent(email)}`,
         {
           headers: { "x-user-email": email },
-        }
+        },
       );
       if (res.ok) {
         const data = await res.json();
         if (data.success && data.user) {
           setCurrentUserPermissions(
-            Array.isArray(data.user.permissions) ? data.user.permissions : []
+            Array.isArray(data.user.permissions) ? data.user.permissions : [],
           );
         }
       }
@@ -199,7 +199,10 @@ export default function TeacherProfileDashboard() {
           addressDetails: parsedAddrDetails,
           address: result.data.address || prev.address || "",
           email: email,
-          socialLinks: { ...(prev.socialLinks || {}), ...(result.data.socialLinks || {}) },
+          socialLinks: {
+            ...(prev.socialLinks || {}),
+            ...(result.data.socialLinks || {}),
+          },
           // অ্যারে ভ্যালুগুলো না থাকলে ডিফল্ট বজায় রাখা
           academic: result.data.academic?.length
             ? result.data.academic
@@ -221,9 +224,12 @@ export default function TeacherProfileDashboard() {
       }
     } catch (err) {
       console.warn("Notice loading teacher profile:", err);
-      if (err instanceof TypeError || (err.message && err.message.includes("fetch"))) {
+      if (
+        err instanceof TypeError ||
+        (err.message && err.message.includes("fetch"))
+      ) {
         setError(
-          "ব্যাকএন্ড সার্ভারের (port 5000) সাথে সংযোগ করা যায়নি। অনুগ্রহ করে ব্যাকএন্ড সার্ভার চালু রয়েছে কিনা যাচাই করুন।"
+          "ব্যাকএন্ড সার্ভারের (port 5000) সাথে সংযোগ করা যায়নি। অনুগ্রহ করে ব্যাকএন্ড সার্ভার চালু রয়েছে কিনা যাচাই করুন।",
         );
       } else {
         setError("প্রোফাইল লোড করতে ব্যর্থ হয়েছে।");
@@ -428,14 +434,14 @@ export default function TeacherProfileDashboard() {
                 href="/dashboard/accountant/finance"
                 className="w-full sm:w-auto justify-center bg-amber-400 hover:bg-amber-500 text-emerald-950 font-bold px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 text-sm"
               >
-                💰 হিসাব বিভাগ (Accounts)
+                💰 হিসাব বিভাগ
               </Link>
             )}
             <Link
               href="/dashboard/attendance"
               className="w-full sm:w-auto justify-center bg-emerald-500/30 hover:bg-emerald-500/50 text-emerald-100 font-bold px-4 py-2.5 rounded-xl border border-emerald-400/30 shadow-md transition-all flex items-center gap-2 text-sm"
             >
-              📋 হাজিরা (Attendance)
+              📋 Attendance
             </Link>
             <button
               onClick={handlePrint}
@@ -466,7 +472,8 @@ export default function TeacherProfileDashboard() {
                   হিসাব ও অর্থ বিভাগের দায়িত্ব অর্পিত হয়েছে
                 </h3>
                 <p className="text-xs text-emerald-100 mt-0.5">
-                  আপনাকে মাদরাসার হিসাব ও অর্থ (Finance & Accounts) বিভাগ পরিচালনার অনুমতি দেওয়া হয়েছে।
+                  আপনাকে মাদরাসার হিসাব ও অর্থ (Finance & Accounts) বিভাগ
+                  পরিচালনার অনুমতি দেওয়া হয়েছে।
                 </p>
               </div>
             </div>
@@ -513,7 +520,8 @@ export default function TeacherProfileDashboard() {
                 ১. হেডার ও ব্যক্তিগত তথ্য (Profile & Personal Details)
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                শিক্ষকের নাম, পদবি, যোগাযোগ, ঠিকানা এবং ব্যাংক হিসাব সংক্রান্ত তথ্য
+                শিক্ষকের নাম, পদবি, যোগাযোগ, ঠিকানা এবং ব্যাংক হিসাব সংক্রান্ত
+                তথ্য
               </p>
             </div>
 
@@ -571,39 +579,47 @@ export default function TeacherProfileDashboard() {
                 </div>
                 <div>
                   <label className="text-xs font-bold text-slate-700 block mb-1">
-                    পূর্ণ নাম (ইংরেজিতে / Full Name)
+                    পূর্ণ নাম (ইংরেজিতে)
                   </label>
                   <input
                     type="text"
                     placeholder="e.g. Muhammad Yousuf Hasani"
                     value={profile.nameEnglish}
-                    onChange={(e) => handleChange("nameEnglish", e.target.value)}
+                    onChange={(e) =>
+                      handleChange("nameEnglish", e.target.value)
+                    }
                     className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all"
                   />
                 </div>
                 <div>
                   <label className="text-xs font-bold text-slate-700 block mb-1">
-                    প্রফেশনাল টাইটেল / পদবি <span className="text-red-500">*</span>
+                    প্রফেশনাল টাইটেল / পদবি{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={profile.designation}
-                    onChange={(e) => handleChange("designation", e.target.value)}
+                    onChange={(e) =>
+                      handleChange("designation", e.target.value)
+                    }
                     className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all font-medium text-slate-800"
                   >
                     <option value="">পদবি নির্বাচন করুন</option>
-                    <option value="শিক্ষক">শিক্ষক</option>
+                    <option value="শিক্ষক">প্রিন্সিপাল</option>
+                    <option value="শিক্ষক">ভাইস প্রিন্সিপাল</option>
                     <option value="অনাবাসিক শিক্ষক">অনাবাসিক শিক্ষক</option>
                     <option value="আবাসিক শিক্ষক">আবাসিক শিক্ষক</option>
                     <option value="হিফজ শিক্ষক">হিফজ শিক্ষক</option>
                     {profile.designation &&
                       !DESIGNATION_OPTIONS.includes(profile.designation) && (
-                        <option value={profile.designation}>{profile.designation}</option>
+                        <option value={profile.designation}>
+                          {profile.designation}
+                        </option>
                       )}
                   </select>
                 </div>
                 <div>
                   <label className="text-xs font-bold text-slate-700 block mb-1">
-                    মোবাইল নম্বর (Phone)
+                    মোবাইল নম্বর
                   </label>
                   <input
                     type="tel"
@@ -642,7 +658,9 @@ export default function TeacherProfileDashboard() {
                     type="text"
                     placeholder="যেমন: হবিগঞ্জ"
                     value={profile.addressDetails?.district || ""}
-                    onChange={(e) => handleAddressDetailChange("district", e.target.value)}
+                    onChange={(e) =>
+                      handleAddressDetailChange("district", e.target.value)
+                    }
                     className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all"
                   />
                 </div>
@@ -654,7 +672,9 @@ export default function TeacherProfileDashboard() {
                     type="text"
                     placeholder="যেমন: হবিগঞ্জ সদর"
                     value={profile.addressDetails?.thana || ""}
-                    onChange={(e) => handleAddressDetailChange("thana", e.target.value)}
+                    onChange={(e) =>
+                      handleAddressDetailChange("thana", e.target.value)
+                    }
                     className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all"
                   />
                 </div>
@@ -666,7 +686,9 @@ export default function TeacherProfileDashboard() {
                     type="text"
                     placeholder="যেমন: হবিগঞ্জ - ৩৩০০"
                     value={profile.addressDetails?.postOffice || ""}
-                    onChange={(e) => handleAddressDetailChange("postOffice", e.target.value)}
+                    onChange={(e) =>
+                      handleAddressDetailChange("postOffice", e.target.value)
+                    }
                     className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all"
                   />
                 </div>
@@ -678,7 +700,9 @@ export default function TeacherProfileDashboard() {
                     type="text"
                     placeholder="যেমন: রাজনগর (জজ বাড়ি সংলগ্ন)"
                     value={profile.addressDetails?.village || ""}
-                    onChange={(e) => handleAddressDetailChange("village", e.target.value)}
+                    onChange={(e) =>
+                      handleAddressDetailChange("village", e.target.value)
+                    }
                     className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all"
                   />
                 </div>
@@ -702,7 +726,9 @@ export default function TeacherProfileDashboard() {
             <div className="space-y-3 pt-3 border-t border-slate-100">
               <div className="flex items-center gap-2 text-xs font-bold text-emerald-800 uppercase tracking-wide bg-emerald-50/70 border border-emerald-200 px-3 py-1.5 rounded-lg w-fit">
                 <span>🏦</span>
-                <span>ব্যাংক অ্যাকাউন্ট সংক্রান্ত তথ্য (Bank Account Details)</span>
+                <span>
+                  ব্যাংক অ্যাকাউন্ট সংক্রান্ত তথ্য (Bank Account Details)
+                </span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-slate-50/70 p-4 rounded-xl border border-slate-200">
@@ -714,7 +740,13 @@ export default function TeacherProfileDashboard() {
                     type="text"
                     placeholder="যেমন: ইসলামী ব্যাংক বাংলাদেশ পিএলসি"
                     value={profile.bankAccount?.bankName || ""}
-                    onChange={(e) => handleNestedChange("bankAccount", "bankName", e.target.value)}
+                    onChange={(e) =>
+                      handleNestedChange(
+                        "bankAccount",
+                        "bankName",
+                        e.target.value,
+                      )
+                    }
                     className="w-full p-2.5 border rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
                   />
                 </div>
@@ -727,7 +759,13 @@ export default function TeacherProfileDashboard() {
                     type="text"
                     placeholder="যেমন: 20501234567890"
                     value={profile.bankAccount?.accountNumber || ""}
-                    onChange={(e) => handleNestedChange("bankAccount", "accountNumber", e.target.value)}
+                    onChange={(e) =>
+                      handleNestedChange(
+                        "bankAccount",
+                        "accountNumber",
+                        e.target.value,
+                      )
+                    }
                     className="w-full p-2.5 border rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 font-mono tracking-wider transition-all"
                   />
                 </div>
@@ -740,7 +778,13 @@ export default function TeacherProfileDashboard() {
                     type="text"
                     placeholder="যেমন: হবিগঞ্জ শাখা"
                     value={profile.bankAccount?.branchName || ""}
-                    onChange={(e) => handleNestedChange("bankAccount", "branchName", e.target.value)}
+                    onChange={(e) =>
+                      handleNestedChange(
+                        "bankAccount",
+                        "branchName",
+                        e.target.value,
+                      )
+                    }
                     className="w-full p-2.5 border rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
                   />
                 </div>
@@ -753,7 +797,13 @@ export default function TeacherProfileDashboard() {
                     type="text"
                     placeholder="যেমন: 125360789"
                     value={profile.bankAccount?.routingNumber || ""}
-                    onChange={(e) => handleNestedChange("bankAccount", "routingNumber", e.target.value)}
+                    onChange={(e) =>
+                      handleNestedChange(
+                        "bankAccount",
+                        "routingNumber",
+                        e.target.value,
+                      )
+                    }
                     className="w-full p-2.5 border rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 font-mono transition-all"
                   />
                 </div>
@@ -763,13 +813,27 @@ export default function TeacherProfileDashboard() {
                     অ্যাকাউন্টের ধরন (Account Type)
                   </label>
                   <select
-                    value={profile.bankAccount?.accountType || "সঞ্চয়ী (Savings)"}
-                    onChange={(e) => handleNestedChange("bankAccount", "accountType", e.target.value)}
+                    value={
+                      profile.bankAccount?.accountType || "সঞ্চয়ী (Savings)"
+                    }
+                    onChange={(e) =>
+                      handleNestedChange(
+                        "bankAccount",
+                        "accountType",
+                        e.target.value,
+                      )
+                    }
                     className="w-full p-2.5 border rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all font-medium text-slate-800"
                   >
-                    <option value="সঞ্চয়ী (Savings)">সঞ্চয়ী হিসাব (Savings Account)</option>
-                    <option value="চলতি (Current)">চলতি হিসাব (Current Account)</option>
-                    <option value="বেতন (Salary)">বেতন হিসাব (Salary Account)</option>
+                    <option value="সঞ্চয়ী (Savings)">
+                      সঞ্চয়ী হিসাব (Savings Account)
+                    </option>
+                    <option value="চলতি (Current)">
+                      চলতি হিসাব (Current Account)
+                    </option>
+                    <option value="বেতন (Salary)">
+                      বেতন হিসাব (Salary Account)
+                    </option>
                     <option value="অন্যান্য">অন্যান্য (Other)</option>
                   </select>
                 </div>
@@ -1421,11 +1485,12 @@ export default function TeacherProfileDashboard() {
             <h1 className="text-2xl sm:text-3xl font-bold uppercase tracking-wide text-slate-900">
               {profile.fullName || "Your Full Name"}
             </h1>
-            {profile.nameEnglish && profile.nameEnglish !== profile.fullName && (
-              <p className="text-xs sm:text-sm font-semibold text-slate-600 uppercase tracking-wider mt-0.5">
-                {profile.nameEnglish}
-              </p>
-            )}
+            {profile.nameEnglish &&
+              profile.nameEnglish !== profile.fullName && (
+                <p className="text-xs sm:text-sm font-semibold text-slate-600 uppercase tracking-wider mt-0.5">
+                  {profile.nameEnglish}
+                </p>
+              )}
             <p className="text-sm sm:text-md font-semibold text-slate-700 mt-1">
               {profile.designation || "Professional Title"}
             </p>
@@ -1566,43 +1631,43 @@ export default function TeacherProfileDashboard() {
         {/* ৭. সার্টিফিকেট ও অ্যাওয়ার্ড */}
         {(profile.certifications.some((c) => c.title) ||
           profile.awards.some((a) => a.title)) && (
-            <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {profile.certifications.some((c) => c.title) && (
-                <div>
-                  <h2 className="text-sm font-bold uppercase border-b border-slate-400 pb-1 mb-2 text-slate-800">
-                    Certifications
-                  </h2>
-                  <div className="text-xs space-y-1 text-slate-700">
-                    {profile.certifications.map(
-                      (c, i) =>
-                        c.title && (
-                          <p key={i}>
-                            • {c.title} ({c.organization}, {c.year})
-                          </p>
-                        ),
-                    )}
-                  </div>
+          <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {profile.certifications.some((c) => c.title) && (
+              <div>
+                <h2 className="text-sm font-bold uppercase border-b border-slate-400 pb-1 mb-2 text-slate-800">
+                  Certifications
+                </h2>
+                <div className="text-xs space-y-1 text-slate-700">
+                  {profile.certifications.map(
+                    (c, i) =>
+                      c.title && (
+                        <p key={i}>
+                          • {c.title} ({c.organization}, {c.year})
+                        </p>
+                      ),
+                  )}
                 </div>
-              )}
-              {profile.awards.some((a) => a.title) && (
-                <div>
-                  <h2 className="text-sm font-bold uppercase border-b border-slate-400 pb-1 mb-2 text-slate-800">
-                    Honors & Awards
-                  </h2>
-                  <div className="text-xs space-y-1 text-slate-700">
-                    {profile.awards.map(
-                      (a, i) =>
-                        a.title && (
-                          <p key={i}>
-                            • {a.title} ({a.organization}, {a.year})
-                          </p>
-                        ),
-                    )}
-                  </div>
+              </div>
+            )}
+            {profile.awards.some((a) => a.title) && (
+              <div>
+                <h2 className="text-sm font-bold uppercase border-b border-slate-400 pb-1 mb-2 text-slate-800">
+                  Honors & Awards
+                </h2>
+                <div className="text-xs space-y-1 text-slate-700">
+                  {profile.awards.map(
+                    (a, i) =>
+                      a.title && (
+                        <p key={i}>
+                          • {a.title} ({a.organization}, {a.year})
+                        </p>
+                      ),
+                  )}
                 </div>
-              )}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* ৮. রেফারেন্স */}
         {profile.references.some((r) => r.name) && (
