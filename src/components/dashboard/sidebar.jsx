@@ -132,10 +132,15 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   }, [syncUserData, refetch]);
 
   const user = liveUser || session?.user;
-  const userRole = (user?.role || "user").toLowerCase();
-  const userPermissions = Array.isArray(user?.permissions)
-    ? user.permissions
-    : [];
+  const userRole = (liveUser?.role || session?.user?.role || "user").toLowerCase();
+  const userPermissions =
+    Array.isArray(liveUser?.permissions) && liveUser.permissions.length > 0
+      ? liveUser.permissions
+      : Array.isArray(session?.user?.permissions)
+      ? session.user.permissions
+      : Array.isArray(liveUser?.permissions)
+      ? liveUser.permissions
+      : [];
   const userName = user?.name || "অতিথি ব্যবহারকারী";
   const avatarLetter = user?.name ? user.name.charAt(0) : "ই";
 
@@ -377,6 +382,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       roles: ["admin", "accountant"],
       permissions: ["manage_finance", "accountant", "accounts", "finance"],
       dropdown: [
+        {
+          title: "হিসাব ড্যাশবোর্ড",
+          href: "/dashboard/accountant",
+        },
         {
           title: "অ্যাকাউন্টিং রিপোর্টস",
           href: "/dashboard/accountant/finance",
