@@ -390,7 +390,7 @@ export default function StaffIdCardManagePage() {
                                     className="w-full h-full object-cover rounded-xl"
                                   />
                                 ) : (
-                                  staff.fullName.charAt(0)
+                                  (staff.fullName || "স").charAt(0)
                                 )}
                               </div>
                               <div>

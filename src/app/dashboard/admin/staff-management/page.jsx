@@ -147,14 +147,23 @@ export default function StaffManagementPage() {
         toast.error(resultStaff.message || "স্টাফ তালিকা লোড করতে ব্যর্থ হয়েছে।");
       }
 
-      if (resultAttendance.success && Array.isArray(resultAttendance.data)) {
-        const presentCount = resultAttendance.data.filter((a) => Boolean(a.checkInTime)).length;
-        const lateCount = resultAttendance.data.filter((a) => a.checkInStatus === "Late").length;
-        setAttendanceSummary({
-          present: presentCount,
-          late: lateCount,
-          total: resultAttendance.data.length,
-        });
+      if (resultAttendance.success) {
+        if (resultAttendance.metrics) {
+          setAttendanceSummary({
+            present: resultAttendance.metrics.presentToday ?? 0,
+            late: resultAttendance.metrics.lateToday ?? 0,
+            total: resultAttendance.metrics.totalStaff ?? 0,
+          });
+        } else if (Array.isArray(resultAttendance.attendanceList)) {
+          const list = resultAttendance.attendanceList;
+          const presentCount = list.filter((a) => Boolean(a.checkInTime || a.hasCheckedIn)).length;
+          const lateCount = list.filter((a) => a.checkInStatus === "Late").length;
+          setAttendanceSummary({
+            present: presentCount,
+            late: lateCount,
+            total: list.length,
+          });
+        }
       }
     } catch (err) {
       console.error("Fetch staff data error:", err);
@@ -305,6 +314,15 @@ export default function StaffManagementPage() {
           .map((s) => (s || "").trim())
           .filter(Boolean);
         if (parts.length > 0) updatedAddress = parts.join(", ");
+      }
+
+      if (parent === "salaryDetails" && field !== "totalSalary") {
+        const basic = Number(updatedNested.basicSalary) || 0;
+        const house = Number(updatedNested.houseRent) || 0;
+        const medical = Number(updatedNested.medicalAllowance) || 0;
+        const other = Number(updatedNested.otherAllowance) || 0;
+        const sum = basic + house + medical + other;
+        updatedNested.totalSalary = sum > 0 ? String(sum) : "";
       }
 
       return {
@@ -886,6 +904,45 @@ export default function StaffManagementPage() {
                       className="w-full p-2.5 border rounded-xl text-xs bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-medium"
                     />
                   </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                      জন্ম তারিখ (Date of Birth)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="15/05/1990"
+                      value={formData.dateOfBirth}
+                      onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+                      className="w-full p-2.5 border rounded-xl text-xs bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-medium"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                      জাতীয় পরিচয়পত্র (NID)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="NID নম্বর"
+                      value={formData.nid}
+                      onChange={(e) => handleInputChange("nid", e.target.value)}
+                      className="w-full p-2.5 border rounded-xl text-xs bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                      জরুরি যোগাযোগ
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="অভিভাবক / আত্মীয়ের নম্বর"
+                      value={formData.emergencyContact}
+                      onChange={(e) => handleInputChange("emergencyContact", e.target.value)}
+                      className="w-full p-2.5 border rounded-xl text-xs bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-medium"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -921,6 +978,32 @@ export default function StaffManagementPage() {
                       value={formData.salaryDetails.basicSalary}
                       onChange={(e) => handleNestedChange("salaryDetails", "basicSalary", e.target.value)}
                       className="w-full p-2.5 border rounded-xl text-xs bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                      বাড়িভাড়া ও অন্যান্য ভাতা (৳)
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="৩০০০"
+                      value={formData.salaryDetails.houseRent}
+                      onChange={(e) => handleNestedChange("salaryDetails", "houseRent", e.target.value)}
+                      className="w-full p-2.5 border rounded-xl text-xs bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                      সর্বমোট মাসিক বেতন (৳)
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="১৫০০০"
+                      value={formData.salaryDetails.totalSalary}
+                      onChange={(e) => handleNestedChange("salaryDetails", "totalSalary", e.target.value)}
+                      className="w-full p-2.5 border rounded-xl text-xs bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-mono font-bold text-teal-700 dark:text-teal-300"
                     />
                   </div>
 
@@ -1059,7 +1142,9 @@ export default function StaffManagementPage() {
               <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
                 <span className="text-slate-500 font-bold block uppercase text-[10px]">বেতন কাঠামো</span>
                 <span className="font-mono font-bold text-teal-700 dark:text-teal-400">
-                  {selectedStaffForView.salaryDetails?.totalSalary ? `৳ ${selectedStaffForView.salaryDetails.totalSalary}` : "অনুল্লেখিত"}
+                  {selectedStaffForView.salaryDetails?.totalSalary || selectedStaffForView.salaryDetails?.basicSalary
+                    ? `৳ ${selectedStaffForView.salaryDetails.totalSalary || selectedStaffForView.salaryDetails.basicSalary}`
+                    : "অনুল্লেখিত"}
                 </span>
               </div>
             </div>

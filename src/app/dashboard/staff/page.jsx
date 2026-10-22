@@ -167,24 +167,17 @@ export default function StaffDashboard() {
       const email = sessionUser?.email || "";
       const query = email ? `?email=${encodeURIComponent(email)}` : "";
 
-      const [resProfile, resToday] = await Promise.all([
-        fetch(`${API_BASE}/api/staff/me${query}`, {
-          headers: email ? { "x-user-email": email } : {},
-        }),
-        fetch(`${API_BASE}/api/staff/attendance/today${query}`, {
-          headers: email ? { "x-user-email": email } : {},
-        }),
-      ]);
+      const resProfile = await fetch(`${API_BASE}/api/staff/me${query}`, {
+        headers: email ? { "x-user-email": email } : {},
+      });
 
-      const [dataProfile, dataToday] = await Promise.all([
-        resProfile.json(),
-        resToday.json(),
-      ]);
+      const dataProfile = await resProfile.json();
 
       if (dataProfile.success && dataProfile.profile) {
         const p = dataProfile.profile;
         setProfileData(p);
         setStats(dataProfile.stats || null);
+        setTodayAttendance(dataProfile.todayAttendance || null);
 
         // Populate Form
         setFormData({
@@ -236,11 +229,6 @@ export default function StaffDashboard() {
           email: sessionUser?.email || "",
         }));
       }
-
-      if (dataToday.success) {
-        setTodayAttendance(dataToday.attendance || null);
-        setShiftPhase(dataToday.shiftPhase || null);
-      }
     } catch (err) {
       console.error("Staff dashboard fetch error:", err);
       toast.error("ড্যাশবোর্ড ডাটা লোড করতে সমস্যা হয়েছে।");
@@ -276,6 +264,15 @@ export default function StaffDashboard() {
           .map((s) => (s || "").trim())
           .filter(Boolean);
         if (parts.length > 0) updatedAddress = parts.join(", ");
+      }
+
+      if (parent === "salaryDetails" && field !== "totalSalary") {
+        const basic = Number(updatedNested.basicSalary) || 0;
+        const house = Number(updatedNested.houseRent) || 0;
+        const medical = Number(updatedNested.medicalAllowance) || 0;
+        const other = Number(updatedNested.otherAllowance) || 0;
+        const sum = basic + house + medical + other;
+        updatedNested.totalSalary = sum > 0 ? String(sum) : "";
       }
 
       return {

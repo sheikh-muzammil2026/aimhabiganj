@@ -185,7 +185,7 @@ export default function StaffAttendancePage() {
     setSelectedStaffToRecord(staff);
     setRecordStatus(staff.checkInStatus === "Late" ? "Late" : "On Time");
     setRecordComment(staff.checkInComment || "");
-    setRecordCheckOutStatus(staff.checkOutStatus || "On Time");
+    setRecordCheckOutStatus(staff.checkOutStatus || "");
     setRecordCheckOutComment(staff.checkOutComment || "");
     setRecordModalOpen(true);
   };
@@ -520,9 +520,26 @@ export default function StaffAttendancePage() {
 
                     <td className="py-4 px-4 font-mono text-xs whitespace-nowrap">
                       {item.hasCheckedIn ? (
-                        <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
-                          <Clock3 className="w-3.5 h-3.5 text-teal-600" />
-                          <span>{formatTime(item.checkInTime)}</span>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
+                            <Clock3 className="w-3.5 h-3.5 text-teal-600" />
+                            <span>{formatTime(item.checkInTime)}</span>
+                          </div>
+                          {item.checkInLocation?.lat && item.checkInLocation?.lng && (
+                            <a
+                              href={`https://www.google.com/maps?q=${item.checkInLocation.lat},${item.checkInLocation.lng}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-[10px] font-sans font-semibold text-teal-600 hover:underline"
+                              title="ম্যাপে চেক-ইন লোকেশন দেখুন"
+                            >
+                              <MapPin className="w-3 h-3" />
+                              <span>
+                                GPS{item.checkInLocation.distance !== undefined ? ` (${item.checkInLocation.distance}m)` : ""}
+                              </span>
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                          )}
                         </div>
                       ) : (
                         <span className="text-slate-400">অনুপস্থিত</span>
@@ -555,9 +572,26 @@ export default function StaffAttendancePage() {
 
                     <td className="py-4 px-4 font-mono text-xs whitespace-nowrap">
                       {item.hasCheckedOut ? (
-                        <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
-                          <Clock3 className="w-3.5 h-3.5 text-slate-600" />
-                          <span>{formatTime(item.checkOutTime)}</span>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
+                            <Clock3 className="w-3.5 h-3.5 text-slate-600" />
+                            <span>{formatTime(item.checkOutTime)}</span>
+                          </div>
+                          {item.checkOutLocation?.lat && item.checkOutLocation?.lng && (
+                            <a
+                              href={`https://www.google.com/maps?q=${item.checkOutLocation.lat},${item.checkOutLocation.lng}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-[10px] font-sans font-semibold text-teal-600 hover:underline"
+                              title="ম্যাপে চেক-আউট লোকেশন দেখুন"
+                            >
+                              <MapPin className="w-3 h-3" />
+                              <span>
+                                GPS{item.checkOutLocation.distance !== undefined ? ` (${item.checkOutLocation.distance}m)` : ""}
+                              </span>
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                          )}
                         </div>
                       ) : (
                         <span className="text-slate-400">--:--</span>
@@ -682,6 +716,7 @@ export default function StaffAttendancePage() {
                     onChange={(e) => setRecordCheckOutStatus(e.target.value)}
                     className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 font-bold"
                   >
+                    <option value="">অপেক্ষমান (প্রস্থান হয়নি)</option>
                     <option value="On Time">সময়মতো (On Time)</option>
                     <option value="Early">পূর্বে প্রস্থান (Early)</option>
                     <option value="Overtime">অতিরিক্ত সময় (Overtime)</option>

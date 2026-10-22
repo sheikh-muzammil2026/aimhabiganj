@@ -9,12 +9,12 @@ import BarcodeSVG from "react-barcode";
  * Standard CR80 landscape card: 85.6mm x 53.98mm (3.375in x 2.125in)
  */
 export default function StaffIdFront({ staff = {}, scale = 1 }) {
-  const name = staff.fullName || staff.name || "Md. Abdullah";
-  const designation = staff.designation || "Office Assistant";
-  const dob = staff.dateOfBirth || staff.dob || "15/05/1992";
-  const mobile = staff.phone || staff.mobile || "01712345678";
-  const bloodGroup = staff.bloodGroup || staff.blood || "A (+)";
-  const idNo = staff.staffId || staff.idNo || "ID NO-AIM ST-001";
+  const name = staff.nameEnglish || staff.fullName || staff.name || "—";
+  const designation = staff.designation || "—";
+  const dob = staff.dateOfBirth || staff.dob || "—";
+  const mobile = staff.phone || staff.mobile || "—";
+  const bloodGroup = staff.bloodGroup || staff.blood || "—";
+  const idNo = staff.staffId || staff.idNo || "—";
   const photo = staff.profileImage || staff.image || "/default-avatar.png";
 
   return (

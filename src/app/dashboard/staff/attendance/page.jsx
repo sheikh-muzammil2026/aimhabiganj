@@ -179,7 +179,7 @@ export default function StaffAttendancePage() {
   }, [sessionLoading, fetchTodayAttendance, fetchHistory]);
 
   // 4. Request GPS Location
-  const requestLocation = useCallback(() => {
+  const requestLocation = useCallback((onSuccess) => {
     if (!navigator.geolocation) {
       const err = "আপনার ডিভাইসে Geolocation সমর্থিত নয়।";
       setLocationError(err);
@@ -193,15 +193,31 @@ export default function StaffAttendancePage() {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude, accuracy } = position.coords;
-        const coords = { lat: latitude, lng: longitude, accuracy };
+        const roundedAccuracy = Math.round(accuracy || 0);
+        const coords = {
+          lat: latitude,
+          lng: longitude,
+          accuracy: roundedAccuracy,
+          timestamp: Date.now(),
+        };
         setCurrentCoords(coords);
 
-        const check = isWithinMadrasaGeofence(latitude, longitude);
-        setGeofenceStatus({
+        const check = isWithinMadrasaGeofence(
+          latitude,
+          longitude,
+          MADRASA_LOCATION.RADIUS_METERS,
+          roundedAccuracy
+        );
+        const statusObj = {
           ...check,
-          accuracy: Math.round(accuracy),
-        });
+          accuracy: roundedAccuracy,
+        };
+        setGeofenceStatus(statusObj);
         setIsLocating(false);
+
+        if (typeof onSuccess === "function") {
+          onSuccess(coords, statusObj);
+        }
       },
       (error) => {
         setIsLocating(false);
@@ -214,6 +230,7 @@ export default function StaffAttendancePage() {
           msg = "লোকেশন পেতে অতিরিক্ত সময় লাগছে। আবার চেষ্টা করুন।";
         }
         setLocationError(msg);
+        toast.warning(msg);
       },
       {
         enableHighAccuracy: true,
@@ -228,8 +245,46 @@ export default function StaffAttendancePage() {
     requestLocation();
   }, [requestLocation]);
 
+  // Verify GPS & Geofence before allowing Check-In or Check-Out
+  const verifyGeofenceBeforeAction = () => {
+    if (!currentCoords) {
+      toast.info("আপনার GPS অবস্থান যাচাই করা হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...");
+      requestLocation();
+      return false;
+    }
+
+    if (
+      currentCoords.accuracy &&
+      MADRASA_LOCATION.MAX_ALLOWED_ACCURACY_METERS &&
+      currentCoords.accuracy > MADRASA_LOCATION.MAX_ALLOWED_ACCURACY_METERS
+    ) {
+      toast.error(
+        `আপনার GPS সংকেত দুর্বল (±${currentCoords.accuracy} মিটার)। অনুগ্রহ করে খোলা স্থানে গিয়ে 'GPS রিফ্রেশ করুন' বাটনে ক্লিক করুন।`
+      );
+      return false;
+    }
+
+    const verification = isWithinMadrasaGeofence(
+      currentCoords.lat,
+      currentCoords.lng,
+      MADRASA_LOCATION.RADIUS_METERS,
+      currentCoords.accuracy
+    );
+
+    if (!verification.isInside) {
+      toast.error(
+        `হাজিরা দিতে আপনাকে মাদরাসা প্রাঙ্গণে (${verification.threshold} মিটারের মধ্যে) থাকতে হবে। আপনার বর্তমান দূরত্ব: ${verification.distance} মিটার।`
+      );
+      return false;
+    }
+
+    return true;
+  };
+
   // 5. Term 1 Check-In API Handler
   const handleCheckInClick = () => {
+    if (!verifyGeofenceBeforeAction()) return;
+
     const status = evaluateStaffCheckInStatus(currentTime);
     if (status === "Late") {
       setCommentModalType("late");
@@ -246,6 +301,8 @@ export default function StaffAttendancePage() {
       return;
     }
 
+    if (!verifyGeofenceBeforeAction()) return;
+
     try {
       setSubmittingCheckIn(true);
       const res = await fetch(`${API_BASE}/api/staff/attendance/check-in`, {
@@ -255,10 +312,10 @@ export default function StaffAttendancePage() {
           "x-user-email": userEmail,
         },
         body: JSON.stringify({
-          lat: currentCoords?.lat,
-          lng: currentCoords?.lng,
+          lat: currentCoords.lat,
+          lng: currentCoords.lng,
+          accuracy: currentCoords.accuracy,
           checkInComment: comment,
-          bypassGeofence: !currentCoords,
           email: userEmail,
           staffEmail: userEmail,
           staffName: sessionUser?.name || "",
@@ -290,6 +347,8 @@ export default function StaffAttendancePage() {
 
   // 6. Term 2 Check-Out API Handler
   const handleCheckOutClick = () => {
+    if (!verifyGeofenceBeforeAction()) return;
+
     const status = evaluateStaffCheckOutStatus(currentTime);
     if (status === "Early") {
       setCommentModalType("early");
@@ -309,6 +368,8 @@ export default function StaffAttendancePage() {
       return;
     }
 
+    if (!verifyGeofenceBeforeAction()) return;
+
     try {
       setSubmittingCheckOut(true);
       const res = await fetch(`${API_BASE}/api/staff/attendance/check-out`, {
@@ -318,10 +379,10 @@ export default function StaffAttendancePage() {
           "x-user-email": userEmail,
         },
         body: JSON.stringify({
-          lat: currentCoords?.lat,
-          lng: currentCoords?.lng,
+          lat: currentCoords.lat,
+          lng: currentCoords.lng,
+          accuracy: currentCoords.accuracy,
           checkOutComment: comment,
-          bypassGeofence: !currentCoords,
           email: userEmail,
           staffEmail: userEmail,
           staffName: sessionUser?.name || "",
@@ -522,7 +583,9 @@ export default function StaffAttendancePage() {
           <div className="flex items-center gap-3">
             <div
               className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                geofenceStatus?.isInside
+                locationError
+                  ? "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-400"
+                  : geofenceStatus?.isInside
                   ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-400"
                   : currentCoords
                   ? "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-400"
@@ -533,32 +596,43 @@ export default function StaffAttendancePage() {
             </div>
 
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <h4 className="text-sm font-black text-slate-900 dark:text-white">
                   মাদরাসা প্রাঙ্গণ ও GPS অবস্থান
                 </h4>
-                {geofenceStatus?.isInside ? (
+                {locationError ? (
+                  <span className="px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 text-[10px] font-black border border-rose-300">
+                    GPS ত্রুটি / পারমিশন নেই
+                  </span>
+                ) : geofenceStatus?.isInside ? (
                   <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 text-[10px] font-black border border-emerald-300">
-                    ক্যাম্পাসের ভেতরে অবস্থিত
+                    ক্যাম্পাসের ভেতরে অবস্থিত ({geofenceStatus.distance} মিটার)
                   </span>
                 ) : currentCoords ? (
                   <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 text-[10px] font-black border border-amber-300">
-                    দূরত্ব: {geofenceStatus?.distance} মিটার
+                    ক্যাম্পাসের বাইরে (দূরত্ব: {geofenceStatus?.distance} মিটার)
                   </span>
                 ) : (
                   <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold">
-                    অবস্থান অনুসন্ধান চলছে...
+                    {isLocating ? "অবস্থান অনুসন্ধান চলছে..." : "অবস্থান যাচাই করা হয়নি"}
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">
-                {MADRASA_LOCATION.NAME} • ব্যাসার্ধ: {MADRASA_LOCATION.RADIUS_METERS} মিটার
-              </p>
+              {locationError ? (
+                <p className="text-xs text-rose-600 dark:text-rose-400 font-semibold mt-0.5">
+                  {locationError}
+                </p>
+              ) : (
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {MADRASA_LOCATION.NAME} • অনুমোদিত ব্যাসার্ধ: {MADRASA_LOCATION.RADIUS_METERS} মিটার
+                  {geofenceStatus?.accuracy ? ` • GPS নির্ভুলতা: ±${geofenceStatus.accuracy} মিটার` : ""}
+                </p>
+              )}
             </div>
           </div>
 
           <button
-            onClick={requestLocation}
+            onClick={() => requestLocation()}
             disabled={isLocating}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-xs font-bold transition-colors shrink-0"
           >

@@ -71,7 +71,7 @@ export default function StaffIdBack({ scale = 1 }) {
               Kachua Road, Habiganj Sadar, Habiganj.
             </p>
             <p className="text-[7.2px] font-black text-slate-900 font-mono leading-tight">
-              Phone: 01836-376174, 01711-000000
+              Phone: 01836-376174, 01804-909500
             </p>
           </div>
         </div>

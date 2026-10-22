@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   Bell,
@@ -12,62 +12,76 @@ import {
   Sparkles,
   ExternalLink,
   Info,
+  RefreshCw,
 } from "lucide-react";
 
+const API_BASE =
+  process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
+
 export default function StaffNoticesPage() {
+  const [notices, setNotices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [category, setCategory] = useState("all");
 
-  const notices = [
-    {
-      id: "st-not-01",
-      title: "স্টাফদের দৈনিক ২ টার্ম হাজিরা সময়সূচী যথাযথ অনুসরণের নির্দেশ",
-      category: "attendance",
-      date: "১০ অক্টোবর ২০২৬",
-      author: "অধ্যক্ষ মহোদয় কার্যালয়",
-      urgent: true,
-      content:
-        "আস-সালাম আইডিয়াল মাদরাসার সকল সম্মানিত কর্মকর্তা ও কর্মচারীদের সদয় অবগতির জন্য জানানো যাচ্ছে যে, মাদরাসার ডিজিটাল হাজিরা সিস্টেম অনুযায়ী ১ম টার্মের প্রবেশ হাজিরা সকাল ৫:৩০ টার মধ্যে এবং ২য় টার্মের প্রস্থান হাজিরা রাত ১০:০০ টা থেকে ১০:১০ টার মধ্যে সম্পন্ন করা বাধ্যতামূলক। ব্যত্যয় ঘটলে স্বয়ংক্রিয়ভাবে বিলম্ব বা আর্লি এক্সিট লিপিবদ্ধ হবে।",
-    },
-    {
-      id: "st-not-02",
-      title: "সকল কর্মকর্তা ও কর্মচারীদের ডিজিটাল আইডি কার্ড বহন সংক্রান্ত বিজ্ঞপ্তি",
-      category: "general",
-      date: "০৫ অক্টোবর ২০২৬",
-      author: "প্রশাসন বিভাগ",
-      urgent: false,
-      content:
-        "মাদরাসা প্রাঙ্গণে সার্বক্ষণিক অবস্থানকালে সকল স্টাফ মেম্বারকে নিজস্ব ডিজিটাল পরিচয়পত্র দৃশ্যমান অবস্থায় পরিধান করতে নির্দেশ প্রদান করা হলো। আইডি কার্ড হারিয়ে গেলে অথবা নষ্ট হলে জরুরি ভিত্তিতে সংশ্লিষ্ট শাখায় নতুন কার্ডের জন্য আবেদন করুন।",
-    },
-    {
-      id: "st-not-03",
-      title: "ক্যাম্পাস নিরাপত্তা ও গেট লকিং প্রটোকল সংক্রান্ত নির্দেশনা",
-      category: "security",
-      date: "২৮ সেপ্টেম্বর ২০২৬",
-      author: "নিরাপত্তা ও শৃঙ্খলা শাখা",
-      urgent: true,
-      content:
-        "রাতের শিফটের নিরাপত্তা প্রহরী ও সহকারী স্টাফদের রাত ১০:০০ টার মধ্যে মাদরাসার মূল ফটক ও ভেতরের গেইটসমূহ বন্ধ করে তদারকি নিশ্চিত করার নির্দেশ দেওয়া হলো।",
-    },
-    {
-      id: "st-not-04",
-      title: "আসন্ন মাসিক বেতন ও বিশেষ ভাতা বিতরণ",
-      category: "finance",
-      date: "২৫ সেপ্টেম্বর ২০২৬",
-      author: "হিসাব বিভাগ",
-      urgent: false,
-      content:
-        "চলতি মাসের বেতন ও ভাতাদি আগামী ১লা তারিখের মধ্যে সংশ্লিষ্ট ব্যাংক হিসাব ও ক্যাশ শাখায় প্রস্তুত থাকবে। কারো কোনো তথ্যগত সংশোধন থাকলে হিসাব শাখায় যোগাযোগ করুন।",
-    },
-  ];
+  const fetchNotices = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetch(`${API_BASE}/api/notices?status=active&limit=100`);
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "নোটিশ লোড করতে সমস্যা হয়েছে।");
+      }
+
+      setNotices(Array.isArray(data.notices) ? data.notices : []);
+    } catch (err) {
+      console.error("Fetch staff notices error:", err);
+      setError(err.message || "সার্ভারের সাথে সংযোগ স্থাপন করা যায়নি।");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchNotices();
+  }, [fetchNotices]);
+
+  const formatBanglaDate = (dateInput) => {
+    if (!dateInput) return "";
+    try {
+      return new Intl.DateTimeFormat("bn-BD", {
+        timeZone: "Asia/Dhaka",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }).format(new Date(dateInput));
+    } catch {
+      return String(dateInput);
+    }
+  };
 
   const filteredNotices = notices.filter((n) => {
-    const matchesSearch =
-      n.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      n.content.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = category === "all" || n.category === category;
+    const title = (n.title || "").toLowerCase();
+    const content = (n.description || n.content || "").toLowerCase();
+    const q = searchTerm.toLowerCase();
+    const matchesSearch = title.includes(q) || content.includes(q);
+    const itemCat = (n.category || "general").toLowerCase();
+    const matchesCategory = category === "all" || itemCat === category.toLowerCase();
     return matchesSearch && matchesCategory;
   });
+
+  const categories = [
+    { key: "all", label: "সকল নোটিশ" },
+    { key: "general", label: "সাধারণ" },
+    { key: "academic", label: "একাডেমিক" },
+    { key: "exam", label: "পরীক্ষা" },
+    { key: "holiday", label: "ছুটি" },
+    { key: "event", label: "ইভেন্ট" },
+  ];
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-fade-in font-sans">
@@ -90,6 +104,16 @@ export default function StaffNoticesPage() {
               মাদরাসা প্রশাসনের পক্ষ থেকে কর্মকর্তা ও কর্মচারীদের জন্য জরুরি বিজ্ঞপ্তি
             </p>
           </div>
+
+          <button
+            onClick={fetchNotices}
+            disabled={loading}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold border border-white/15 transition-colors"
+            title="রিফ্রেশ করুন"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+            <span>রিফ্রেশ</span>
+          </button>
         </div>
       </div>
 
@@ -107,25 +131,17 @@ export default function StaffNoticesPage() {
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto text-xs font-bold">
-          {["all", "attendance", "security", "general", "finance"].map((cat) => (
+          {categories.map((cat) => (
             <button
-              key={cat}
-              onClick={() => setCategory(cat)}
+              key={cat.key}
+              onClick={() => setCategory(cat.key)}
               className={`px-3 py-1.5 rounded-xl transition-all whitespace-nowrap ${
-                category === cat
+                category === cat.key
                   ? "bg-emerald-800 text-white shadow-xs"
                   : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
               }`}
             >
-              {cat === "all"
-                ? "সকল নোটিশ"
-                : cat === "attendance"
-                ? "হাজিরা সংক্রান্ত"
-                : cat === "security"
-                ? "নিরাপত্তা"
-                : cat === "finance"
-                ? "হিসাব ও বেতন"
-                : "সাধারণ"}
+              {cat.label}
             </button>
           ))}
         </div>
@@ -133,47 +149,82 @@ export default function StaffNoticesPage() {
 
       {/* Notices List */}
       <div className="space-y-4">
-        {filteredNotices.length === 0 ? (
+        {loading ? (
+          <div className="bg-white dark:bg-[#0f172a] rounded-3xl p-12 text-center text-xs text-slate-500 border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-3">
+            <RefreshCw className="w-5 h-5 animate-spin text-teal-600" />
+            <span>নোটিশ লোড হচ্ছে...</span>
+          </div>
+        ) : error ? (
+          <div className="bg-white dark:bg-[#0f172a] rounded-3xl p-12 text-center text-xs text-rose-500 border border-slate-200 dark:border-slate-800">
+            {error}
+          </div>
+        ) : filteredNotices.length === 0 ? (
           <div className="bg-white dark:bg-[#0f172a] rounded-3xl p-12 text-center text-xs text-slate-500 border border-slate-200 dark:border-slate-800">
             কোনো নোটিশ পাওয়া যায়নি।
           </div>
         ) : (
-          filteredNotices.map((n) => (
-            <div
-              key={n.id}
-              className={`bg-white dark:bg-[#0f172a] rounded-3xl p-6 border shadow-xs transition-all hover:shadow-md space-y-3 ${
-                n.urgent
-                  ? "border-amber-400/80 dark:border-amber-500/40"
-                  : "border-slate-200 dark:border-slate-800"
-              }`}
-            >
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  {n.urgent && (
-                    <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400 text-[10px] font-black border border-amber-300">
-                      জরুরি
+          filteredNotices.map((n) => {
+            const isUrgent =
+              n.urgent === true ||
+              (n.priority && ["urgent", "high"].includes(String(n.priority).toLowerCase()));
+
+            return (
+              <div
+                key={n._id || n.id}
+                className={`bg-white dark:bg-[#0f172a] rounded-3xl p-6 border shadow-xs transition-all hover:shadow-md space-y-3 ${
+                  isUrgent
+                    ? "border-amber-400/80 dark:border-amber-500/40"
+                    : "border-slate-200 dark:border-slate-800"
+                }`}
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    {isUrgent && (
+                      <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400 text-[10px] font-black border border-amber-300">
+                        জরুরি
+                      </span>
+                    )}
+                    <span className="text-xs font-bold text-teal-700 dark:text-teal-400">
+                      {n.createdBy || n.author || "মাদরাসা প্রশাসন"}
                     </span>
-                  )}
-                  <span className="text-xs font-bold text-teal-700 dark:text-teal-400">
-                    {n.author}
+                    {n.category && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-semibold uppercase">
+                        {n.category}
+                      </span>
+                    )}
+                  </div>
+
+                  <span className="text-xs text-slate-500 flex items-center gap-1 font-medium">
+                    <Calendar className="w-3.5 h-3.5" />
+                    <span>{formatBanglaDate(n.publishDate || n.createdAt || n.date)}</span>
                   </span>
                 </div>
 
-                <span className="text-xs text-slate-500 flex items-center gap-1 font-medium">
-                  <Calendar className="w-3.5 h-3.5" />
-                  <span>{n.date}</span>
-                </span>
+                <h3 className="text-base font-black text-slate-900 dark:text-white leading-snug">
+                  {n.title}
+                </h3>
+
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">
+                  {n.description || n.content || ""}
+                </p>
+
+                {n.attachmentUrl && (
+                  <div className="pt-2">
+                    <a
+                      href={n.attachmentUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-teal-700 dark:text-teal-400 hover:underline"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>সংযুক্ত ফাইল / বিজ্ঞপ্তি দেখুন</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                )}
               </div>
-
-              <h3 className="text-base font-black text-slate-900 dark:text-white leading-snug">
-                {n.title}
-              </h3>
-
-              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                {n.content}
-              </p>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>

@@ -55,21 +55,22 @@ export default function StaffIdCardPage() {
 
   useEffect(() => {
     if (!sessionLoading) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchProfile();
     }
   }, [sessionLoading, fetchProfile]);
 
   const staff = profile || {
-    fullName: sessionUser?.name || "মুহাম্মদ আব্দুল্লাহ",
-    name: sessionUser?.name || "মুহাম্মদ আব্দুল্লাহ",
-    designation: "অফিস সহকারী (Office Assistant)",
-    staffId: "ID NO-AIM ST-001",
-    email: sessionUser?.email || "abdullah.office@aimhabiganj.edu.bd",
-    phone: "০১৭১২৩৪৫৬৭৮",
-    bloodGroup: "A (+)",
-    dateOfBirth: "15/05/1992",
-    joiningDate: "01/01/2023",
-    address: "হবিগঞ্জ সদর, হবিগঞ্জ",
+    fullName: sessionUser?.name || "নাম সংরক্ষিত নেই",
+    name: sessionUser?.name || "নাম সংরক্ষিত নেই",
+    designation: "পদবি সংরক্ষিত নেই",
+    staffId: "—",
+    email: sessionUser?.email || "—",
+    phone: "—",
+    bloodGroup: "—",
+    dateOfBirth: "—",
+    joiningDate: "—",
+    address: "—",
     profileImage: sessionUser?.image || "",
   };
 

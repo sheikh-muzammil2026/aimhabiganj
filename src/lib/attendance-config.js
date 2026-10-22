@@ -1,9 +1,11 @@
 // Fixed Geofence Configuration for Madrasa premises
 // As-Salam Ideal Madrasah (AIM), Habiganj Campus
 export const MADRASA_LOCATION = {
-  LATITUDE: parseFloat(process.env.NEXT_PUBLIC_MADRASA_LAT || "24.3840"),
-  LONGITUDE: parseFloat(process.env.NEXT_PUBLIC_MADRASA_LNG || "91.4169"),
+  LATITUDE: parseFloat(process.env.NEXT_PUBLIC_MADRASA_LAT || "24.381197"),
+  LONGITUDE: parseFloat(process.env.NEXT_PUBLIC_MADRASA_LNG || "91.416974"),
   RADIUS_METERS: parseFloat(process.env.NEXT_PUBLIC_MADRASA_RADIUS || "200"),
+  MAX_ALLOWED_ACCURACY_METERS: 500,
+  ACCURACY_TOLERANCE_METERS: 50,
   NAME: "আস-সালাম আইডিয়াল মাদরাসা (AIM) ক্যাম্পাস",
   ADDRESS: "হবিগঞ্জ সদর, হবিগঞ্জ, বাংলাদেশ",
 };
@@ -82,24 +84,61 @@ export function calculateDistanceMeters(lat1, lon1, lat2, lon2) {
  * @param {number} userLat
  * @param {number} userLng
  * @param {number} [customRadius]
- * @returns {{ isInside: boolean, distance: number, threshold: number }}
+ * @param {number} [accuracy]
+ * @returns {{ isInside: boolean, isValidCoords: boolean, distance: number, threshold: number, effectiveThreshold: number, accuracy: number }}
  */
 export function isWithinMadrasaGeofence(
   userLat,
   userLng,
-  customRadius = MADRASA_LOCATION.RADIUS_METERS
+  customRadius = MADRASA_LOCATION.RADIUS_METERS,
+  accuracy = 0
 ) {
+  const latNum = Number(userLat);
+  const lngNum = Number(userLng);
+
+  if (
+    !Number.isFinite(latNum) ||
+    !Number.isFinite(lngNum) ||
+    latNum < -90 ||
+    latNum > 90 ||
+    lngNum < -180 ||
+    lngNum > 180 ||
+    (latNum === 0 && lngNum === 0)
+  ) {
+    return {
+      isInside: false,
+      isValidCoords: false,
+      distance: Infinity,
+      threshold: customRadius,
+      effectiveThreshold: customRadius,
+      accuracy: Number(accuracy) || 0,
+    };
+  }
+
+  const accNum =
+    Number.isFinite(Number(accuracy)) && Number(accuracy) > 0
+      ? Math.round(Number(accuracy))
+      : 0;
   const distance = calculateDistanceMeters(
-    Number(userLat),
-    Number(userLng),
+    latNum,
+    lngNum,
     MADRASA_LOCATION.LATITUDE,
     MADRASA_LOCATION.LONGITUDE
   );
 
+  const tolerance = Math.min(
+    accNum,
+    MADRASA_LOCATION.ACCURACY_TOLERANCE_METERS || 50
+  );
+  const effectiveThreshold = customRadius + tolerance;
+
   return {
-    isInside: distance <= customRadius,
+    isInside: distance <= effectiveThreshold,
+    isValidCoords: true,
     distance: Math.round(distance),
     threshold: customRadius,
+    effectiveThreshold: Math.round(effectiveThreshold),
+    accuracy: accNum,
   };
 }
 
