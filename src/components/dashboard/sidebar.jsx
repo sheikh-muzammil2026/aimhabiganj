@@ -364,6 +364,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       permissions: ["manage_users", "manage_staff", "manage_attendance"],
       dropdown: [
         {
+          title: "সকল স্টাফ তালিকা",
+          href: "/dashboard/admin/staff-management",
+        },
+        {
           title: "স্টাফ আইডি কার্ড তৈরি",
           href: "/dashboard/admin/staff-management/staff-id-card",
         },
