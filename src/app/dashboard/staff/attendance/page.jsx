@@ -130,7 +130,9 @@ export default function StaffAttendancePage() {
       const email = sessionUser?.email || "";
       const query = email ? `?email=${encodeURIComponent(email)}` : "";
 
-      const res = await fetch(`${API_BASE}/api/staff/attendance/today${query}`);
+      const res = await fetch(`${API_BASE}/api/staff/attendance/today${query}`, {
+        headers: email ? { "x-user-email": email } : {},
+      });
       const json = await res.json();
       if (json.success) {
         setTodayData(json.attendance);
@@ -153,7 +155,9 @@ export default function StaffAttendancePage() {
       if (selectedMonth) queryParams.append("month", selectedMonth);
       queryParams.append("limit", "30");
 
-      const res = await fetch(`${API_BASE}/api/staff/attendance/history?${queryParams.toString()}`);
+      const res = await fetch(`${API_BASE}/api/staff/attendance/history?${queryParams.toString()}`, {
+        headers: email ? { "x-user-email": email } : {},
+      });
       const json = await res.json();
       if (json.success) {
         setHistoryList(json.history || []);
@@ -168,6 +172,7 @@ export default function StaffAttendancePage() {
 
   useEffect(() => {
     if (!sessionLoading) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchTodayAttendance();
       fetchHistory();
     }
@@ -219,6 +224,7 @@ export default function StaffAttendancePage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     requestLocation();
   }, [requestLocation]);
 
@@ -234,16 +240,28 @@ export default function StaffAttendancePage() {
   };
 
   const executeCheckIn = async (comment = "") => {
+    const userEmail = sessionUser?.email;
+    if (!userEmail) {
+      toast.error("লগইন সেশন পাওয়া যায়নি। অনুগ্রহ করে পুনরায় লগইন করুন।");
+      return;
+    }
+
     try {
       setSubmittingCheckIn(true);
       const res = await fetch(`${API_BASE}/api/staff/attendance/check-in`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-email": userEmail,
+        },
         body: JSON.stringify({
           lat: currentCoords?.lat,
           lng: currentCoords?.lng,
           checkInComment: comment,
           bypassGeofence: !currentCoords,
+          email: userEmail,
+          staffEmail: userEmail,
+          staffName: sessionUser?.name || "",
         }),
       });
 
@@ -285,16 +303,28 @@ export default function StaffAttendancePage() {
   };
 
   const executeCheckOut = async (comment = "") => {
+    const userEmail = sessionUser?.email;
+    if (!userEmail) {
+      toast.error("লগইন সেশন পাওয়া যায়নি। অনুগ্রহ করে পুনরায় লগইন করুন।");
+      return;
+    }
+
     try {
       setSubmittingCheckOut(true);
       const res = await fetch(`${API_BASE}/api/staff/attendance/check-out`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-email": userEmail,
+        },
         body: JSON.stringify({
           lat: currentCoords?.lat,
           lng: currentCoords?.lng,
           checkOutComment: comment,
           bypassGeofence: !currentCoords,
+          email: userEmail,
+          staffEmail: userEmail,
+          staffName: sessionUser?.name || "",
         }),
       });
 
