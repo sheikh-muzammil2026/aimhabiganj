@@ -26,9 +26,9 @@ import {
 } from "lucide-react";
 import { toast } from "react-toastify";
 import { getDhakaTime } from "@/lib/attendance-config";
+import Image from "next/image";
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
+const API_BASE = process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
 
 export default function StaffAttendancePage() {
   const [selectedDate, setSelectedDate] = useState(() => {
@@ -79,7 +79,9 @@ export default function StaffAttendancePage() {
         status: statusFilter,
       });
 
-      const res = await fetch(`${API_BASE}/api/admin/staff-attendance?${query.toString()}`);
+      const res = await fetch(
+        `${API_BASE}/api/admin/staff-attendance?${query.toString()}`,
+      );
       const data = await res.json();
 
       if (!res.ok || !data.success) {
@@ -137,7 +139,7 @@ export default function StaffAttendancePage() {
     try {
       setLoadingMonthly(true);
       const res = await fetch(
-        `${API_BASE}/api/admin/staff-attendance?month=${targetMonth}`
+        `${API_BASE}/api/admin/staff-attendance?month=${targetMonth}`,
       );
       const json = await res.json();
       if (json.success) {
@@ -270,7 +272,7 @@ export default function StaffAttendancePage() {
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white text-xs font-bold shadow-md transition-all active:scale-95"
           >
             <Printer className="w-4 h-4 text-teal-400" />
-            <span>মাসিক সারাংশ প্রিন্ট / ডাউনলোড</span>
+            <span>মাসিক রিপোর্ট প্রিন্ট / ডাউনলোড</span>
           </button>
 
           <button
@@ -379,10 +381,19 @@ export default function StaffAttendancePage() {
             <Clock className="w-5 h-5" />
           </div>
           <div className="text-xs">
-            <span className="font-black text-slate-900 dark:text-white">স্টাফদের দৈনিক ২ টার্ম হাজিরা সময়সূচী:</span>{" "}
+            <span className="font-black text-slate-900 dark:text-white">
+              স্টাফদের দৈনিক ২ টার্ম হাজিরা সময়সূচী:
+            </span>{" "}
             <span className="text-slate-600 dark:text-slate-300">
-              ১ম টার্ম (সকালের চেক-ইন): শেষ সময় <strong className="text-emerald-700 dark:text-emerald-400">ভোর ৫:৩০ টা</strong> (এরপর লেট) •{" "}
-              ২য় টার্ম (রাতের চেক-আউট): সময় <strong className="text-teal-700 dark:text-teal-400">রাত ১০:০০ টা থেকে ১০:১০ টা</strong> (পূর্বে আর্লি, পরে ওভারটাইম)।
+              ১ম টার্ম (সকালের চেক-ইন): শেষ সময়{" "}
+              <strong className="text-emerald-700 dark:text-emerald-400">
+                ভোর ৫:৩০ টা
+              </strong>{" "}
+              (এরপর লেট) • ২য় টার্ম (রাতের চেক-আউট): সময়{" "}
+              <strong className="text-teal-700 dark:text-teal-400">
+                রাত ১০:০০ টা থেকে ১০:১০ টা
+              </strong>{" "}
+              (পূর্বে আর্লি, পরে ওভারটাইম)।
             </span>
           </div>
         </div>
@@ -487,13 +498,21 @@ export default function StaffAttendancePage() {
               <thead className="text-[11px] uppercase tracking-wider bg-slate-50 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 border-b border-slate-200/60 dark:border-slate-700/40">
                 <tr>
                   <th className="py-3.5 px-5 font-bold">স্টাফ পরিচিতি</th>
-                  <th className="py-3.5 px-4 font-bold">প্রবেশ হাজিরা (Check-In)</th>
+                  <th className="py-3.5 px-4 font-bold">
+                    প্রবেশ হাজিরা (Check-In)
+                  </th>
                   <th className="py-3.5 px-4 font-bold">প্রবেশ স্ট্যাটাস</th>
-                  <th className="py-3.5 px-4 font-bold">প্রস্থান হাজিরা (Check-Out)</th>
+                  <th className="py-3.5 px-4 font-bold">
+                    প্রস্থান হাজিরা (Check-Out)
+                  </th>
                   <th className="py-3.5 px-4 font-bold">প্রস্থান স্ট্যাটাস</th>
                   <th className="py-3.5 px-4 font-bold">কর্মঘণ্টা</th>
-                  <th className="py-3.5 px-4 font-bold">দেরি/পূর্বে প্রস্থানের কারণ</th>
-                  <th className="py-3.5 px-4 font-bold text-center">হাজিরা পরিবর্তন</th>
+                  <th className="py-3.5 px-4 font-bold">
+                    দেরি/পূর্বে প্রস্থানের কারণ
+                  </th>
+                  <th className="py-3.5 px-4 font-bold text-center">
+                    হাজিরা পরিবর্তন
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-700/30">
@@ -525,21 +544,25 @@ export default function StaffAttendancePage() {
                             <Clock3 className="w-3.5 h-3.5 text-teal-600" />
                             <span>{formatTime(item.checkInTime)}</span>
                           </div>
-                          {item.checkInLocation?.lat && item.checkInLocation?.lng && (
-                            <a
-                              href={`https://www.google.com/maps?q=${item.checkInLocation.lat},${item.checkInLocation.lng}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-[10px] font-sans font-semibold text-teal-600 hover:underline"
-                              title="ম্যাপে চেক-ইন লোকেশন দেখুন"
-                            >
-                              <MapPin className="w-3 h-3" />
-                              <span>
-                                GPS{item.checkInLocation.distance !== undefined ? ` (${item.checkInLocation.distance}m)` : ""}
-                              </span>
-                              <ExternalLink className="w-2.5 h-2.5" />
-                            </a>
-                          )}
+                          {item.checkInLocation?.lat &&
+                            item.checkInLocation?.lng && (
+                              <a
+                                href={`https://www.google.com/maps?q=${item.checkInLocation.lat},${item.checkInLocation.lng}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-[10px] font-sans font-semibold text-teal-600 hover:underline"
+                                title="ম্যাপে চেক-ইন লোকেশন দেখুন"
+                              >
+                                <MapPin className="w-3 h-3" />
+                                <span>
+                                  GPS
+                                  {item.checkInLocation.distance !== undefined
+                                    ? ` (${item.checkInLocation.distance}m)`
+                                    : ""}
+                                </span>
+                                <ExternalLink className="w-2.5 h-2.5" />
+                              </a>
+                            )}
                         </div>
                       ) : (
                         <span className="text-slate-400">অনুপস্থিত</span>
@@ -560,7 +583,9 @@ export default function StaffAttendancePage() {
                           ) : (
                             <AlertCircle className="w-3.5 h-3.5" />
                           )}
-                          {item.checkInStatus === "On Time" ? "On Time" : "Late"}
+                          {item.checkInStatus === "On Time"
+                            ? "On Time"
+                            : "Late"}
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400">
@@ -577,21 +602,25 @@ export default function StaffAttendancePage() {
                             <Clock3 className="w-3.5 h-3.5 text-slate-600" />
                             <span>{formatTime(item.checkOutTime)}</span>
                           </div>
-                          {item.checkOutLocation?.lat && item.checkOutLocation?.lng && (
-                            <a
-                              href={`https://www.google.com/maps?q=${item.checkOutLocation.lat},${item.checkOutLocation.lng}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-[10px] font-sans font-semibold text-teal-600 hover:underline"
-                              title="ম্যাপে চেক-আউট লোকেশন দেখুন"
-                            >
-                              <MapPin className="w-3 h-3" />
-                              <span>
-                                GPS{item.checkOutLocation.distance !== undefined ? ` (${item.checkOutLocation.distance}m)` : ""}
-                              </span>
-                              <ExternalLink className="w-2.5 h-2.5" />
-                            </a>
-                          )}
+                          {item.checkOutLocation?.lat &&
+                            item.checkOutLocation?.lng && (
+                              <a
+                                href={`https://www.google.com/maps?q=${item.checkOutLocation.lat},${item.checkOutLocation.lng}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-[10px] font-sans font-semibold text-teal-600 hover:underline"
+                                title="ম্যাপে চেক-আউট লোকেশন দেখুন"
+                              >
+                                <MapPin className="w-3 h-3" />
+                                <span>
+                                  GPS
+                                  {item.checkOutLocation.distance !== undefined
+                                    ? ` (${item.checkOutLocation.distance}m)`
+                                    : ""}
+                                </span>
+                                <ExternalLink className="w-2.5 h-2.5" />
+                              </a>
+                            )}
                         </div>
                       ) : (
                         <span className="text-slate-400">--:--</span>
@@ -606,8 +635,8 @@ export default function StaffAttendancePage() {
                             item.checkOutStatus === "On Time"
                               ? "bg-teal-100 text-teal-800 dark:bg-teal-950/70 dark:text-teal-300 border border-teal-300"
                               : item.checkOutStatus === "Early"
-                              ? "bg-rose-100 text-rose-800 dark:bg-rose-950/70 dark:text-rose-300 border border-rose-300"
-                              : "bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-300"
+                                ? "bg-rose-100 text-rose-800 dark:bg-rose-950/70 dark:text-rose-300 border border-rose-300"
+                                : "bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-300"
                           }`}
                         >
                           {item.checkOutStatus === "On Time" ? (
@@ -618,27 +647,42 @@ export default function StaffAttendancePage() {
                           {item.checkOutStatus}
                         </span>
                       ) : (
-                        <span className="text-xs text-slate-400">অপেক্ষমান</span>
+                        <span className="text-xs text-slate-400">
+                          অপেক্ষমান
+                        </span>
                       )}
                     </td>
 
                     <td className="py-4 px-4 text-xs font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">
-                      {calculateWorkDuration(item.checkInTime, item.checkOutTime) || (
-                        <span className="text-slate-400">--</span>
-                      )}
+                      {calculateWorkDuration(
+                        item.checkInTime,
+                        item.checkOutTime,
+                      ) || <span className="text-slate-400">--</span>}
                     </td>
 
                     <td className="py-4 px-4 text-xs text-slate-600 dark:text-slate-300 max-w-xs">
                       {item.checkInComment || item.checkOutComment ? (
                         <div className="flex flex-col gap-1">
                           {item.checkInComment && (
-                            <span title={item.checkInComment} className="truncate">
-                              <strong className="text-rose-600 font-semibold">দেরি:</strong> {item.checkInComment}
+                            <span
+                              title={item.checkInComment}
+                              className="truncate"
+                            >
+                              <strong className="text-rose-600 font-semibold">
+                                দেরি:
+                              </strong>{" "}
+                              {item.checkInComment}
                             </span>
                           )}
                           {item.checkOutComment && (
-                            <span title={item.checkOutComment} className="truncate">
-                              <strong className="text-amber-600 font-semibold">আর্লি:</strong> {item.checkOutComment}
+                            <span
+                              title={item.checkOutComment}
+                              className="truncate"
+                            >
+                              <strong className="text-amber-600 font-semibold">
+                                আর্লি:
+                              </strong>{" "}
+                              {item.checkOutComment}
                             </span>
                           )}
                         </div>
@@ -786,7 +830,7 @@ export default function StaffAttendancePage() {
                 <Printer className="w-5 h-5 text-teal-600 dark:text-teal-400" />
                 <div>
                   <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                    মাসিক কর্মচারী উপস্থিতি সারাংশ (A4 Landscape)
+                    মাসিক কর্মচারী উপস্থিতি রিপোর্ট
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
                     প্রিন্ট বা পিডিএফ ডাউনলোডের পূর্বে প্রিভিউ যাচাই করুন
@@ -834,7 +878,7 @@ export default function StaffAttendancePage() {
               {loadingMonthly ? (
                 <div className="py-20 text-center text-slate-400 text-sm flex flex-col items-center justify-center gap-3">
                   <RefreshCw className="w-6 h-6 animate-spin text-teal-600" />
-                  <span>মাসিক সারাংশ লোড হচ্ছে...</span>
+                  <span>মাসিক রিপোর্ট লোড হচ্ছে...</span>
                 </div>
               ) : !monthlyData ? (
                 <div className="py-16 text-center text-slate-400 text-sm">
@@ -865,13 +909,14 @@ export default function StaffAttendancePage() {
                   {/* Title Header */}
                   <div className="text-center mb-3 space-y-0.5">
                     <h3 className="text-xs md:text-sm font-bold text-gray-800">
-                      কর্মচারী (স্টাফ) মাসিক উপস্থিতি সারাংশ রেজিস্টার
+                      কর্মচারী (স্টাফ) মাসিক উপস্থিতি রিপোর্ট রেজিস্টার
                     </h3>
                     <h2 className="text-xl md:text-2xl font-black text-gray-900 leading-tight">
                       {formatMonthBangla(selectedMonth)}
                     </h2>
                     <p className="text-xs text-gray-600 font-semibold">
-                      মোট কার্যদিবস: {monthlyData.totalWorkingDays} দিন | মোট স্টাফ: {monthlyData.totalStaff} জন
+                      মোট কার্যদিবস: {monthlyData.totalWorkingDays} দিন | মোট
+                      স্টাফ: {monthlyData.totalStaff} জন
                     </p>
                   </div>
 
@@ -880,72 +925,132 @@ export default function StaffAttendancePage() {
                     <table className="w-full border-collapse border border-gray-800 text-gray-900 text-xs">
                       <thead>
                         <tr className="bg-gray-100 text-center font-bold">
-                          <th className="border border-gray-800 py-2 px-1 w-10">ক্র.</th>
-                          <th className="border border-gray-800 py-2 px-3 text-left">স্টাফের নাম</th>
-                          <th className="border border-gray-800 py-2 px-2 text-left">পদবি</th>
-                          <th className="border border-gray-800 py-2 px-2">উপস্থিত</th>
-                          <th className="border border-gray-800 py-2 px-2">১ম টার্ম অন-টাইম</th>
-                          <th className="border border-gray-800 py-2 px-2">১ম টার্ম লেট</th>
-                          <th className="border border-gray-800 py-2 px-2">পূর্বে প্রস্থান</th>
-                          <th className="border border-gray-800 py-2 px-2">অনুপস্থিত</th>
-                          <th className="border border-gray-800 py-2 px-2">শতকরা হার</th>
-                          <th className="border border-gray-800 py-2 px-3 text-left">দেরি বা আগাম প্রস্থানের কারণসমূহ</th>
+                          <th className="border border-gray-800 py-2 px-1 w-10">
+                            ক্র.
+                          </th>
+                          <th className="border border-gray-800 py-2 px-3 text-left">
+                            স্টাফের নাম
+                          </th>
+                          <th className="border border-gray-800 py-2 px-2 text-left">
+                            পদবি
+                          </th>
+                          <th className="border border-gray-800 py-2 px-2">
+                            উপস্থিত
+                          </th>
+                          <th className="border border-gray-800 py-2 px-2">
+                            ১ম টার্ম অন-টাইম
+                          </th>
+                          <th className="border border-gray-800 py-2 px-2">
+                            ১ম টার্ম লেট
+                          </th>
+                          <th className="border border-gray-800 py-2 px-2">
+                            পূর্বে প্রস্থান
+                          </th>
+                          <th className="border border-gray-800 py-2 px-2">
+                            অনুপস্থিত
+                          </th>
+                          <th className="border border-gray-800 py-2 px-2">
+                            শতকরা হার
+                          </th>
+                          <th className="border border-gray-800 py-2 px-3 text-left">
+                            দেরি বা আগাম প্রস্থানের কারণসমূহ
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
-                        {(monthlyData.summary || monthlyData.staffSummary)?.map((staff, index) => (
-                          <tr key={staff.staffId || index} className="text-center hover:bg-gray-50">
-                            <td className="border border-gray-800 py-1.5 px-1 font-mono">{index + 1}</td>
-                            <td className="border border-gray-800 py-1.5 px-3 text-left font-bold">{staff.fullName}</td>
-                            <td className="border border-gray-800 py-1.5 px-2 text-left text-gray-700">{staff.designation}</td>
-                            <td className="border border-gray-800 py-1.5 px-2 font-bold text-teal-800">{staff.presentDays} দিন</td>
-                            <td className="border border-gray-800 py-1.5 px-2 text-emerald-700">{staff.onTimeDays}</td>
-                            <td className="border border-gray-800 py-1.5 px-2 text-rose-700 font-semibold">{staff.lateDays}</td>
-                            <td className="border border-gray-800 py-1.5 px-2 text-amber-700">{staff.earlyExitDays}</td>
-                            <td className="border border-gray-800 py-1.5 px-2 text-red-600 font-semibold">{staff.absentDays} দিন</td>
-                            <td className="border border-gray-800 py-1.5 px-2 font-bold">{staff.attendanceRate}%</td>
-                            <td className="border border-gray-800 py-1.5 px-3 text-left text-[11px] text-gray-600">
-                              {staff.lateComments?.length > 0 || staff.earlyComments?.length > 0 ? (
-                                <div className="space-y-0.5">
-                                  {staff.lateComments?.slice(0, 2).map((c, i) => (
-                                    <div key={`l-${i}`} className="truncate">
-                                      <span className="font-semibold text-rose-700">[{c.date.slice(8)} তারিখ (লেট)]:</span> {c.comment}
-                                    </div>
-                                  ))}
-                                  {staff.earlyComments?.slice(0, 2).map((c, i) => (
-                                    <div key={`e-${i}`} className="truncate">
-                                      <span className="font-semibold text-amber-700">[{c.date.slice(8)} তারিখ (আর্লি)]:</span> {c.comment}
-                                    </div>
-                                  ))}
-                                </div>
-                              ) : (
-                                <span className="text-gray-400">—</span>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
+                        {(monthlyData.summary || monthlyData.staffSummary)?.map(
+                          (staff, index) => (
+                            <tr
+                              key={staff.staffId || index}
+                              className="text-center hover:bg-gray-50"
+                            >
+                              <td className="border border-gray-800 py-1.5 px-1 font-mono">
+                                {index + 1}
+                              </td>
+                              <td className="border border-gray-800 py-1.5 px-3 text-left font-bold">
+                                {staff.fullName}
+                              </td>
+                              <td className="border border-gray-800 py-1.5 px-2 text-left text-gray-700">
+                                {staff.designation}
+                              </td>
+                              <td className="border border-gray-800 py-1.5 px-2 font-bold text-teal-800">
+                                {staff.presentDays} দিন
+                              </td>
+                              <td className="border border-gray-800 py-1.5 px-2 text-emerald-700">
+                                {staff.onTimeDays}
+                              </td>
+                              <td className="border border-gray-800 py-1.5 px-2 text-rose-700 font-semibold">
+                                {staff.lateDays}
+                              </td>
+                              <td className="border border-gray-800 py-1.5 px-2 text-amber-700">
+                                {staff.earlyExitDays}
+                              </td>
+                              <td className="border border-gray-800 py-1.5 px-2 text-red-600 font-semibold">
+                                {staff.absentDays} দিন
+                              </td>
+                              <td className="border border-gray-800 py-1.5 px-2 font-bold">
+                                {staff.attendanceRate}%
+                              </td>
+                              <td className="border border-gray-800 py-1.5 px-3 text-left text-[11px] text-gray-600">
+                                {staff.lateComments?.length > 0 ||
+                                staff.earlyComments?.length > 0 ? (
+                                  <div className="space-y-0.5">
+                                    {staff.lateComments
+                                      ?.slice(0, 2)
+                                      .map((c, i) => (
+                                        <div
+                                          key={`l-${i}`}
+                                          className="truncate"
+                                        >
+                                          <span className="font-semibold text-rose-700">
+                                            [{c.date.slice(8)} তারিখ (লেট)]:
+                                          </span>{" "}
+                                          {c.comment}
+                                        </div>
+                                      ))}
+                                    {staff.earlyComments
+                                      ?.slice(0, 2)
+                                      .map((c, i) => (
+                                        <div
+                                          key={`e-${i}`}
+                                          className="truncate"
+                                        >
+                                          <span className="font-semibold text-amber-700">
+                                            [{c.date.slice(8)} তারিখ (আর্লি)]:
+                                          </span>{" "}
+                                          {c.comment}
+                                        </div>
+                                      ))}
+                                  </div>
+                                ) : (
+                                  <span className="text-gray-400">—</span>
+                                )}
+                              </td>
+                            </tr>
+                          ),
+                        )}
                       </tbody>
                     </table>
                   </div>
 
                   {/* Principal Signature & Footer Section */}
-                  <div className="mt-12 pt-6 flex justify-between items-end px-4">
-                    <div className="text-center w-44 border-t border-gray-800 pt-1 text-xs font-bold text-gray-800">
-                      হাজিরা তত্ত্বাবধায়ক
-                    </div>
-                    <div className="text-center w-44 border-t border-gray-800 pt-1 text-xs font-bold text-gray-800">
-                      নাজেমে তালিমাত
-                    </div>
-                    <div className="text-center w-48 border-t border-gray-800 pt-1 text-xs font-bold text-gray-800">
-                      <div className="h-10 flex items-center justify-center -mt-8 mb-1">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src="/principle's_signature.jpg"
+                  <div className="mt-8 pt-4 flex justify-end items-end px-6 break-inside-avoid print:mt-6 print:px-2">
+                    {/* প্রিন্সিপাল এর স্বাক্ষর (Admit Card Styling Reused) */}
+                    <div className="text-center flex flex-col items-center">
+                      <div className="relative w-36 h-6 print:mt-auto">
+                        <Image
+                          src={"/principle's_signature.jpg"}
                           alt="Principal Signature"
-                          className="h-10 object-contain mx-auto"
+                          width={100}
+                          height={40}
+                          unoptimized
+                          className="absolute -top-1.5 right-8 h-7 w-14 object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45"
                         />
                       </div>
-                      মুহতামিম / অধ্যক্ষ
+                      <div className="w-36 border-b border-gray-800 mb-1"></div>
+                      <span className="text-xs font-bold text-gray-900">
+                        প্রিন্সিপাল
+                      </span>
                     </div>
                   </div>
                 </div>

@@ -21,12 +21,15 @@ import {
   Clock3,
   CreditCard,
   Printer,
+  Download,
   X,
   FileText,
   ChevronDown,
   Layers,
   Info,
 } from "lucide-react";
+import { pdf } from "@react-pdf/renderer";
+import TeacherMonthlyAttendancePdfDocument from "@/components/dashboard/teachers/attendance/TeacherMonthlyAttendancePdfDocument";
 import {
   getDhakaTime,
   RESIDENTIAL_ATTENDANCE_RULES,
@@ -34,6 +37,23 @@ import {
 } from "@/lib/attendance-config";
 
 const API_BASE = process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
+
+const toBengaliNumber = (num) => {
+  if (num === null || num === undefined) return "";
+  const banglaDigits = {
+    0: "০",
+    1: "১",
+    2: "২",
+    3: "৩",
+    4: "৪",
+    5: "৫",
+    6: "৬",
+    7: "৭",
+    8: "৮",
+    9: "৯",
+  };
+  return String(num).replace(/[0-9]/g, (digit) => banglaDigits[digit]);
+};
 
 export default function AdminTeachersAttendancePage() {
   const [selectedDate, setSelectedDate] = useState(() => {
@@ -53,6 +73,8 @@ export default function AdminTeachersAttendancePage() {
   });
   const [monthlyData, setMonthlyData] = useState(null);
   const [loadingMonthly, setLoadingMonthly] = useState(false);
+  const [generatingPdfPrint, setGeneratingPdfPrint] = useState(false);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
 
   const [metrics, setMetrics] = useState({
     totalTeachers: 0,
@@ -89,8 +111,62 @@ export default function AdminTeachersAttendancePage() {
     fetchMonthlyData(selectedMonth);
   };
 
-  const handlePrintMonthly = () => {
-    window.print();
+  const handlePrintMonthly = async () => {
+    if (!monthlyData) return;
+    try {
+      setGeneratingPdfPrint(true);
+      const origin =
+        typeof window !== "undefined" ? window.location.origin : "";
+      const blob = await pdf(
+        <TeacherMonthlyAttendancePdfDocument
+          monthlyData={monthlyData}
+          formattedMonth={formatMonthBangla(selectedMonth)}
+          selectedMonth={selectedMonth}
+          origin={origin}
+        />,
+      ).toBlob();
+      const blobUrl = URL.createObjectURL(blob);
+      const printWindow = window.open(blobUrl, "_blank");
+      if (printWindow) {
+        printWindow.focus();
+      } else {
+        window.print();
+      }
+    } catch (err) {
+      console.error("Error generating PDF print view:", err);
+      window.print();
+    } finally {
+      setGeneratingPdfPrint(false);
+    }
+  };
+
+  const handleDownloadMonthlyPdf = async () => {
+    if (!monthlyData) return;
+    try {
+      setDownloadingPdf(true);
+      const origin =
+        typeof window !== "undefined" ? window.location.origin : "";
+      const blob = await pdf(
+        <TeacherMonthlyAttendancePdfDocument
+          monthlyData={monthlyData}
+          formattedMonth={formatMonthBangla(selectedMonth)}
+          selectedMonth={selectedMonth}
+          origin={origin}
+        />,
+      ).toBlob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Teachers-Monthly-Attendance-${selectedMonth}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Error downloading monthly attendance PDF:", err);
+    } finally {
+      setDownloadingPdf(false);
+    }
   };
 
   const formatMonthBangla = (monthStr) => {
@@ -111,7 +187,7 @@ export default function AdminTeachersAttendancePage() {
       "ডিসেম্বর",
     ];
     const monthIndex = parseInt(month, 10) - 1;
-    return `${monthNames[monthIndex] || month} ${year}`;
+    return `${monthNames[monthIndex] || toBengaliNumber(month)} ${toBengaliNumber(year)}`;
   };
 
   // Fetch Attendance & Metrics
@@ -184,7 +260,7 @@ export default function AdminTeachersAttendancePage() {
       {/* Navigation Tabs between ID Card and Attendance */}
       <div className="flex items-center gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-2xl w-fit border border-slate-200/80 dark:border-slate-700/60">
         <Link
-          href="/dashboard/admin/teachers-management"
+          href="/dashboard/admin/teachers-management/teachers-id-card"
           className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-white dark:hover:bg-slate-700 transition-all"
         >
           <CreditCard className="w-4 h-4" />
@@ -222,7 +298,7 @@ export default function AdminTeachersAttendancePage() {
           </button>
 
           <Link
-            href="/dashboard/attendance"
+            href="/dashboard/teachers-attendance"
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition-all active:scale-95"
           >
             <Clock className="w-4 h-4" />
@@ -932,10 +1008,30 @@ export default function AdminTeachersAttendancePage() {
 
                 <button
                   onClick={handlePrintMonthly}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md transition-all active:scale-95"
+                  disabled={
+                    loadingMonthly || !monthlyData || generatingPdfPrint
+                  }
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md transition-all active:scale-95 disabled:opacity-50"
                 >
-                  <Printer className="w-4 h-4" />
-                  <span>প্রিন্ট / ডাউনলোড (Print)</span>
+                  {generatingPdfPrint ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Printer className="w-4 h-4" />
+                  )}
+                  <span>প্রিন্ট ভিউ (PDF Print)</span>
+                </button>
+
+                <button
+                  onClick={handleDownloadMonthlyPdf}
+                  disabled={loadingMonthly || !monthlyData || downloadingPdf}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600 text-white text-xs font-bold shadow-md transition-all active:scale-95 disabled:opacity-50"
+                >
+                  {downloadingPdf ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Download className="w-4 h-4" />
+                  )}
+                  <span>ডাউনলোড (PDF Download)</span>
                 </button>
 
                 <button
@@ -963,48 +1059,32 @@ export default function AdminTeachersAttendancePage() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {/* Institution Header with Logo and Name in Arabic, Bengali & English */}
-                  <div className="flex items-center justify-between gap-2 sm:gap-4 mb-2 border-b-4 border-double border-gray-800 pb-2 pl-2 pr-2">
-                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center">
+                  {/* Header with separate Logo and Banner (/banner_routine.png) */}
+                  <div className="flex items-center justify-center gap-0 mb-2 border-b-4 border-double border-gray-800 pb-1 pl-2">
+                    <div className="w-20 h-20 md:w-28 md:h-28 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-3">
                       <Image
                         src="/aimlogo1.png"
                         alt="Institution Logo"
-                        width={96}
-                        height={96}
+                        width={200}
+                        height={200}
+                        quality={100}
                         priority
                         unoptimized
                         className="w-full h-full object-cover scale-[1.05]"
                       />
                     </div>
-
-                    <div className="flex-1 text-center px-1 sm:px-2 space-y-0.5">
-                      {/* Arabic Name */}
-                      <p
-                        dir="rtl"
-                        className="text-base sm:text-lg md:text-xl font-bold text-gray-800 tracking-wide font-serif leading-tight antialiased"
-                        style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
-                      >
-                        مدرسة السلام النموذجية
-                      </p>
-
-                      {/* Bengali Name (Primary Visual Prominence) */}
-                      <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-gray-900 tracking-tight leading-tight">
-                        আস-সালাম আইডিয়াল মাদরাসা <span className="text-emerald-800">(এইম)</span>
-                      </h1>
-
-                      {/* English Name */}
-                      <h2 className="text-xs sm:text-sm md:text-base font-bold text-gray-700 tracking-wide">
-                        As-Salam Ideal Madrasah (AIM), Habiganj
-                      </h2>
-
-                      {/* Subtitle / Location */}
-                      <p className="text-[10px] sm:text-[11px] font-semibold text-gray-500 tracking-wider">
-                        হবিগঞ্জ সদর, হবিগঞ্জ • স্থাপিত: ২০১৮
-                      </p>
+                    <div className="flex-grow text-center">
+                      <Image
+                        src="/banner_routine.png"
+                        alt="Institution Banner"
+                        width={2000}
+                        height={400}
+                        quality={100}
+                        priority
+                        unoptimized
+                        className="w-full h-auto max-h-45 object-fill mx-auto print:max-h-45"
+                      />
                     </div>
-
-                    {/* Right spacer for visual balance with logo */}
-                    <div className="w-20 md:w-24 flex-shrink-0 hidden sm:block print:block" aria-hidden="true" />
                   </div>
 
                   {/* Title Header */}
@@ -1016,8 +1096,9 @@ export default function AdminTeachersAttendancePage() {
                       {formatMonthBangla(selectedMonth)}
                     </h2>
                     <p className="text-xs text-gray-600 font-semibold">
-                      মোট কার্যদিবস: {monthlyData.totalWorkingDays} দিন | মোট
-                      শিক্ষক: {monthlyData.totalTeachers} জন
+                      মোট কার্যদিবস:{" "}
+                      {toBengaliNumber(monthlyData.totalWorkingDays)} দিন | মোট
+                      শিক্ষক: {toBengaliNumber(monthlyData.totalTeachers)} জন
                     </p>
                   </div>
 
@@ -1065,7 +1146,7 @@ export default function AdminTeachersAttendancePage() {
                             className="text-center hover:bg-gray-50"
                           >
                             <td className="border border-gray-800 py-1.5 px-1 font-mono">
-                              {index + 1}
+                              {toBengaliNumber(index + 1)}
                             </td>
                             <td className="border border-gray-800 py-1.5 px-3 text-left font-bold">
                               {teacher.teacherName}
@@ -1074,22 +1155,22 @@ export default function AdminTeachersAttendancePage() {
                               {teacher.designation}
                             </td>
                             <td className="border border-gray-800 py-1.5 px-2 font-bold text-emerald-800">
-                              {teacher.presentDays} দিন
+                              {toBengaliNumber(teacher.presentDays)} দিন
                             </td>
                             <td className="border border-gray-800 py-1.5 px-2 text-emerald-700">
-                              {teacher.onTimeDays}
+                              {toBengaliNumber(teacher.onTimeDays)}
                             </td>
                             <td className="border border-gray-800 py-1.5 px-2 text-rose-700 font-semibold">
-                              {teacher.lateDays}
+                              {toBengaliNumber(teacher.lateDays)}
                             </td>
                             <td className="border border-gray-800 py-1.5 px-2 text-amber-700">
-                              {teacher.earlyExitDays}
+                              {toBengaliNumber(teacher.earlyExitDays)}
                             </td>
                             <td className="border border-gray-800 py-1.5 px-2 text-red-600 font-semibold">
-                              {teacher.absentDays} দিন
+                              {toBengaliNumber(teacher.absentDays)} দিন
                             </td>
                             <td className="border border-gray-800 py-1.5 px-2 font-bold">
-                              {teacher.attendanceRate}%
+                              {toBengaliNumber(teacher.attendanceRate)}%
                             </td>
                             <td className="border border-gray-800 py-1.5 px-3 text-left text-[11px] text-gray-600">
                               {teacher.lateComments?.length > 0 ||
@@ -1100,7 +1181,8 @@ export default function AdminTeachersAttendancePage() {
                                     .map((c, i) => (
                                       <div key={`l-${i}`} className="truncate">
                                         <span className="font-semibold text-rose-700">
-                                          [{c.date.slice(8)} তারিখ]:
+                                          [{toBengaliNumber(c.date?.slice(8))}{" "}
+                                          তারিখ]:
                                         </span>{" "}
                                         {c.comment}
                                       </div>
@@ -1110,7 +1192,8 @@ export default function AdminTeachersAttendancePage() {
                                     .map((c, i) => (
                                       <div key={`e-${i}`} className="truncate">
                                         <span className="font-semibold text-amber-700">
-                                          [{c.date.slice(8)} তারিখ (আর্লি)]:
+                                          [{toBengaliNumber(c.date?.slice(8))}{" "}
+                                          তারিখ (আর্লি)]:
                                         </span>{" "}
                                         {c.comment}
                                       </div>
@@ -1142,7 +1225,7 @@ export default function AdminTeachersAttendancePage() {
                       </div>
                       <div className="w-36 border-b border-gray-800 mb-1"></div>
                       <span className="text-xs font-bold text-gray-900">
-                        মুহতামিম / অধ্যক্ষ
+                        প্রিন্সিপাল
                       </span>
                     </div>
                   </div>
@@ -1152,35 +1235,6 @@ export default function AdminTeachersAttendancePage() {
           </div>
         </div>
       )}
-
-      {/* A4 Landscape Print Styling */}
-      <style jsx global>{`
-        @media print {
-          @page {
-            size: A4 landscape;
-            margin: 8mm 10mm;
-          }
-          body * {
-            visibility: hidden;
-          }
-          #printable-monthly-summary,
-          #printable-monthly-summary * {
-            visibility: visible;
-          }
-          #printable-monthly-summary {
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: 100vw;
-            min-height: 100vh;
-            margin: 0;
-            padding: 8mm 10mm;
-            background: white !important;
-            color: #111827 !important;
-            z-index: 999999;
-          }
-        }
-      `}</style>
     </div>
   );
 }
