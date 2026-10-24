@@ -591,10 +591,21 @@ export default function TeacherAttendancePage() {
               <span>দৈনিক শিক্ষক হাজিরা ও প্রস্থান</span>
             </h1>
             <p className="text-sm text-emerald-100/80 max-w-xl leading-relaxed">
-              স্বাগতম, <strong>{teacherProfile?.name || teacherName}</strong> ({teacherEmail})।
-              মাদরাসা প্রাঙ্গণে অবস্থানকালীন সময়মতো প্রবেশ ও প্রস্থান হাজিরা নিশ্চিত করুন।
+              স্বাগতম,{" "}
+              <strong className="font-mono text-amber-300">
+                {teacherProfile?.teacherId ||
+                  teacherProfile?.id ||
+                  "আইডি নির্ধারিত নয়"}
+              </strong>{" "}
+              ({teacherEmail})। মাদরাসা প্রাঙ্গণে অবস্থানকালীন সময়মতো প্রবেশ ও
+              প্রস্থান হাজিরা নিশ্চিত করুন।
             </p>
             <div className="flex flex-wrap items-center gap-2 pt-1">
+              {(teacherProfile?.teacherId || teacherProfile?.id) && (
+                <span className="px-2.5 py-0.5 text-xs font-mono font-bold rounded-md bg-emerald-950/60 text-amber-300 border border-amber-400/30">
+                  শিক্ষক আইডি: {teacherProfile.teacherId || teacherProfile.id}
+                </span>
+              )}
               {teacherProfile?.designation && (
                 <span className="px-2.5 py-0.5 text-xs font-semibold rounded-md bg-white/20 text-white border border-white/20">
                   পদবি: {teacherProfile.designation}

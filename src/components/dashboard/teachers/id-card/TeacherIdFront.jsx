@@ -9,13 +9,18 @@ import BarcodeSVG from "react-barcode";
  * Standard CR80 landscape card: 85.6mm x 53.98mm (3.375in x 2.125in)
  */
 export default function TeacherIdFront({ teacher = {}, scale = 1 }) {
-  const name = teacher.fullName || teacher.name || "Sheikh Muzammil";
-  const designation = teacher.designation || "Assistant Teacher";
-  const dob = teacher.dateOfBirth || teacher.dob || "13/12/1998";
-  const mobile = teacher.phone || teacher.mobile || "01836376174";
-  const bloodGroup = teacher.bloodGroup || teacher.blood || "A (-)";
-  const idNo = teacher.teacherId || teacher.idNo || "ID NO-AIM 0 235";
-  const photo = teacher.profileImage || teacher.image || "/default-avatar.png";
+  const name = teacher?.fullName || teacher?.name || "—";
+  const designation = teacher?.designation || "শিক্ষক";
+  const dob = teacher?.dateOfBirth || teacher?.dob || "—";
+  const mobile = teacher?.phone || teacher?.mobile || "—";
+  const bloodGroup = teacher?.bloodGroup || teacher?.blood || "—";
+  const idNo = teacher?.teacherId || teacher?.idNo || "—";
+  const photo =
+    teacher?.profileImage || teacher?.image || "/default-avatar.png";
+  const barcodeValue =
+    idNo && idNo !== "—"
+      ? String(idNo).replace(/\s+/g, "")
+      : String(teacher?._id || "AIM").slice(-8);
 
   return (
     <div
@@ -203,7 +208,7 @@ export default function TeacherIdFront({ teacher = {}, scale = 1 }) {
         {/* Left: Barcode Container */}
         <div className="h-[21px] bg-white px-1.5 py-[2px] rounded-xs shadow-xs flex items-center justify-center overflow-hidden">
           <BarcodeSVG
-            value={idNo ? idNo.replace(/\s+/g, "") : "AIM0235"}
+            value={barcodeValue}
             format="CODE128"
             width={0.9}
             height={16}

@@ -385,7 +385,7 @@ export default function AdminTeachersAttendancePage() {
               {metrics.onTimeToday}
             </h3>
             <p className="text-[11px] text-teal-600/80 dark:text-teal-400/80 font-medium">
-              ৮:০৫ এর পূর্বে প্রবেশ
+              নির্ধারিত সময়ে প্রবেশ
             </p>
           </div>
         </div>
@@ -403,7 +403,7 @@ export default function AdminTeachersAttendancePage() {
               {metrics.lateToday}
             </h3>
             <p className="text-[11px] text-amber-600/80 dark:text-amber-400/80 font-medium">
-              ৮:০৫ এর পরে প্রবেশ
+              নির্ধারিত সময়ের পরে প্রবেশ
             </p>
           </div>
         </div>
@@ -441,7 +441,7 @@ export default function AdminTeachersAttendancePage() {
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="শিক্ষকের নাম বা ইমেইল দিয়ে খুঁজুন..."
+              placeholder="শিক্ষক আইডি, পদবি বা ইমেইল দিয়ে খুঁজুন..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -479,8 +479,8 @@ export default function AdminTeachersAttendancePage() {
 
       {/* 4. Full Attendance Table */}
       <div className="bg-white dark:bg-slate-800/80 rounded-3xl border border-slate-200/80 dark:border-slate-700/60 shadow-xs overflow-hidden">
-        <div className="p-5 border-b border-slate-100 dark:border-slate-700/60 flex items-center justify-between">
-          <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+        <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-700/60 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex flex-wrap items-center gap-2">
             <span>হাজিরা রেজিস্টার তালিকা</span>
             <span className="text-xs font-mono px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded-md text-slate-600 dark:text-slate-300">
               {selectedDate}
@@ -505,471 +505,912 @@ export default function AdminTeachersAttendancePage() {
             কোনো শিক্ষকের তথ্য বা হাজিরার রেকর্ড পাওয়া যায়নি।
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="text-[11px] uppercase tracking-wider bg-slate-50 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 border-b border-slate-200/60 dark:border-slate-700/40">
-                <tr>
-                  <th className="py-3.5 px-5 font-bold">শিক্ষক পরিচিতি</th>
-                  <th className="py-3.5 px-4 font-bold">
-                    প্রবেশ হাজিরা (Check-In)
-                  </th>
-                  <th className="py-3.5 px-4 font-bold">প্রবেশ স্ট্যাটাস</th>
-                  <th className="py-3.5 px-4 font-bold">
-                    প্রস্থান হাজিরা (Check-Out)
-                  </th>
-                  <th className="py-3.5 px-4 font-bold">প্রস্থান স্ট্যাটাস</th>
-                  <th className="py-3.5 px-4 font-bold">কর্মঘণ্টা</th>
-                  <th className="py-3.5 px-4 font-bold">
-                    দেরি/পূর্বে প্রস্থানের কারণ
-                  </th>
-                  <th className="py-3.5 px-4 font-bold">অবস্থান</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/30">
-                {attendanceList.map((item) => {
-                  const teacherKey = item.teacherId || item.teacherEmail;
-                  const isExpanded = expandedTeacherId === teacherKey;
-                  const isMultiShiftTeacher =
-                    item.category === "residential" ||
-                    item.category === "hifz" ||
-                    (item.shifts && Object.keys(item.shifts).length > 0);
+          <>
+            {/* Mobile & Tablet Responsive Card View (< lg) */}
+            <div className="block lg:hidden divide-y divide-slate-100 dark:divide-slate-700/40">
+              {attendanceList.map((item) => {
+                const teacherKey = item.teacherId || item.teacherEmail;
+                const displayTeacherId = item.teacherId || "আইডি নেই";
+                const isExpanded = expandedTeacherId === teacherKey;
+                const isMultiShiftTeacher =
+                  item.category === "residential" ||
+                  item.category === "hifz" ||
+                  (item.shifts && Object.keys(item.shifts).length > 0);
 
-                  // Extract all shift-level comments
-                  const allComments = [];
-                  if (item.shifts) {
-                    Object.values(item.shifts).forEach((s) => {
-                      if (s?.checkInComment) {
-                        allComments.push({
-                          type: "late",
-                          label: `${s.name || s.shiftId} (দেরি)`,
-                          comment: s.checkInComment,
-                        });
-                      }
-                      if (s?.checkOutComment) {
-                        allComments.push({
-                          type: "early",
-                          label: `${s.name || s.shiftId} (আর্লি)`,
-                          comment: s.checkOutComment,
-                        });
-                      }
-                    });
-                  }
-                  if (allComments.length === 0) {
-                    if (item.checkInComment) {
+                const allComments = [];
+                const shiftLabels = {
+                  shift1: "১ম শিফট",
+                  shift2: "২য় শিফট",
+                  shift3: "৩য় শিফট",
+                };
+                if (item.shifts && typeof item.shifts === "object") {
+                  const orderedKeys = [
+                    "shift1",
+                    "shift2",
+                    "shift3",
+                    ...Object.keys(item.shifts).filter(
+                      (k) => !["shift1", "shift2", "shift3"].includes(k),
+                    ),
+                  ];
+                  orderedKeys.forEach((sKey) => {
+                    const s = item.shifts[sKey];
+                    if (!s) return;
+                    const sTitle =
+                      s.name || shiftLabels[sKey] || s.shiftId || sKey;
+                    if (s.checkInComment) {
                       allComments.push({
                         type: "late",
-                        label: "দেরি",
-                        comment: item.checkInComment,
+                        label: `${sTitle} (দেরি)`,
+                        comment: s.checkInComment,
                       });
                     }
-                    if (item.checkOutComment) {
+                    if (s.checkOutComment) {
                       allComments.push({
                         type: "early",
-                        label: "আর্লি",
-                        comment: item.checkOutComment,
+                        label: `${sTitle} (আর্লি)`,
+                        comment: s.checkOutComment,
                       });
                     }
+                  });
+                }
+                if (allComments.length === 0) {
+                  if (item.checkInComment) {
+                    allComments.push({
+                      type: "late",
+                      label: "দেরি",
+                      comment: item.checkInComment,
+                    });
                   }
+                  if (item.checkOutComment) {
+                    allComments.push({
+                      type: "early",
+                      label: "আর্লি",
+                      comment: item.checkOutComment,
+                    });
+                  }
+                }
 
-                  const completedShiftsCount = item.shifts
-                    ? Object.values(item.shifts).filter((s) => !!s?.checkInTime)
-                        .length
-                    : 0;
+                const completedShiftsCount = item.shifts
+                  ? Object.values(item.shifts).filter((s) => !!s?.checkInTime)
+                      .length
+                  : 0;
 
-                  return (
-                    <React.Fragment key={teacherKey}>
-                      <tr className="hover:bg-slate-50/70 dark:hover:bg-slate-700/20 transition-colors">
-                        {/* Teacher Profile Column */}
-                        <td className="py-4 px-5">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 font-bold flex items-center justify-center flex-shrink-0 text-sm border border-emerald-200 dark:border-emerald-800">
-                              {item.profileImage ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                  src={item.profileImage}
-                                  alt={item.teacherName}
-                                  className="w-full h-full object-cover rounded-2xl"
-                                />
-                              ) : (
-                                item.teacherName.charAt(0)
-                              )}
-                            </div>
-                            <div>
-                              <p className="font-bold text-slate-900 dark:text-white leading-snug">
-                                {item.teacherName}
-                              </p>
-                              <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-                                {item.teacherEmail}
-                              </p>
-                              <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
-                                <span className="inline-block text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.2 rounded">
-                                  {item.designation}
-                                </span>
-                                {isMultiShiftTeacher && (
-                                  <span className="inline-block text-[10px] font-bold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/70 px-2 py-0.2 rounded-full border border-amber-300/80 dark:border-amber-700">
-                                    {item.category === "residential"
-                                      ? "আবাসিক (৩ শিফট)"
-                                      : item.category === "hifz"
-                                        ? "হিফজ (৩ শিফট)"
-                                        : "৩ শিফট"}
-                                  </span>
-                                )}
-                              </div>
-                              {isMultiShiftTeacher && (
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setExpandedTeacherId(
-                                      isExpanded ? null : teacherKey,
-                                    )
-                                  }
-                                  className="mt-1.5 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 dark:hover:bg-amber-900 border border-amber-200 dark:border-amber-800 transition-colors"
-                                >
-                                  <Layers className="w-3 h-3 text-amber-600 dark:text-amber-400" />
-                                  <span>
-                                    শিফট তথ্য ({completedShiftsCount}/৩)
-                                  </span>
-                                  <ChevronDown
-                                    className={`w-3 h-3 transition-transform ${
-                                      isExpanded ? "rotate-180" : ""
-                                    }`}
-                                  />
-                                </button>
-                              )}
-                            </div>
+                return (
+                  <div
+                    key={teacherKey}
+                    className="p-4 space-y-3 hover:bg-slate-50/60 dark:hover:bg-slate-700/15 transition-colors"
+                  >
+                    {/* Card Top: Identity & Overall Status */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3 min-w-0">
+                        <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 font-bold font-mono flex items-center justify-center flex-shrink-0 text-xs border border-emerald-200 dark:border-emerald-800">
+                          {item.profileImage ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={item.profileImage}
+                              alt={displayTeacherId}
+                              className="w-full h-full object-cover rounded-2xl"
+                            />
+                          ) : (
+                            "ID"
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <p className="font-black font-mono text-sm text-slate-900 dark:text-white leading-snug break-all">
+                              {displayTeacherId}
+                            </p>
+                            {!item.rawTeacherId && (
+                              <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 font-medium">
+                                অটো আইডি
+                              </span>
+                            )}
                           </div>
-                        </td>
-
-                        {/* Check-In Time */}
-                        <td className="py-4 px-4 font-mono text-xs whitespace-nowrap">
-                          {item.hasCheckedIn ? (
-                            <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
-                              <Clock3 className="w-3.5 h-3.5 text-emerald-600" />
-                              <span>{formatTime(item.checkInTime)}</span>
-                            </div>
-                          ) : (
-                            <span className="text-slate-400">অনুপস্থিত</span>
+                          {item.teacherEmail && (
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono truncate">
+                              {item.teacherEmail}
+                            </p>
                           )}
-                        </td>
-
-                        {/* Check-In Status Badge */}
-                        <td className="py-4 px-4 whitespace-nowrap">
-                          {item.hasCheckedIn ? (
-                            <span
-                              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${
-                                item.checkInStatus === "On Time"
-                                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300"
-                                  : "bg-rose-100 text-rose-800 dark:bg-rose-950/70 dark:text-rose-300 border border-rose-300"
-                              }`}
-                            >
-                              {item.checkInStatus === "On Time" ? (
-                                <CheckCircle2 className="w-3.5 h-3.5" />
-                              ) : (
-                                <AlertCircle className="w-3.5 h-3.5" />
-                              )}
-                              {item.checkInStatus === "On Time"
-                                ? "On Time"
-                                : "Late"}
+                          <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                            <span className="inline-block text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded">
+                              {item.designation}
                             </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-600">
-                              <XCircle className="w-3.5 h-3.5 text-slate-400" />
-                              Absent
-                            </span>
-                          )}
-                        </td>
+                            {isMultiShiftTeacher && (
+                              <span className="inline-block text-[10px] font-bold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/70 px-2 py-0.5 rounded-full border border-amber-300/80 dark:border-amber-700">
+                                {item.category === "residential"
+                                  ? "আবাসিক (৩ শিফট)"
+                                  : item.category === "hifz"
+                                    ? "হিফজ (৩ শিফট)"
+                                    : "৩ শিফট"}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
 
-                        {/* Check-Out Time */}
-                        <td className="py-4 px-4 font-mono text-xs whitespace-nowrap">
-                          {item.hasCheckedOut ? (
-                            <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
-                              <Clock3 className="w-3.5 h-3.5 text-teal-600" />
+                      {/* Primary Attendance Badge */}
+                      <div className="flex-shrink-0">
+                        {item.hasCheckedIn ? (
+                          <span
+                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ${
+                              item.checkInStatus === "On Time"
+                                ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300"
+                                : "bg-rose-100 text-rose-800 dark:bg-rose-950/70 dark:text-rose-300 border border-rose-300"
+                            }`}
+                          >
+                            {item.checkInStatus === "On Time" ? (
+                              <CheckCircle2 className="w-3 h-3" />
+                            ) : (
+                              <AlertCircle className="w-3 h-3" />
+                            )}
+                            {item.checkInStatus === "On Time"
+                              ? "On Time"
+                              : "Late"}
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-600">
+                            <XCircle className="w-3 h-3 text-slate-400" />
+                            Absent
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Check-in / Check-out 2-Column Grid */}
+                    <div className="grid grid-cols-2 gap-2.5 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-700/50 text-xs">
+                      <div className="space-y-1">
+                        <span className="text-[10px] font-bold uppercase text-slate-400 block">
+                          প্রবেশ হাজিরা (Check-In)
+                        </span>
+                        {item.hasCheckedIn ? (
+                          <div className="flex items-center gap-1.5 font-mono font-bold text-slate-800 dark:text-slate-200">
+                            <Clock3 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                            <span>{formatTime(item.checkInTime)}</span>
+                          </div>
+                        ) : (
+                          <span className="text-slate-400 font-medium">
+                            অনুপস্থিত
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="space-y-1 border-l border-slate-200/70 dark:border-slate-700/60 pl-2.5">
+                        <span className="text-[10px] font-bold uppercase text-slate-400 block">
+                          প্রস্থান হাজিরা (Check-Out)
+                        </span>
+                        {item.hasCheckedOut ? (
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <div className="flex items-center gap-1 font-mono font-bold text-slate-800 dark:text-slate-200">
+                              <Clock3 className="w-3.5 h-3.5 text-teal-600 flex-shrink-0" />
                               <span>{formatTime(item.checkOutTime)}</span>
                             </div>
-                          ) : (
-                            <span className="text-slate-400">--:--</span>
-                          )}
-                        </td>
-
-                        {/* Check-Out Status Badge */}
-                        <td className="py-4 px-4 whitespace-nowrap">
-                          {item.hasCheckedOut ? (
                             <span
-                              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${
+                              className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
                                 item.checkOutStatus === "On Time"
-                                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300"
-                                  : "bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-300"
+                                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300"
+                                  : "bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300"
                               }`}
                             >
-                              {item.checkOutStatus === "On Time" ? (
-                                <CheckCircle2 className="w-3.5 h-3.5" />
-                              ) : (
-                                <AlertCircle className="w-3.5 h-3.5" />
-                              )}
                               {item.checkOutStatus === "On Time"
                                 ? "On Time"
                                 : "Early"}
                             </span>
-                          ) : (
-                            <span className="text-xs text-slate-400">
-                              অপেক্ষমান
+                          </div>
+                        ) : (
+                          <span className="text-slate-400 font-medium">
+                            অপেক্ষমান
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Meta Row: Work Duration, Location & 3-Shift Toggle */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                      <div className="flex flex-wrap items-center gap-3 text-slate-600 dark:text-slate-300">
+                        <span>
+                          <strong className="text-slate-400 font-medium">
+                            কর্মঘণ্টা:
+                          </strong>{" "}
+                          <span className="font-semibold">
+                            {calculateWorkDuration(
+                              item.checkInTime,
+                              item.checkOutTime,
+                            ) || "--"}
+                          </span>
+                        </span>
+
+                        {item.checkInLocation && (
+                          <a
+                            href={`https://maps.google.com/?q=${item.checkInLocation.lat},${item.checkInLocation.lng}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 hover:underline font-mono text-[11px]"
+                          >
+                            <MapPin className="w-3 h-3" />
+                            <span>
+                              {item.checkInLocation.lat.toFixed(4)},{" "}
+                              {item.checkInLocation.lng.toFixed(4)}
                             </span>
-                          )}
-                        </td>
+                            <ExternalLink className="w-2.5 h-2.5" />
+                          </a>
+                        )}
+                      </div>
 
-                        {/* Duration */}
-                        <td className="py-4 px-4 text-xs font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">
-                          {calculateWorkDuration(
-                            item.checkInTime,
-                            item.checkOutTime,
-                          ) || <span className="text-slate-400">--</span>}
-                        </td>
+                      {isMultiShiftTeacher && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setExpandedTeacherId(isExpanded ? null : teacherKey)
+                          }
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 dark:hover:bg-amber-900 border border-amber-200 dark:border-amber-800 transition-colors"
+                        >
+                          <Layers className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                          <span>শিফট তথ্য ({completedShiftsCount}/৩)</span>
+                          <ChevronDown
+                            className={`w-3.5 h-3.5 transition-transform ${
+                              isExpanded ? "rotate-180" : ""
+                            }`}
+                          />
+                        </button>
+                      )}
+                    </div>
 
-                        {/* Reason / Comments Column */}
-                        <td className="py-4 px-4 text-xs text-slate-600 dark:text-slate-300 max-w-xs">
-                          {allComments.length > 0 ? (
-                            <div className="flex flex-col gap-1">
-                              {allComments.map((c, i) => (
-                                <span
-                                  key={i}
-                                  title={c.comment}
-                                  className="truncate"
-                                >
-                                  <strong
-                                    className={
-                                      c.type === "late"
-                                        ? "text-rose-600 font-semibold"
-                                        : "text-amber-600 font-semibold"
-                                    }
-                                  >
-                                    {c.label}:
-                                  </strong>{" "}
-                                  {c.comment}
-                                </span>
-                              ))}
-                            </div>
-                          ) : (
-                            <span className="text-slate-400">--</span>
-                          )}
-                        </td>
-
-                        {/* Location Link */}
-                        <td className="py-4 px-4 whitespace-nowrap text-xs">
-                          {item.checkInLocation ? (
-                            <a
-                              href={`https://maps.google.com/?q=${item.checkInLocation.lat},${item.checkInLocation.lng}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 hover:underline font-mono"
-                              title="ম্যাপে অবস্থান দেখুন"
+                    {/* Comments Box (Mobile) */}
+                    {allComments.length > 0 && (
+                      <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-700/50 text-xs space-y-1">
+                        <p className="text-[10px] font-bold uppercase text-slate-400">
+                          দেরি / পূর্বে প্রস্থানের কারণ:
+                        </p>
+                        {allComments.map((c, i) => (
+                          <div
+                            key={i}
+                            className="leading-snug break-words text-slate-700 dark:text-slate-300"
+                          >
+                            <strong
+                              className={
+                                c.type === "late"
+                                  ? "text-rose-600 font-semibold"
+                                  : "text-amber-600 font-semibold"
+                              }
                             >
-                              <MapPin className="w-3.5 h-3.5" />
-                              <span>
-                                {item.checkInLocation.lat.toFixed(4)},{" "}
-                                {item.checkInLocation.lng.toFixed(4)}
-                              </span>
-                              <ExternalLink className="w-3 h-3" />
-                            </a>
-                          ) : (
-                            <span className="text-slate-400">--</span>
-                          )}
-                        </td>
-                      </tr>
+                              {c.label}:
+                            </strong>{" "}
+                            {c.comment}
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
-                      {/* Expandable 3-Shift Breakdown Sub-Row */}
-                      {isExpanded && (
-                        <tr className="bg-slate-50/90 dark:bg-slate-900/80 border-y border-amber-200/60 dark:border-amber-900/40">
-                          <td colSpan={8} className="p-4 sm:p-5">
-                            <div className="space-y-3">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  <Layers className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                                  <h4 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-white">
-                                    {item.teacherName} — দৈনিক ৩ শিফট বিস্তারিত
-                                    বিবরণ
-                                  </h4>
-                                  <span className="text-[10px] px-2 py-0.5 rounded-md font-semibold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300">
-                                    {item.category === "residential"
-                                      ? "আবাসিক শিক্ষক"
-                                      : item.category === "hifz"
-                                        ? "হিফজ শিক্ষক"
-                                        : item.designation}
-                                  </span>
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={() => setExpandedTeacherId(null)}
-                                  className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold"
+                    {/* Expandable 3-Shift Breakdown inside Mobile Card */}
+                    {isExpanded && (
+                      <div className="pt-2 border-t border-amber-200/60 dark:border-amber-900/40 space-y-2.5">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
+                            <Layers className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                            <h4 className="text-xs font-bold text-slate-800 dark:text-white">
+                              শিক্ষক আইডি: {displayTeacherId} — ৩ শিফট বিবরণ
+                            </h4>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setExpandedTeacherId(null)}
+                            className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold"
+                          >
+                            বন্ধ করুন ✕
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                          {["shift1", "shift2", "shift3"].map(
+                            (shiftKey, sIdx) => {
+                              const rules =
+                                item.category === "hifz"
+                                  ? HIFZ_ATTENDANCE_RULES[shiftKey]
+                                  : RESIDENTIAL_ATTENDANCE_RULES[shiftKey];
+                              const sRecord = item.shifts?.[shiftKey];
+                              const hasIn = !!sRecord?.checkInTime;
+                              const hasOut = !!sRecord?.checkOutTime;
+
+                              return (
+                                <div
+                                  key={shiftKey}
+                                  className={`p-3 rounded-2xl border text-xs space-y-1.5 ${
+                                    hasIn
+                                      ? "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-xs"
+                                      : "bg-slate-100/60 dark:bg-slate-800/40 border-slate-200/60 dark:border-slate-700/30 opacity-85"
+                                  }`}
                                 >
-                                  বন্ধ করুন ✕
-                                </button>
-                              </div>
-
-                              {/* 3 Shifts Grid */}
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                {["shift1", "shift2", "shift3"].map(
-                                  (shiftKey, sIdx) => {
-                                    const rules =
-                                      item.category === "hifz"
-                                        ? HIFZ_ATTENDANCE_RULES[shiftKey]
-                                        : RESIDENTIAL_ATTENDANCE_RULES[
-                                            shiftKey
-                                          ];
-                                    const sRecord = item.shifts?.[shiftKey];
-                                    const hasIn = !!sRecord?.checkInTime;
-                                    const hasOut = !!sRecord?.checkOutTime;
-
-                                    return (
-                                      <div
-                                        key={shiftKey}
-                                        className={`p-3.5 rounded-2xl border text-xs space-y-2 ${
-                                          hasIn
-                                            ? "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-xs"
-                                            : "bg-slate-100/60 dark:bg-slate-800/40 border-slate-200/60 dark:border-slate-700/30 opacity-80"
-                                        }`}
-                                      >
-                                        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
-                                          <span className="font-bold text-slate-900 dark:text-white">
-                                            {rules?.name || `শিফট ${sIdx + 1}`}
-                                          </span>
-                                          <span className="text-[10px] font-medium text-slate-400">
-                                            {rules?.nameEnglish}
-                                          </span>
-                                        </div>
-
-                                        {/* Window Rules */}
-                                        <div className="text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5">
-                                          <p>
-                                            প্রবেশ:{" "}
-                                            {rules?.checkInWindowLabel || "--"}
-                                          </p>
-                                          <p>
-                                            প্রস্থান:{" "}
-                                            {rules?.checkOutWindowLabel || "--"}
-                                          </p>
-                                        </div>
-
-                                        {/* Check-In Details */}
-                                        <div className="pt-1 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between">
-                                          <span className="text-slate-500">
-                                            প্রবেশ (In):
-                                          </span>
-                                          {hasIn ? (
-                                            <div className="flex items-center gap-1.5 font-mono font-bold">
-                                              <span>
-                                                {formatTime(
-                                                  sRecord.checkInTime,
-                                                )}
-                                              </span>
-                                              <span
-                                                className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
-                                                  sRecord.checkInStatus ===
-                                                  "On Time"
-                                                    ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-                                                    : "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300"
-                                                }`}
-                                              >
-                                                {sRecord.checkInStatus}
-                                              </span>
-                                            </div>
-                                          ) : (
-                                            <span className="text-slate-400">
-                                              অনুপস্থিত
-                                            </span>
-                                          )}
-                                        </div>
-
-                                        {/* Check-Out Details */}
-                                        <div className="flex items-center justify-between">
-                                          <span className="text-slate-500">
-                                            প্রস্থান (Out):
-                                          </span>
-                                          {hasOut ? (
-                                            <div className="flex items-center gap-1.5 font-mono font-bold">
-                                              <span>
-                                                {formatTime(
-                                                  sRecord.checkOutTime,
-                                                )}
-                                              </span>
-                                              <span
-                                                className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
-                                                  sRecord.checkOutStatus ===
-                                                  "On Time"
-                                                    ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-                                                    : "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
-                                                }`}
-                                              >
-                                                {sRecord.checkOutStatus}
-                                              </span>
-                                            </div>
-                                          ) : (
-                                            <span className="text-slate-400">
-                                              অপেক্ষমান
-                                            </span>
-                                          )}
-                                        </div>
-
-                                        {/* Shift Comments */}
-                                        {(sRecord?.checkInComment ||
-                                          sRecord?.checkOutComment) && (
-                                          <div className="pt-2 border-t border-slate-100 dark:border-slate-700/60 space-y-1">
-                                            {sRecord.checkInComment && (
-                                              <div className="p-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 text-[11px]">
-                                                <span className="font-bold">
-                                                  দেরির কারণ:
-                                                </span>{" "}
-                                                {sRecord.checkInComment}
-                                              </div>
-                                            )}
-                                            {sRecord.checkOutComment && (
-                                              <div className="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 text-[11px]">
-                                                <span className="font-bold">
-                                                  আর্লি কারণ:
-                                                </span>{" "}
-                                                {sRecord.checkOutComment}
-                                              </div>
-                                            )}
-                                          </div>
-                                        )}
-
-                                        {/* Location Link */}
-                                        {sRecord?.checkInLocation && (
-                                          <div className="pt-1 text-[10px] text-slate-400 font-mono flex items-center justify-between">
-                                            <span>অবস্থান:</span>
-                                            <a
-                                              href={`https://maps.google.com/?q=${sRecord.checkInLocation.lat},${sRecord.checkInLocation.lng}`}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-0.5"
-                                            >
-                                              <MapPin className="w-3 h-3" />
-                                              <span>
-                                                {sRecord.checkInLocation.lat.toFixed(
-                                                  4,
-                                                )}
-                                                ,{" "}
-                                                {sRecord.checkInLocation.lng.toFixed(
-                                                  4,
-                                                )}
-                                              </span>
-                                            </a>
-                                          </div>
-                                        )}
+                                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-1.5">
+                                    <span className="font-bold text-slate-900 dark:text-white">
+                                      {rules?.name || `শিফট ${sIdx + 1}`}
+                                    </span>
+                                    <span className="text-[10px] font-medium text-slate-400">
+                                      {rules?.nameEnglish}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center justify-between pt-0.5">
+                                    <span className="text-slate-500">
+                                      প্রবেশ (In):
+                                    </span>
+                                    {hasIn ? (
+                                      <div className="flex items-center gap-1 font-mono font-bold">
+                                        <span>
+                                          {formatTime(sRecord.checkInTime)}
+                                        </span>
+                                        <span
+                                          className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
+                                            sRecord.checkInStatus === "On Time"
+                                              ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                                              : "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300"
+                                          }`}
+                                        >
+                                          {sRecord.checkInStatus}
+                                        </span>
                                       </div>
-                                    );
-                                  },
+                                    ) : (
+                                      <span className="text-slate-400">
+                                        অনুপস্থিত
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-slate-500">
+                                      প্রস্থান (Out):
+                                    </span>
+                                    {hasOut ? (
+                                      <div className="flex items-center gap-1 font-mono font-bold">
+                                        <span>
+                                          {formatTime(sRecord.checkOutTime)}
+                                        </span>
+                                        <span
+                                          className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
+                                            sRecord.checkOutStatus === "On Time"
+                                              ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                                              : "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                                          }`}
+                                        >
+                                          {sRecord.checkOutStatus}
+                                        </span>
+                                      </div>
+                                    ) : (
+                                      <span className="text-slate-400">
+                                        অপেক্ষমান
+                                      </span>
+                                    )}
+                                  </div>
+                                  {(sRecord?.checkInComment ||
+                                    sRecord?.checkOutComment) && (
+                                    <div className="pt-1.5 border-t border-slate-100 dark:border-slate-700/60 space-y-1">
+                                      {sRecord.checkInComment && (
+                                        <div className="p-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 text-[11px] break-words">
+                                          <span className="font-bold">
+                                            দেরির কারণ:
+                                          </span>{" "}
+                                          {sRecord.checkInComment}
+                                        </div>
+                                      )}
+                                      {sRecord.checkOutComment && (
+                                        <div className="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 text-[11px] break-words">
+                                          <span className="font-bold">
+                                            আর্লি কারণ:
+                                          </span>{" "}
+                                          {sRecord.checkOutComment}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            },
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop Scrollable Table View (>= lg) */}
+            <div className="hidden lg:block overflow-x-auto">
+              <table className="w-full min-w-[980px] text-left text-sm">
+                <thead className="text-[11px] uppercase tracking-wider bg-slate-50 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 border-b border-slate-200/60 dark:border-slate-700/40">
+                  <tr>
+                    <th className="py-3.5 px-5 font-bold">
+                      শিক্ষক আইডি (Teacher ID)
+                    </th>
+                    <th className="py-3.5 px-4 font-bold">
+                      প্রবেশ হাজিরা (Check-In)
+                    </th>
+                    <th className="py-3.5 px-4 font-bold">প্রবেশ স্ট্যাটাস</th>
+                    <th className="py-3.5 px-4 font-bold">
+                      প্রস্থান হাজিরা (Check-Out)
+                    </th>
+                    <th className="py-3.5 px-4 font-bold">প্রস্থান স্ট্যাটাস</th>
+                    <th className="py-3.5 px-4 font-bold">কর্মঘণ্টা</th>
+                    <th className="py-3.5 px-4 font-bold">
+                      দেরি/পূর্বে প্রস্থানের কারণ
+                    </th>
+                    <th className="py-3.5 px-4 font-bold">অবস্থান</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-700/30">
+                  {attendanceList.map((item) => {
+                    const teacherKey = item.teacherId || item.teacherEmail;
+                    const displayTeacherId = item.teacherId || "আইডি নেই";
+                    const isExpanded = expandedTeacherId === teacherKey;
+                    const isMultiShiftTeacher =
+                      item.category === "residential" ||
+                      item.category === "hifz" ||
+                      (item.shifts && Object.keys(item.shifts).length > 0);
+
+                    // Extract all shift-level comments in chronological shift order
+                    const allComments = [];
+                    const shiftLabels = {
+                      shift1: "১ম শিফট",
+                      shift2: "২য় শিফট",
+                      shift3: "৩য় শিফট",
+                    };
+                    if (item.shifts && typeof item.shifts === "object") {
+                      const orderedKeys = [
+                        "shift1",
+                        "shift2",
+                        "shift3",
+                        ...Object.keys(item.shifts).filter(
+                          (k) => !["shift1", "shift2", "shift3"].includes(k),
+                        ),
+                      ];
+                      orderedKeys.forEach((sKey) => {
+                        const s = item.shifts[sKey];
+                        if (!s) return;
+                        const sTitle =
+                          s.name || shiftLabels[sKey] || s.shiftId || sKey;
+                        if (s.checkInComment) {
+                          allComments.push({
+                            type: "late",
+                            label: `${sTitle} (দেরি)`,
+                            comment: s.checkInComment,
+                          });
+                        }
+                        if (s.checkOutComment) {
+                          allComments.push({
+                            type: "early",
+                            label: `${sTitle} (আর্লি)`,
+                            comment: s.checkOutComment,
+                          });
+                        }
+                      });
+                    }
+                    if (allComments.length === 0) {
+                      if (item.checkInComment) {
+                        allComments.push({
+                          type: "late",
+                          label: "দেরি",
+                          comment: item.checkInComment,
+                        });
+                      }
+                      if (item.checkOutComment) {
+                        allComments.push({
+                          type: "early",
+                          label: "আর্লি",
+                          comment: item.checkOutComment,
+                        });
+                      }
+                    }
+
+                    const completedShiftsCount = item.shifts
+                      ? Object.values(item.shifts).filter(
+                          (s) => !!s?.checkInTime,
+                        ).length
+                      : 0;
+
+                    return (
+                      <React.Fragment key={teacherKey}>
+                        <tr className="hover:bg-slate-50/70 dark:hover:bg-slate-700/20 transition-colors">
+                          {/* Teacher ID Column */}
+                          <td className="py-4 px-5">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 font-bold font-mono flex items-center justify-center flex-shrink-0 text-xs border border-emerald-200 dark:border-emerald-800">
+                                {item.profileImage ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img
+                                    src={item.profileImage}
+                                    alt={displayTeacherId}
+                                    className="w-full h-full object-cover rounded-2xl"
+                                  />
+                                ) : (
+                                  "ID"
+                                )}
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-1.5">
+                                  <p className="font-black font-mono text-slate-900 dark:text-white leading-snug">
+                                    {displayTeacherId}
+                                  </p>
+                                  {!item.rawTeacherId && (
+                                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 font-medium">
+                                      অটো আইডি
+                                    </span>
+                                  )}
+                                </div>
+                                {item.teacherEmail && (
+                                  <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                                    {item.teacherEmail}
+                                  </p>
+                                )}
+                                <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                                  <span className="inline-block text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.2 rounded">
+                                    {item.designation}
+                                  </span>
+                                  {isMultiShiftTeacher && (
+                                    <span className="inline-block text-[10px] font-bold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/70 px-2 py-0.2 rounded-full border border-amber-300/80 dark:border-amber-700">
+                                      {item.category === "residential"
+                                        ? "আবাসিক (৩ শিফট)"
+                                        : item.category === "hifz"
+                                          ? "হিফজ (৩ শিফট)"
+                                          : "৩ শিফট"}
+                                    </span>
+                                  )}
+                                </div>
+                                {isMultiShiftTeacher && (
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setExpandedTeacherId(
+                                        isExpanded ? null : teacherKey,
+                                      )
+                                    }
+                                    className="mt-1.5 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 dark:hover:bg-amber-900 border border-amber-200 dark:border-amber-800 transition-colors"
+                                  >
+                                    <Layers className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                                    <span>
+                                      শিফট তথ্য ({completedShiftsCount}/৩)
+                                    </span>
+                                    <ChevronDown
+                                      className={`w-3 h-3 transition-transform ${
+                                        isExpanded ? "rotate-180" : ""
+                                      }`}
+                                    />
+                                  </button>
                                 )}
                               </div>
                             </div>
                           </td>
+
+                          {/* Check-In Time */}
+                          <td className="py-4 px-4 font-mono text-xs whitespace-nowrap">
+                            {item.hasCheckedIn ? (
+                              <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
+                                <Clock3 className="w-3.5 h-3.5 text-emerald-600" />
+                                <span>{formatTime(item.checkInTime)}</span>
+                              </div>
+                            ) : (
+                              <span className="text-slate-400">অনুপস্থিত</span>
+                            )}
+                          </td>
+
+                          {/* Check-In Status Badge */}
+                          <td className="py-4 px-4 whitespace-nowrap">
+                            {item.hasCheckedIn ? (
+                              <span
+                                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${
+                                  item.checkInStatus === "On Time"
+                                    ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300"
+                                    : "bg-rose-100 text-rose-800 dark:bg-rose-950/70 dark:text-rose-300 border border-rose-300"
+                                }`}
+                              >
+                                {item.checkInStatus === "On Time" ? (
+                                  <CheckCircle2 className="w-3.5 h-3.5" />
+                                ) : (
+                                  <AlertCircle className="w-3.5 h-3.5" />
+                                )}
+                                {item.checkInStatus === "On Time"
+                                  ? "On Time"
+                                  : "Late"}
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-600">
+                                <XCircle className="w-3.5 h-3.5 text-slate-400" />
+                                Absent
+                              </span>
+                            )}
+                          </td>
+
+                          {/* Check-Out Time */}
+                          <td className="py-4 px-4 font-mono text-xs whitespace-nowrap">
+                            {item.hasCheckedOut ? (
+                              <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
+                                <Clock3 className="w-3.5 h-3.5 text-teal-600" />
+                                <span>{formatTime(item.checkOutTime)}</span>
+                              </div>
+                            ) : (
+                              <span className="text-slate-400">--:--</span>
+                            )}
+                          </td>
+
+                          {/* Check-Out Status Badge */}
+                          <td className="py-4 px-4 whitespace-nowrap">
+                            {item.hasCheckedOut ? (
+                              <span
+                                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${
+                                  item.checkOutStatus === "On Time"
+                                    ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300"
+                                    : "bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-300"
+                                }`}
+                              >
+                                {item.checkOutStatus === "On Time" ? (
+                                  <CheckCircle2 className="w-3.5 h-3.5" />
+                                ) : (
+                                  <AlertCircle className="w-3.5 h-3.5" />
+                                )}
+                                {item.checkOutStatus === "On Time"
+                                  ? "On Time"
+                                  : "Early"}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-slate-400">
+                                অপেক্ষমান
+                              </span>
+                            )}
+                          </td>
+
+                          {/* Duration */}
+                          <td className="py-4 px-4 text-xs font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">
+                            {calculateWorkDuration(
+                              item.checkInTime,
+                              item.checkOutTime,
+                            ) || <span className="text-slate-400">--</span>}
+                          </td>
+
+                          {/* Reason / Comments Column */}
+                          <td className="py-4 px-4 text-xs text-slate-600 dark:text-slate-300 max-w-xs">
+                            {allComments.length > 0 ? (
+                              <div className="flex flex-col gap-1">
+                                {allComments.map((c, i) => (
+                                  <span
+                                    key={i}
+                                    title={c.comment}
+                                    className="leading-snug break-words"
+                                  >
+                                    <strong
+                                      className={
+                                        c.type === "late"
+                                          ? "text-rose-600 font-semibold"
+                                          : "text-amber-600 font-semibold"
+                                      }
+                                    >
+                                      {c.label}:
+                                    </strong>{" "}
+                                    {c.comment}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-slate-400">--</span>
+                            )}
+                          </td>
+
+                          {/* Location Link */}
+                          <td className="py-4 px-4 whitespace-nowrap text-xs">
+                            {item.checkInLocation ? (
+                              <a
+                                href={`https://maps.google.com/?q=${item.checkInLocation.lat},${item.checkInLocation.lng}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 hover:underline font-mono"
+                                title="ম্যাপে অবস্থান দেখুন"
+                              >
+                                <MapPin className="w-3.5 h-3.5" />
+                                <span>
+                                  {item.checkInLocation.lat.toFixed(4)},{" "}
+                                  {item.checkInLocation.lng.toFixed(4)}
+                                </span>
+                                <ExternalLink className="w-3 h-3" />
+                              </a>
+                            ) : (
+                              <span className="text-slate-400">--</span>
+                            )}
+                          </td>
                         </tr>
-                      )}
-                    </React.Fragment>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+
+                        {/* Expandable 3-Shift Breakdown Sub-Row */}
+                        {isExpanded && (
+                          <tr className="bg-slate-50/90 dark:bg-slate-900/80 border-y border-amber-200/60 dark:border-amber-900/40">
+                            <td colSpan={8} className="p-4 sm:p-5">
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <Layers className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                                    <h4 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-white font-mono">
+                                      শিক্ষক আইডি: {displayTeacherId} — দৈনিক ৩
+                                      শিফট বিস্তারিত বিবরণ
+                                    </h4>
+                                    <span className="text-[10px] px-2 py-0.5 rounded-md font-semibold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300">
+                                      {item.category === "residential"
+                                        ? "আবাসিক শিক্ষক"
+                                        : item.category === "hifz"
+                                          ? "হিফজ শিক্ষক"
+                                          : item.designation}
+                                    </span>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => setExpandedTeacherId(null)}
+                                    className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold"
+                                  >
+                                    বন্ধ করুন ✕
+                                  </button>
+                                </div>
+
+                                {/* 3 Shifts Grid */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                  {["shift1", "shift2", "shift3"].map(
+                                    (shiftKey, sIdx) => {
+                                      const rules =
+                                        item.category === "hifz"
+                                          ? HIFZ_ATTENDANCE_RULES[shiftKey]
+                                          : RESIDENTIAL_ATTENDANCE_RULES[
+                                              shiftKey
+                                            ];
+                                      const sRecord = item.shifts?.[shiftKey];
+                                      const hasIn = !!sRecord?.checkInTime;
+                                      const hasOut = !!sRecord?.checkOutTime;
+
+                                      return (
+                                        <div
+                                          key={shiftKey}
+                                          className={`p-3.5 rounded-2xl border text-xs space-y-2 ${
+                                            hasIn
+                                              ? "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-xs"
+                                              : "bg-slate-100/60 dark:bg-slate-800/40 border-slate-200/60 dark:border-slate-700/30 opacity-80"
+                                          }`}
+                                        >
+                                          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
+                                            <span className="font-bold text-slate-900 dark:text-white">
+                                              {rules?.name ||
+                                                `শিফট ${sIdx + 1}`}
+                                            </span>
+                                            <span className="text-[10px] font-medium text-slate-400">
+                                              {rules?.nameEnglish}
+                                            </span>
+                                          </div>
+
+                                          {/* Window Rules */}
+                                          <div className="text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5">
+                                            <p>
+                                              প্রবেশ:{" "}
+                                              {rules?.checkInWindowLabel ||
+                                                "--"}
+                                            </p>
+                                            <p>
+                                              প্রস্থান:{" "}
+                                              {rules?.checkOutWindowLabel ||
+                                                "--"}
+                                            </p>
+                                          </div>
+
+                                          {/* Check-In Details */}
+                                          <div className="pt-1 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between">
+                                            <span className="text-slate-500">
+                                              প্রবেশ (In):
+                                            </span>
+                                            {hasIn ? (
+                                              <div className="flex items-center gap-1.5 font-mono font-bold">
+                                                <span>
+                                                  {formatTime(
+                                                    sRecord.checkInTime,
+                                                  )}
+                                                </span>
+                                                <span
+                                                  className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
+                                                    sRecord.checkInStatus ===
+                                                    "On Time"
+                                                      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                                                      : "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300"
+                                                  }`}
+                                                >
+                                                  {sRecord.checkInStatus}
+                                                </span>
+                                              </div>
+                                            ) : (
+                                              <span className="text-slate-400">
+                                                অনুপস্থিত
+                                              </span>
+                                            )}
+                                          </div>
+
+                                          {/* Check-Out Details */}
+                                          <div className="flex items-center justify-between">
+                                            <span className="text-slate-500">
+                                              প্রস্থান (Out):
+                                            </span>
+                                            {hasOut ? (
+                                              <div className="flex items-center gap-1.5 font-mono font-bold">
+                                                <span>
+                                                  {formatTime(
+                                                    sRecord.checkOutTime,
+                                                  )}
+                                                </span>
+                                                <span
+                                                  className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
+                                                    sRecord.checkOutStatus ===
+                                                    "On Time"
+                                                      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                                                      : "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                                                  }`}
+                                                >
+                                                  {sRecord.checkOutStatus}
+                                                </span>
+                                              </div>
+                                            ) : (
+                                              <span className="text-slate-400">
+                                                অপেক্ষমান
+                                              </span>
+                                            )}
+                                          </div>
+
+                                          {/* Shift Comments */}
+                                          {(sRecord?.checkInComment ||
+                                            sRecord?.checkOutComment) && (
+                                            <div className="pt-2 border-t border-slate-100 dark:border-slate-700/60 space-y-1">
+                                              {sRecord.checkInComment && (
+                                                <div className="p-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 text-[11px] break-words">
+                                                  <span className="font-bold">
+                                                    দেরির কারণ:
+                                                  </span>{" "}
+                                                  {sRecord.checkInComment}
+                                                </div>
+                                              )}
+                                              {sRecord.checkOutComment && (
+                                                <div className="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 text-[11px] break-words">
+                                                  <span className="font-bold">
+                                                    আর্লি কারণ:
+                                                  </span>{" "}
+                                                  {sRecord.checkOutComment}
+                                                </div>
+                                              )}
+                                            </div>
+                                          )}
+
+                                          {/* Location Link */}
+                                          {sRecord?.checkInLocation && (
+                                            <div className="pt-1 text-[10px] text-slate-400 font-mono flex items-center justify-between">
+                                              <span>অবস্থান:</span>
+                                              <a
+                                                href={`https://maps.google.com/?q=${sRecord.checkInLocation.lat},${sRecord.checkInLocation.lng}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-0.5"
+                                              >
+                                                <MapPin className="w-3 h-3" />
+                                                <span>
+                                                  {sRecord.checkInLocation.lat.toFixed(
+                                                    4,
+                                                  )}
+                                                  ,{" "}
+                                                  {sRecord.checkInLocation.lng.toFixed(
+                                                    4,
+                                                  )}
+                                                </span>
+                                              </a>
+                                            </div>
+                                          )}
+                                        </div>
+                                      );
+                                    },
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 
@@ -1111,7 +1552,7 @@ export default function AdminTeachersAttendancePage() {
                             ক্র.
                           </th>
                           <th className="border border-gray-800 py-2 px-3 text-left">
-                            শিক্ষকের নাম
+                            শিক্ষক আইডি (Teacher ID)
                           </th>
                           <th className="border border-gray-800 py-2 px-2 text-left">
                             পদবি
@@ -1148,8 +1589,8 @@ export default function AdminTeachersAttendancePage() {
                             <td className="border border-gray-800 py-1.5 px-1 font-mono">
                               {toBengaliNumber(index + 1)}
                             </td>
-                            <td className="border border-gray-800 py-1.5 px-3 text-left font-bold">
-                              {teacher.teacherName}
+                            <td className="border border-gray-800 py-1.5 px-3 text-left font-bold font-mono">
+                              {teacher.teacherId || "আইডি নেই"}
                             </td>
                             <td className="border border-gray-800 py-1.5 px-2 text-left text-gray-700">
                               {teacher.designation}
@@ -1176,28 +1617,30 @@ export default function AdminTeachersAttendancePage() {
                               {teacher.lateComments?.length > 0 ||
                               teacher.earlyComments?.length > 0 ? (
                                 <div className="space-y-0.5">
-                                  {teacher.lateComments
-                                    ?.slice(0, 2)
-                                    .map((c, i) => (
-                                      <div key={`l-${i}`} className="truncate">
-                                        <span className="font-semibold text-rose-700">
-                                          [{toBengaliNumber(c.date?.slice(8))}{" "}
-                                          তারিখ]:
-                                        </span>{" "}
-                                        {c.comment}
-                                      </div>
-                                    ))}
-                                  {teacher.earlyComments
-                                    ?.slice(0, 2)
-                                    .map((c, i) => (
-                                      <div key={`e-${i}`} className="truncate">
-                                        <span className="font-semibold text-amber-700">
-                                          [{toBengaliNumber(c.date?.slice(8))}{" "}
-                                          তারিখ (আর্লি)]:
-                                        </span>{" "}
-                                        {c.comment}
-                                      </div>
-                                    ))}
+                                  {teacher.lateComments?.map((c, i) => (
+                                    <div
+                                      key={`l-${i}`}
+                                      className="leading-snug break-words"
+                                    >
+                                      <span className="font-semibold text-rose-700">
+                                        [{toBengaliNumber(c.date?.slice(8))}{" "}
+                                        তারিখ]:
+                                      </span>{" "}
+                                      {c.comment}
+                                    </div>
+                                  ))}
+                                  {teacher.earlyComments?.map((c, i) => (
+                                    <div
+                                      key={`e-${i}`}
+                                      className="leading-snug break-words"
+                                    >
+                                      <span className="font-semibold text-amber-700">
+                                        [{toBengaliNumber(c.date?.slice(8))}{" "}
+                                        তারিখ (আর্লি)]:
+                                      </span>{" "}
+                                      {c.comment}
+                                    </div>
+                                  ))}
                                 </div>
                               ) : (
                                 <span className="text-gray-400">—</span>

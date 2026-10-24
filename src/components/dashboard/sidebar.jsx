@@ -380,18 +380,15 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
     {
       id: "finance",
-      title: "হিসাব ও অর্থ বিভাগ",
+      title: "হিসাব বিভাগ",
       icon: "💰",
       lucideIcon: <Wallet className="w-5 h-5" />,
       roles: ["admin", "accountant"],
       permissions: ["manage_finance", "accountant", "accounts", "finance"],
       dropdown: [
+        
         {
-          title: "হিসাব ড্যাশবোর্ড",
-          href: "/dashboard/accountant",
-        },
-        {
-          title: "অ্যাকাউন্টিং রিপোর্টস",
+          title: "আয়-ব্যয়-রসিদ",
           href: "/dashboard/accountant/finance",
         },
         {
@@ -460,7 +457,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       title: "ডিজিটাল হাজিরা",
       icon: "📅",
       lucideIcon: <CalendarCheck className="w-5 h-5" />,
-      href: "/dashboard/attendance",
+      href: "/dashboard/teachers-attendance",
       roles: ["admin", "teacher", "accountant"],
       permissions: ["manage_academics", "manage_attendance"],
     },

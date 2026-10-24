@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
   },
   nameText: {
     fontSize: 9,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "HindSiliguriBold",
     color: "#0F172A",
     textTransform: "uppercase",
   },
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     fontSize: 6.2,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "HindSiliguriBold",
     color: "#1E293B",
     flex: 1,
   },
@@ -361,13 +361,16 @@ const styles = StyleSheet.create({
 /**
  * Barcode Simulator Component for PDF
  */
-const PdfBarcode = ({ code = "AIM0235" }) => {
+const PdfBarcode = ({ code = "AIM" }) => {
   // Generate pseudo barcode bars from string
+  const safeCode = String(code || "AIM");
   const bars = [];
-  const hash = code.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const hash = safeCode
+    .split("")
+    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
   for (let i = 0; i < 28; i++) {
-    const isThick = ((hash * (i + 1)) % 7) > 3;
-    const isSpacer = ((hash * (i + 3)) % 5) === 0;
+    const isThick = (hash * (i + 1)) % 7 > 3;
+    const isSpacer = (hash * (i + 3)) % 5 === 0;
     bars.push(
       <View
         key={i}
@@ -377,7 +380,7 @@ const PdfBarcode = ({ code = "AIM0235" }) => {
           backgroundColor: isSpacer ? "#FFFFFF" : "#000000",
           marginRight: 0.8,
         }}
-      />
+      />,
     );
   }
   return <View style={styles.barcodeSimulation}>{bars}</View>;
@@ -387,18 +390,19 @@ const PdfBarcode = ({ code = "AIM0235" }) => {
  * Single Card Front PDF View
  */
 export const PdfTeacherFront = ({ teacher = {}, origin = "" }) => {
-  const name = teacher.fullName || teacher.name || "Sheikh Muzammil";
-  const designation = teacher.designation || "Assistant Teacher";
-  const dob = teacher.dateOfBirth || teacher.dob || "13/12/1998";
-  const mobile = teacher.phone || teacher.mobile || "01836376174";
-  const bloodGroup = teacher.bloodGroup || teacher.blood || "A (-)";
-  const idNo = teacher.teacherId || teacher.idNo || "ID NO-AIM 0 235";
+  const name = teacher?.fullName || teacher?.name || "—";
+  const designation = teacher?.designation || "শিক্ষক";
+  const dob = teacher?.dateOfBirth || teacher?.dob || "—";
+  const mobile = teacher?.phone || teacher?.mobile || "—";
+  const bloodGroup = teacher?.bloodGroup || teacher?.blood || "—";
+  const idNo = teacher?.teacherId || teacher?.idNo || "—";
   const logoUrl = origin ? `${origin}/aimlogo1.png` : "/aimlogo1.png";
   const sigUrl = origin
     ? `${origin}/principle's_signature.jpg`
     : "/principle's_signature.jpg";
   const photoUrl =
-    teacher.profileImage ||
+    teacher?.profileImage ||
+    teacher?.image ||
     (origin ? `${origin}/default-avatar.png` : "/default-avatar.png");
 
   return (
@@ -455,7 +459,11 @@ export const PdfTeacherFront = ({ teacher = {}, origin = "" }) => {
 
           {/* Signature */}
           <View style={styles.signatureContainer}>
-            <Image src={sigUrl} style={styles.signatureImg} alt="Authorized Signature" />
+            <Image
+              src={sigUrl}
+              style={styles.signatureImg}
+              alt="Authorized Signature"
+            />
             <Text style={styles.signatureText}>Authorized Signature</Text>
           </View>
         </View>
@@ -467,7 +475,9 @@ export const PdfTeacherFront = ({ teacher = {}, origin = "" }) => {
             <Text style={styles.badgeTopText}>Card</Text>
           </View>
           <View style={styles.badgeBottom}>
-            <Text style={styles.badgeBottomText}>{idNo.replace("ID NO-", "")}</Text>
+            <Text style={styles.badgeBottomText}>
+              {String(idNo).replace("ID NO-", "")}
+            </Text>
           </View>
         </View>
       </View>
@@ -581,7 +591,11 @@ export default function TeacherIdPdfDocument({
     <Document>
       <Page size="A4" orientation="landscape" style={styles.a4Page}>
         {teachers.map((teacher, idx) => (
-          <View key={teacher._id || idx} style={styles.cardPairContainer} wrap={false}>
+          <View
+            key={teacher._id || idx}
+            style={styles.cardPairContainer}
+            wrap={false}
+          >
             {(printSide === "both" || printSide === "front") && (
               <PdfTeacherFront teacher={teacher} origin={origin} />
             )}

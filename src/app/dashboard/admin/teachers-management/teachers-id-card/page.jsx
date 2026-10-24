@@ -50,7 +50,7 @@ const TeacherIdCardPdfActions = dynamic(
 const API_BASE =
   process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
 
-export default function teacherIdCardManagePage() {
+export default function TeacherIdCardManagePage() {
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -59,7 +59,7 @@ export default function teacherIdCardManagePage() {
 
   // Print & Preview Options
   const [printSide, setPrintSide] = useState("both"); // "both", "front", "back"
-  const [activePreviewTeacher, setActivePreviewTeacher] = useState(null);
+  const [activePreviewId, setActivePreviewId] = useState(null);
 
   // Edit Teacher Modal
   const [editingTeacher, setEditingTeacher] = useState(null);
@@ -84,7 +84,9 @@ export default function teacherIdCardManagePage() {
         params.append("search", searchQuery.trim());
       }
 
-      const res = await fetch(`${API_BASE}/api/admin/teachers?${params.toString()}`);
+      const res = await fetch(
+        `${API_BASE}/api/admin/teachers?${params.toString()}`,
+      );
       const result = await res.json();
 
       if (!res.ok || !result.success) {
@@ -96,7 +98,7 @@ export default function teacherIdCardManagePage() {
       const list = result.data || [];
       setTeachers(list);
 
-      // Default select all if no selection yet
+      // Default select all if no selection yet, or prune stale IDs
       setSelectedIds((prev) => {
         if (prev.length === 0 && list.length > 0) {
           return list.map((t) => t._id);
@@ -104,9 +106,12 @@ export default function teacherIdCardManagePage() {
         return prev;
       });
 
-      setActivePreviewTeacher(
-        (prev) => prev || (list.length > 0 ? list[0] : null),
-      );
+      setActivePreviewId((prev) => {
+        if (prev && list.some((t) => t._id === prev)) {
+          return prev;
+        }
+        return list.length > 0 ? list[0]._id : null;
+      });
     } catch (err) {
       console.error("Fetch teachers error:", err);
       setError(err.message || "সার্ভারে সংযোগ করা যাচ্ছে না।");
@@ -128,11 +133,38 @@ export default function teacherIdCardManagePage() {
     return teachers.filter((t) => selectedIds.includes(t._id));
   }, [teachers, selectedIds]);
 
+  // Dynamically derive the active preview teacher from live `teachers` / `selectedTeachers` state
+  // (and overlay live edits if the Edit Modal is currently open for this teacher)
+  const activePreviewTeacher = useMemo(() => {
+    if (teachers.length === 0) return null;
+    let baseTeacher = null;
+    if (activePreviewId) {
+      baseTeacher = teachers.find((t) => t._id === activePreviewId) || null;
+    }
+    if (!baseTeacher) {
+      baseTeacher =
+        selectedTeachers.length > 0 ? selectedTeachers[0] : teachers[0];
+    }
+    if (editingTeacher && baseTeacher && editingTeacher._id === baseTeacher._id) {
+      return {
+        ...baseTeacher,
+        ...editFormData,
+      };
+    }
+    return baseTeacher;
+  }, [teachers, selectedTeachers, activePreviewId, editingTeacher, editFormData]);
+
   // Toggle Single Selection
   const toggleSelectTeacher = (id) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
-    );
+    setSelectedIds((prev) => {
+      const next = prev.includes(id)
+        ? prev.filter((item) => item !== id)
+        : [...prev, id];
+      if (!prev.includes(id)) {
+        setActivePreviewId(id);
+      }
+      return next;
+    });
   };
 
   // Select / Deselect All
@@ -146,6 +178,7 @@ export default function teacherIdCardManagePage() {
 
   // Open Edit Modal
   const handleOpenEdit = (teacher) => {
+    setActivePreviewId(teacher._id);
     setEditingTeacher(teacher);
     setEditFormData({
       fullName: teacher.fullName || "",
@@ -180,6 +213,7 @@ export default function teacherIdCardManagePage() {
       }
 
       toast.success("শিক্ষকের আইডি কার্ডের তথ্য সফলভাবে আপডেট হয়েছে!");
+      setActivePreviewId(editingTeacher._id);
       setEditingTeacher(null);
       fetchTeachers();
     } catch (err) {
@@ -266,17 +300,22 @@ export default function teacherIdCardManagePage() {
       {/* ================= 3. LIVE CARD PREVIEW SECTION ================= */}
       {activePreviewTeacher && (
         <div className="print:hidden bg-gradient-to-br from-slate-900 via-slate-850 to-slate-900 text-white rounded-3xl p-6 shadow-xl border border-slate-750">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-700/60 gap-3">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between pb-4 border-b border-slate-700/60 gap-3">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                 <Sparkles className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                <h3 className="text-base sm:text-lg font-black text-white flex flex-wrap items-center gap-2">
                   <span>লাইভ কার্ড প্রিভিউ:</span>
                   <span className="text-emerald-400">
-                    {activePreviewTeacher.fullName}
+                    {activePreviewTeacher.fullName || "—"}
                   </span>
+                  {activePreviewTeacher.teacherId && (
+                    <span className="text-xs font-mono px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      ID: {activePreviewTeacher.teacherId}
+                    </span>
+                  )}
                 </h3>
                 <p className="text-xs text-slate-400">
                   CR80 ল্যান্ডস্কেপ ফরম্যাট (৮৫.৬ মিমি × ৫৩.৯৮ মিমি / ৩.৩৭৫
@@ -285,38 +324,56 @@ export default function teacherIdCardManagePage() {
               </div>
             </div>
 
-            {/* Print Side Toggle */}
-            <div className="flex items-center gap-1.5 p-1 bg-slate-800 rounded-xl border border-slate-700 text-xs">
-              <button
-                onClick={() => setPrintSide("both")}
-                className={`px-3 py-1.5 rounded-lg font-bold transition-all ${
-                  printSide === "both"
-                    ? "bg-emerald-600 text-white shadow-xs"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                উভয় পাশ (Both)
-              </button>
-              <button
-                onClick={() => setPrintSide("front")}
-                className={`px-3 py-1.5 rounded-lg font-bold transition-all ${
-                  printSide === "front"
-                    ? "bg-emerald-600 text-white shadow-xs"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                সামনের পাশ (Front)
-              </button>
-              <button
-                onClick={() => setPrintSide("back")}
-                className={`px-3 py-1.5 rounded-lg font-bold transition-all ${
-                  printSide === "back"
-                    ? "bg-emerald-600 text-white shadow-xs"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                পেছনের পাশ (Back)
-              </button>
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Quick Teacher Selector for Live Preview */}
+              {teachers.length > 1 && (
+                <select
+                  value={activePreviewTeacher._id || ""}
+                  onChange={(e) => setActivePreviewId(e.target.value)}
+                  className="px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-xs font-bold text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  title="প্রিভিউ করার জন্য শিক্ষক পরিবর্তন করুন"
+                >
+                  {teachers.map((t) => (
+                    <option key={t._id} value={t._id}>
+                      {t.fullName} ({t.teacherId || "No ID"})
+                    </option>
+                  ))}
+                </select>
+              )}
+
+              {/* Print Side Toggle */}
+              <div className="flex items-center gap-1.5 p-1 bg-slate-800 rounded-xl border border-slate-700 text-xs">
+                <button
+                  onClick={() => setPrintSide("both")}
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-all ${
+                    printSide === "both"
+                      ? "bg-emerald-600 text-white shadow-xs"
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  উভয় পাশ (Both)
+                </button>
+                <button
+                  onClick={() => setPrintSide("front")}
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-all ${
+                    printSide === "front"
+                      ? "bg-emerald-600 text-white shadow-xs"
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  সামনের পাশ (Front)
+                </button>
+                <button
+                  onClick={() => setPrintSide("back")}
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-all ${
+                    printSide === "back"
+                      ? "bg-emerald-600 text-white shadow-xs"
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  পেছনের পাশ (Back)
+                </button>
+              </div>
             </div>
           </div>
 
@@ -533,7 +590,7 @@ export default function teacherIdCardManagePage() {
                         <div className="flex items-center justify-center gap-1.5">
                           {/* Live Preview Button */}
                           <button
-                            onClick={() => setActivePreviewTeacher(teacher)}
+                            onClick={() => setActivePreviewId(teacher._id)}
                             className={`p-1.5 rounded-lg text-xs font-bold transition-all ${
                               isPreviewing
                                 ? "bg-emerald-600 text-white shadow-xs"
@@ -617,14 +674,14 @@ export default function teacherIdCardManagePage() {
                         designation: e.target.value,
                       })
                     }
-                    placeholder="e.g. Arabic Teacher"
+                    placeholder="e.g. আবাসিক শিক্ষক / সহকারী শিক্ষক"
                     className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    আইডি নম্বর (ID No)
+                    আইডি নম্বর (Teacher ID)
                   </label>
                   <input
                     type="text"
@@ -635,7 +692,7 @@ export default function teacherIdCardManagePage() {
                         teacherId: e.target.value,
                       })
                     }
-                    placeholder="e.g. ID NO-AIM 0 235"
+                    placeholder="e.g. AIM-T-101"
                     className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono"
                   />
                 </div>

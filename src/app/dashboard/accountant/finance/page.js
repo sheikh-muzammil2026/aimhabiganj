@@ -749,11 +749,11 @@ export default function FinanceDashboard() {
         {/* Modern Tabs Navigation */}
         <div className="flex border-b border-slate-200 overflow-x-auto gap-1 sm:gap-2 pb-px scrollbar-none max-w-full">
           {[
-            { id: "overview", label: "📊 ওভারভিউ ড্যাশবোর্ড" },
-            { id: "income", label: "📥 আয় এন্ট্রি (রসিদ)" },
-            { id: "expense", label: "📤 ব্যয় এন্ট্রি (ভাউচার)" },
+            { id: "overview", label: "📊 সকল রসিদ" },
+            { id: "income", label: "📥 আয় এন্ট্রি" },
+            { id: "expense", label: "📤 ব্যয় এন্ট্রি" },
             { id: "report", label: "📋 আর্থিক বিবরণী" },
-            { id: "pending", label: "⏳ পেন্ডিং ভাউচার/রসিদ" },
+            { id: "pending", label: "⏳ পেন্ডিং রসিদ" },
           ].map((tab) => (
             <button
               key={tab.id}

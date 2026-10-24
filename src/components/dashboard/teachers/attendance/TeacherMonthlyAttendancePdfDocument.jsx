@@ -346,7 +346,7 @@ export default function TeacherMonthlyAttendancePdfDocument({
                 <Text style={styles.headerText}>ক্র.</Text>
               </View>
               <View style={[styles.cell, styles.colName]}>
-                <Text style={styles.headerTextLeft}>শিক্ষকের নাম</Text>
+                <Text style={styles.headerTextLeft}>শিক্ষক আইডি (Teacher ID)</Text>
               </View>
               <View style={[styles.cell, styles.colDesignation]}>
                 <Text style={styles.headerTextLeft}>পদবি</Text>
@@ -399,7 +399,7 @@ export default function TeacherMonthlyAttendancePdfDocument({
 
                   <View style={[styles.cell, styles.colName]}>
                     <Text style={styles.cellTextBoldLeft}>
-                      {teacher.teacherName || "—"}
+                      {teacher.teacherId || "আইডি নেই"}
                     </Text>
                   </View>
 
@@ -448,7 +448,7 @@ export default function TeacherMonthlyAttendancePdfDocument({
                   <View style={[styles.cell, styles.colComments]}>
                     {hasComments ? (
                       <View>
-                        {teacher.lateComments?.slice(0, 2).map((c, i) => (
+                        {teacher.lateComments?.map((c, i) => (
                           <Text key={`l-${i}`} style={styles.commentItem}>
                             <Text style={styles.commentLateTag}>
                               [
@@ -458,7 +458,7 @@ export default function TeacherMonthlyAttendancePdfDocument({
                             {c.comment}
                           </Text>
                         ))}
-                        {teacher.earlyComments?.slice(0, 2).map((c, i) => (
+                        {teacher.earlyComments?.map((c, i) => (
                           <Text key={`e-${i}`} style={styles.commentItem}>
                             <Text style={styles.commentEarlyTag}>
                               [

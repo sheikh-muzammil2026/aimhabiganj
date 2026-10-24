@@ -91,6 +91,7 @@ export default function TeacherProfileDashboard() {
   const [profile, setProfile] = useState({
     email: teacherEmail,
     // ১. হেডার ও ব্যক্তিগত তথ্য
+    teacherId: "",
     fullName: "",
     nameEnglish: "",
     designation: "",
@@ -193,6 +194,8 @@ export default function TeacherProfileDashboard() {
         setProfile((prev) => ({
           ...prev,
           ...result.data,
+          teacherId:
+            result.data.teacherId || result.data.idNo || prev.teacherId || "",
           designation: parsedDesignation,
           nameEnglish: result.data.nameEnglish || prev.nameEnglish || "",
           bankAccount: parsedBank,
@@ -438,7 +441,7 @@ export default function TeacherProfileDashboard() {
               </Link>
             )}
             <Link
-              href="/dashboard/attendance"
+              href="/dashboard/teachers-attendance"
               className="w-full sm:w-auto justify-center bg-emerald-500/30 hover:bg-emerald-500/50 text-emerald-100 font-bold px-4 py-2.5 rounded-xl border border-emerald-400/30 shadow-md transition-all flex items-center gap-2 text-sm"
             >
               📋 Attendance
@@ -566,6 +569,19 @@ export default function TeacherProfileDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <label className="text-xs font-bold text-slate-700 block mb-1">
+                    শিক্ষক আইডি
+                   
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="যেমন: 0235"
+                    value={profile.teacherId || ""}
+                    onChange={(e) => handleChange("teacherId", e.target.value)}
+                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all font-mono font-bold text-emerald-900"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">
                     পূর্ণ নাম (বাংলায়) <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -604,8 +620,8 @@ export default function TeacherProfileDashboard() {
                     className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all font-medium text-slate-800"
                   >
                     <option value="">পদবি নির্বাচন করুন</option>
-                    <option value="শিক্ষক">প্রিন্সিপাল</option>
-                    <option value="শিক্ষক">ভাইস প্রিন্সিপাল</option>
+                    <option value="প্রিন্সিপাল">প্রিন্সিপাল</option>
+                    <option value="ভাইস প্রিন্সিপাল">ভাইস প্রিন্সিপাল</option>
                     <option value="অনাবাসিক শিক্ষক">অনাবাসিক শিক্ষক</option>
                     <option value="আবাসিক শিক্ষক">আবাসিক শিক্ষক</option>
                     <option value="হিফজ শিক্ষক">হিফজ শিক্ষক</option>
@@ -629,7 +645,7 @@ export default function TeacherProfileDashboard() {
                     className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all font-mono"
                   />
                 </div>
-                <div className="md:col-span-1 lg:col-span-2">
+                <div>
                   <label className="text-xs font-bold text-slate-700 block mb-1">
                     ইমেইল এড্রেস (Read-only)
                   </label>
@@ -1493,6 +1509,11 @@ export default function TeacherProfileDashboard() {
               )}
             <p className="text-sm sm:text-md font-semibold text-slate-700 mt-1">
               {profile.designation || "Professional Title"}
+              {profile.teacherId && (
+                <span className="ml-2 text-xs font-mono px-2 py-0.5 bg-slate-100 border border-slate-300 rounded text-slate-800">
+                  ID: {profile.teacherId}
+                </span>
+              )}
             </p>
             <div className="text-xs text-slate-600 mt-2 space-y-0.5">
               <p>
