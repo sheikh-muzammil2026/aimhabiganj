@@ -132,9 +132,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   logoImage: {
-    width: 42,
-    height: 42,
-    objectFit: "contain",
+    width: 65, // scale-[1.05] (80 * 1.05 = 84)
+    height: 65,
+    objectFit: "cover", // object-cover
   },
   bannerContainer: {
     flex: 1,
@@ -143,9 +143,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   bannerImage: {
-    width: "92%",
-    maxHeight: 28,
-    objectFit: "contain",
+    width: "95%", // w-full
+    maxHeight: 80, // max-h-45 / print:max-h-45 (45 * 4 = 180)
+    objectFit: "fill", // object-fill
   },
   madrasaTitleFallback: {
     fontSize: 13,
@@ -396,18 +396,17 @@ function VoucherHalf({ tx, copyType, baseUrl = "" }) {
 
           {/* Banner / Title in the Center */}
           <View style={styles.bannerContainer}>
-            <Image src={bannerUrl} style={styles.bannerImage} alt="Madrasah Banner" />
+            <Image
+              src={bannerUrl}
+              style={styles.bannerImage}
+              alt="Madrasah Banner"
+            />
             <Text style={styles.headerSubtitle}>
               হবিগঞ্জ সদর, হবিগঞ্জ | মোবাইল: ০১৭১২-৩৪৫৬৭৮
             </Text>
             <Text style={styles.headerContact}>
               ইমেইল: aimhabiganj@gmail.com
             </Text>
-          </View>
-
-          {/* Right Logo placeholder for balanced symmetry */}
-          <View style={styles.logoContainer}>
-            <Image src={logoUrl} style={styles.logoImage} alt="Logo Right" />
           </View>
         </View>
 
@@ -434,9 +433,7 @@ function VoucherHalf({ tx, copyType, baseUrl = "" }) {
             </View>
             <View style={styles.metaCol}>
               <Text style={styles.metaLabel}>তারিখ:</Text>
-              <Text style={styles.metaValue}>
-                {toBanglaNum(tx.date || "")}
-              </Text>
+              <Text style={styles.metaValue}>{toBanglaNum(tx.date || "")}</Text>
             </View>
           </View>
 
@@ -539,9 +536,7 @@ function VoucherHalf({ tx, copyType, baseUrl = "" }) {
         {/* Remarks / Description if available */}
         {tx.description ? (
           <View style={styles.remarksBox}>
-            <Text style={styles.remarksText}>
-              বিবরণ: {tx.description}
-            </Text>
+            <Text style={styles.remarksText}>বিবরণ: {tx.description}</Text>
           </View>
         ) : null}
 
