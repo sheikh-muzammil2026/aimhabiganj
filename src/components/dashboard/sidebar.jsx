@@ -18,13 +18,12 @@ import {
   Shield,
   Settings,
 } from "lucide-react";
-import { MdOutlineNotListedLocation } from "react-icons/md";
 import { IoNotificationsCircle } from "react-icons/io5";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
 
-export default function Sidebar({ isOpen, setIsOpen }) {
+export default function Sidebar() {
   const pathname = usePathname();
   const [openDropdown, setOpenDropdown] = useState(null);
   const [openNestedSubmenus, setOpenNestedSubmenus] = useState({});
@@ -164,7 +163,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   const menuConfig = [
     {
       id: "admin-dashboard",
-      title: "ড্যাশবোর্ড",
+      title: userRole === "teacher" ? "ড্যাশবোর্ড ও সিভি ফরম" : "ড্যাশবোর্ড",
       icon: "🕌",
       lucideIcon: <LayoutDashboard className="w-5 h-5" />,
       href: getDashboardHref(userRole),
@@ -178,6 +177,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         "user",
       ],
     },
+   
+    
     {
       id: "academics",
       title: "শিক্ষা কার্যক্রম",
@@ -346,6 +347,14 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       ],
       dropdown: [
         {
+          title: "এডমিন সিভি",
+          href: "/dashboard/teacher",
+        },
+        {
+          title: "এডমিন হাজিরা",
+          href: "/dashboard/teachers-attendance",
+        },
+        {
           title: "শিক্ষক আইডি কার্ড তৈরি",
           href: "/dashboard/admin/teachers-management/teachers-id-card",
         },
@@ -386,7 +395,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       roles: ["admin", "accountant"],
       permissions: ["manage_finance", "accountant", "accounts", "finance"],
       dropdown: [
-        
         {
           title: "আয়-ব্যয়-রসিদ",
           href: "/dashboard/accountant/finance",
@@ -452,15 +460,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         "user",
       ],
     },
-    {
-      id: "attendance",
-      title: "ডিজিটাল হাজিরা",
-      icon: "📅",
-      lucideIcon: <CalendarCheck className="w-5 h-5" />,
-      href: "/dashboard/teachers-attendance",
-      roles: ["admin", "teacher", "accountant"],
-      permissions: ["manage_academics", "manage_attendance"],
-    },
 
     {
       id: "administration",
@@ -480,6 +479,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     }
     if (item.id === "staff-corner") {
       return userRole === "staff";
+    }
+    // Avoid duplicate /dashboard/teacher link when user's primary role is already "teacher"
+    if (item.id === "teacher-cv-profile" && userRole === "teacher") {
+      return false;
     }
 
     // Admin has full access to all admin and shared menus
@@ -519,6 +522,13 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       item.id === "academics" &&
       (userPermissions.includes("manage_academics") ||
         userPermissions.includes("manage_teachers"))
+    )
+      return true;
+    if (
+      item.id === "teacher-cv-profile" &&
+      (userPermissions.includes("manage_academics") ||
+        userPermissions.includes("manage_teachers") ||
+        userPermissions.includes("teacher"))
     )
       return true;
     if (
@@ -794,6 +804,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             className="group flex items-center gap-2.5 focus:outline-none"
           >
             <div className="w-10 h-10 rounded-full border border-blue-900 p-0.5 flex-shrink-0 flex items-center justify-center bg-white">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/aimlogo1.png"
                 alt="AIM Logo"
@@ -903,6 +914,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             >
               <div className="w-8 h-8 rounded-full bg-amber-400 text-[#043e30] flex items-center justify-center font-black text-sm group-hover:scale-105 transition-transform">
                 {user?.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={user.image}
                     alt="Profile"

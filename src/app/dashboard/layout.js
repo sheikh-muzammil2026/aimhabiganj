@@ -147,7 +147,8 @@ const DashboardLayout = ({ children }) => {
         p === "manage_teachers" &&
         (permissions.includes("manage_attendance") ||
           permissions.includes("teacher_attendance") ||
-          permissions.includes("manage_users"))
+          permissions.includes("manage_users") ||
+          permissions.includes("teacher"))
       )
         return true;
       if (
@@ -155,7 +156,8 @@ const DashboardLayout = ({ children }) => {
         (permissions.includes("manage_teachers") ||
           permissions.includes("teacher_attendance") ||
           permissions.includes("manage_academics") ||
-          permissions.includes("manage_users"))
+          permissions.includes("manage_users") ||
+          permissions.includes("teacher"))
       )
         return true;
       if (
@@ -235,8 +237,30 @@ const DashboardLayout = ({ children }) => {
       return;
     }
 
+    if (
+      pathname.startsWith("/dashboard/attendance") ||
+      pathname.startsWith("/dashboard/teachers-attendance")
+    ) {
+      if (
+        userRole !== "teacher" &&
+        userRole !== "accountant" &&
+        !hasPerm("manage_academics") &&
+        !hasPerm("manage_attendance") &&
+        !hasPerm("manage_teachers") &&
+        !hasPerm("teacher")
+      ) {
+        router.replace("/dashboard/unauthorized");
+      }
+      return;
+    }
+
     if (pathname.startsWith("/dashboard/teacher")) {
-      if (userRole !== "teacher" && !hasPerm("manage_teachers") && !hasPerm("manage_academics")) {
+      if (
+        userRole !== "teacher" &&
+        !hasPerm("manage_teachers") &&
+        !hasPerm("manage_academics") &&
+        !hasPerm("teacher")
+      ) {
         router.replace("/dashboard/unauthorized");
       }
       return;
@@ -249,30 +273,21 @@ const DashboardLayout = ({ children }) => {
       return;
     }
 
-    if (pathname.startsWith("/dashboard/attendance")) {
-      if (
-        userRole !== "teacher" &&
-        !hasPerm("manage_academics") &&
-        !hasPerm("manage_attendance") &&
-        !hasPerm("manage_teachers")
-      ) {
-        router.replace("/dashboard/unauthorized");
-      }
-      return;
-    }
-
     if (pathname.startsWith("/dashboard/shared")) {
       if (
         pathname.startsWith("/dashboard/shared/academics") &&
         userRole !== "teacher" &&
-        !hasPerm("manage_academics")
+        !hasPerm("manage_academics") &&
+        !hasPerm("manage_teachers") &&
+        !hasPerm("teacher")
       ) {
         router.replace("/dashboard/unauthorized");
         return;
       }
       if (
         pathname.startsWith("/dashboard/shared/gallery") &&
-        userRole !== "teacher"
+        userRole !== "teacher" &&
+        !hasPerm("manage_gallery")
       ) {
         router.replace("/dashboard/unauthorized");
         return;

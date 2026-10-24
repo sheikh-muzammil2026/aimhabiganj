@@ -47,21 +47,6 @@ export async function proxy(request) {
   const userRole = (user.role || "student").toLowerCase();
   const permissions = Array.isArray(user.permissions) ? user.permissions : [];
 
-  // 4. Handle root /dashboard redirect to user's role dashboard
-  // if (pathname === "/dashboard" || pathname === "/dashboard/") {
-  //   const targetDashboard =
-  //     userRole === "admin"
-  //       ? "/dashboard/admin"
-  //       : userRole === "teacher"
-  //         ? "/dashboard/teacher"
-  //         : userRole === "accountant"
-  //           ? "/dashboard/accountant"
-  //           : userRole === "parent"
-  //             ? "/dashboard/parent"
-  //             : "/dashboard/student";
-  //   return NextResponse.redirect(new URL(targetDashboard, request.url));
-  // }
-
   // 5. Common pages accessible to all authenticated roles
   if (pathname.startsWith("/dashboard/profile-settings")) {
     return NextResponse.next();
@@ -88,7 +73,7 @@ export async function proxy(request) {
     );
   }
 
-  // Admins and superadmins have unrestricted access to all remaining routes
+  // Admins and superadmins have unrestricted access to all remaining routes (including /dashboard/teacher and /dashboard/teachers-attendance)
   if (userRole === "admin" || userRole === "superadmin") {
     return NextResponse.next();
   }
@@ -119,7 +104,9 @@ export async function proxy(request) {
     }
     if (
       pathname.startsWith("/dashboard/admin/teachers-management") &&
-      hasPerm("manage_users")
+      (hasPerm("manage_users") ||
+        hasPerm("manage_teachers") ||
+        hasPerm("manage_attendance"))
     ) {
       return NextResponse.next();
     }
@@ -152,9 +139,14 @@ export async function proxy(request) {
     );
   }
 
-  // Check /dashboard/teacher routes
+  // Check /dashboard/teacher routes (accessible to teachers, admins, and users with teacher/academic permissions)
   if (pathname.startsWith("/dashboard/teacher")) {
-    if (userRole === "teacher") {
+    if (
+      userRole === "teacher" ||
+      hasPerm("manage_teachers") ||
+      hasPerm("manage_academics") ||
+      hasPerm("teacher")
+    ) {
       return NextResponse.next();
     }
     return NextResponse.redirect(
@@ -172,9 +164,19 @@ export async function proxy(request) {
     );
   }
 
-  // Check /dashboard/attendance route
-  if (pathname.startsWith("/dashboard/attendance")) {
-    if (userRole === "teacher" || hasPerm("manage_academics")) {
+  // Check /dashboard/attendance and /dashboard/teachers-attendance routes
+  if (
+    pathname.startsWith("/dashboard/attendance") ||
+    pathname.startsWith("/dashboard/teachers-attendance")
+  ) {
+    if (
+      userRole === "teacher" ||
+      userRole === "accountant" ||
+      hasPerm("manage_academics") ||
+      hasPerm("manage_attendance") ||
+      hasPerm("manage_teachers") ||
+      hasPerm("teacher")
+    ) {
       return NextResponse.next();
     }
     return NextResponse.redirect(
@@ -185,7 +187,12 @@ export async function proxy(request) {
   // Check /dashboard/shared routes
   if (pathname.startsWith("/dashboard/shared")) {
     if (pathname.startsWith("/dashboard/shared/academics")) {
-      if (userRole === "teacher" || hasPerm("manage_academics")) {
+      if (
+        userRole === "teacher" ||
+        hasPerm("manage_academics") ||
+        hasPerm("manage_teachers") ||
+        hasPerm("teacher")
+      ) {
         return NextResponse.next();
       }
       return NextResponse.redirect(
@@ -193,7 +200,7 @@ export async function proxy(request) {
       );
     }
     if (pathname.startsWith("/dashboard/shared/gallery")) {
-      if (userRole === "teacher") {
+      if (userRole === "teacher" || hasPerm("manage_gallery")) {
         return NextResponse.next();
       }
       return NextResponse.redirect(

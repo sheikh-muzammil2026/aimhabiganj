@@ -538,13 +538,8 @@ export default function TeacherProfileDashboard() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="text-3xl sm:text-4xl">🕌</span>
-                )}
-              </div>
-              <div className="space-y-2 text-center sm:text-left w-full sm:w-auto">
-                <label className="block text-xs font-bold text-slate-700">
-                  প্রোফাইল ছবি পরিবর্তন করুন
-                </label>
+                 <div className="space-y-2 text-center sm:text-left w-full sm:w-auto">
+               
                 <input
                   type="file"
                   accept="image/*"
@@ -558,6 +553,9 @@ export default function TeacherProfileDashboard() {
                   </p>
                 )}
               </div>
+                )}
+              </div>
+              
             </div>
 
             {/* ১.১ নাম ও পরিচিতি (Personal Information) */}
