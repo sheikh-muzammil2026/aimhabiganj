@@ -20,8 +20,7 @@ import {
 } from "lucide-react";
 import { IoNotificationsCircle } from "react-icons/io5";
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
+const API_BASE = process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -131,15 +130,19 @@ export default function Sidebar() {
   }, [syncUserData, refetch]);
 
   const user = liveUser || session?.user;
-  const userRole = (liveUser?.role || session?.user?.role || "user").toLowerCase();
+  const userRole = (
+    liveUser?.role ||
+    session?.user?.role ||
+    "user"
+  ).toLowerCase();
   const userPermissions =
     Array.isArray(liveUser?.permissions) && liveUser.permissions.length > 0
       ? liveUser.permissions
       : Array.isArray(session?.user?.permissions)
-      ? session.user.permissions
-      : Array.isArray(liveUser?.permissions)
-      ? liveUser.permissions
-      : [];
+        ? session.user.permissions
+        : Array.isArray(liveUser?.permissions)
+          ? liveUser.permissions
+          : [];
   const userName = user?.name || "অতিথি ব্যবহারকারী";
   const avatarLetter = user?.name ? user.name.charAt(0) : "ই";
 
@@ -177,8 +180,7 @@ export default function Sidebar() {
         "user",
       ],
     },
-   
-    
+
     {
       id: "academics",
       title: "শিক্ষা কার্যক্রম",
@@ -352,7 +354,7 @@ export default function Sidebar() {
         },
         {
           title: "এডমিন হাজিরা",
-          href: "/dashboard/teachers-attendance",
+          href: "/dashboard/teacher/teachers-attendance",
         },
         {
           title: "শিক্ষক আইডি কার্ড তৈরি",

@@ -346,7 +346,7 @@ export default function TeacherMonthlyAttendancePdfDocument({
                 <Text style={styles.headerText}>ক্র.</Text>
               </View>
               <View style={[styles.cell, styles.colName]}>
-                <Text style={styles.headerTextLeft}>শিক্ষক আইডি (Teacher ID)</Text>
+                <Text style={styles.headerTextLeft}>শিক্ষক আইডি</Text>
               </View>
               <View style={[styles.cell, styles.colDesignation]}>
                 <Text style={styles.headerTextLeft}>পদবি</Text>
@@ -358,7 +358,7 @@ export default function TeacherMonthlyAttendancePdfDocument({
                 <Text style={styles.headerText}>সময়মতো</Text>
               </View>
               <View style={[styles.cell, styles.colLate]}>
-                <Text style={styles.headerText}>দেরিতে (Late)</Text>
+                <Text style={styles.headerText}>দেরিতে</Text>
               </View>
               <View style={[styles.cell, styles.colEarly]}>
                 <Text style={styles.headerText}>পূর্বে প্রস্থান</Text>
@@ -451,8 +451,7 @@ export default function TeacherMonthlyAttendancePdfDocument({
                         {teacher.lateComments?.map((c, i) => (
                           <Text key={`l-${i}`} style={styles.commentItem}>
                             <Text style={styles.commentLateTag}>
-                              [
-                              {c.date ? toBengaliNumber(c.date.slice(8)) : ""}{" "}
+                              [{c.date ? toBengaliNumber(c.date.slice(8)) : ""}{" "}
                               তারিখ]:{" "}
                             </Text>
                             {c.comment}
@@ -461,8 +460,7 @@ export default function TeacherMonthlyAttendancePdfDocument({
                         {teacher.earlyComments?.map((c, i) => (
                           <Text key={`e-${i}`} style={styles.commentItem}>
                             <Text style={styles.commentEarlyTag}>
-                              [
-                              {c.date ? toBengaliNumber(c.date.slice(8)) : ""}{" "}
+                              [{c.date ? toBengaliNumber(c.date.slice(8)) : ""}{" "}
                               তারিখ (আর্লি)]:{" "}
                             </Text>
                             {c.comment}

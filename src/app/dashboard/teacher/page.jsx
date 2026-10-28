@@ -441,7 +441,7 @@ export default function TeacherProfileDashboard() {
               </Link>
             )}
             <Link
-              href="/dashboard/teachers-attendance"
+              href="/dashboard/teacher/teachers-attendance"
               className="w-full sm:w-auto justify-center bg-emerald-500/30 hover:bg-emerald-500/50 text-emerald-100 font-bold px-4 py-2.5 rounded-xl border border-emerald-400/30 shadow-md transition-all flex items-center gap-2 text-sm"
             >
               📋 Attendance
@@ -538,24 +538,22 @@ export default function TeacherProfileDashboard() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                 <div className="space-y-2 text-center sm:text-left w-full sm:w-auto">
-               
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  disabled={uploadingImage}
-                  className="text-xs w-full max-w-xs mx-auto sm:mx-0 cursor-pointer"
-                />
-                {uploadingImage && (
-                  <p className="text-xs text-amber-600 font-semibold animate-pulse">
-                    ছবি আপলোড হচ্ছে...
-                  </p>
+                  <div className="space-y-2 text-center sm:text-left w-full sm:w-auto">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={uploadingImage}
+                      className="text-xs w-full max-w-xs mx-auto sm:mx-0 cursor-pointer"
+                    />
+                    {uploadingImage && (
+                      <p className="text-xs text-amber-600 font-semibold animate-pulse">
+                        ছবি আপলোড হচ্ছে...
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
-                )}
-              </div>
-              
             </div>
 
             {/* ১.১ নাম ও পরিচিতি (Personal Information) */}
@@ -568,7 +566,6 @@ export default function TeacherProfileDashboard() {
                 <div>
                   <label className="text-xs font-bold text-slate-700 block mb-1">
                     শিক্ষক আইডি
-                   
                   </label>
                   <input
                     type="text"

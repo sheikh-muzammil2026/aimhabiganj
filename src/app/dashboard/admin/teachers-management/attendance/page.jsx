@@ -916,9 +916,7 @@ export default function AdminTeachersAttendancePage() {
               <table className="w-full min-w-[980px] text-left text-sm">
                 <thead className="text-[11px] uppercase tracking-wider bg-slate-50 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 border-b border-slate-200/60 dark:border-slate-700/40">
                   <tr>
-                    <th className="py-3.5 px-5 font-bold">
-                      শিক্ষক আইডি (Teacher ID)
-                    </th>
+                    <th className="py-3.5 px-5 font-bold">শিক্ষক আইডি</th>
                     <th className="py-3.5 px-4 font-bold">
                       প্রবেশ হাজিরা (Check-In)
                     </th>
@@ -926,7 +924,9 @@ export default function AdminTeachersAttendancePage() {
                     <th className="py-3.5 px-4 font-bold">
                       প্রস্থান হাজিরা (Check-Out)
                     </th>
-                    <th className="py-3.5 px-4 font-bold">প্রস্থান স্ট্যাটাস</th>
+                    <th className="py-3.5 px-4 font-bold">
+                      প্রস্থান স্ট্যাটাস
+                    </th>
                     <th className="py-3.5 px-4 font-bold">কর্মঘণ্টা</th>
                     <th className="py-3.5 px-4 font-bold">
                       দেরি/পূর্বে প্রস্থানের কারণ
@@ -1459,7 +1459,7 @@ export default function AdminTeachersAttendancePage() {
                   ) : (
                     <Printer className="w-4 h-4" />
                   )}
-                  <span>প্রিন্ট ভিউ (PDF Print)</span>
+                  <span>প্রিন্ট ভিউ</span>
                 </button>
 
                 <button
@@ -1472,7 +1472,7 @@ export default function AdminTeachersAttendancePage() {
                   ) : (
                     <Download className="w-4 h-4" />
                   )}
-                  <span>ডাউনলোড (PDF Download)</span>
+                  <span>ডাউনলোড</span>
                 </button>
 
                 <button
@@ -1492,7 +1492,7 @@ export default function AdminTeachersAttendancePage() {
               {loadingMonthly ? (
                 <div className="py-20 text-center text-slate-400 text-sm flex flex-col items-center justify-center gap-3">
                   <RefreshCw className="w-6 h-6 animate-spin text-emerald-600" />
-                  <span>মাসিক সারাংশ লোড হচ্ছে...</span>
+                  <span>মাসিক উপস্থিতি রিপোর্ট লোড হচ্ছে...</span>
                 </div>
               ) : !monthlyData ? (
                 <div className="py-16 text-center text-slate-400 text-sm">
@@ -1552,7 +1552,7 @@ export default function AdminTeachersAttendancePage() {
                             ক্র.
                           </th>
                           <th className="border border-gray-800 py-2 px-3 text-left">
-                            শিক্ষক আইডি (Teacher ID)
+                            শিক্ষক আইডি
                           </th>
                           <th className="border border-gray-800 py-2 px-2 text-left">
                             পদবি
@@ -1564,7 +1564,7 @@ export default function AdminTeachersAttendancePage() {
                             সময়মতো
                           </th>
                           <th className="border border-gray-800 py-2 px-2">
-                            দেরিতে (Late)
+                            দেরিতে
                           </th>
                           <th className="border border-gray-800 py-2 px-2">
                             পূর্বে প্রস্থান
