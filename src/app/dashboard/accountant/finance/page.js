@@ -41,8 +41,42 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_SERVER_URL ||
   "http://localhost:5000";
 
+const FUND_ACCOUNTS = [
+  {
+    accountNumber: "19071310000015",
+    name: "As-Salam Ideal Madrasah",
+    nameBn: "জেনারেল ব্যাংক হিসাব-১৫",
+    openingBalance: 25069.02,
+  },
+  {
+    accountNumber: "19071213000673",
+    name: "As-Salam Ideal Madrasah(Future Fund)",
+    nameBn: "ফিউচার ফান্ড ব্যাংক হিসাব-৬৭৩",
+    openingBalance: 38220.52,
+  },
+  {
+    accountNumber: "19071210000674",
+    name: "As-Salam Ideal Madrasah(Donation Fund)",
+    nameBn: "ডোনেশন ফান্ড ব্যাংক হিসাব-৬৭৪",
+    openingBalance: 202892.51,
+  },
+  {
+    accountNumber: "19071210000675",
+    name: "As-Salam Ideal Madrasah(Zakath Fund)",
+    nameBn: "যাকাত ফান্ড ব্যাংক হিসাব-৬৭৫",
+    openingBalance: 9371.1,
+  },
+  {
+    accountNumber: "19071210000804",
+    name: "As-Salam Ideal Madrasah(Yeatim Fund)",
+    nameBn: "এয়াতিম ফান্ড ব্যাংক হিসাব-৮০৪",
+    openingBalance: 169479.47,
+  },
+];
+
 const INCOME_HEADS = [
   "জেনারেল ব্যাংক হিসাব-১৫",
+  "ফিউচার ফান্ড ব্যাংক হিসাব-৬৭৩",
   "এয়াতিম ফান্ড ব্যাংক হিসাব-৮০৪",
   "ডোনেশন ফান্ড ব্যাংক হিসাব-৬৭৪",
   "যাকাত ফান্ড ব্যাংক হিসাব-৬৭৫",
@@ -147,19 +181,23 @@ export default function FinanceDashboard() {
   const currentYear = today.getFullYear().toString();
   const currentMonthNum = String(today.getMonth() + 1).padStart(2, "0");
 
-  // Filter States for Overview & Reports (Default to "all" for real-time overall view)
-  const [reportYear, setReportYear] = useState("all");
-  const [reportMonth, setReportMonth] = useState("all");
+  // Filter States for Overview & Reports (Default to current month/year for active rolling balance view)
+  const [reportYear, setReportYear] = useState(currentYear);
+  const [reportMonth, setReportMonth] = useState(currentMonthNum);
+  const [reportAccount, setReportAccount] = useState("all");
   const [summaryData, setSummaryData] = useState({
     totalIncome: 0,
     totalExpense: 0,
     netBalance: 0,
     openingBalance: 0,
     totalUsableFund: 0,
+    overallOpeningBalance: 0,
     overallIncome: 0,
     overallExpense: 0,
     overallBalance: 0,
     activeMonths: [],
+    funds: FUND_ACCOUNTS,
+    fundBreakdown: [],
     incomeBreakdown: [],
     expenseBreakdown: [],
   });
@@ -181,11 +219,16 @@ export default function FinanceDashboard() {
   const [editingId, setEditingId] = useState(null);
   const [editingType, setEditingType] = useState(null);
 
-  // Income Form States (Updated to separate fields)
+  // Income Form States (Updated to separate fields + fund accountNumber)
   const [incomeForm, setIncomeForm] = useState({
     receiptNo: "",
+    accountNumber: "19071310000015",
+    payerType: "donor",
     donorName: "",
     studentId: "",
+    studentName: "",
+    className: "",
+    discount: "",
     date: today.toISOString().split("T")[0],
     month: `${currentYear}-${currentMonthNum}`,
     paymentMethod: "Cash",
@@ -193,9 +236,10 @@ export default function FinanceDashboard() {
     items: [{ head: INCOME_HEADS[0], amount: "" }],
   });
 
-  // Expense Form States (Renamed Recipient placeholder to Spender)
+  // Expense Form States (Renamed Recipient placeholder to Spender + fund accountNumber)
   const [expenseForm, setExpenseForm] = useState({
     voucherNo: "",
+    accountNumber: "19071310000015",
     receiverName: "", // Maps to Spender Name
     advanceAmount: "",
     chequeNo: "",
@@ -228,6 +272,7 @@ export default function FinanceDashboard() {
       const queryParams = [];
       if (reportMonth && reportMonth !== "all") queryParams.push(`month=${reportMonth}`);
       if (reportYear && reportYear !== "all") queryParams.push(`year=${reportYear}`);
+      if (reportAccount && reportAccount !== "all") queryParams.push(`accountNumber=${reportAccount}`);
       const queryString = queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
 
       const res = await fetch(`${API_BASE_URL}/api/finance/summary${queryString}`);
@@ -252,6 +297,7 @@ export default function FinanceDashboard() {
   }, [
     reportMonth,
     reportYear,
+    reportAccount,
     triggerNotification,
     setLoading,
     setSummaryData,
@@ -262,6 +308,7 @@ export default function FinanceDashboard() {
     try {
       setLoading(true);
       let url = `${API_BASE_URL}/api/finance/transactions?page=${txPage}&limit=10&type=${txFilterType}`;
+      if (reportAccount && reportAccount !== "all") url += `&accountNumber=${encodeURIComponent(reportAccount)}`;
       if (txSearch) url += `&search=${encodeURIComponent(txSearch)}`;
       if (txStartDate) url += `&startDate=${txStartDate}`;
       if (txEndDate) url += `&endDate=${txEndDate}`;
@@ -286,6 +333,7 @@ export default function FinanceDashboard() {
   }, [
     txPage,
     txFilterType,
+    reportAccount,
     txStartDate,
     txEndDate,
     txSearch,
@@ -373,6 +421,7 @@ export default function FinanceDashboard() {
       const parsed = parsePayerName(tx.payerName);
       setIncomeForm({
         receiptNo: tx.receiptNo || "",
+        accountNumber: tx.accountNumber || "19071310000015",
         payerType: tx.payerType || (parsed.studentId ? "student" : "donor"),
         donorName: tx.donorName || parsed.donorName || "",
         studentId: tx.studentId || parsed.studentId || "",
@@ -396,6 +445,7 @@ export default function FinanceDashboard() {
     } else {
       setExpenseForm({
         voucherNo: tx.voucherNo || "",
+        accountNumber: tx.accountNumber || "19071310000015",
         receiverName: tx.receiverName || "",
         advanceAmount:
           tx.advanceAmount !== undefined ? tx.advanceAmount.toString() : "",
@@ -492,6 +542,7 @@ export default function FinanceDashboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           receiptNo: incomeForm.receiptNo,
+          accountNumber: incomeForm.accountNumber || "19071310000015",
           payerName: payerNamePayload,
           payerType: incomeForm.payerType,
           donorName: incomeForm.donorName,
@@ -518,6 +569,7 @@ export default function FinanceDashboard() {
         // Reset form
         setIncomeForm({
           receiptNo: "",
+          accountNumber: "19071310000015",
           payerType: "donor",
           donorName: "",
           studentId: "",
@@ -573,6 +625,7 @@ export default function FinanceDashboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...expenseForm,
+          accountNumber: expenseForm.accountNumber || "19071310000015",
           items: validItems,
         }),
       });
@@ -588,6 +641,7 @@ export default function FinanceDashboard() {
         // Reset form
         setExpenseForm({
           voucherNo: "",
+          accountNumber: "19071310000015",
           receiverName: "",
           advanceAmount: "",
           chequeNo: "",
@@ -699,11 +753,26 @@ export default function FinanceDashboard() {
             </p>
           </div>
 
-          {/* Month/Year Selection for Overview */}
+          {/* Month/Year & Fund Selection for Overview */}
           {activeTab === "overview" && (
-            <div className="flex items-center justify-between sm:justify-start gap-2 bg-white p-2 rounded-xl border border-emerald-900/10 shadow-xs shrink-0 w-full sm:w-auto">
-              <div className="flex items-center gap-2 min-w-0">
+            <div className="flex flex-wrap items-center justify-between sm:justify-start gap-2 bg-white p-2 rounded-xl border border-emerald-900/10 shadow-xs shrink-0 w-full sm:w-auto">
+              <div className="flex flex-wrap items-center gap-2 min-w-0">
                 <Calendar className="w-4 h-4 text-emerald-800 shrink-0" />
+                <select
+                  value={reportAccount}
+                  onChange={(e) => {
+                    setReportAccount(e.target.value);
+                    setTxPage(1);
+                  }}
+                  className="text-xs font-bold text-emerald-900 bg-emerald-50/70 px-2 py-1 rounded-lg border border-emerald-200 focus:outline-none cursor-pointer"
+                >
+                  <option value="all">সকল ফান্ড (সমন্বিত)</option>
+                  {FUND_ACCOUNTS.map((f) => (
+                    <option key={f.accountNumber} value={f.accountNumber}>
+                      {f.nameBn} ({f.accountNumber.slice(-4)})
+                    </option>
+                  ))}
+                </select>
                 <select
                   value={reportMonth}
                   onChange={(e) => setReportMonth(e.target.value)}
@@ -776,6 +845,9 @@ export default function FinanceDashboard() {
             reportMonth={reportMonth}
             setReportMonth={setReportMonth}
             reportYear={reportYear}
+            reportAccount={reportAccount}
+            setReportAccount={setReportAccount}
+            FUND_ACCOUNTS={FUND_ACCOUNTS}
             getMonthLabel={getMonthLabel}
             formatBanglaNumber={formatBanglaNumber}
             loading={loading}
@@ -802,6 +874,7 @@ export default function FinanceDashboard() {
             incomeForm={incomeForm}
             setIncomeForm={setIncomeForm}
             INCOME_HEADS={INCOME_HEADS}
+            FUND_ACCOUNTS={FUND_ACCOUNTS}
             loading={loading}
             onSubmit={handleIncomeSubmit}
             setActiveTab={setActiveTab}
@@ -815,6 +888,7 @@ export default function FinanceDashboard() {
             expenseForm={expenseForm}
             setExpenseForm={setExpenseForm}
             EXPENSE_HEADS={EXPENSE_HEADS}
+            FUND_ACCOUNTS={FUND_ACCOUNTS}
             loading={loading}
             onSubmit={handleExpenseSubmit}
             setActiveTab={setActiveTab}
@@ -829,6 +903,9 @@ export default function FinanceDashboard() {
             setReportYear={setReportYear}
             reportMonth={reportMonth}
             setReportMonth={setReportMonth}
+            reportAccount={reportAccount}
+            setReportAccount={setReportAccount}
+            FUND_ACCOUNTS={FUND_ACCOUNTS}
             summaryData={summaryData}
             BANGAL_MONTHS={BANGAL_MONTHS}
             getMonthLabel={getMonthLabel}
@@ -1406,29 +1483,87 @@ function ReportPrintLayout({
         </div>
       </div>
 
-      {/* Calculations / Summary Footer Row */}
-      <div className="grid grid-cols-3 gap-px bg-slate-350 border border-slate-300 text-xs font-black">
-        <div className="bg-emerald-50 p-3 text-emerald-950 flex justify-between items-center gap-2">
-          <span>সর্বমোট আয়:</span>
+      {/* Calculations / Summary Footer Row (5 Rolling Balance Figures) */}
+      <div className="grid grid-cols-5 gap-px bg-slate-350 border border-slate-300 text-[10px] font-black">
+        <div className="bg-indigo-50 p-2.5 text-indigo-950 flex flex-col justify-between gap-1">
+          <span className="text-[9px] text-indigo-700">প্রারম্ভিক ব্যালেন্স:</span>
           <span className="text-xs font-black whitespace-nowrap">
-            ৳ {formatBanglaNumber(data.totalIncome.toLocaleString("bn-BD"))}
+            ৳ {formatBanglaNumber((data.openingBalance || 0).toLocaleString("bn-BD"))}
           </span>
         </div>
-        <div className="bg-rose-50 p-3 text-rose-950 flex justify-between items-center gap-2">
-          <span>সর্বমোট ব্যয়:</span>
+        <div className="bg-emerald-50 p-2.5 text-emerald-950 flex flex-col justify-between gap-1">
+          <span className="text-[9px] text-emerald-700">চলতি আয়:</span>
           <span className="text-xs font-black whitespace-nowrap">
-            ৳ {formatBanglaNumber(data.totalExpense.toLocaleString("bn-BD"))}
+            ৳ {formatBanglaNumber((data.totalIncome || 0).toLocaleString("bn-BD"))}
+          </span>
+        </div>
+        <div className="bg-teal-50 p-2.5 text-teal-950 flex flex-col justify-between gap-1">
+          <span className="text-[9px] text-teal-700">ব্যয়যোগ্য তহবিল:</span>
+          <span className="text-xs font-black whitespace-nowrap">
+            ৳ {formatBanglaNumber(((data.totalUsableFund ?? ((data.openingBalance || 0) + (data.totalIncome || 0))) || 0).toLocaleString("bn-BD"))}
+          </span>
+        </div>
+        <div className="bg-rose-50 p-2.5 text-rose-950 flex flex-col justify-between gap-1">
+          <span className="text-[9px] text-rose-700">চলতি ব্যয়:</span>
+          <span className="text-xs font-black whitespace-nowrap">
+            ৳ {formatBanglaNumber((data.totalExpense || 0).toLocaleString("bn-BD"))}
           </span>
         </div>
         <div
-          className={`p-3 flex justify-between items-center gap-2 ${data.netBalance >= 0 ? "bg-blue-50 text-blue-950" : "bg-amber-50 text-amber-950"}`}
+          className={`p-2.5 flex flex-col justify-between gap-1 ${(data.netBalance || 0) >= 0 ? "bg-blue-50 text-blue-950" : "bg-amber-50 text-amber-950"}`}
         >
-          <span>নেট ব্যালেন্স (উদ্বৃত্ত):</span>
+          <span className="text-[9px]">সমাপনী উদ্বৃত্ত:</span>
           <span className="text-xs font-black whitespace-nowrap">
-            ৳ {formatBanglaNumber(data.netBalance.toLocaleString("bn-BD"))}
+            ৳ {formatBanglaNumber((data.netBalance || 0).toLocaleString("bn-BD"))}
           </span>
         </div>
       </div>
+
+      {/* Fund-Wise Breakdown Table in Print */}
+      {Array.isArray(data.fundBreakdown) && data.fundBreakdown.length > 0 && (
+        <div className="mt-4">
+          <h4 className="text-[11px] font-black text-emerald-950 mb-1.5">
+            ফান্ড-ভিত্তিক ব্যালেন্স বিবরণী (Fund-Wise Rolling Balance)
+          </h4>
+          <table className="w-full text-[9.5px] border border-collapse border-slate-300">
+            <thead>
+              <tr className="bg-slate-100 text-slate-700 font-bold">
+                <th className="p-1.5 border border-slate-300 text-left">ফান্ড ও ব্যাংক হিসাব</th>
+                <th className="p-1.5 border border-slate-300 text-right">প্রারম্ভিক জের</th>
+                <th className="p-1.5 border border-slate-300 text-right">চলতি আয়</th>
+                <th className="p-1.5 border border-slate-300 text-right">ব্যয়যোগ্য তহবিল</th>
+                <th className="p-1.5 border border-slate-300 text-right">চলতি ব্যয়</th>
+                <th className="p-1.5 border border-slate-300 text-right">সমাপনী উদ্বৃত্ত</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.fundBreakdown.map((f) => (
+                <tr key={f.accountNumber}>
+                  <td className="p-1.5 border border-slate-300 font-bold">
+                    <div>{f.nameBn || f.name}</div>
+                    <div className="text-[8px] font-mono text-slate-500">Acc: {f.accountNumber}</div>
+                  </td>
+                  <td className="p-1.5 border border-slate-300 text-right font-semibold">
+                    ৳ {formatBanglaNumber((f.openingBalance || 0).toLocaleString("bn-BD"))}
+                  </td>
+                  <td className="p-1.5 border border-slate-300 text-right font-semibold text-emerald-800">
+                    ৳ {formatBanglaNumber((f.totalIncome || 0).toLocaleString("bn-BD"))}
+                  </td>
+                  <td className="p-1.5 border border-slate-300 text-right font-bold text-teal-900">
+                    ৳ {formatBanglaNumber((f.availableBalance || 0).toLocaleString("bn-BD"))}
+                  </td>
+                  <td className="p-1.5 border border-slate-300 text-right font-semibold text-rose-800">
+                    ৳ {formatBanglaNumber((f.totalExpense || 0).toLocaleString("bn-BD"))}
+                  </td>
+                  <td className="p-1.5 border border-slate-300 text-right font-black text-blue-950">
+                    ৳ {formatBanglaNumber((f.closingBalance || 0).toLocaleString("bn-BD"))}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Signature Area */}
       <div className="grid grid-cols-3 gap-6 pt-16 text-center text-[10px] font-bold text-slate-500">

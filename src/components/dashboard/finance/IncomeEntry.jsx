@@ -10,6 +10,7 @@ export default function IncomeEntry({
   incomeForm,
   setIncomeForm,
   INCOME_HEADS,
+  FUND_ACCOUNTS = [],
   loading,
   onSubmit,
   setActiveTab,
@@ -120,16 +121,41 @@ export default function IncomeEntry({
     setIncomeForm({ ...incomeForm, items: newItems });
   };
 
+  const inferAccountFromHead = (headVal) => {
+    const h = String(headVal || "");
+    if (h.includes("৮০৪") || h.includes("এয়াতিম") || h.includes("ইয়াতিম")) {
+      return "19071210000804";
+    }
+    if (h.includes("৬৭৫") || h.includes("যাকাত")) {
+      return "19071210000675";
+    }
+    if (h.includes("৬৭৪") || h.includes("ডোনেশন") || h.includes("সাদাকাহ")) {
+      return "19071210000674";
+    }
+    if (h.includes("৬৭৩") || h.includes("ফিউচার")) {
+      return "19071213000673";
+    }
+    if (h.includes("১৫") || h.includes("জেনারেল")) {
+      return "19071310000015";
+    }
+    return null;
+  };
+
   const handleRowChange = (index, field, value) => {
     const newItems = [...incomeForm.items];
     newItems[index][field] = value;
+    let nextAcc = incomeForm.accountNumber || "19071310000015";
     if (field === 'head') {
       const found = dbCategories.find(c => c.name === value);
       if (found && found.presetFee > 0) {
         newItems[index]['amount'] = found.presetFee.toString();
       }
+      const inferred = inferAccountFromHead(value);
+      if (inferred) {
+        nextAcc = inferred;
+      }
     }
-    setIncomeForm({ ...incomeForm, items: newItems });
+    setIncomeForm({ ...incomeForm, accountNumber: nextAcc, items: newItems });
   };
 
   const currentIncomeTotal = incomeForm.items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
@@ -196,6 +222,25 @@ export default function IncomeEntry({
               <option value="bKash">বিকাশ</option>
               <option value="Nagad">নগদ মোবাইল ব্যাংকিং</option>
               <option value="Rocket">রকেট</option>
+            </select>
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className="text-xs font-bold text-slate-650 block mb-1">
+              ফান্ড / ব্যাংক হিসাব (Fund Account)
+            </label>
+            <select
+              value={incomeForm.accountNumber || "19071310000015"}
+              onChange={(e) =>
+                setIncomeForm({ ...incomeForm, accountNumber: e.target.value })
+              }
+              className="px-3 py-2.5 border border-emerald-200 bg-emerald-50/30 rounded-xl text-xs font-bold text-emerald-950 w-full focus:outline-none focus:border-emerald-700"
+            >
+              {FUND_ACCOUNTS.map((f) => (
+                <option key={f.accountNumber} value={f.accountNumber}>
+                  {f.name} — {f.nameBn} (Acc: {f.accountNumber})
+                </option>
+              ))}
             </select>
           </div>
 
@@ -343,6 +388,7 @@ export default function IncomeEntry({
               <div className="flex items-center gap-2 w-full sm:w-36 md:w-48">
                 <input
                   type="number"
+                  step="0.01"
                   placeholder="টাকা (৳)"
                   min="0"
                   value={item.amount}

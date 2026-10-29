@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Printer, Calendar, RefreshCw, Loader2 } from 'lucide-react';
 
 const API_BASE_URL =
@@ -53,6 +53,9 @@ export default function MonthlyReport({
   setReportYear,
   reportMonth,
   setReportMonth,
+  reportAccount = "all",
+  setReportAccount,
+  FUND_ACCOUNTS = [],
   summaryData, // parent monthly summary
   BANGAL_MONTHS,
   getMonthLabel,
@@ -77,39 +80,62 @@ export default function MonthlyReport({
 
   // Local aggregated summary data for daily/weekly
   const [localSummaryData, setLocalSummaryData] = useState({
+    openingBalance: 0,
     totalIncome: 0,
+    totalUsableFund: 0,
     totalExpense: 0,
     netBalance: 0,
+    fundBreakdown: [],
     incomeBreakdown: [],
     expenseBreakdown: []
   });
 
-  // Refetch when report criteria change
-  useEffect(() => {
-    const fetchAndAggregate = async (start, end) => {
+  const fetchAndAggregate = useCallback(
+    async (start, end) => {
+      await Promise.resolve();
       try {
         setLocalLoading(true);
-        const res = await fetch(`${API_BASE_URL}/api/finance/transactions?limit=2000&startDate=${start}&endDate=${end}`);
+        const accParam =
+          reportAccount && reportAccount !== "all"
+            ? `&accountNumber=${encodeURIComponent(reportAccount)}`
+            : "";
+        const res = await fetch(
+          `${API_BASE_URL}/api/finance/transactions?limit=2000&startDate=${start}&endDate=${end}${accParam}`,
+        );
         const data = await res.json();
         if (data.success && Array.isArray(data.data)) {
           const aggregated = aggregateTransactions(data.data);
-          setLocalSummaryData(aggregated);
+          setLocalSummaryData({
+            ...aggregated,
+            openingBalance: 0,
+            totalUsableFund: aggregated.totalIncome,
+            fundBreakdown: [],
+          });
         } else {
-          console.error("Failed to fetch transactions for report:", data.message);
+          console.error(
+            "Failed to fetch transactions for report:",
+            data.message,
+          );
         }
       } catch (err) {
         console.error("Error in report aggregation fetch:", err);
       } finally {
         setLocalLoading(false);
       }
-    };
+    },
+    [reportAccount],
+  );
 
-    if (subTab === 'daily') {
-      fetchAndAggregate(dailyDate, dailyDate);
-    } else if (subTab === 'weekly') {
-      fetchAndAggregate(weeklyStartDate, weeklyEndDate);
-    }
-  }, [subTab, dailyDate, weeklyStartDate, weeklyEndDate]);
+  // Refetch when report criteria change
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      if (subTab === 'daily') {
+        fetchAndAggregate(dailyDate, dailyDate);
+      } else if (subTab === 'weekly') {
+        fetchAndAggregate(weeklyStartDate, weeklyEndDate);
+      }
+    });
+  }, [subTab, dailyDate, weeklyStartDate, weeklyEndDate, fetchAndAggregate]);
 
   const activeData = subTab === 'monthly' ? summaryData : localSummaryData;
   const isLoading = subTab === 'monthly' ? parentLoading : localLoading;
@@ -195,8 +221,22 @@ export default function MonthlyReport({
           )}
 
           {subTab === 'monthly' && (
-            <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
+            <div className="flex flex-wrap items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
               <Calendar className="w-4 h-4 text-emerald-800 shrink-0" />
+              {setReportAccount && (
+                <select
+                  value={reportAccount}
+                  onChange={(e) => setReportAccount(e.target.value)}
+                  className="text-xs font-bold text-emerald-900 bg-white px-2 py-0.5 rounded border border-emerald-200 focus:outline-none cursor-pointer"
+                >
+                  <option value="all">সকল ফান্ড</option>
+                  {FUND_ACCOUNTS.map((f) => (
+                    <option key={f.accountNumber} value={f.accountNumber}>
+                      {f.nameBn} ({f.accountNumber.slice(-4)})
+                    </option>
+                  ))}
+                </select>
+              )}
               <select
                 value={reportMonth}
                 onChange={(e) => setReportMonth(e.target.value)}
@@ -318,21 +358,87 @@ export default function MonthlyReport({
           </div>
         </div>
 
-        {/* Calculations / Summary Footer Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-slate-200 border-x border-b border-slate-200 text-xs font-black print:grid-cols-3">
-          <div className="bg-emerald-50/50 p-3 sm:p-4 text-emerald-950 flex justify-between items-center gap-2">
-            <span>সর্বমোট আয়:</span>
-            <span className="text-xs sm:text-sm whitespace-nowrap">৳ {formatBanglaNumber(activeData.totalIncome.toLocaleString('bn-BD'))}</span>
+        {/* Calculations / Summary Footer Row (5 Rolling Balance Figures) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-px bg-slate-200 border-x border-b border-slate-200 text-xs font-black print:grid-cols-5">
+          <div className="bg-indigo-50/50 p-3 sm:p-4 text-indigo-950 flex flex-col justify-between gap-1">
+            <span className="text-[10px] text-indigo-700">প্রারম্ভিক ব্যালেন্স:</span>
+            <span className="text-xs sm:text-sm whitespace-nowrap">
+              ৳ {formatBanglaNumber((activeData.openingBalance || 0).toLocaleString('bn-BD'))}
+            </span>
           </div>
-          <div className="bg-rose-50/50 p-3 sm:p-4 text-rose-950 flex justify-between items-center gap-2">
-            <span>সর্বমোট ব্যয়:</span>
-            <span className="text-xs sm:text-sm whitespace-nowrap">৳ {formatBanglaNumber(activeData.totalExpense.toLocaleString('bn-BD'))}</span>
+          <div className="bg-emerald-50/50 p-3 sm:p-4 text-emerald-950 flex flex-col justify-between gap-1">
+            <span className="text-[10px] text-emerald-700">+ সর্বমোট আয়:</span>
+            <span className="text-xs sm:text-sm whitespace-nowrap">
+              ৳ {formatBanglaNumber((activeData.totalIncome || 0).toLocaleString('bn-BD'))}
+            </span>
           </div>
-          <div className={`p-3 sm:p-4 flex justify-between items-center gap-2 ${activeData.netBalance >= 0 ? 'bg-blue-50/60 text-blue-950' : 'bg-amber-50/60 text-amber-950'}`}>
-            <span>নেট ব্যালেন্স (উদ্বৃত্ত):</span>
-            <span className="text-xs sm:text-sm whitespace-nowrap">৳ {formatBanglaNumber(activeData.netBalance.toLocaleString('bn-BD'))}</span>
+          <div className="bg-teal-50/50 p-3 sm:p-4 text-teal-950 flex flex-col justify-between gap-1">
+            <span className="text-[10px] text-teal-700">= মোট ব্যয়যোগ্য তহবিল:</span>
+            <span className="text-xs sm:text-sm whitespace-nowrap">
+              ৳ {formatBanglaNumber(((activeData.totalUsableFund ?? ((activeData.openingBalance || 0) + (activeData.totalIncome || 0))) || 0).toLocaleString('bn-BD'))}
+            </span>
+          </div>
+          <div className="bg-rose-50/50 p-3 sm:p-4 text-rose-950 flex flex-col justify-between gap-1">
+            <span className="text-[10px] text-rose-700">- সর্বমোট ব্যয়:</span>
+            <span className="text-xs sm:text-sm whitespace-nowrap">
+              ৳ {formatBanglaNumber((activeData.totalExpense || 0).toLocaleString('bn-BD'))}
+            </span>
+          </div>
+          <div className={`p-3 sm:p-4 flex flex-col justify-between gap-1 ${(activeData.netBalance || 0) >= 0 ? 'bg-blue-50/60 text-blue-950' : 'bg-amber-50/60 text-amber-950'}`}>
+            <span className="text-[10px]">= সমাপনী উদ্বৃত্ত:</span>
+            <span className="text-xs sm:text-sm whitespace-nowrap">
+              ৳ {formatBanglaNumber((activeData.netBalance || 0).toLocaleString('bn-BD'))}
+            </span>
           </div>
         </div>
+
+        {/* Fund-Wise Monthly Balance Table */}
+        {subTab === 'monthly' && Array.isArray(activeData.fundBreakdown) && activeData.fundBreakdown.length > 0 && (
+          <div className="mt-6">
+            <h4 className="text-xs font-extrabold text-emerald-950 mb-2">
+              🏦 ফান্ড-ভিত্তিক মাসিক রোলিং ব্যালেন্স বিবরণী
+            </h4>
+            <div className="overflow-x-auto border border-slate-200 rounded-xl print:rounded-none">
+              <table className="min-w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 font-bold">
+                    <th className="p-2.5 border-r border-slate-200">ফান্ড ও ব্যাংক হিসাব</th>
+                    <th className="p-2.5 border-r border-slate-200 text-right text-indigo-800">প্রারম্ভিক জের</th>
+                    <th className="p-2.5 border-r border-slate-200 text-right text-emerald-800">+ চলতি আয়</th>
+                    <th className="p-2.5 border-r border-slate-200 text-right text-teal-800">= ব্যয়যোগ্য তহবিল</th>
+                    <th className="p-2.5 border-r border-slate-200 text-right text-rose-800">- চলতি ব্যয়</th>
+                    <th className="p-2.5 text-right text-blue-900">= সমাপনী উদ্বৃত্ত</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200 font-semibold text-slate-700">
+                  {activeData.fundBreakdown.map((f) => (
+                    <tr key={f.accountNumber}>
+                      <td className="p-2.5 border-r border-slate-200">
+                        <div className="font-bold text-slate-900">{f.nameBn || f.name}</div>
+                        <div className="text-[10px] font-mono text-slate-500">Acc: {f.accountNumber}</div>
+                      </td>
+                      <td className="p-2.5 border-r border-slate-200 text-right font-bold text-indigo-950 whitespace-nowrap">
+                        ৳ {formatBanglaNumber((f.openingBalance || 0).toLocaleString('bn-BD'))}
+                      </td>
+                      <td className="p-2.5 border-r border-slate-200 text-right font-bold text-emerald-800 whitespace-nowrap">
+                        ৳ {formatBanglaNumber((f.totalIncome || 0).toLocaleString('bn-BD'))}
+                      </td>
+                      <td className="p-2.5 border-r border-slate-200 text-right font-black text-teal-900 whitespace-nowrap">
+                        ৳ {formatBanglaNumber((f.availableBalance || 0).toLocaleString('bn-BD'))}
+                      </td>
+                      <td className="p-2.5 border-r border-slate-200 text-right font-bold text-rose-800 whitespace-nowrap">
+                        ৳ {formatBanglaNumber((f.totalExpense || 0).toLocaleString('bn-BD'))}
+                      </td>
+                      <td className="p-2.5 text-right font-black text-blue-950 whitespace-nowrap">
+                        ৳ {formatBanglaNumber((f.closingBalance || 0).toLocaleString('bn-BD'))}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
         {/* Signature Area */}
         <div className="grid grid-cols-3 gap-2 sm:gap-6 pt-12 sm:pt-16 text-center text-[10px] sm:text-xs font-bold text-slate-500 mt-6 sm:mt-10 print:mt-14">

@@ -10,6 +10,7 @@ export default function ExpenseEntry({
   expenseForm,
   setExpenseForm,
   EXPENSE_HEADS,
+  FUND_ACCOUNTS = [],
   loading,
   onSubmit,
   setActiveTab,
@@ -76,7 +77,16 @@ export default function ExpenseEntry({
   const handleRowChange = (index, field, value) => {
     const newItems = [...expenseForm.items];
     newItems[index][field] = value;
-    setExpenseForm({ ...expenseForm, items: newItems });
+    let nextAcc = expenseForm.accountNumber || "19071310000015";
+    if (field === "head") {
+      const h = String(value || "");
+      if (h.includes("অরফান") || h.includes("এয়াতিম") || h.includes("ইয়াতিম")) {
+        nextAcc = "19071210000804";
+      } else if (h.includes("যাকাত")) {
+        nextAcc = "19071210000675";
+      }
+    }
+    setExpenseForm({ ...expenseForm, accountNumber: nextAcc, items: newItems });
   };
 
   const currentExpenseTotal = expenseForm.items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
@@ -181,6 +191,25 @@ export default function ExpenseEntry({
               className="px-3 py-2 border border-slate-200 rounded-xl text-xs w-full focus:outline-none focus:border-emerald-700"
             />
           </div>
+
+          <div>
+            <label className="text-[10px] font-bold text-slate-600 block mb-1">
+              ফান্ড / ব্যাংক হিসাব (Fund Account)
+            </label>
+            <select
+              value={expenseForm.accountNumber || "19071310000015"}
+              onChange={(e) =>
+                setExpenseForm({ ...expenseForm, accountNumber: e.target.value })
+              }
+              className="px-3 py-2 border border-emerald-200 bg-emerald-50/30 rounded-xl text-xs font-bold text-emerald-950 w-full focus:outline-none focus:border-emerald-700"
+            >
+              {FUND_ACCOUNTS.map((f) => (
+                <option key={f.accountNumber} value={f.accountNumber}>
+                  {f.nameBn} ({f.accountNumber})
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Voucher Items */}
@@ -248,6 +277,7 @@ export default function ExpenseEntry({
                   <label className="text-[10px] font-bold text-slate-505 block mb-1">টাকার পরিমাণ (৳)</label>
                   <input
                     type="number"
+                    step="0.01"
                     placeholder="টাকা (৳)"
                     min="0"
                     value={item.amount}
