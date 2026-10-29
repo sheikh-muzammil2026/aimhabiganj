@@ -599,6 +599,68 @@ export default function FinanceDashboard() {
     }
   };
 
+  const handleReimbursementStatusUpdate = async (nextReimbursement) => {
+    // If editing an existing expense voucher in the database, persist the status update via API
+    if (editingId && editingType === "expense") {
+      const validItems = expenseForm.items.filter(
+        (item) => item.amount !== "" && parseFloat(item.amount) > 0,
+      );
+      try {
+        const res = await fetch(
+          `${API_BASE_URL}/api/finance/expense/${editingId}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ...expenseForm,
+              accountNumber: expenseForm.accountNumber || "19071310000015",
+              items: validItems,
+              reimbursement: nextReimbursement,
+            }),
+          },
+        );
+        const data = await res.json();
+        if (!data.success) {
+          triggerNotification(
+            "error",
+            data.message || "পরিশোধের অবস্থা আপডেট করা যায়নি।",
+          );
+          return false;
+        }
+        setExpenseForm((prev) => ({
+          ...prev,
+          reimbursement: nextReimbursement,
+        }));
+        triggerNotification(
+          "success",
+          "পরিশোধের অবস্থা সফলভাবে আপডেট করা হয়েছে!",
+        );
+        fetchSummary();
+        fetchTransactions();
+        fetchPendingTransactions();
+        return true;
+      } catch (err) {
+        console.error(err);
+        triggerNotification("error", "সার্ভারে রিকোয়েস্ট পাঠাতে সমস্যা হয়েছে।");
+        return false;
+      }
+    }
+
+    // For a draft/new voucher entry, update form state after confirmation
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    setExpenseForm((prev) => ({
+      ...prev,
+      reimbursement: nextReimbursement,
+    }));
+    triggerNotification(
+      "success",
+      nextReimbursement.status === "paid"
+        ? "পরিশোধের অবস্থা 'পরিশোধিত (Paid)' হিসেবে নিশ্চিত করা হয়েছে!"
+        : "পরিশোধের অবস্থা 'অপরিশোধিত (Unpaid)' হিসেবে নিশ্চিত করা হয়েছে!",
+    );
+    return true;
+  };
+
   const handleExpenseSubmit = async (e) => {
     e.preventDefault();
     const validItems = expenseForm.items.filter(
@@ -891,6 +953,7 @@ export default function FinanceDashboard() {
             FUND_ACCOUNTS={FUND_ACCOUNTS}
             loading={loading}
             onSubmit={handleExpenseSubmit}
+            onReimbursementStatusUpdate={handleReimbursementStatusUpdate}
             setActiveTab={setActiveTab}
             formatBanglaNumber={formatBanglaNumber}
             isEditing={Boolean(editingId && editingType === "expense")}

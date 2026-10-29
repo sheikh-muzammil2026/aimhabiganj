@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Plus, Trash2, Loader2, RefreshCw } from 'lucide-react';
+import { Plus, Trash2, Loader2, RefreshCw, AlertTriangle } from 'lucide-react';
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_SERVER_API ||
@@ -13,11 +13,14 @@ export default function ExpenseEntry({
   FUND_ACCOUNTS = [],
   loading,
   onSubmit,
+  onReimbursementStatusUpdate,
   setActiveTab,
   formatBanglaNumber,
   isEditing = false
 }) {
   const [isVoucherLoading, setIsVoucherLoading] = useState(false);
+  const [pendingReimbursement, setPendingReimbursement] = useState(null);
+  const [isStatusUpdating, setIsStatusUpdating] = useState(false);
   const prevDateRef = useRef(expenseForm.date);
 
   // Dedicated Auto Voucher ID Generator
@@ -292,10 +295,22 @@ export default function ExpenseEntry({
         </div>
 
         {/* Deficit / Reimbursement Section */}
-        {currentExpenseBalance < 0 && expenseForm.reimbursement?.status !== 'paid' && (
-          <div className="border-t border-dashed border-slate-200 pt-4 space-y-3 bg-rose-50/30 p-4 rounded-xl">
-            <h4 className="text-xs font-black text-rose-900 flex items-center gap-1">
-              <span>⚠️</span> ঘাটতি বা ঋণ পরিশোধের বিবরণী (Reimbursement Details)
+        {currentExpenseBalance < 0 && (
+          <div
+            className={`border-t border-dashed pt-4 space-y-3 p-4 rounded-xl transition-colors ${
+              expenseForm.reimbursement?.status === 'paid'
+                ? 'border-emerald-200 bg-emerald-50/40'
+                : 'border-slate-200 bg-rose-50/30'
+            }`}
+          >
+            <h4
+              className={`text-xs font-black flex items-center gap-1 ${
+                expenseForm.reimbursement?.status === 'paid'
+                  ? 'text-emerald-900'
+                  : 'text-rose-900'
+              }`}
+            >
+              <span>{expenseForm.reimbursement?.status === 'paid' ? '✅' : '⚠️'}</span> ঘাটতি বা ঋণ পরিশোধের বিবরণী (Reimbursement Details)
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
@@ -341,16 +356,21 @@ export default function ExpenseEntry({
                     type="checkbox"
                     id="reimbursementStatusCheckbox"
                     checked={expenseForm.reimbursement?.status === 'paid'}
-                    onChange={(e) => setExpenseForm({
-                      ...expenseForm,
-                      reimbursement: {
+                    onChange={(e) => {
+                      const nextStatus = e.target.checked ? 'paid' : 'unpaid';
+                      setPendingReimbursement({
                         ...(expenseForm.reimbursement || {}),
-                        status: e.target.checked ? 'paid' : 'unpaid'
-                      }
-                    })}
-                    className="w-4 h-4 text-emerald-800 focus:ring-emerald-700 border-slate-300 rounded"
+                        method: expenseForm.reimbursement?.method || 'Cash',
+                        date:
+                          expenseForm.reimbursement?.date ||
+                          expenseForm.date ||
+                          new Date().toISOString().split('T')[0],
+                        status: nextStatus,
+                      });
+                    }}
+                    className="w-4 h-4 text-emerald-800 focus:ring-emerald-700 border-slate-300 rounded cursor-pointer"
                   />
-                  <label htmlFor="reimbursementStatusCheckbox" className="text-xs font-bold text-slate-700 cursor-pointer">
+                  <label htmlFor="reimbursementStatusCheckbox" className="text-xs font-bold text-slate-700 cursor-pointer select-none">
                     পরিশোধিত (Paid)
                   </label>
                 </div>
@@ -407,6 +427,86 @@ export default function ExpenseEntry({
           </button>
         </div>
       </form>
+
+      {/* Reimbursement Status Confirmation Modal */}
+      {pendingReimbursement && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 print:hidden">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-slide-in">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3 bg-amber-50/70">
+              <div className="p-2 bg-amber-100 text-amber-800 rounded-xl shrink-0">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <h3 className="text-sm sm:text-base font-black text-slate-900">
+                পরিশোধের অবস্থা পরিবর্তন নিশ্চিতকরণ
+              </h3>
+            </div>
+
+            <div className="p-6 space-y-3">
+              <p className="text-xs sm:text-sm text-slate-700 font-semibold leading-relaxed">
+                আপনি কি নিশ্চিতভাবে এই খরচের ঘাটতি বা ঋণ পরিশোধের অবস্থা পরিবর্তন করতে চান?
+              </p>
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs flex items-center justify-between">
+                <span className="text-slate-500 font-bold">নতুন অবস্থা:</span>
+                <span
+                  className={`px-2.5 py-0.5 rounded-full font-black ${
+                    pendingReimbursement.status === 'paid'
+                      ? 'bg-emerald-100 text-emerald-900 border border-emerald-200'
+                      : 'bg-rose-100 text-rose-900 border border-rose-200'
+                  }`}
+                >
+                  {pendingReimbursement.status === 'paid'
+                    ? 'পরিশোধিত (Paid)'
+                    : 'অপরিশোধিত (Unpaid)'}
+                </span>
+              </div>
+            </div>
+
+            <div className="px-6 py-3.5 border-t border-slate-100 bg-slate-50 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                disabled={isStatusUpdating}
+                onClick={() => setPendingReimbursement(null)}
+                className="px-4 py-2 border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold transition-colors disabled:opacity-50"
+              >
+                বাতিল করুন
+              </button>
+              <button
+                type="button"
+                disabled={isStatusUpdating}
+                onClick={async () => {
+                  try {
+                    setIsStatusUpdating(true);
+                    if (onReimbursementStatusUpdate) {
+                      const ok = await onReimbursementStatusUpdate(pendingReimbursement);
+                      if (ok !== false) {
+                        setPendingReimbursement(null);
+                      }
+                    } else {
+                      setExpenseForm({
+                        ...expenseForm,
+                        reimbursement: pendingReimbursement,
+                      });
+                      setPendingReimbursement(null);
+                    }
+                  } finally {
+                    setIsStatusUpdating(false);
+                  }
+                }}
+                className="px-5 py-2 bg-emerald-800 hover:bg-emerald-950 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors disabled:opacity-60"
+              >
+                {isStatusUpdating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>আপডেট হচ্ছে...</span>
+                  </>
+                ) : (
+                  <span>হ্যাঁ, নিশ্চিত করুন</span>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
