@@ -7,6 +7,7 @@ import {
   CheckCircle,
   AlertCircle,
   Loader2,
+  Eye,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -1012,7 +1013,7 @@ export default function FinanceDashboard() {
                       <th className="p-3">নাম (দাতা/গ্রহীতা)</th>
                       <th className="p-3">খাত ও বিবরণ</th>
                       <th className="p-3 text-right">টাকার পরিমাণ</th>
-                      <th className="p-3 text-center w-36">অ্যাকশন</th>
+                      <th className="p-3 text-center w-48">অ্যাকশন</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
@@ -1045,6 +1046,11 @@ export default function FinanceDashboard() {
                           <div className="text-slate-800 font-bold">
                             {tx.items.map((it) => it.head).join(", ")}
                           </div>
+                          {tx.accountNumber && (
+                            <span className="inline-block text-[10px] font-bold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100 mt-1">
+                              🏦 {tx.fundNameBn || tx.fundName || tx.accountNumber} ({tx.accountNumber.slice(-4)})
+                            </span>
+                          )}
                           {tx.description && (
                             <span className="text-[10px] text-slate-400 block font-normal mt-0.5">
                               {tx.description}
@@ -1062,6 +1068,14 @@ export default function FinanceDashboard() {
                           )}
                         </td>
                         <td className="p-3 text-center flex justify-center gap-1.5">
+                          <button
+                            onClick={() => setPrintData(tx)}
+                            className="px-2.5 py-1.5 bg-slate-700 hover:bg-slate-900 text-white rounded-lg text-[10px] font-black transition-colors flex items-center gap-1"
+                            title="ভাউচার দেখুন"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            <span>দেখুন</span>
+                          </button>
                           <button
                             onClick={() => handleApprove(tx._id, tx.type)}
                             className="px-2.5 py-1.5 bg-emerald-800 hover:bg-emerald-950 text-white rounded-lg text-[10px] font-black transition-colors"
