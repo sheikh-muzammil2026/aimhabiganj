@@ -1,5 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Printer, Calendar, RefreshCw, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from "react";
+import { Printer, Calendar, RefreshCw, Loader2, Phone, Globe, Mail } from "lucide-react";
+import { MdEmail, MdInstallMobile } from "react-icons/md";
+import { BsWhatsapp, BsYoutube } from "react-icons/bs";
+import { FaFacebook } from "react-icons/fa";
+import Image from "next/image";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_SERVER_API ||
@@ -13,18 +17,20 @@ const aggregateTransactions = (txList) => {
   const incomeMap = {};
   const expenseMap = {};
 
-  txList.forEach(tx => {
-    if (tx.type === 'income') {
+  txList.forEach((tx) => {
+    if (tx.type === "income") {
       const amount = tx.totalIncome || 0;
       totalIncome += amount;
-      tx.items?.forEach(item => {
-        incomeMap[item.head] = (incomeMap[item.head] || 0) + (parseFloat(item.amount) || 0);
+      tx.items?.forEach((item) => {
+        incomeMap[item.head] =
+          (incomeMap[item.head] || 0) + (parseFloat(item.amount) || 0);
       });
-    } else if (tx.type === 'expense') {
+    } else if (tx.type === "expense") {
       const amount = tx.totalExpense || 0;
       totalExpense += amount;
-      tx.items?.forEach(item => {
-        expenseMap[item.head] = (expenseMap[item.head] || 0) + (parseFloat(item.amount) || 0);
+      tx.items?.forEach((item) => {
+        expenseMap[item.head] =
+          (expenseMap[item.head] || 0) + (parseFloat(item.amount) || 0);
       });
     }
   });
@@ -44,7 +50,7 @@ const aggregateTransactions = (txList) => {
     totalExpense,
     netBalance,
     incomeBreakdown,
-    expenseBreakdown
+    expenseBreakdown,
   };
 };
 
@@ -62,20 +68,22 @@ export default function MonthlyReport({
   formatBanglaNumber,
   loading: parentLoading,
   fetchSummary,
-  onPrintReport
+  onPrintReport,
 }) {
-  const [subTab, setSubTab] = useState('monthly'); // daily, weekly, monthly
+  const [subTab, setSubTab] = useState("monthly"); // daily, weekly, monthly
   const [localLoading, setLocalLoading] = useState(false);
 
   // Daily report states
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = new Date().toISOString().split("T")[0];
   const [dailyDate, setDailyDate] = useState(todayStr);
 
   // Weekly report states
   const today = new Date();
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(today.getDate() - 6);
-  const [weeklyStartDate, setWeeklyStartDate] = useState(sevenDaysAgo.toISOString().split('T')[0]);
+  const [weeklyStartDate, setWeeklyStartDate] = useState(
+    sevenDaysAgo.toISOString().split("T")[0],
+  );
   const [weeklyEndDate, setWeeklyEndDate] = useState(todayStr);
 
   // Local aggregated summary data for daily/weekly
@@ -87,7 +95,7 @@ export default function MonthlyReport({
     netBalance: 0,
     fundBreakdown: [],
     incomeBreakdown: [],
-    expenseBreakdown: []
+    expenseBreakdown: [],
   });
 
   const fetchAndAggregate = useCallback(
@@ -129,37 +137,37 @@ export default function MonthlyReport({
   // Refetch when report criteria change
   useEffect(() => {
     Promise.resolve().then(() => {
-      if (subTab === 'daily') {
+      if (subTab === "daily") {
         fetchAndAggregate(dailyDate, dailyDate);
-      } else if (subTab === 'weekly') {
+      } else if (subTab === "weekly") {
         fetchAndAggregate(weeklyStartDate, weeklyEndDate);
       }
     });
   }, [subTab, dailyDate, weeklyStartDate, weeklyEndDate, fetchAndAggregate]);
 
-  const activeData = subTab === 'monthly' ? summaryData : localSummaryData;
-  const isLoading = subTab === 'monthly' ? parentLoading : localLoading;
+  const activeData = subTab === "monthly" ? summaryData : localSummaryData;
+  const isLoading = subTab === "monthly" ? parentLoading : localLoading;
 
   const handleLocalPrint = () => {
-    let reportTitle = '';
-    let reportPeriod = '';
+    let reportTitle = "";
+    let reportPeriod = "";
 
-    if (subTab === 'daily') {
-      reportTitle = 'দৈনিক আয় ও ব্যয় বিবরণী';
+    if (subTab === "daily") {
+      reportTitle = "দৈনিক আয় ও ব্যয় বিবরণী";
       reportPeriod = `তারিখ: ${formatBanglaNumber(dailyDate)}`;
-    } else if (subTab === 'weekly') {
-      reportTitle = 'সাপ্তাহিক আয় ও ব্যয় বিবরণী';
+    } else if (subTab === "weekly") {
+      reportTitle = "সাপ্তাহিক আয় ও ব্যয় বিবরণী";
       reportPeriod = `তারিখ সীমা: ${formatBanglaNumber(weeklyStartDate)} থেকে ${formatBanglaNumber(weeklyEndDate)}`;
     } else {
-      reportTitle = 'মাসিক আয় ও ব্যয় বিবরণী';
+      reportTitle = "মাসিক আয় ও ব্যয় বিবরণী";
       reportPeriod = `মাস: ${getMonthLabel(reportMonth)} | বছর: ${formatBanglaNumber(reportYear)}`;
     }
 
     onPrintReport({
-      type: 'report',
+      type: "report",
       title: reportTitle,
       period: reportPeriod,
-      data: activeData
+      data: activeData,
     });
   };
 
@@ -170,17 +178,18 @@ export default function MonthlyReport({
         {/* Report Sub-Tabs Selection */}
         <div className="flex bg-slate-100 p-1 rounded-xl w-full xl:w-auto">
           {[
-            { id: 'daily', label: '📅 দৈনিক বিবরণী' },
-            { id: 'weekly', label: '📅 সাপ্তাহিক বিবরণী' },
-            { id: 'monthly', label: '📅 মাসিক বিবরণী' }
-          ].map(tab => (
+            { id: "daily", label: "📅 দৈনিক বিবরণী" },
+            { id: "weekly", label: "📅 সাপ্তাহিক বিবরণী" },
+            { id: "monthly", label: "📅 মাসিক বিবরণী" },
+          ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setSubTab(tab.id)}
-              className={`flex-1 xl:flex-none py-1.5 px-4 text-xs font-bold rounded-lg transition-all ${subTab === tab.id
-                  ? 'bg-white text-emerald-900 shadow-xs'
-                  : 'text-slate-500 hover:text-slate-800'
-                }`}
+              className={`flex-1 xl:flex-none py-1.5 px-4 text-xs font-bold rounded-lg transition-all ${
+                subTab === tab.id
+                  ? "bg-white text-emerald-900 shadow-xs"
+                  : "text-slate-500 hover:text-slate-800"
+              }`}
             >
               {tab.label}
             </button>
@@ -189,7 +198,7 @@ export default function MonthlyReport({
 
         {/* Dynamic Filters depending on Selected Tab */}
         <div className="flex flex-wrap items-center gap-3">
-          {subTab === 'daily' && (
+          {subTab === "daily" && (
             <div className="flex items-center gap-2">
               <label className="text-xs font-bold text-slate-600">তারিখ:</label>
               <input
@@ -201,9 +210,11 @@ export default function MonthlyReport({
             </div>
           )}
 
-          {subTab === 'weekly' && (
+          {subTab === "weekly" && (
             <div className="flex items-center gap-2 flex-wrap">
-              <label className="text-xs font-bold text-slate-600">তারিখ সীমা:</label>
+              <label className="text-xs font-bold text-slate-600">
+                তারিখ সীমা:
+              </label>
               <input
                 type="date"
                 value={weeklyStartDate}
@@ -220,7 +231,7 @@ export default function MonthlyReport({
             </div>
           )}
 
-          {subTab === 'monthly' && (
+          {subTab === "monthly" && (
             <div className="flex flex-wrap items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
               <Calendar className="w-4 h-4 text-emerald-800 shrink-0" />
               {setReportAccount && (
@@ -242,8 +253,10 @@ export default function MonthlyReport({
                 onChange={(e) => setReportMonth(e.target.value)}
                 className="text-xs font-bold text-slate-700 bg-transparent border-none focus:outline-none cursor-pointer"
               >
-                {BANGAL_MONTHS.map(m => (
-                  <option key={m.value} value={m.value}>{m.label}</option>
+                {BANGAL_MONTHS.map((m) => (
+                  <option key={m.value} value={m.value}>
+                    {m.label}
+                  </option>
                 ))}
               </select>
               <select
@@ -251,9 +264,15 @@ export default function MonthlyReport({
                 onChange={(e) => setReportYear(e.target.value)}
                 className="text-xs font-bold text-slate-700 bg-transparent border-none focus:outline-none cursor-pointer"
               >
-                {["২০২৫", "২০২৬", "২০২৭", "২০২৮"].map(yr => {
-                  const engYear = yr.replace(/[০-৯]/g, d => "০১২৩৪৫৬৭৮৯".indexOf(d));
-                  return <option key={engYear} value={engYear}>{yr}</option>;
+                {["২০২৫", "২০২৬", "২০২৭", "২০২৮"].map((yr) => {
+                  const engYear = yr.replace(/[০-৯]/g, (d) =>
+                    "০১২৩৪৫৬৭৮৯".indexOf(d),
+                  );
+                  return (
+                    <option key={engYear} value={engYear}>
+                      {yr}
+                    </option>
+                  );
                 })}
               </select>
             </div>
@@ -262,17 +281,20 @@ export default function MonthlyReport({
           {/* Refresh Action */}
           <button
             onClick={() => {
-              if (subTab === 'monthly') fetchSummary();
-              else fetchAndAggregate(
-                subTab === 'daily' ? dailyDate : weeklyStartDate,
-                subTab === 'daily' ? dailyDate : weeklyEndDate
-              );
+              if (subTab === "monthly") fetchSummary();
+              else
+                fetchAndAggregate(
+                  subTab === "daily" ? dailyDate : weeklyStartDate,
+                  subTab === "daily" ? dailyDate : weeklyEndDate,
+                );
             }}
             disabled={isLoading}
             className="p-2 hover:bg-slate-100 rounded-xl text-slate-500 transition-colors border border-slate-200 shrink-0"
             title="রিফ্রেশ"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`}
+            />
           </button>
 
           {/* Print Action */}
@@ -281,40 +303,89 @@ export default function MonthlyReport({
             disabled={isLoading}
             className="px-4 py-2 bg-emerald-800 hover:bg-emerald-950 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors shrink-0"
           >
-            <Printer className="w-4 h-4" /> প্রিন্ট করুন (A4 PDF)
+            <Printer className="w-4 h-4" /> প্রিন্ট করুন
           </button>
         </div>
       </div>
 
       {/* Physical Report Sheet Container */}
       <div className="bg-white border border-slate-200 p-4 sm:p-6 md:p-12 rounded-2xl shadow-xs print:border-none print:shadow-none print:p-0 print:m-0 overflow-x-auto relative min-h-[300px]">
-
         {isLoading && (
           <div className="absolute inset-0 bg-white/70 flex items-center justify-center z-10 rounded-2xl">
             <div className="flex flex-col items-center gap-2">
               <Loader2 className="w-8 h-8 text-emerald-800 animate-spin" />
-              <span className="text-xs text-slate-500 font-bold">ডাটা লোড হচ্ছে...</span>
+              <span className="text-xs text-slate-500 font-bold">
+                ডাটা লোড হচ্ছে...
+              </span>
             </div>
           </div>
         )}
 
         {/* Logo/Header */}
         <div className="text-center pb-6 sm:pb-8 border-b border-emerald-900/15">
-          <h2 className="text-xl sm:text-2xl font-black text-emerald-950">আস-সালাম আইডিয়াল মাদরাসা (এইম)</h2>
-          <p className="text-xs text-slate-500 font-bold mt-1">হবিগঞ্জ সদর, হবিগঞ্জ</p>
-          <h3 className="text-sm sm:text-base font-black bg-slate-100 border border-slate-200 inline-block px-4 sm:px-6 py-1.5 rounded-full text-slate-700 mt-3 sm:mt-4 tracking-wide">
-            {subTab === 'daily' ? 'দৈনিক' : subTab === 'weekly' ? 'সাপ্তাহিক' : 'মাসিক'} আয় ও ব্যয় বিবরণী
+          <div className="flex items-center justify-between gap-2 border-b-2 border-[#C5A059] pb-2">
+            {/* Logo on the left */}
+            <div className="w-20 h-20 md:w-45 md:h-45 print:!w-36 print:!h-36 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-3">
+              <Image
+                src={"/aimlogo1.png"}
+                alt="Institution Logo"
+                width={200}
+                height={200}
+                quality={100}
+                priority
+                className="w-full h-full object-cover scale-[1.08] transform-gpu"
+              />
+            </div>
+
+            {/* Banner in the center */}
+            <div className="flex-1 text-center min-w-0 px-1">
+              <div className="flex-grow text-center">
+                <Image
+                  src={"/banner_routine.png"}
+                  alt="Institution Banner"
+                  width={1000}
+                  height={400}
+                  quality={100}
+                  priority
+                  className="w-full h-auto max-h-45 object-fill mx-auto print:max-h-45"
+                />
+              </div>
+            </div>
+
+            {/* Right Logo placeholder for balanced symmetry */}
+          </div>
+          <p className="text-sm text-slate-600 font-semibold mt-2">
+            দক্ষিণ শ্যামলী, হবিগঞ্জ সদর, হবিগঞ্জ
+          </p>
+          <div className="flex items-center justify-center gap-2 mt-1 text-[8.5px] text-emerald-800 font-medium">
+            <span className="flex items-center gap-0.5">
+              <MdInstallMobile className="text-[10px] shrink-0" /> +880 1748
+              868161
+            </span>
+            <span className="text-slate-300">|</span>
+            <span className="flex items-center gap-0.5">
+              <MdEmail className="text-[10px] shrink-0" /> aimhabiganj@gmail.com
+            </span>
+          </div>
+          <h3 className="text-[9px] sm:text-base font-black bg-slate-100 border border-slate-200 inline-block px-4 sm:px-6 py-1.5 rounded-full text-slate-700 mt-3 sm:mt-4 tracking-wide">
+            {subTab === "daily"
+              ? "দৈনিক"
+              : subTab === "weekly"
+                ? "সাপ্তাহিক"
+                : "মাসিক"}{" "}
+            আয় ও ব্যয় বিবরণী
           </h3>
           <p className="text-xs text-emerald-800 font-extrabold mt-3 tracking-wider">
-            {subTab === 'daily' && `তারিখ: ${formatBanglaNumber(dailyDate)}`}
-            {subTab === 'weekly' && `তারিখ সীমা: ${formatBanglaNumber(weeklyStartDate)} থেকে ${formatBanglaNumber(weeklyEndDate)}`}
-            {subTab === 'monthly' && `মাস: ${getMonthLabel(reportMonth)} | বছর: ${formatBanglaNumber(reportYear)}`}
+            {subTab === "daily" && `তারিখ: ${formatBanglaNumber(dailyDate)}`}
+            {subTab === "weekly" &&
+              `তারিখ সীমা: ${formatBanglaNumber(weeklyStartDate)} থেকে ${formatBanglaNumber(weeklyEndDate)}`}
+            {subTab === "monthly" &&
+              `মাস: ${getMonthLabel(reportMonth)} | বছর: ${formatBanglaNumber(reportYear)}`}
           </p>
         </div>
 
         {/* Dual Column Sheet (Income vs Expense) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-slate-200 border-x border-b border-slate-200 mt-6 print:grid-cols-2">
-
           {/* Income Column */}
           <div className="bg-white p-4 sm:p-5 space-y-4">
             <h4 className="text-xs font-extrabold text-emerald-900 uppercase tracking-widest border-b-2 border-emerald-100 pb-2 flex items-center justify-between">
@@ -323,13 +394,18 @@ export default function MonthlyReport({
             </h4>
 
             {activeData.incomeBreakdown?.length === 0 ? (
-              <p className="text-xs text-slate-400 py-6 text-center">কোনো আয়ের এন্ট্রি নেই</p>
+              <p className="text-xs text-slate-400 py-6 text-center">
+                কোনো আয়ের এন্ট্রি নেই
+              </p>
             ) : (
               <div className="divide-y divide-slate-100 font-semibold text-slate-700 text-xs">
                 {activeData.incomeBreakdown?.map((item, idx) => (
                   <div key={idx} className="flex justify-between py-2.5">
                     <span className="pr-4">{item.head}</span>
-                    <span className="font-bold text-slate-900 whitespace-nowrap">৳ {formatBanglaNumber(item.amount.toLocaleString('bn-BD'))}</span>
+                    <span className="font-bold text-slate-900 whitespace-nowrap">
+                      ৳{" "}
+                      {formatBanglaNumber(item.amount.toLocaleString("bn-BD"))}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -344,13 +420,18 @@ export default function MonthlyReport({
             </h4>
 
             {activeData.expenseBreakdown?.length === 0 ? (
-              <p className="text-xs text-slate-400 py-6 text-center">কোনো ব্যয়ের এন্ট্রি নেই</p>
+              <p className="text-xs text-slate-400 py-6 text-center">
+                কোনো ব্যয়ের এন্ট্রি নেই
+              </p>
             ) : (
               <div className="divide-y divide-slate-100 font-semibold text-slate-700 text-xs">
                 {activeData.expenseBreakdown?.map((item, idx) => (
                   <div key={idx} className="flex justify-between py-2.5">
                     <span className="pr-4">{item.head}</span>
-                    <span className="font-bold text-slate-900 whitespace-nowrap">৳ {formatBanglaNumber(item.amount.toLocaleString('bn-BD'))}</span>
+                    <span className="font-bold text-slate-900 whitespace-nowrap">
+                      ৳{" "}
+                      {formatBanglaNumber(item.amount.toLocaleString("bn-BD"))}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -361,98 +442,198 @@ export default function MonthlyReport({
         {/* Calculations / Summary Footer Row (5 Rolling Balance Figures) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-px bg-slate-200 border-x border-b border-slate-200 text-xs font-black print:grid-cols-5">
           <div className="bg-indigo-50/50 p-3 sm:p-4 text-indigo-950 flex flex-col justify-between gap-1">
-            <span className="text-[10px] text-indigo-700">প্রারম্ভিক ব্যালেন্স:</span>
+            <span className="text-[10px] text-indigo-700">
+              প্রারম্ভিক ব্যালেন্স:
+            </span>
             <span className="text-xs sm:text-sm whitespace-nowrap">
-              ৳ {formatBanglaNumber((activeData.openingBalance || 0).toLocaleString('bn-BD'))}
+              ৳{" "}
+              {formatBanglaNumber(
+                (activeData.openingBalance || 0).toLocaleString("bn-BD"),
+              )}
             </span>
           </div>
           <div className="bg-emerald-50/50 p-3 sm:p-4 text-emerald-950 flex flex-col justify-between gap-1">
             <span className="text-[10px] text-emerald-700">+ সর্বমোট আয়:</span>
             <span className="text-xs sm:text-sm whitespace-nowrap">
-              ৳ {formatBanglaNumber((activeData.totalIncome || 0).toLocaleString('bn-BD'))}
+              ৳{" "}
+              {formatBanglaNumber(
+                (activeData.totalIncome || 0).toLocaleString("bn-BD"),
+              )}
             </span>
           </div>
           <div className="bg-teal-50/50 p-3 sm:p-4 text-teal-950 flex flex-col justify-between gap-1">
-            <span className="text-[10px] text-teal-700">= মোট ব্যয়যোগ্য তহবিল:</span>
+            <span className="text-[10px] text-teal-700">
+              = মোট ব্যয়যোগ্য তহবিল:
+            </span>
             <span className="text-xs sm:text-sm whitespace-nowrap">
-              ৳ {formatBanglaNumber(((activeData.totalUsableFund ?? ((activeData.openingBalance || 0) + (activeData.totalIncome || 0))) || 0).toLocaleString('bn-BD'))}
+              ৳{" "}
+              {formatBanglaNumber(
+                (
+                  (activeData.totalUsableFund ??
+                    (activeData.openingBalance || 0) +
+                      (activeData.totalIncome || 0)) ||
+                  0
+                ).toLocaleString("bn-BD"),
+              )}
             </span>
           </div>
           <div className="bg-rose-50/50 p-3 sm:p-4 text-rose-950 flex flex-col justify-between gap-1">
             <span className="text-[10px] text-rose-700">- সর্বমোট ব্যয়:</span>
             <span className="text-xs sm:text-sm whitespace-nowrap">
-              ৳ {formatBanglaNumber((activeData.totalExpense || 0).toLocaleString('bn-BD'))}
+              ৳{" "}
+              {formatBanglaNumber(
+                (activeData.totalExpense || 0).toLocaleString("bn-BD"),
+              )}
             </span>
           </div>
-          <div className={`p-3 sm:p-4 flex flex-col justify-between gap-1 ${(activeData.netBalance || 0) >= 0 ? 'bg-blue-50/60 text-blue-950' : 'bg-amber-50/60 text-amber-950'}`}>
+          <div
+            className={`p-3 sm:p-4 flex flex-col justify-between gap-1 ${(activeData.netBalance || 0) >= 0 ? "bg-blue-50/60 text-blue-950" : "bg-amber-50/60 text-amber-950"}`}
+          >
             <span className="text-[10px]">= সমাপনী উদ্বৃত্ত:</span>
             <span className="text-xs sm:text-sm whitespace-nowrap">
-              ৳ {formatBanglaNumber((activeData.netBalance || 0).toLocaleString('bn-BD'))}
+              ৳{" "}
+              {formatBanglaNumber(
+                (activeData.netBalance || 0).toLocaleString("bn-BD"),
+              )}
             </span>
           </div>
         </div>
 
         {/* Fund-Wise Monthly Balance Table */}
-        {subTab === 'monthly' && Array.isArray(activeData.fundBreakdown) && activeData.fundBreakdown.length > 0 && (
-          <div className="mt-6">
-            <h4 className="text-xs font-extrabold text-emerald-950 mb-2">
-              🏦 ফান্ড-ভিত্তিক মাসিক রোলিং ব্যালেন্স বিবরণী
-            </h4>
-            <div className="overflow-x-auto border border-slate-200 rounded-xl print:rounded-none">
-              <table className="min-w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 font-bold">
-                    <th className="p-2.5 border-r border-slate-200">ফান্ড ও ব্যাংক হিসাব</th>
-                    <th className="p-2.5 border-r border-slate-200 text-right text-indigo-800">প্রারম্ভিক জের</th>
-                    <th className="p-2.5 border-r border-slate-200 text-right text-emerald-800">+ চলতি আয়</th>
-                    <th className="p-2.5 border-r border-slate-200 text-right text-teal-800">= ব্যয়যোগ্য তহবিল</th>
-                    <th className="p-2.5 border-r border-slate-200 text-right text-rose-800">- চলতি ব্যয়</th>
-                    <th className="p-2.5 text-right text-blue-900">= সমাপনী উদ্বৃত্ত</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200 font-semibold text-slate-700">
-                  {activeData.fundBreakdown.map((f) => (
-                    <tr key={f.accountNumber}>
-                      <td className="p-2.5 border-r border-slate-200">
-                        <div className="font-bold text-slate-900">{f.nameBn || f.name}</div>
-                        <div className="text-[10px] font-mono text-slate-500">Acc: {f.accountNumber}</div>
-                      </td>
-                      <td className="p-2.5 border-r border-slate-200 text-right font-bold text-indigo-950 whitespace-nowrap">
-                        ৳ {formatBanglaNumber((f.openingBalance || 0).toLocaleString('bn-BD'))}
-                      </td>
-                      <td className="p-2.5 border-r border-slate-200 text-right font-bold text-emerald-800 whitespace-nowrap">
-                        ৳ {formatBanglaNumber((f.totalIncome || 0).toLocaleString('bn-BD'))}
-                      </td>
-                      <td className="p-2.5 border-r border-slate-200 text-right font-black text-teal-900 whitespace-nowrap">
-                        ৳ {formatBanglaNumber((f.availableBalance || 0).toLocaleString('bn-BD'))}
-                      </td>
-                      <td className="p-2.5 border-r border-slate-200 text-right font-bold text-rose-800 whitespace-nowrap">
-                        ৳ {formatBanglaNumber((f.totalExpense || 0).toLocaleString('bn-BD'))}
-                      </td>
-                      <td className="p-2.5 text-right font-black text-blue-950 whitespace-nowrap">
-                        ৳ {formatBanglaNumber((f.closingBalance || 0).toLocaleString('bn-BD'))}
-                      </td>
+        {subTab === "monthly" &&
+          Array.isArray(activeData.fundBreakdown) &&
+          activeData.fundBreakdown.length > 0 && (
+            <div className="mt-6">
+              <h4 className="text-xs font-extrabold text-emerald-950 mb-2">
+                🏦 ফান্ড-ভিত্তিক মাসিক রোলিং ব্যালেন্স বিবরণী
+              </h4>
+              <div className="overflow-x-auto border border-slate-200 rounded-xl print:rounded-none">
+                <table className="min-w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 font-bold">
+                      <th className="p-2.5 border-r border-slate-200">
+                        ফান্ড ও ব্যাংক হিসাব
+                      </th>
+                      <th className="p-2.5 border-r border-slate-200 text-right text-indigo-800">
+                        প্রারম্ভিক জের
+                      </th>
+                      <th className="p-2.5 border-r border-slate-200 text-right text-emerald-800">
+                        + চলতি আয়
+                      </th>
+                      <th className="p-2.5 border-r border-slate-200 text-right text-teal-800">
+                        = ব্যয়যোগ্য তহবিল
+                      </th>
+                      <th className="p-2.5 border-r border-slate-200 text-right text-rose-800">
+                        - চলতি ব্যয়
+                      </th>
+                      <th className="p-2.5 text-right text-blue-900">
+                        = সমাপনী উদ্বৃত্ত
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 font-semibold text-slate-700">
+                    {activeData.fundBreakdown.map((f) => (
+                      <tr key={f.accountNumber}>
+                        <td className="p-2.5 border-r border-slate-200">
+                          <div className="font-bold text-slate-900">
+                            {f.nameBn || f.name}
+                          </div>
+                          <div className="text-[10px] font-mono text-slate-500">
+                            Acc: {f.accountNumber}
+                          </div>
+                        </td>
+                        <td className="p-2.5 border-r border-slate-200 text-right font-bold text-indigo-950 whitespace-nowrap">
+                          ৳{" "}
+                          {formatBanglaNumber(
+                            (f.openingBalance || 0).toLocaleString("bn-BD"),
+                          )}
+                        </td>
+                        <td className="p-2.5 border-r border-slate-200 text-right font-bold text-emerald-800 whitespace-nowrap">
+                          ৳{" "}
+                          {formatBanglaNumber(
+                            (f.totalIncome || 0).toLocaleString("bn-BD"),
+                          )}
+                        </td>
+                        <td className="p-2.5 border-r border-slate-200 text-right font-black text-teal-900 whitespace-nowrap">
+                          ৳{" "}
+                          {formatBanglaNumber(
+                            (f.availableBalance || 0).toLocaleString("bn-BD"),
+                          )}
+                        </td>
+                        <td className="p-2.5 border-r border-slate-200 text-right font-bold text-rose-800 whitespace-nowrap">
+                          ৳{" "}
+                          {formatBanglaNumber(
+                            (f.totalExpense || 0).toLocaleString("bn-BD"),
+                          )}
+                        </td>
+                        <td className="p-2.5 text-right font-black text-blue-950 whitespace-nowrap">
+                          ৳{" "}
+                          {formatBanglaNumber(
+                            (f.closingBalance || 0).toLocaleString("bn-BD"),
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* Signature Area */}
         <div className="grid grid-cols-3 gap-2 sm:gap-6 pt-12 sm:pt-16 text-center text-[10px] sm:text-xs font-bold text-slate-500 mt-6 sm:mt-10 print:mt-14">
           <div className="border-t border-slate-300 pt-2 mx-1 sm:mx-4">
             <p>হিসাবরক্ষক</p>
-            <span className="text-[9px] sm:text-[10px] text-slate-400 block font-normal mt-0.5 sm:mt-1">ক্যাশিয়ার / মুহাসিব</span>
+            <span className="text-[9px] sm:text-[10px] text-slate-400 block font-normal mt-0.5 sm:mt-1">
+              ক্যাশিয়ার / মুহাসিব
+            </span>
           </div>
           <div className="border-t border-slate-300 pt-2 mx-1 sm:mx-4">
             <p>যাচাইকারী</p>
-            <span className="text-[9px] sm:text-[10px] text-slate-400 block font-normal mt-0.5 sm:mt-1">অর্থ সম্পাদক</span>
+            <span className="text-[9px] sm:text-[10px] text-slate-400 block font-normal mt-0.5 sm:mt-1">
+              অর্থ সম্পাদক
+            </span>
           </div>
           <div className="border-t border-slate-300 pt-2 mx-1 sm:mx-4">
             <p>অনুমোদনকারী</p>
-            <span className="text-[9px] sm:text-[10px] text-slate-400 block font-normal mt-0.5 sm:mt-1">মুহতামিম / অধ্যক্ষ</span>
+            <span className="text-[9px] sm:text-[10px] text-slate-400 block font-normal mt-0.5 sm:mt-1">
+              প্রিন্সিপাল
+            </span>
+          </div>
+        </div>
+
+        {/* সোশ্যাল ও কন্টাক্ট ইনফো */}
+        <div className="pt-1 border-t border-gray-300">
+          <div className="flex flex-wrap justify-center items-center gap-x-1 gap-y-0.5 text-[8.5px] font-semibold text-gray-800">
+            <span className="flex items-center gap-0.5">
+              <Phone className="w-2.5 h-2.5 text-gray-700" />
+              ০১৩১৬-২০৯২০১
+            </span>
+
+            <span className="flex items-center gap-0.5">
+              <BsWhatsapp className="w-2.5 h-2.5 text-green-600" />
+              ০১৭৪৮-৮৮৬১৬১
+            </span>
+
+            <span className="flex items-center gap-0.5">
+              <Globe className="w-2.5 h-2.5 text-blue-500" />
+              www.aimhabiganj.com
+            </span>
+
+            <span className="flex items-center gap-0.5">
+              <Mail className="w-2.5 h-2.5 text-red-500" />
+              aimhabiganj@gmail.com
+            </span>
+
+            <span className="flex items-center gap-0.5">
+              <FaFacebook className="w-2.5 h-2.5 text-blue-600" />
+              aimhabiganj
+            </span>
+
+            <span className="flex items-center gap-0.5">
+              <BsYoutube className="w-2.5 h-2.5 text-red-600" />
+              aimhabiganj
+            </span>
           </div>
         </div>
       </div>

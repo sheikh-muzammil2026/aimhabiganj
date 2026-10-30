@@ -100,7 +100,7 @@ export default function ExpenseEntry({
       {/* Header Banner */}
       <div className="bg-emerald-900 text-white p-4 sm:p-6 text-center space-y-1">
         <h2 className="text-lg sm:text-xl font-black tracking-wide">আস-সালাম আইডিয়াল মাদরাসা (এইম)</h2>
-        <p className="text-xs text-emerald-100 font-medium">হবিগঞ্জ সদর, হবিগঞ্জ</p>
+        <p className="text-xs text-emerald-100 font-medium">দক্ষিণ শ্যামলী, হবিগঞ্জ সদর, হবিগঞ্জ</p>
         <div className="inline-block bg-white text-emerald-950 font-black text-xs px-3 sm:px-4 py-1 sm:py-1.5 rounded-full mt-2 sm:mt-3 shadow-xs">
           খরচ ভাউচার ফর্ম (Voucher Entry)
         </div>

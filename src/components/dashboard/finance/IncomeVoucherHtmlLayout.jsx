@@ -2,7 +2,10 @@
 
 import React from "react";
 import Image from "next/image";
+import { Phone, Globe, Mail } from "lucide-react";
 import { MdEmail, MdInstallMobile } from "react-icons/md";
+import { BsWhatsapp, BsYoutube } from "react-icons/bs";
+import { FaFacebook } from "react-icons/fa";
 
 // Single Half for Income Voucher (Office Copy or Donor/Student Copy)
 function VoucherSingleHalf({
@@ -17,7 +20,12 @@ function VoucherSingleHalf({
     Boolean(tx.studentName) ||
     (tx.payerName && tx.payerName.includes(" / "));
 
-  const parsed = parsePayerName ? parsePayerName(tx.payerName) : { donorName: tx.donorName || tx.payerName || "N/A", studentId: tx.studentId || "" };
+  const parsed = parsePayerName
+    ? parsePayerName(tx.payerName)
+    : {
+        donorName: tx.donorName || tx.payerName || "N/A",
+        studentId: tx.studentId || "",
+      };
 
   const displayName = isStudent
     ? tx.studentName || parsed.donorName || "N/A"
@@ -53,7 +61,7 @@ function VoucherSingleHalf({
       </div>
 
       <div className="relative z-10 flex flex-col justify-between h-full">
-        {/* Header Section matching Admit Card Branding */}
+        {/* Header Section */}
         <div className="flex items-center justify-between gap-2 border-b-2 border-[#C5A059] pb-2">
           {/* Logo on the left */}
           <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-slate-50 border border-[#C5A059]">
@@ -79,36 +87,29 @@ function VoucherSingleHalf({
               />
             </div>
             <p className="text-[9px] text-slate-600 font-semibold mt-0.5">
-              হবিগঞ্জ সদর, হবিগঞ্জ
+              দক্ষিণ শ্যামলী, হবিগঞ্জ সদর, হবিগঞ্জ
             </p>
             <div className="flex items-center justify-center gap-2 text-[8.5px] text-emerald-800 font-medium">
               <span className="flex items-center gap-0.5">
-                <MdInstallMobile className="text-[10px] shrink-0" /> ০১৭১২-৩৪৫৬৭৮
+                <MdInstallMobile className="text-[10px] shrink-0" />{" "}
+                +880 1748 868161
               </span>
               <span className="text-slate-300">|</span>
               <span className="flex items-center gap-0.5">
-                <MdEmail className="text-[10px] shrink-0" /> aimhabiganj@gmail.com
+                <MdEmail className="text-[10px] shrink-0" />{" "}
+                aimhabiganj@gmail.com
               </span>
             </div>
           </div>
 
           {/* Right Logo placeholder for balanced symmetry */}
-          <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-slate-50 border border-[#C5A059]">
-            <Image
-              src="/aimlogo1.png"
-              alt="Institution Logo"
-              width={40}
-              height={40}
-              className="object-contain"
-            />
-          </div>
         </div>
 
         {/* Voucher Title and Copy Type Badges */}
         <div className="flex items-center justify-between my-1.5 px-0.5">
           <div className="inline-block bg-emerald-800 text-white px-3 py-0.5 rounded-full border border-emerald-600 shadow-xs">
             <span className="text-[10px] font-bold tracking-wider uppercase">
-              আদায় রসিদ (INCOME VOUCHER)
+              আদায় রসিদ
             </span>
           </div>
           <span className="text-[9px] font-bold bg-amber-50 text-amber-900 border border-amber-300 px-2 py-0.5 rounded-md">
@@ -126,7 +127,9 @@ function VoucherSingleHalf({
           </div>
           <div className="flex items-center justify-end gap-1 text-right">
             <span className="font-bold text-slate-500">তারিখ:</span>
-            <span className="font-bold">{formatBanglaNumber(tx.date || "")}</span>
+            <span className="font-bold">
+              {formatBanglaNumber(tx.date || "")}
+            </span>
           </div>
 
           <div className="flex items-center gap-1">
@@ -141,9 +144,7 @@ function VoucherSingleHalf({
             <span className="font-bold text-slate-500">
               {isStudent ? "আইডি/শ্রেণি:" : "ধরণ:"}
             </span>
-            <span className="font-bold text-slate-800 truncate">
-              {subInfo}
-            </span>
+            <span className="font-bold text-slate-800 truncate">{subInfo}</span>
           </div>
 
           <div className="flex items-center gap-1">
@@ -165,9 +166,15 @@ function VoucherSingleHalf({
           <table className="w-full text-[9.5px] text-left border border-collapse border-slate-300">
             <thead>
               <tr className="bg-slate-100/90 text-slate-700 font-bold border-b border-slate-300">
-                <th className="p-1 border border-slate-300 text-center w-8">ক্র.</th>
-                <th className="p-1 border border-slate-300">আয়ের খাত ও বিবরণ</th>
-                <th className="p-1 border border-slate-300 text-right w-24">পরিমাণ (টাকা)</th>
+                <th className="p-1 border border-slate-300 text-center w-8">
+                  ক্র.
+                </th>
+                <th className="p-1 border border-slate-300">
+                  আয়ের খাত ও বিবরণ
+                </th>
+                <th className="p-1 border border-slate-300 text-right w-24">
+                  পরিমাণ (টাকা)
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -180,7 +187,10 @@ function VoucherSingleHalf({
                     {item.head || "সাধারণ আয়"}
                   </td>
                   <td className="p-1 border border-slate-300 text-right font-bold">
-                    ৳ {formatBanglaNumber(Number(item.amount || 0).toLocaleString("bn-BD"))}
+                    ৳{" "}
+                    {formatBanglaNumber(
+                      Number(item.amount || 0).toLocaleString("bn-BD"),
+                    )}
                   </td>
                 </tr>
               ))}
@@ -188,16 +198,25 @@ function VoucherSingleHalf({
               {discount > 0 && (
                 <>
                   <tr className="bg-slate-50/70 font-semibold text-slate-600">
-                    <td colSpan="2" className="p-1 border border-slate-300 text-right">
+                    <td
+                      colSpan="2"
+                      className="p-1 border border-slate-300 text-right"
+                    >
                       মোট আসল টাকা:
                     </td>
                     <td className="p-1 border border-slate-300 text-right">
-                      ৳ {formatBanglaNumber(originalTotal.toLocaleString("bn-BD"))}
+                      ৳{" "}
+                      {formatBanglaNumber(
+                        originalTotal.toLocaleString("bn-BD"),
+                      )}
                     </td>
                   </tr>
                   <tr className="bg-rose-50/60 text-rose-800 font-bold">
-                    <td colSpan="2" className="p-1 border border-slate-300 text-right">
-                      বিশেষ ছাড় / ডিসকাউন্ট:
+                    <td
+                      colSpan="2"
+                      className="p-1 border border-slate-300 text-right"
+                    >
+                      ডিসকাউন্ট:
                     </td>
                     <td className="p-1 border border-slate-300 text-right">
                       - ৳ {formatBanglaNumber(discount.toLocaleString("bn-BD"))}
@@ -207,7 +226,10 @@ function VoucherSingleHalf({
               )}
 
               <tr className="bg-emerald-50/80 font-black text-emerald-950">
-                <td colSpan="2" className="p-1 border border-slate-300 text-right">
+                <td
+                  colSpan="2"
+                  className="p-1 border border-slate-300 text-right"
+                >
                   সর্বমোট আদায়কৃত টাকা:
                 </td>
                 <td className="p-1 border border-slate-300 text-right text-[10.5px]">
@@ -227,18 +249,59 @@ function VoucherSingleHalf({
         )}
 
         {/* Signature Lines */}
-        <div className="grid grid-cols-3 gap-3 pt-6 text-center text-[8.5px] font-bold text-slate-600">
+        <div className="flex items-center justify-between gap-3 pt-6 text-center text-[8.5px] font-bold text-slate-600">
           <div className="border-t border-slate-400 pt-1">
             <p>আদায়কারী</p>
-            <span className="text-[7px] text-slate-400 block font-normal">স্বাক্ষর ও তারিখ</span>
+            <span className="text-[7px] text-slate-400 block font-normal">
+              স্বাক্ষর ও তারিখ
+            </span>
           </div>
-          <div className="border-t border-slate-400 pt-1">
+          {/* <div className="border-t border-slate-400 pt-1">
             <p>হিসাবরক্ষক</p>
-            <span className="text-[7px] text-slate-400 block font-normal">ক্যাশিয়ার</span>
-          </div>
+            <span className="text-[7px] text-slate-400 block font-normal">
+              ক্যাশিয়ার
+            </span>
+          </div> */}
           <div className="border-t border-slate-400 pt-1">
             <p>অনুমোদনকারী</p>
-            <span className="text-[7px] text-slate-400 block font-normal">মুহতামিম / অধ্যক্ষ</span>
+            <span className="text-[7px] text-slate-400 block font-normal">
+              প্রিন্সিপাল
+            </span>
+          </div>
+        </div>
+
+        {/* সোশ্যাল ও কন্টাক্ট ইনফো */}
+        <div className="pt-1 border-t border-gray-300 mt-2">
+          <div className="flex flex-wrap justify-center items-center gap-x-1 gap-y-0.5 text-[8.5px] font-semibold text-gray-800">
+            <span className="flex items-center gap-0.5">
+              <Phone className="w-2.5 h-2.5 text-gray-700" />
+              ০১৩১৬-২০৯২০১
+            </span>
+
+            <span className="flex items-center gap-0.5">
+              <BsWhatsapp className="w-2.5 h-2.5 text-green-600" />
+              ০১৭৪৮-৮৮৬১৬১
+            </span>
+
+            <span className="flex items-center gap-0.5">
+              <Globe className="w-2.5 h-2.5 text-blue-500" />
+              www.aimhabiganj.com
+            </span>
+
+            <span className="flex items-center gap-0.5">
+              <Mail className="w-2.5 h-2.5 text-red-500" />
+              aimhabiganj@gmail.com
+            </span>
+
+            <span className="flex items-center gap-0.5">
+              <FaFacebook className="w-2.5 h-2.5 text-blue-600" />
+              aimhabiganj
+            </span>
+
+            <span className="flex items-center gap-0.5">
+              <BsYoutube className="w-2.5 h-2.5 text-red-600" />
+              aimhabiganj
+            </span>
           </div>
         </div>
       </div>

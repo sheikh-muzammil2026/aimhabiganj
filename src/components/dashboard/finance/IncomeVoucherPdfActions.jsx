@@ -9,7 +9,7 @@ export default function IncomeVoucherPdfActions({ tx }) {
   const isClient = React.useSyncExternalStore(
     () => () => {},
     () => true,
-    () => false
+    () => false,
   );
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
@@ -17,7 +17,8 @@ export default function IncomeVoucherPdfActions({ tx }) {
     if (!tx) return;
     setIsGeneratingPdf(true);
     try {
-      const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
+      const baseUrl =
+        typeof window !== "undefined" ? window.location.origin : "";
       const doc = <IncomeVoucherPdfDocument tx={tx} baseUrl={baseUrl} />;
       const blob = await pdf(doc).toBlob();
       const blobUrl = URL.createObjectURL(blob);
@@ -67,7 +68,7 @@ export default function IncomeVoucherPdfActions({ tx }) {
           ) : (
             <>
               <Download className="w-3.5 h-3.5 text-emerald-700" />
-              <span>A4 PDF ডাউনলোড</span>
+              <span> PDF ডাউনলোড</span>
             </>
           )
         }
@@ -88,19 +89,9 @@ export default function IncomeVoucherPdfActions({ tx }) {
         ) : (
           <>
             <ExternalLink className="w-3.5 h-3.5" />
-            <span>A4 ল্যান্ডস্কেপ PDF প্রিন্ট ভিউ</span>
+            <span>PDF প্রিন্ট ভিউ</span>
           </>
         )}
-      </button>
-
-      {/* 3. Browser Print */}
-      <button
-        onClick={() => window.print()}
-        className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs"
-        title="ব্রাউজার প্রিন্ট উইন্ডো খুলুন"
-      >
-        <Printer className="w-3.5 h-3.5" />
-        <span>ব্রাউজার প্রিন্ট</span>
       </button>
     </div>
   );
