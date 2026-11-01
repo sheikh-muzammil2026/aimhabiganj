@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { BsYoutube } from "react-icons/bs";
+import { RiFacebookCircleFill, RiGlobalFill } from "react-icons/ri";
 
 export default function Footer() {
   return (
@@ -29,31 +31,31 @@ export default function Footer() {
             {/* সোশ্যাল মিডিয়া ও ওয়েবসাইট আইকন লিংক */}
             <div className="flex space-x-3 pt-2">
               <a
-                href="https://facebook.com" // আপনার মাদরাসার অরিজিনাল ফেসবুক লিংক এখানে বসবে
+                href="https://www.facebook.com/p/AIM-Habiganj-100062973924471/" // আপনার মাদরাসার অরিজিনাল ফেসবুক লিংক এখানে বসবে
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full bg-emerald-900/50 text-emerald-200 hover:bg-amber-500 hover:text-slate-950 flex items-center justify-center transition-all duration-200 dark:bg-slate-900 dark:hover:bg-emerald-600 dark:hover:text-white font-bold text-xs"
                 title="ফেসবুক পেজ"
               >
-                FB
+                <RiFacebookCircleFill  />
               </a>
               <a
-                href="https://youtube.com" // আপনার মাদরাসার অরিজিনাল ইউটিউব লিংক এখানে বসবে
+                href="http://www.youtube.com/@aimhabiganj" // আপনার মাদরাসার অরিজিনাল ইউটিউব লিংক এখানে বসবে
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full bg-emerald-900/50 text-emerald-200 hover:bg-amber-500 hover:text-slate-950 flex items-center justify-center transition-all duration-200 dark:bg-slate-900 dark:hover:bg-emerald-600 dark:hover:text-white font-bold text-xs"
                 title="ইউটিউব চ্যানেল"
               >
-                YT
+                <BsYoutube  />
               </a>
               <a
-                href="https://example.com" // মাদরাসার অন্য ওয়েবসাইটের লিংকটি এখানে বসবে
+                href="https://aimhabiganj.com" // মাদরাসার অন্য ওয়েবসাইটের লিংকটি এখানে বসবে
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full bg-emerald-900/50 text-emerald-200 hover:bg-amber-500 hover:text-slate-950 flex items-center justify-center transition-all duration-200 dark:bg-slate-900 dark:hover:bg-emerald-600 dark:hover:text-white font-bold text-xs"
                 title="অন্যান্য ওয়েবসাইট"
               >
-                WEB
+                <RiGlobalFill/>
               </a>
             </div>
           </div>
@@ -114,15 +116,15 @@ export default function Footer() {
             <ul className="space-y-3.5 text-sm font-normal text-gray-400 dark:text-slate-400">
               <li className="flex items-start gap-2.5">
                 <span className="text-amber-400 mt-0.5 flex-shrink-0">📍</span>
-                <span className="leading-relaxed">হবিগঞ্জ সদর,<br />হবিগঞ্জ, সিলেট, বাংলাদেশ।<br /></span>
+                <span className="leading-relaxed">দক্ষিণ শ্যামলী, হবিগঞ্জ সদর,<br />হবিগঞ্জ, সিলেট, বাংলাদেশ।<br /></span>
               </li>
               <li className="flex items-center gap-2.5">
                 <span className="text-amber-400 flex-shrink-0">📞</span>
-                <span>+৮৮০১৮৩৬-৩৭৬১৭৪</span>
+                <span>+8801748-868161</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <span className="text-amber-400 flex-shrink-0">✉️</span>
-                <span className="break-all">info@assalammadrasah.com</span>
+                <span className="break-all">aimhabiganj@gmail.com</span>
               </li>
             </ul>
           </div>

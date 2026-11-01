@@ -126,14 +126,17 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   logoContainer: {
-    width: 44,
-    height: 44,
-    alignItems: "center",
-    justifyContent: "center",
+   width: 52,
+  height: 52,
+  borderRadius: 26,
+  overflow: "hidden",
+  alignItems: "center",
+  justifyContent: "center",
   },
   logoImage: {
-    width: 65, // scale-[1.05] (80 * 1.05 = 84)
-    height: 65,
+    width: 55, // scale-[1.05] (80 * 1.05 = 84)
+    height: 55,
+    borderRadius: "9999px",
     objectFit: "cover", // object-cover
   },
   bannerContainer: {
@@ -401,12 +404,12 @@ function VoucherHalf({ tx, copyType, baseUrl = "" }) {
               style={styles.bannerImage}
               alt="Madrasah Banner"
             />
-            <Text style={styles.headerSubtitle}>
+            {/* <Text style={styles.headerSubtitle}>
               হবিগঞ্জ সদর, হবিগঞ্জ | মোবাইল: ০১৭১২-৩৪৫৬৭৮
             </Text>
             <Text style={styles.headerContact}>
               ইমেইল: aimhabiganj@gmail.com
-            </Text>
+            </Text> */}
           </View>
         </View>
 
@@ -552,7 +555,7 @@ function VoucherHalf({ tx, copyType, baseUrl = "" }) {
           </View>
           <View style={styles.signatureBlock}>
             <Text style={styles.signatureTitle}>অনুমোদনকারী</Text>
-            <Text style={styles.signatureSubtitle}>মুহতামিম / অধ্যক্ষ</Text>
+            <Text style={styles.signatureSubtitle}>প্রিন্সিপাল</Text>
           </View>
         </View>
       </View>

@@ -25,7 +25,7 @@ export default function TopHeader() {
               alt="As-Salam Ideal Madrasah  (AIM) Logo"
               fill
               sizes="(max-width: 768px) 65px, 90px"
-              className="object-cover scale-[1.05] rounded-full"
+              className="object-cover scale-[1.10] rounded-full"
               priority
             />
           </Link>
