@@ -126,12 +126,12 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   logoContainer: {
-   width: 52,
-  height: 52,
-  borderRadius: 26,
-  overflow: "hidden",
-  alignItems: "center",
-  justifyContent: "center",
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    overflow: "hidden",
+    alignItems: "center",
+    justifyContent: "center",
   },
   logoImage: {
     width: 55, // scale-[1.05] (80 * 1.05 = 84)
@@ -421,11 +421,8 @@ function VoucherHalf({ tx, copyType, baseUrl = "" }) {
               alt="Madrasah Banner"
             />
             <Text style={styles.headerSubtitle}>
-              দক্ষিণ শ্যামলী, হবিগঞ্জ সদর, হবিগঞ্জ | মোবাইল: +880 1748 868161
+              দক্ষিণ শ্যামলী, হবিগঞ্জ সদর, হবিগঞ্জ
             </Text>
-            <Text style={styles.headerContact}>
-              ইমেইল: aimhabiganj@gmail.com
-            </Text> 
           </View>
         </View>
 
@@ -529,7 +526,7 @@ function VoucherHalf({ tx, copyType, baseUrl = "" }) {
                   { color: "#B91C1C", fontWeight: "bold" },
                 ]}
               >
-                বিশেষ ছাড় / ডিসকাউন্ট
+                ডিসকাউন্ট
               </Text>
               <Text
                 style={[
@@ -578,7 +575,8 @@ function VoucherHalf({ tx, copyType, baseUrl = "" }) {
         {/* সোশ্যাল ও কন্টাক্ট ইনফো */}
         <View style={styles.socialFooter}>
           <Text style={styles.socialFooterText}>
-            ০১৩১৬-২০৯২০১ | WhatsApp: ০১৭৪৮-৮৮৬১৬১ | www.aimhabiganj.com | aimhabiganj@gmail.com | FB/YT: aimhabiganj
+            ০১৩১৬-২০৯২০১ | WhatsApp: ০১৭৪৮-৮৮৬১৬১ | www.aimhabiganj.com |
+            aimhabiganj@gmail.com | FB/YT: aimhabiganj
           </Text>
         </View>
       </View>

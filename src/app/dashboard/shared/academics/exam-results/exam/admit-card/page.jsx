@@ -3,11 +3,52 @@
 import { Globe, Mail, Phone } from "lucide-react";
 import Image from "next/image";
 import { QRCodeSVG } from "qrcode.react";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { BsWhatsapp, BsYoutube } from "react-icons/bs";
 import { FaFacebook } from "react-icons/fa";
+import { useReactToPrint } from "react-to-print";
+
+const ADMIT_CARD_PAGE_STYLE = `
+  @media print {
+    @page {
+      size: A5 portrait;
+      margin: 0mm !important;
+    }
+
+    html,
+    body {
+      width: 100% !important;
+      height: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #fff !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    .print-area-container {
+      width: 100% !important;
+      gap: 0 !important;
+    }
+
+    .page-break {
+      width: 148mm !important;
+      height: 209mm !important;
+      margin: 0 auto !important;
+      padding: 6mm !important;
+      box-sizing: border-box !important;
+      page-break-after: always !important;
+      break-after: page !important;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+      overflow: hidden !important;
+    }
+  }
+`;
 
 export default function AdmitCardGenerator() {
+  const printAreaRef = useRef(null);
+  const [isPrinting, setIsPrinting] = useState(false);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -243,22 +284,7 @@ export default function AdmitCardGenerator() {
   // ডায়নামিক ফিল্টারিং লজিক (ব্যাকএন্ড দ্বারা নিয়ন্ত্রিত)
   const filteredStudents = students;
 
-  const sessionYears = [
-    "২০২৬",
-    "২০২৫",
-    "২০২৪",
-    "২০২৩",
-    "২০২২",
-    "২০২১",
-  ];
-
-  const uniqueFeeCategories = [
-    "General",
-    "Orphan",
-    "Poor Fund",
-    "Scholarship",
-    "Staff Child",
-  ];
+  const sessionYears = ["২০২৬", "২০২৫", "২০২৪", "২০২৩", "২০২২", "২০২১"];
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
@@ -286,8 +312,26 @@ export default function AdmitCardGenerator() {
     }
   };
 
+  const reactToPrintFn = useReactToPrint({
+    contentRef: printAreaRef,
+    documentTitle: `Admit-Card-${examName || "Exam"}`,
+    pageStyle: ADMIT_CARD_PAGE_STYLE,
+    onBeforePrint: () => {
+      setIsPrinting(true);
+      return Promise.resolve();
+    },
+    onAfterPrint: () => {
+      setIsPrinting(false);
+    },
+    onPrintError: () => {
+      setIsPrinting(false);
+    },
+  });
+
   const handlePrint = () => {
-    window.print();
+    if (!printAreaRef.current) return;
+    setIsPrinting(true);
+    reactToPrintFn();
   };
 
   const studentsToPrint = students.filter((s) => selectedIds.includes(s._id));
@@ -538,14 +582,21 @@ export default function AdmitCardGenerator() {
           </span>
           <button
             onClick={handlePrint}
-            disabled={selectedIds.length === 0}
-            className={`w-full sm:w-auto px-4 sm:px-6 py-2.5 rounded-md font-bold text-sm sm:text-base text-white transition ${
-              selectedIds.length === 0
+            disabled={selectedIds.length === 0 || isPrinting}
+            className={`w-full sm:w-auto px-4 sm:px-6 py-2.5 rounded-md font-bold text-sm sm:text-base text-white transition flex items-center justify-center gap-2 ${
+              selectedIds.length === 0 || isPrinting
                 ? "bg-gray-400 dark:bg-gray-800 dark:text-gray-500 cursor-not-allowed"
                 : "bg-teal-600 hover:bg-teal-700 shadow-lg"
             }`}
           >
-            🖨️ সিলেক্টেড এডমিট কার্ড প্রিন্ট করুন ({selectedIds.length})
+            {isPrinting ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block"></span>
+                <span>প্রিন্ট প্রস্তুত হচ্ছে...</span>
+              </>
+            ) : (
+              <>🖨️ সিলেক্টেড এডমিট কার্ড প্রিন্ট করুন ({selectedIds.length})</>
+            )}
           </button>
         </div>
 
@@ -724,7 +775,10 @@ export default function AdmitCardGenerator() {
           </p>
         </div>
       ) : (
-        <div className="print-area-container flex flex-col items-center gap-8">
+        <div
+          ref={printAreaRef}
+          className="print-area-container flex flex-col items-center gap-8"
+        >
           {admitCards.map((card) => {
             // রুটিন ৫টির বেশি হলে ২ কলামে ভাগ করার জন্য হেলপার লজিক
             const routine = card.routine || [];
@@ -803,7 +857,10 @@ export default function AdmitCardGenerator() {
                         </div>
                         <p className="text-[11px] font-semibold text-gray-700 leading-tight">
                           {card.examName || "পরীক্ষা"} -{" "}
-                          {(card.sessionYear || "২০২৬").split(/[-–/]/)[0].trim()} শিক্ষাবর্ষ
+                          {(card.sessionYear || "২০২৬")
+                            .split(/[-–/]/)[0]
+                            .trim()}{" "}
+                          শিক্ষাবর্ষ
                         </p>
                         <p className="text-[11px] font-bold text-gray-900 mt-0.5">
                           শ্রেণি: {card.className || "N/A"}

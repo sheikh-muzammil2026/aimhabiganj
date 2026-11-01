@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   Printer,
   Calendar,
@@ -12,11 +12,8 @@ import {
   Globe,
   Mail,
 } from "lucide-react";
-import Link from "next/link";
-import Image from "next/image";
 import dynamic from "next/dynamic";
 
-import { MdEmail, MdInstallMobile } from "react-icons/md";
 import { BsWhatsapp, BsYoutube } from "react-icons/bs";
 import { FaFacebook } from "react-icons/fa";
 import Overview from "@/components/dashboard/finance/Overview";
@@ -24,6 +21,8 @@ import IncomeEntry from "@/components/dashboard/finance/IncomeEntry";
 import ExpenseEntry from "@/components/dashboard/finance/ExpenseEntry";
 import MonthlyReport from "@/components/dashboard/finance/MonthlyReport";
 import IncomeVoucherHtmlLayout from "@/components/dashboard/finance/IncomeVoucherHtmlLayout";
+import ExpenseVoucherHtmlLayout from "@/components/dashboard/finance/ExpenseVoucherHtmlLayout";
+import ExpenseVoucherPdfActions from "@/components/dashboard/finance/ExpenseVoucherPdfActions";
 
 const IncomeVoucherPdfActions = dynamic(
   () => import("@/components/dashboard/finance/IncomeVoucherPdfActions"),
@@ -39,7 +38,7 @@ const IncomeVoucherPdfActions = dynamic(
         </button>
       </div>
     ),
-  }
+  },
 );
 
 const API_BASE_URL =
@@ -257,6 +256,7 @@ export default function FinanceDashboard() {
 
   // Print Preview / Media Print State
   const [printData, setPrintData] = useState(null);
+  const expenseVoucherRef = useRef(null);
 
   // Alert Handler Helper
   const triggerNotification = useCallback((type, msg) => {
@@ -276,12 +276,18 @@ export default function FinanceDashboard() {
     try {
       setLoading(true);
       const queryParams = [];
-      if (reportMonth && reportMonth !== "all") queryParams.push(`month=${reportMonth}`);
-      if (reportYear && reportYear !== "all") queryParams.push(`year=${reportYear}`);
-      if (reportAccount && reportAccount !== "all") queryParams.push(`accountNumber=${reportAccount}`);
-      const queryString = queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
+      if (reportMonth && reportMonth !== "all")
+        queryParams.push(`month=${reportMonth}`);
+      if (reportYear && reportYear !== "all")
+        queryParams.push(`year=${reportYear}`);
+      if (reportAccount && reportAccount !== "all")
+        queryParams.push(`accountNumber=${reportAccount}`);
+      const queryString =
+        queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
 
-      const res = await fetch(`${API_BASE_URL}/api/finance/summary${queryString}`);
+      const res = await fetch(
+        `${API_BASE_URL}/api/finance/summary${queryString}`,
+      );
       const data = await res.json();
       if (data.success) {
         setSummaryData(data.data);
@@ -314,7 +320,8 @@ export default function FinanceDashboard() {
     try {
       setLoading(true);
       let url = `${API_BASE_URL}/api/finance/transactions?page=${txPage}&limit=10&type=${txFilterType}`;
-      if (reportAccount && reportAccount !== "all") url += `&accountNumber=${encodeURIComponent(reportAccount)}`;
+      if (reportAccount && reportAccount !== "all")
+        url += `&accountNumber=${encodeURIComponent(reportAccount)}`;
       if (txSearch) url += `&search=${encodeURIComponent(txSearch)}`;
       if (txStartDate) url += `&startDate=${txStartDate}`;
       if (txEndDate) url += `&endDate=${txEndDate}`;
@@ -776,19 +783,19 @@ export default function FinanceDashboard() {
     <>
       <style>{`
         @media print {
+          @page {
+            size: ${printData?.type === "income" ? "A4 landscape" : "A4 portrait"};
+            margin: ${printData?.type === "income" ? "5mm" : "10mm"};
+          }
           body {
             background-color: white !important;
             color: black !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
           html, body {
             margin: 0 !important;
             padding: 0 !important;
-          }
-          @page {
-            size: ${printData?.type === "income" ? "A4 landscape" : printData?.type === "report" ? "A4 portrait" : "A5 portrait"};
-            margin: ${printData?.type === "income" ? "5mm" : "10mm"} !important;
           }
         }
       `}</style>
@@ -1053,7 +1060,9 @@ export default function FinanceDashboard() {
                           </div>
                           {tx.accountNumber && (
                             <span className="inline-block text-[10px] font-bold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100 mt-1">
-                              🏦 {tx.fundNameBn || tx.fundName || tx.accountNumber} ({tx.accountNumber.slice(-4)})
+                              🏦{" "}
+                              {tx.fundNameBn || tx.fundName || tx.accountNumber}{" "}
+                              ({tx.accountNumber.slice(-4)})
                             </span>
                           )}
                           {tx.description && (
@@ -1160,11 +1169,16 @@ export default function FinanceDashboard() {
                       getMonthLabel={getMonthLabel}
                     />
                   ) : (
-                    <VoucherPrintLayout
-                      tx={printData}
-                      formatBanglaNumber={formatBanglaNumber}
-                      parsePayerName={parsePayerName}
-                    />
+                    <div
+                      ref={expenseVoucherRef}
+                      className="bg-white text-black w-full"
+                    >
+                      <ExpenseVoucherHtmlLayout
+                        tx={printData}
+                        formatBanglaNumber={formatBanglaNumber}
+                        parsePayerName={parsePayerName}
+                      />
+                    </div>
                   )}
                 </div>
               )}
@@ -1181,13 +1195,18 @@ export default function FinanceDashboard() {
 
               {printData.type === "income" ? (
                 <IncomeVoucherPdfActions tx={printData} />
-              ) : (
+              ) : printData.type === "report" ? (
                 <button
                   onClick={() => window.print()}
                   className="px-5 py-2 bg-emerald-800 hover:bg-emerald-950 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs"
                 >
                   <Printer className="w-4 h-4" /> প্রিন্ট করুন
                 </button>
+              ) : (
+                <ExpenseVoucherPdfActions
+                  tx={printData}
+                  contentRef={expenseVoucherRef}
+                />
               )}
             </div>
           </div>
@@ -1212,7 +1231,7 @@ export default function FinanceDashboard() {
               parsePayerName={parsePayerName}
             />
           ) : (
-            <VoucherPrintLayout
+            <ExpenseVoucherHtmlLayout
               tx={printData}
               formatBanglaNumber={formatBanglaNumber}
               parsePayerName={parsePayerName}
@@ -1220,299 +1239,6 @@ export default function FinanceDashboard() {
           ))}
       </div>
     </>
-  );
-}
-
-// Print layouts
-function VoucherPrintLayout({ tx, formatBanglaNumber, parsePayerName }) {
-  const isIncome = tx.type === "income";
-  const parsed = parsePayerName(tx.payerName);
-
-  const title = isIncome ? "আয় আদায় রসিদ" : "ব্যয় পরিশোধ ভাউচার";
-  const idLabel = isIncome ? "রসিদ নম্বর " : "ভাউচার নম্বর";
-  const idValue = isIncome ? tx.receiptNo : tx.voucherNo;
-  const dateValue = tx.date;
-  const totalAmount = isIncome ? tx.totalIncome : tx.totalExpense;
-
-  const isStudent =
-    isIncome &&
-    (tx.payerType === "student" ||
-      !!tx.studentId ||
-      (tx.payerName && tx.payerName.includes(" / ")));
-  const deficit =
-    !isIncome && tx.totalExpense > tx.advanceAmount
-      ? tx.totalExpense - tx.advanceAmount
-      : 0;
-
-  return (
-    <div className="space-y-4 text-black bg-white w-full max-w-full font-sans leading-relaxed text-xs">
-      {/* Organisation Header matching Admit Card Branding */}
-      <div className="flex items-center justify-between gap-3 border-b-2 border-[#C5A059] pb-3 text-center">
-        <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-slate-50 border border-[#C5A059]">
-          <Image src="/aimlogo1.png" alt="Logo" width={40} height={40} className="object-contain" />
-        </div>
-        <div className="flex-1 text-center min-w-0">
-          <div className="w-full flex justify-center">
-            <Image src="/banner.png" alt="Banner" width={280} height={40} className="max-h-8 w-auto object-contain mx-auto" priority />
-          </div>
-          <p className="text-[9px] text-slate-600 font-semibold mt-0.5">
-            দক্ষিণ শ্যামলী, হবিগঞ্জ সদর, হবিগঞ্জ
-          </p>
-          <div className="flex items-center justify-center gap-2 text-[8.5px] text-emerald-800 font-medium">
-            <span className="flex items-center gap-0.5">
-              <MdInstallMobile className="text-[10px] shrink-0" /> +880 1748 868161
-            </span>
-            <span className="text-slate-300">|</span>
-            <span className="flex items-center gap-0.5">
-              <MdEmail className="text-[10px] shrink-0" /> aimhabiganj@gmail.com
-            </span>
-          </div>
-        </div>
-        <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-slate-50 border border-[#C5A059]">
-          <Image src="/aimlogo1.png" alt="Logo" width={40} height={40} className="object-contain" />
-        </div>
-      </div>
-
-      <div className="text-center my-1.5">
-        <div className="inline-block bg-emerald-800 text-white px-4 py-0.5 rounded-full border border-emerald-600 shadow-xs text-[10px] font-bold tracking-wider uppercase">
-          {title}
-        </div>
-      </div>
-
-      {/* Metadata Section */}
-      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px] border-b border-dashed border-slate-300 pb-2">
-        <div>
-          <span className="font-bold text-slate-500">{idLabel}: </span>
-          <span className="font-mono font-black text-emerald-955">
-            {idValue}
-          </span>
-        </div>
-        <div className="text-right">
-          <span className="font-bold text-slate-500">তারিখ: </span>
-          <span className="font-bold">{formatBanglaNumber(dateValue)}</span>
-        </div>
-
-        {isIncome ? (
-          isStudent ? (
-            <>
-              <div>
-                <span className="font-bold text-slate-500">
-                  শিক্ষার্থীর নাম :{" "}
-                </span>
-                <span className="font-bold text-slate-800">
-                  {tx.studentName || parsed.donorName || "N/A"}
-                </span>
-              </div>
-              <div className="text-right">
-                <span className="font-bold text-slate-500">
-                  আইডি ও শ্রেণী:{" "}
-                </span>
-                <span className="font-bold text-slate-800">
-                  {tx.studentId || parsed.studentId || "N/A"} (
-                  {tx.className || "N/A"})
-                </span>
-              </div>
-            </>
-          ) : (
-            <>
-              <div>
-                <span className="font-bold text-slate-500">দাতার নাম : </span>
-                <span className="font-bold text-slate-800">
-                  {tx.donorName || parsed.donorName || "N/A"}
-                </span>
-              </div>
-              <div className="text-right">
-                <span className="font-bold text-slate-500">ধরণ: </span>
-                <span className="font-bold text-slate-800">
-                  দাতা / অনুদানকারী
-                </span>
-              </div>
-            </>
-          )
-        ) : (
-          <>
-            <div>
-              <span className="font-bold text-slate-500">খরচকারির নাম: </span>
-              <span className="font-bold text-slate-800">
-                {tx.receiverName || "N/A"}
-              </span>
-            </div>
-            <div className="text-right">
-              <span className="font-bold text-slate-500">চেক নং: </span>
-              <span className="font-mono font-bold text-slate-800">
-                {tx.chequeNo || "N/A"}
-              </span>
-            </div>
-          </>
-        )}
-
-        <div>
-          <span className="font-bold text-slate-500">পেমেন্ট পদ্ধতি: </span>
-          <span className="font-bold">{tx.paymentMethod || "Cash"}</span>
-        </div>
-        {!isIncome && tx.advanceAmount > 0 && (
-          <div className="text-right">
-            <span className="font-bold text-slate-500">অগ্রীম গৃহীত: </span>
-            <span className="font-bold">
-              ৳ {formatBanglaNumber(tx.advanceAmount.toLocaleString("bn-BD"))}
-            </span>
-          </div>
-        )}
-        {deficit > 0 && (
-          <div className="sm:col-span-2 text-right">
-            <span className="font-bold text-slate-500">ঘাটতি/ঋণ: </span>
-            <span className="font-bold text-rose-900">
-              ৳ {formatBanglaNumber(deficit.toLocaleString("bn-BD"))}
-            </span>
-            {tx.reimbursement?.status === "paid" && (
-              <span className="text-emerald-600 font-bold ml-1.5">(paid)</span>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Particulars Table */}
-      <table className="w-full text-[10px] text-left border border-collapse border-slate-300 font-medium">
-        <thead>
-          <tr className="bg-slate-50 border-b border-slate-350 text-slate-700 font-bold">
-            <th className="p-1.5 border border-slate-300 text-center w-10">
-              ক্রমিক
-            </th>
-            <th className="p-1.5 border border-slate-300">হিসাবের খাত</th>
-            <th className="p-1.5 border border-slate-300 text-right w-28">
-              টাকার পরিমাণ
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {tx.items?.map((item, index) => (
-            <tr key={index} className="border-b border-slate-200">
-              <td className="p-1.5 border border-slate-300 text-center">
-                {formatBanglaNumber(index + 1)}
-              </td>
-              <td className="p-1.5 border border-slate-300 font-semibold">
-                <div>{item.head}</div>
-                {!isIncome && (item.institutionName || item.shopVoucher) && (
-                  <div className="text-[8px] text-slate-500 font-normal mt-0.5">
-                    {item.institutionName &&
-                      "সরবরাহকারী প্রতিষ্ঠান: " + item.institutionName}
-                    {item.shopVoucher && " | মেমো নং: " + item.shopVoucher}
-                  </div>
-                )}
-              </td>
-              <td className="p-1.5 border border-slate-300 text-right font-bold">
-                ৳ {formatBanglaNumber(item.amount.toLocaleString("bn-BD"))}
-              </td>
-            </tr>
-          ))}
-          {isIncome && tx.discount > 0 && (
-            <>
-              <tr className="bg-slate-50/50 font-bold print:hidden">
-                <td
-                  colSpan="2"
-                  className="p-1.5 border border-slate-300 text-right"
-                >
-                  আসল মোট:
-                </td>
-                <td className="p-1.5 border border-slate-300 text-right">
-                  ৳{" "}
-                  {formatBanglaNumber(
-                    (tx.totalIncome + tx.discount).toLocaleString("bn-BD"),
-                  )}
-                </td>
-              </tr>
-              <tr className="bg-slate-50/50 text-rose-800 font-bold print:hidden">
-                <td
-                  colSpan="2"
-                  className="p-1.5 border border-slate-300 text-right font-bold"
-                >
-                  ছাড়:
-                </td>
-                <td className="p-1.5 border border-slate-300 text-right font-bold">
-                  - ৳ {formatBanglaNumber(tx.discount.toLocaleString("bn-BD"))}
-                </td>
-              </tr>
-            </>
-          )}
-          <tr className="bg-slate-50/50 font-black">
-            <td
-              colSpan="2"
-              className="p-1.5 border border-slate-300 text-right"
-            >
-              সর্বমোট:
-            </td>
-            <td className="p-1.5 border border-slate-300 text-right text-xs">
-              ৳ {formatBanglaNumber(totalAmount.toLocaleString("bn-BD"))}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      {/* Remarks Section */}
-      {tx.description && (
-        <div className="text-[10px] bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-          <span className="font-bold text-slate-500">বিবরণ / মন্তব্য: </span>
-          <span className="text-slate-700 font-medium">{tx.description}</span>
-        </div>
-      )}
-
-      {/* Signature Lines */}
-      <div className="grid grid-cols-3 gap-6 pt-12 text-center text-[9px] font-bold text-slate-500">
-        <div className="border-t border-slate-400 pt-1.5">
-          <p>{isIncome ? "আদায়কারী" : "খরচকারী / গ্রহীতা"}</p>
-          <span className="text-[7px] text-slate-400 block font-normal mt-0.5">
-            স্বাক্ষর ও তারিখ
-          </span>
-        </div>
-        <div className="border-t border-slate-400 pt-1.5">
-          <p>হিসাবরক্ষক</p>
-          <span className="text-[7px] text-slate-400 block font-normal mt-0.5">
-            ক্যাশিয়ার
-          </span>
-        </div>
-        <div className="border-t border-slate-400 pt-1.5">
-          <p>অনুমোদনকারী</p>
-          <span className="text-[7px] text-slate-400 block font-normal mt-0.5">
-            প্রিন্সিপাল
-          </span>
-        </div>
-      </div>
-
-      {/* সোশ্যাল ও কন্টাক্ট ইনফো */}
-      <div className="pt-1 border-t border-gray-300">
-        <div className="flex flex-wrap justify-center items-center gap-x-1 gap-y-0.5 text-[8.5px] font-semibold text-gray-800">
-          <span className="flex items-center gap-0.5">
-            <Phone className="w-2.5 h-2.5 text-gray-700" />
-            ০১৩১৬-২০৯২০১
-          </span>
-
-          <span className="flex items-center gap-0.5">
-            <BsWhatsapp className="w-2.5 h-2.5 text-green-600" />
-            ০১৭৪৮-৮৮৬১৬১
-          </span>
-
-          <span className="flex items-center gap-0.5">
-            <Globe className="w-2.5 h-2.5 text-blue-500" />
-            www.aimhabiganj.com
-          </span>
-
-          <span className="flex items-center gap-0.5">
-            <Mail className="w-2.5 h-2.5 text-red-500" />
-            aimhabiganj@gmail.com
-          </span>
-
-          <span className="flex items-center gap-0.5">
-            <FaFacebook className="w-2.5 h-2.5 text-blue-600" />
-            aimhabiganj
-          </span>
-
-          <span className="flex items-center gap-0.5">
-            <BsYoutube className="w-2.5 h-2.5 text-red-600" />
-            aimhabiganj
-          </span>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -1527,12 +1253,6 @@ function ReportPrintLayout({
     <div className="space-y-6 text-black bg-white w-full max-w-full font-sans leading-relaxed">
       {/* Logo/Header */}
       <div className="text-center pb-6 border-b border-slate-400">
-        <h2 className="text-xl sm:text-2xl font-black text-emerald-950">
-          আস-সালাম আইডিয়াল মাদরাসা (এইম)
-        </h2>
-        <p className="text-xs text-slate-500 font-bold mt-0.5">
-          দক্ষিণ শ্যামলী, হবিগঞ্জ সদর, হবিগঞ্জ
-        </p>
         <h3 className="text-sm font-black bg-slate-50 border border-slate-300 inline-block px-6 py-1.5 rounded-full text-slate-700 mt-4 tracking-wide">
           {title}
         </h3>
@@ -1603,27 +1323,45 @@ function ReportPrintLayout({
       {/* Calculations / Summary Footer Row (5 Rolling Balance Figures) */}
       <div className="grid grid-cols-5 gap-px bg-slate-350 border border-slate-300 text-[10px] font-black">
         <div className="bg-indigo-50 p-2.5 text-indigo-950 flex flex-col justify-between gap-1">
-          <span className="text-[9px] text-indigo-700">প্রারম্ভিক ব্যালেন্স:</span>
+          <span className="text-[9px] text-indigo-700">
+            প্রারম্ভিক ব্যালেন্স:
+          </span>
           <span className="text-xs font-black whitespace-nowrap">
-            ৳ {formatBanglaNumber((data.openingBalance || 0).toLocaleString("bn-BD"))}
+            ৳{" "}
+            {formatBanglaNumber(
+              (data.openingBalance || 0).toLocaleString("bn-BD"),
+            )}
           </span>
         </div>
         <div className="bg-emerald-50 p-2.5 text-emerald-950 flex flex-col justify-between gap-1">
           <span className="text-[9px] text-emerald-700">চলতি আয়:</span>
           <span className="text-xs font-black whitespace-nowrap">
-            ৳ {formatBanglaNumber((data.totalIncome || 0).toLocaleString("bn-BD"))}
+            ৳{" "}
+            {formatBanglaNumber(
+              (data.totalIncome || 0).toLocaleString("bn-BD"),
+            )}
           </span>
         </div>
         <div className="bg-teal-50 p-2.5 text-teal-950 flex flex-col justify-between gap-1">
           <span className="text-[9px] text-teal-700">ব্যয়যোগ্য তহবিল:</span>
           <span className="text-xs font-black whitespace-nowrap">
-            ৳ {formatBanglaNumber(((data.totalUsableFund ?? ((data.openingBalance || 0) + (data.totalIncome || 0))) || 0).toLocaleString("bn-BD"))}
+            ৳{" "}
+            {formatBanglaNumber(
+              (
+                (data.totalUsableFund ??
+                  (data.openingBalance || 0) + (data.totalIncome || 0)) ||
+                0
+              ).toLocaleString("bn-BD"),
+            )}
           </span>
         </div>
         <div className="bg-rose-50 p-2.5 text-rose-950 flex flex-col justify-between gap-1">
           <span className="text-[9px] text-rose-700">চলতি ব্যয়:</span>
           <span className="text-xs font-black whitespace-nowrap">
-            ৳ {formatBanglaNumber((data.totalExpense || 0).toLocaleString("bn-BD"))}
+            ৳{" "}
+            {formatBanglaNumber(
+              (data.totalExpense || 0).toLocaleString("bn-BD"),
+            )}
           </span>
         </div>
         <div
@@ -1631,7 +1369,8 @@ function ReportPrintLayout({
         >
           <span className="text-[9px]">সমাপনী উদ্বৃত্ত:</span>
           <span className="text-xs font-black whitespace-nowrap">
-            ৳ {formatBanglaNumber((data.netBalance || 0).toLocaleString("bn-BD"))}
+            ৳{" "}
+            {formatBanglaNumber((data.netBalance || 0).toLocaleString("bn-BD"))}
           </span>
         </div>
       </div>
@@ -1645,12 +1384,24 @@ function ReportPrintLayout({
           <table className="w-full text-[9.5px] border border-collapse border-slate-300">
             <thead>
               <tr className="bg-slate-100 text-slate-700 font-bold">
-                <th className="p-1.5 border border-slate-300 text-left">ফান্ড ও ব্যাংক হিসাব</th>
-                <th className="p-1.5 border border-slate-300 text-right">প্রারম্ভিক জের</th>
-                <th className="p-1.5 border border-slate-300 text-right">চলতি আয়</th>
-                <th className="p-1.5 border border-slate-300 text-right">ব্যয়যোগ্য তহবিল</th>
-                <th className="p-1.5 border border-slate-300 text-right">চলতি ব্যয়</th>
-                <th className="p-1.5 border border-slate-300 text-right">সমাপনী উদ্বৃত্ত</th>
+                <th className="p-1.5 border border-slate-300 text-left">
+                  ফান্ড ও ব্যাংক হিসাব
+                </th>
+                <th className="p-1.5 border border-slate-300 text-right">
+                  প্রারম্ভিক জের
+                </th>
+                <th className="p-1.5 border border-slate-300 text-right">
+                  চলতি আয়
+                </th>
+                <th className="p-1.5 border border-slate-300 text-right">
+                  ব্যয়যোগ্য তহবিল
+                </th>
+                <th className="p-1.5 border border-slate-300 text-right">
+                  চলতি ব্যয়
+                </th>
+                <th className="p-1.5 border border-slate-300 text-right">
+                  সমাপনী উদ্বৃত্ত
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -1658,22 +1409,39 @@ function ReportPrintLayout({
                 <tr key={f.accountNumber}>
                   <td className="p-1.5 border border-slate-300 font-bold">
                     <div>{f.nameBn || f.name}</div>
-                    <div className="text-[8px] font-mono text-slate-500">Acc: {f.accountNumber}</div>
+                    <div className="text-[8px] font-mono text-slate-500">
+                      Acc: {f.accountNumber}
+                    </div>
                   </td>
                   <td className="p-1.5 border border-slate-300 text-right font-semibold">
-                    ৳ {formatBanglaNumber((f.openingBalance || 0).toLocaleString("bn-BD"))}
+                    ৳{" "}
+                    {formatBanglaNumber(
+                      (f.openingBalance || 0).toLocaleString("bn-BD"),
+                    )}
                   </td>
                   <td className="p-1.5 border border-slate-300 text-right font-semibold text-emerald-800">
-                    ৳ {formatBanglaNumber((f.totalIncome || 0).toLocaleString("bn-BD"))}
+                    ৳{" "}
+                    {formatBanglaNumber(
+                      (f.totalIncome || 0).toLocaleString("bn-BD"),
+                    )}
                   </td>
                   <td className="p-1.5 border border-slate-300 text-right font-bold text-teal-900">
-                    ৳ {formatBanglaNumber((f.availableBalance || 0).toLocaleString("bn-BD"))}
+                    ৳{" "}
+                    {formatBanglaNumber(
+                      (f.availableBalance || 0).toLocaleString("bn-BD"),
+                    )}
                   </td>
                   <td className="p-1.5 border border-slate-300 text-right font-semibold text-rose-800">
-                    ৳ {formatBanglaNumber((f.totalExpense || 0).toLocaleString("bn-BD"))}
+                    ৳{" "}
+                    {formatBanglaNumber(
+                      (f.totalExpense || 0).toLocaleString("bn-BD"),
+                    )}
                   </td>
                   <td className="p-1.5 border border-slate-300 text-right font-black text-blue-950">
-                    ৳ {formatBanglaNumber((f.closingBalance || 0).toLocaleString("bn-BD"))}
+                    ৳{" "}
+                    {formatBanglaNumber(
+                      (f.closingBalance || 0).toLocaleString("bn-BD"),
+                    )}
                   </td>
                 </tr>
               ))}
@@ -1681,63 +1449,6 @@ function ReportPrintLayout({
           </table>
         </div>
       )}
-
-      {/* Signature Area */}
-      <div className="grid grid-cols-3 gap-6 pt-16 text-center text-[10px] font-bold text-slate-500">
-        <div className="border-t border-slate-300 pt-2">
-          <p>হিসাবরক্ষক</p>
-          <span className="text-[8px] text-slate-400 block font-normal mt-0.5">
-            ক্যাশিয়ার
-          </span>
-        </div>
-        <div className="border-t border-slate-300 pt-2">
-          <p>যাচাইকারী</p>
-          <span className="text-[8px] text-slate-400 block font-normal mt-0.5">
-            অর্থ সম্পাদক
-          </span>
-        </div>
-        <div className="border-t border-slate-300 pt-2">
-          <p>অনুমোদনকারী</p>
-          <span className="text-[8px] text-slate-400 block font-normal mt-0.5">
-            প্রিন্সিপাল
-          </span>
-        </div>
-      </div>
-
-      {/* সোশ্যাল ও কন্টাক্ট ইনফো */}
-      <div className="pt-1 border-t border-gray-300">
-        <div className="flex flex-wrap justify-center items-center gap-x-1 gap-y-0.5 text-[8.5px] font-semibold text-gray-800">
-          <span className="flex items-center gap-0.5">
-            <Phone className="w-2.5 h-2.5 text-gray-700" />
-            ০১৩১৬-২০৯২০১
-          </span>
-
-          <span className="flex items-center gap-0.5">
-            <BsWhatsapp className="w-2.5 h-2.5 text-green-600" />
-            ০১৭৪৮-৮৮৬১৬১
-          </span>
-
-          <span className="flex items-center gap-0.5">
-            <Globe className="w-2.5 h-2.5 text-blue-500" />
-            www.aimhabiganj.com
-          </span>
-
-          <span className="flex items-center gap-0.5">
-            <Mail className="w-2.5 h-2.5 text-red-500" />
-            aimhabiganj@gmail.com
-          </span>
-
-          <span className="flex items-center gap-0.5">
-            <FaFacebook className="w-2.5 h-2.5 text-blue-600" />
-            aimhabiganj
-          </span>
-
-          <span className="flex items-center gap-0.5">
-            <BsYoutube className="w-2.5 h-2.5 text-red-600" />
-            aimhabiganj
-          </span>
-        </div>
-      </div>
     </div>
   );
 }

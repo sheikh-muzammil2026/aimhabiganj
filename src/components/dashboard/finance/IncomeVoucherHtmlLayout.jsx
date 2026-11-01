@@ -82,24 +82,13 @@ function VoucherSingleHalf({
                 alt="Institution Banner"
                 width={280}
                 height={40}
-                className="max-h-8 w-auto object-contain mx-auto"
+                className="w-auto object-fill mx-auto max-h-45"
                 priority
               />
             </div>
             <p className="text-[9px] text-slate-600 font-semibold mt-0.5">
               দক্ষিণ শ্যামলী, হবিগঞ্জ সদর, হবিগঞ্জ
             </p>
-            <div className="flex items-center justify-center gap-2 text-[8.5px] text-emerald-800 font-medium">
-              <span className="flex items-center gap-0.5">
-                <MdInstallMobile className="text-[10px] shrink-0" />{" "}
-                +880 1748 868161
-              </span>
-              <span className="text-slate-300">|</span>
-              <span className="flex items-center gap-0.5">
-                <MdEmail className="text-[10px] shrink-0" />{" "}
-                aimhabiganj@gmail.com
-              </span>
-            </div>
           </div>
 
           {/* Right Logo placeholder for balanced symmetry */}

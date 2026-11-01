@@ -89,7 +89,7 @@ export default function IncomeVoucherPdfActions({ tx }) {
         ) : (
           <>
             <ExternalLink className="w-3.5 h-3.5" />
-            <span>A4 ল্যান্ডস্কেপ PDF প্রিন্ট ভিউ</span>
+            <span>PDF প্রিন্ট ভিউ</span>
           </>
         )}
       </button>

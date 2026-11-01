@@ -1,9 +1,54 @@
 "use client";
 import { IdCardBack } from "@/components/dashboard/students/id-card/IdCardBack";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import BarcodeSVG from "react-barcode";
+import { useReactToPrint } from "react-to-print";
+
+const ID_CARD_PAGE_STYLE = `
+  @media print {
+    html,
+    body {
+      background: #ffffff !important;
+      height: auto !important;
+      min-height: 100% !important;
+      overflow: visible !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    @page {
+      size: A4 portrait;
+      margin: 10mm 8mm;
+    }
+
+    .print-grid-container {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      justify-content: flex-start !important;
+      align-items: flex-start !important;
+      gap: 12px 10px !important;
+      width: 100% !important;
+      height: auto !important;
+      overflow: visible !important;
+    }
+
+    .id-card-print-box {
+      width: 2.125in !important;
+      height: 3.375in !important;
+      box-sizing: border-box !important;
+      break-inside: avoid !important;
+      page-break-inside: avoid !important;
+      -webkit-column-break-inside: avoid !important;
+      margin-bottom: 8px !important;
+    }
+  }
+`;
 
 export default function IdCardGenerator() {
+  const printAreaRef = useRef(null);
+  const [isPrinting, setIsPrinting] = useState(false);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,8 +60,6 @@ export default function IdCardGenerator() {
   const [selectedDivision, setSelectedDivision] = useState("all"); // preHifz, hifz, academy
   const [selectedAcademyType, setSelectedAcademyType] = useState("all");
   const [selectedClass, setSelectedClass] = useState("all");
-  const [selectedType, setSelectedType] = useState("all");
-  const [selectedFeeCategory, setSelectedFeeCategory] = useState("all");
 
   // পেজিনেশন স্টেটসমূহ
   const [currentPage, setCurrentPage] = useState(1);
@@ -42,9 +85,6 @@ export default function IdCardGenerator() {
       if (selectedAcademyType !== "all")
         params.append("academyType", selectedAcademyType);
       if (selectedClass !== "all") params.append("class", selectedClass);
-      if (selectedType !== "all") params.append("type", selectedType);
-      if (selectedFeeCategory !== "all")
-        params.append("feeCategory", selectedFeeCategory);
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_API}/api/students?${params.toString()}`,
@@ -77,8 +117,6 @@ export default function IdCardGenerator() {
     selectedDivision,
     selectedAcademyType,
     selectedClass,
-    selectedType,
-    selectedFeeCategory,
   ]);
 
   useEffect(() => {
@@ -180,14 +218,6 @@ export default function IdCardGenerator() {
     "২০১৮",
   ];
 
-  const uniqueFeeCategories = [
-    "General",
-    "Orphan",
-    "Poor Fund",
-    "Scholarship",
-    "Staff Child",
-  ];
-
   const handleSelectAll = (e) => {
     if (e.target.checked) {
       const currentPageIds = filteredStudents.map((s) => s._id);
@@ -214,8 +244,26 @@ export default function IdCardGenerator() {
     }
   };
 
+  const reactToPrintFn = useReactToPrint({
+    contentRef: printAreaRef,
+    documentTitle: "Student-ID-Cards",
+    pageStyle: ID_CARD_PAGE_STYLE,
+    onBeforePrint: () => {
+      setIsPrinting(true);
+      return Promise.resolve();
+    },
+    onAfterPrint: () => {
+      setIsPrinting(false);
+    },
+    onPrintError: () => {
+      setIsPrinting(false);
+    },
+  });
+
   const handlePrint = () => {
-    window.print();
+    if (!printAreaRef.current) return;
+    setIsPrinting(true);
+    reactToPrintFn();
   };
 
   const studentsToPrint = students.filter((s) => selectedIds.includes(s._id));
@@ -429,46 +477,6 @@ export default function IdCardGenerator() {
               ))}
             </select>
           </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-gray-650 dark:text-gray-400 mb-1">
-              আবাসিক স্ট্যাটাস
-            </label>
-            <select
-              value={selectedType}
-              onChange={(e) => {
-                setSelectedType(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full border border-gray-300 dark:border-slate-750 bg-white dark:bg-slate-900 text-slate-850 dark:text-slate-200 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">সকল টাইপ</option>
-              <option value="আবাসিক">আবাসিক</option>
-              <option value="অনাবাসিক">অনাবাসিক</option>
-              <option value="ডে-কেয়ার">ডে-কেয়ার</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-gray-650 dark:text-gray-400 mb-1">
-              ফি ক্যাটাগরি
-            </label>
-            <select
-              value={selectedFeeCategory}
-              onChange={(e) => {
-                setSelectedFeeCategory(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full border border-gray-300 dark:border-slate-750 bg-white dark:bg-slate-900 text-slate-850 dark:text-slate-200 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">সকল ফি ক্যাটাগরি</option>
-              {uniqueFeeCategories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t dark:border-slate-800 pt-4 mb-4">
@@ -478,14 +486,21 @@ export default function IdCardGenerator() {
           </span>
           <button
             onClick={handlePrint}
-            disabled={selectedIds.length === 0}
-            className={`w-full sm:w-auto px-4 sm:px-6 py-2.5 rounded-md font-bold text-sm sm:text-base text-white transition ${
-              selectedIds.length === 0
+            disabled={selectedIds.length === 0 || isPrinting}
+            className={`w-full sm:w-auto px-4 sm:px-6 py-2.5 rounded-md font-bold text-sm sm:text-base text-white transition flex items-center justify-center gap-2 ${
+              selectedIds.length === 0 || isPrinting
                 ? "bg-gray-400 dark:bg-gray-800 dark:text-gray-500 cursor-not-allowed"
                 : "bg-emerald-600 hover:bg-emerald-700 shadow-lg"
             }`}
           >
-            🖨️ সিলেক্টেড আইডি কার্ড প্রিন্ট করুন ({selectedIds.length})
+            {isPrinting ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block"></span>
+                <span>প্রিন্ট প্রস্তুত হচ্ছে...</span>
+              </>
+            ) : (
+              <>🖨️ সিলেক্টেড আইডি কার্ড প্রিন্ট করুন ({selectedIds.length})</>
+            )}
           </button>
         </div>
 
@@ -755,7 +770,10 @@ export default function IdCardGenerator() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 print:grid-cols-3 gap-1 sm:gap-6 print:gap-4 print:mt-3 justify-items-center">
+          <div
+            ref={printAreaRef}
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 print:grid-cols-3 gap-1 sm:gap-6 print:gap-4 print:mt-3 justify-items-center"
+          >
             {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 print:block gap-4 sm:gap-6 print:mt-3"> */}
             {studentsToPrint.map((student) => {
               const details = getStudentClassDetails(student);
