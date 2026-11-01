@@ -9,7 +9,7 @@ export default function IncomeVoucherPdfActions({ tx }) {
   const isClient = React.useSyncExternalStore(
     () => () => {},
     () => true,
-    () => false
+    () => false,
   );
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
@@ -17,7 +17,8 @@ export default function IncomeVoucherPdfActions({ tx }) {
     if (!tx) return;
     setIsGeneratingPdf(true);
     try {
-      const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
+      const baseUrl =
+        typeof window !== "undefined" ? window.location.origin : "";
       const doc = <IncomeVoucherPdfDocument tx={tx} baseUrl={baseUrl} />;
       const blob = await pdf(doc).toBlob();
       const blobUrl = URL.createObjectURL(blob);
@@ -67,7 +68,7 @@ export default function IncomeVoucherPdfActions({ tx }) {
           ) : (
             <>
               <Download className="w-3.5 h-3.5 text-emerald-700" />
-              <span>A4 PDF ডাউনলোড</span>
+              <span> PDF ডাউনলোড</span>
             </>
           )
         }
@@ -88,12 +89,10 @@ export default function IncomeVoucherPdfActions({ tx }) {
         ) : (
           <>
             <ExternalLink className="w-3.5 h-3.5" />
-            <span>PDF প্রিন্ট ভিউ</span>
+            <span>A4 ল্যান্ডস্কেপ PDF প্রিন্ট ভিউ</span>
           </>
         )}
       </button>
-
-    
     </div>
   );
 }

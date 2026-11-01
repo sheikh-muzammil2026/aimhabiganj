@@ -330,6 +330,22 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 0.5,
   },
+  socialFooter: {
+    borderTopWidth: 0.5,
+    borderTopColor: "#D1D5DB",
+    paddingTop: 3,
+    marginTop: 4,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  socialFooterText: {
+    fontSize: 6.5,
+    fontWeight: "bold",
+    color: "#1F2937",
+    textAlign: "center",
+  },
 });
 
 // Single voucher half layout component
@@ -404,12 +420,12 @@ function VoucherHalf({ tx, copyType, baseUrl = "" }) {
               style={styles.bannerImage}
               alt="Madrasah Banner"
             />
-            {/* <Text style={styles.headerSubtitle}>
-              হবিগঞ্জ সদর, হবিগঞ্জ | মোবাইল: ০১৭১২-৩৪৫৬৭৮
+            <Text style={styles.headerSubtitle}>
+              দক্ষিণ শ্যামলী, হবিগঞ্জ সদর, হবিগঞ্জ | মোবাইল: +880 1748 868161
             </Text>
             <Text style={styles.headerContact}>
               ইমেইল: aimhabiganj@gmail.com
-            </Text> */}
+            </Text> 
           </View>
         </View>
 
@@ -557,6 +573,13 @@ function VoucherHalf({ tx, copyType, baseUrl = "" }) {
             <Text style={styles.signatureTitle}>অনুমোদনকারী</Text>
             <Text style={styles.signatureSubtitle}>প্রিন্সিপাল</Text>
           </View>
+        </View>
+
+        {/* সোশ্যাল ও কন্টাক্ট ইনফো */}
+        <View style={styles.socialFooter}>
+          <Text style={styles.socialFooterText}>
+            ০১৩১৬-২০৯২০১ | WhatsApp: ০১৭৪৮-৮৮৬১৬১ | www.aimhabiganj.com | aimhabiganj@gmail.com | FB/YT: aimhabiganj
+          </Text>
         </View>
       </View>
     </View>

@@ -8,12 +8,17 @@ import {
   AlertCircle,
   Loader2,
   Eye,
+  Phone,
+  Globe,
+  Mail,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 
 import { MdEmail, MdInstallMobile } from "react-icons/md";
+import { BsWhatsapp, BsYoutube } from "react-icons/bs";
+import { FaFacebook } from "react-icons/fa";
 import Overview from "@/components/dashboard/finance/Overview";
 import IncomeEntry from "@/components/dashboard/finance/IncomeEntry";
 import ExpenseEntry from "@/components/dashboard/finance/ExpenseEntry";
@@ -1251,11 +1256,11 @@ function VoucherPrintLayout({ tx, formatBanglaNumber, parsePayerName }) {
             <Image src="/banner.png" alt="Banner" width={280} height={40} className="max-h-8 w-auto object-contain mx-auto" priority />
           </div>
           <p className="text-[9px] text-slate-600 font-semibold mt-0.5">
-            হবিগঞ্জ সদর, হবিগঞ্জ
+            দক্ষিণ শ্যামলী, হবিগঞ্জ সদর, হবিগঞ্জ
           </p>
           <div className="flex items-center justify-center gap-2 text-[8.5px] text-emerald-800 font-medium">
             <span className="flex items-center gap-0.5">
-              <MdInstallMobile className="text-[10px] shrink-0" /> ০১৭১২-৩৪৫৬৭৮
+              <MdInstallMobile className="text-[10px] shrink-0" /> +880 1748 868161
             </span>
             <span className="text-slate-300">|</span>
             <span className="flex items-center gap-0.5">
@@ -1472,6 +1477,41 @@ function VoucherPrintLayout({ tx, formatBanglaNumber, parsePayerName }) {
           </span>
         </div>
       </div>
+
+      {/* সোশ্যাল ও কন্টাক্ট ইনফো */}
+      <div className="pt-1 border-t border-gray-300">
+        <div className="flex flex-wrap justify-center items-center gap-x-1 gap-y-0.5 text-[8.5px] font-semibold text-gray-800">
+          <span className="flex items-center gap-0.5">
+            <Phone className="w-2.5 h-2.5 text-gray-700" />
+            ০১৩১৬-২০৯২০১
+          </span>
+
+          <span className="flex items-center gap-0.5">
+            <BsWhatsapp className="w-2.5 h-2.5 text-green-600" />
+            ০১৭৪৮-৮৮৬১৬১
+          </span>
+
+          <span className="flex items-center gap-0.5">
+            <Globe className="w-2.5 h-2.5 text-blue-500" />
+            www.aimhabiganj.com
+          </span>
+
+          <span className="flex items-center gap-0.5">
+            <Mail className="w-2.5 h-2.5 text-red-500" />
+            aimhabiganj@gmail.com
+          </span>
+
+          <span className="flex items-center gap-0.5">
+            <FaFacebook className="w-2.5 h-2.5 text-blue-600" />
+            aimhabiganj
+          </span>
+
+          <span className="flex items-center gap-0.5">
+            <BsYoutube className="w-2.5 h-2.5 text-red-600" />
+            aimhabiganj
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
@@ -1491,7 +1531,7 @@ function ReportPrintLayout({
           আস-সালাম আইডিয়াল মাদরাসা (এইম)
         </h2>
         <p className="text-xs text-slate-500 font-bold mt-0.5">
-          হবিগঞ্জ সদর, হবিগঞ্জ
+          দক্ষিণ শ্যামলী, হবিগঞ্জ সদর, হবিগঞ্জ
         </p>
         <h3 className="text-sm font-black bg-slate-50 border border-slate-300 inline-block px-6 py-1.5 rounded-full text-slate-700 mt-4 tracking-wide">
           {title}
@@ -1660,6 +1700,41 @@ function ReportPrintLayout({
           <p>অনুমোদনকারী</p>
           <span className="text-[8px] text-slate-400 block font-normal mt-0.5">
             প্রিন্সিপাল
+          </span>
+        </div>
+      </div>
+
+      {/* সোশ্যাল ও কন্টাক্ট ইনফো */}
+      <div className="pt-1 border-t border-gray-300">
+        <div className="flex flex-wrap justify-center items-center gap-x-1 gap-y-0.5 text-[8.5px] font-semibold text-gray-800">
+          <span className="flex items-center gap-0.5">
+            <Phone className="w-2.5 h-2.5 text-gray-700" />
+            ০১৩১৬-২০৯২০১
+          </span>
+
+          <span className="flex items-center gap-0.5">
+            <BsWhatsapp className="w-2.5 h-2.5 text-green-600" />
+            ০১৭৪৮-৮৮৬১৬১
+          </span>
+
+          <span className="flex items-center gap-0.5">
+            <Globe className="w-2.5 h-2.5 text-blue-500" />
+            www.aimhabiganj.com
+          </span>
+
+          <span className="flex items-center gap-0.5">
+            <Mail className="w-2.5 h-2.5 text-red-500" />
+            aimhabiganj@gmail.com
+          </span>
+
+          <span className="flex items-center gap-0.5">
+            <FaFacebook className="w-2.5 h-2.5 text-blue-600" />
+            aimhabiganj
+          </span>
+
+          <span className="flex items-center gap-0.5">
+            <BsYoutube className="w-2.5 h-2.5 text-red-600" />
+            aimhabiganj
           </span>
         </div>
       </div>
