@@ -1,11 +1,11 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
-import { Phone, Globe, Mail } from "lucide-react";
-import { MdEmail, MdInstallMobile } from "react-icons/md";
-import { BsWhatsapp, BsYoutube } from "react-icons/bs";
-import { FaFacebook } from "react-icons/fa";
+import PrintSocialFooter from "@/components/shared/print/PrintSocialFooter";
+import {
+  resolveVoucherParty,
+  VoucherHeader,
+} from "@/components/dashboard/finance/VoucherSharedParts";
 
 export default function ExpenseVoucherHtmlLayout({
   tx,
@@ -14,25 +14,16 @@ export default function ExpenseVoucherHtmlLayout({
 }) {
   if (!tx) return null;
 
-  const isIncome = tx.type === "income";
-  const parsed = parsePayerName
-    ? parsePayerName(tx.payerName)
-    : {
-        donorName: tx.donorName || tx.payerName || "N/A",
-        studentId: tx.studentId || "",
-      };
+  const { isIncome, isStudent, parsed } = resolveVoucherParty(
+    tx,
+    parsePayerName,
+  );
 
   const title = isIncome ? "আয় আদায় রসিদ" : "ব্যয় পরিশোধ ভাউচার";
   const idLabel = isIncome ? "রসিদ নম্বর " : "ভাউচার নম্বর";
   const idValue = isIncome ? tx.receiptNo : tx.voucherNo;
   const dateValue = tx.date;
   const totalAmount = isIncome ? tx.totalIncome : tx.totalExpense;
-
-  const isStudent =
-    isIncome &&
-    (tx.payerType === "student" ||
-      !!tx.studentId ||
-      (tx.payerName && tx.payerName.includes(" / ")));
   const deficit =
     !isIncome && tx.totalExpense > tx.advanceAmount
       ? tx.totalExpense - tx.advanceAmount
@@ -41,50 +32,12 @@ export default function ExpenseVoucherHtmlLayout({
   return (
     <div className="space-y-4 text-black bg-white w-full max-w-full font-sans leading-relaxed text-xs">
       {/* Organisation Header matching Admit Card Branding */}
-      <div className="flex items-center justify-between gap-3 border-b-2 border-[#C5A059] pb-3 text-center">
-        <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-slate-50 border border-[#C5A059]">
-          <Image
-            src="/aimlogo1.png"
-            alt="Logo"
-            width={40}
-            height={40}
-            className="object-contain"
-          />
-        </div>
-        <div className="flex-1 text-center min-w-0">
-          <div className="w-full flex justify-center">
-            <Image
-              src="/banner.png"
-              alt="Banner"
-              width={280}
-              height={40}
-              className="max-h-8 w-auto object-contain mx-auto"
-              priority
-            />
-          </div>
-          <p className="text-[9px] text-slate-600 font-semibold mt-0.5">
-            দক্ষিণ শ্যামলী, হবিগঞ্জ সদর, হবিগঞ্জ
-          </p>
-          <div className="flex items-center justify-center gap-2 text-[8.5px] text-emerald-800 font-medium">
-            <span className="flex items-center gap-0.5">
-              <MdInstallMobile className="text-[10px] shrink-0" /> +880 1748 868161
-            </span>
-            <span className="text-slate-300">|</span>
-            <span className="flex items-center gap-0.5">
-              <MdEmail className="text-[10px] shrink-0" /> aimhabiganj@gmail.com
-            </span>
-          </div>
-        </div>
-        <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-slate-50 border border-[#C5A059]">
-          <Image
-            src="/aimlogo1.png"
-            alt="Logo"
-            width={40}
-            height={40}
-            className="object-contain"
-          />
-        </div>
-      </div>
+      <VoucherHeader
+        showRightLogo
+        showContactRow
+        bannerClassName="max-h-8 w-auto object-contain mx-auto"
+        className="flex items-center justify-between gap-3 border-b-2 border-[#C5A059] pb-3 text-center"
+      />
 
       <div className="text-center my-1.5">
         <div className="inline-block bg-emerald-800 text-white px-4 py-0.5 rounded-full border border-emerald-600 shadow-xs text-[10px] font-bold tracking-wider uppercase">
@@ -292,39 +245,7 @@ export default function ExpenseVoucherHtmlLayout({
       </div>
 
       {/* সোশ্যাল ও কন্টাক্ট ইনফো */}
-      <div className="pt-1 border-t border-gray-300">
-        <div className="flex flex-wrap justify-center items-center gap-x-1 gap-y-0.5 text-[8.5px] font-semibold text-gray-800">
-          <span className="flex items-center gap-0.5">
-            <Phone className="w-2.5 h-2.5 text-gray-700" />
-            ০১৩১৬-২০৯২০১
-          </span>
-
-          <span className="flex items-center gap-0.5">
-            <BsWhatsapp className="w-2.5 h-2.5 text-green-600" />
-            ০১৭৪৮-৮৮৬১৬১
-          </span>
-
-          <span className="flex items-center gap-0.5">
-            <Globe className="w-2.5 h-2.5 text-blue-500" />
-            www.aimhabiganj.com
-          </span>
-
-          <span className="flex items-center gap-0.5">
-            <Mail className="w-2.5 h-2.5 text-red-500" />
-            aimhabiganj@gmail.com
-          </span>
-
-          <span className="flex items-center gap-0.5">
-            <FaFacebook className="w-2.5 h-2.5 text-blue-600" />
-            aimhabiganj
-          </span>
-
-          <span className="flex items-center gap-0.5">
-            <BsYoutube className="w-2.5 h-2.5 text-red-600" />
-            aimhabiganj
-          </span>
-        </div>
-      </div>
+      <PrintSocialFooter />
     </div>
   );
 }

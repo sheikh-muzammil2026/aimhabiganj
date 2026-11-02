@@ -529,3 +529,134 @@ export function getActiveTeacherShift(category, date = new Date()) {
 
   return "shift1";
 }
+
+/**
+ * Converts English digits in a value to Bengali digits
+ * @param {string|number} num
+ * @returns {string}
+ */
+export function toBengaliNumber(num) {
+  if (num === null || num === undefined) return "";
+  const banglaDigits = {
+    0: "০",
+    1: "১",
+    2: "২",
+    3: "৩",
+    4: "৪",
+    5: "৫",
+    6: "৬",
+    7: "৭",
+    8: "৮",
+    9: "৯",
+  };
+  return String(num).replace(/[0-9]/g, (digit) => banglaDigits[digit]);
+}
+
+/**
+ * Formats a Date in Asia/Dhaka timezone with seconds (e.g. "08:04:12 AM")
+ * @param {Date|string|number} date
+ * @returns {string}
+ */
+export function formatDhakaTimeWithSeconds(date) {
+  try {
+    return new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Dhaka",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    }).format(date instanceof Date ? date : new Date(date));
+  } catch {
+    return "--:--:--";
+  }
+}
+
+/**
+ * Formats a timestamp in Asia/Dhaka timezone without seconds (e.g. "08:04 AM")
+ * @param {string|Date|number} isoString
+ * @returns {string}
+ */
+export function formatDhakaTimeOnly(isoString) {
+  if (!isoString) return "--:--";
+  try {
+    return new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Dhaka",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    }).format(new Date(isoString));
+  } catch {
+    return "--:--";
+  }
+}
+
+/**
+ * Formats a date in bn-BD locale (Asia/Dhaka timezone) with full weekday, year, month, day
+ * @param {string|Date|number} isoStringOrDate
+ * @returns {string}
+ */
+export function formatDhakaDateBangla(isoStringOrDate) {
+  if (!isoStringOrDate) return "";
+  try {
+    return new Intl.DateTimeFormat("bn-BD", {
+      timeZone: "Asia/Dhaka",
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(
+      typeof isoStringOrDate === "string"
+        ? new Date(isoStringOrDate)
+        : isoStringOrDate
+    );
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * Formats a "YYYY-MM" string into Bangla month name and year
+ * @param {string} monthStr
+ * @param {boolean} [useBengaliDigits=false]
+ * @returns {string}
+ */
+export function formatMonthBangla(monthStr, useBengaliDigits = false) {
+  if (!monthStr) return "";
+  const [year, month] = monthStr.split("-");
+  const monthNames = [
+    "জানুয়ারি",
+    "ফেব্রুয়ারি",
+    "মার্চ",
+    "এপ্রিল",
+    "মে",
+    "জুন",
+    "জুলাই",
+    "আগস্ট",
+    "সেপ্টেম্বর",
+    "অক্টোবর",
+    "নভেম্বর",
+    "ডিসেম্বর",
+  ];
+  const monthIndex = parseInt(month, 10) - 1;
+  const fallbackMonth = useBengaliDigits ? toBengaliNumber(month) : month;
+  const formattedYear = useBengaliDigits ? toBengaliNumber(year) : year;
+  return `${monthNames[monthIndex] || fallbackMonth} ${formattedYear}`;
+}
+
+/**
+ * Calculates working hours between check-in and check-out ISO strings
+ * @param {string} checkInIso
+ * @param {string} checkOutIso
+ * @returns {string|null}
+ */
+export function calculateWorkDuration(checkInIso, checkOutIso) {
+  if (!checkInIso || !checkOutIso) return null;
+  const diffMs = new Date(checkOutIso) - new Date(checkInIso);
+  if (diffMs <= 0) return "০ মি.";
+  const totalMinutes = Math.floor(diffMs / (1000 * 60));
+  const hours = Math.floor(totalMinutes / 60);
+  const mins = totalMinutes % 60;
+  if (hours === 0) return `${mins} মি.`;
+  return `${hours} ঘণ্টা ${mins} মি.`;
+}
+

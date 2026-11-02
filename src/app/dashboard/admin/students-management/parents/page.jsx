@@ -21,6 +21,11 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { BsWhatsapp } from "react-icons/bs";
+import {
+  CLASS_ORDER,
+  parseRollNumber,
+  SESSION_YEARS,
+} from "@/lib/studentUtils";
 
 // Dynamic import of PDF print & download button (SSR disabled to ensure clean client-side canvas/pdf generation)
 const ParentsPrintButton = dynamic(
@@ -34,28 +39,6 @@ const ParentsPrintButton = dynamic(
     ),
   }
 );
-
-// Standard class ordering for Madrasah
-const CLASS_ORDER = [
-  "প্লে",
-  "নার্সারি",
-  "প্রথম",
-  "দ্বিতীয়",
-  "তৃতীয়",
-  "চতুর্থ",
-  "পঞ্চম",
-  "ষষ্ঠ",
-  "সপ্তম",
-  "অষ্টম",
-  "নবম",
-  "দশম",
-  "১১শ শ্রেণি",
-  "১২শ শ্রেণি",
-  "কায়দা/আমপারা",
-  "নাজেরা",
-  "সবক",
-  "শুনানি",
-];
 
 function ParentsContent() {
   const [students, setStudents] = useState([]);
@@ -147,21 +130,6 @@ function ParentsContent() {
     if (student.divisionPreHifz?.active) return "প্রি-হিফজ বিভাগ";
     if (student.divisionHifz?.active) return "হিফজুল কুরআন বিভাগ";
     return "সাধারণ";
-  };
-
-  // Roll number numeric parser
-  const parseRollNumber = (r) => {
-    if (!r || r === "N/A") return Infinity;
-    const bnToEn = {
-      "০": "0", "১": "1", "২": "2", "৩": "3", "৪": "4",
-      "৫": "5", "৬": "6", "৭": "7", "৮": "8", "৯": "9",
-    };
-    const enStr = String(r)
-      .split("")
-      .map((char) => bnToEn[char] || char)
-      .join("");
-    const num = parseInt(enStr, 10);
-    return isNaN(num) ? Infinity : num;
   };
 
   // Search filtering
@@ -285,9 +253,7 @@ function ParentsContent() {
     return parts.length > 0 ? parts.join(", ") : "তথ্য নেই";
   };
 
-  const sessionYears = [
-    "২০২৬", "২০২৫", "২০২৪", "২০২৩", "২০২২", "২০২১", "২০২০", "২০১৯", "২০১৮"
-  ];
+  const sessionYears = SESSION_YEARS;
 
   return (
     <div className="p-3 sm:p-5 lg:p-8 bg-slate-50 dark:bg-slate-950 min-h-screen space-y-6">

@@ -2,36 +2,22 @@
 
 import Image from "next/image";
 import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth-client";
 import { formatSubjectName } from "@/lib/subjectFormatter";
 import Pagination from "@/components/dashboard/Pagination";
-import { Globe, Mail, Phone } from "lucide-react";
-import { BsWhatsapp, BsYoutube } from "react-icons/bs";
-import { FaFacebook } from "react-icons/fa";
+import PrintSignatures from "@/components/shared/print/PrintSignatures";
+import PrintSocialFooter from "@/components/shared/print/PrintSocialFooter";
+import useUrlPagination from "@/hooks/useUrlPagination";
+import { toBengaliDigits } from "@/lib/studentUtils";
 
 const API_BASE_URL = (
   process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000"
 ).replace(/\/$/, "");
 
-const toBengaliDigits = (num) => {
-  if (num === null || num === undefined) return "";
-  const bengaliDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
-  return String(num).replace(/[0-9]/g, (digit) => bengaliDigits[Number(digit)]);
-};
-
 function ClassWiseResultContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-
-  const pageParam = parseInt(searchParams.get("page"), 10);
-  const limitParam = parseInt(searchParams.get("limit"), 10);
-
-  const currentPage =
-    Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
-  const currentLimit = [10, 20, 50, 100].includes(limitParam) ? limitParam : 20;
+  const { currentPage, currentLimit, updatePaginationParams, resetPageToFirst } =
+    useUrlPagination();
 
   const { data: session } = authClient.useSession();
   const user = session?.user;
@@ -81,22 +67,6 @@ function ClassWiseResultContent() {
   const [isPublished, setIsPublished] = useState(false);
   const [loading, setLoading] = useState(false);
   const [toggling, setToggling] = useState(false);
-
-  const updatePaginationParams = useCallback(
-    (newPage, newLimit) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("page", String(newPage));
-      params.set("limit", String(newLimit || currentLimit));
-      router.push(`${pathname}?${params.toString()}`, { scroll: false });
-    },
-    [searchParams, currentLimit, pathname, router],
-  );
-
-  const resetPageToFirst = useCallback(() => {
-    if (currentPage !== 1) {
-      updatePaginationParams(1, currentLimit);
-    }
-  }, [currentPage, currentLimit, updatePaginationParams]);
 
   const [principalSignatureSrc] = useState("/principle's_signature.jpg");
   const [controllerSignatureSrc] = useState("/anarul.png");
@@ -1490,78 +1460,17 @@ function ClassWiseResultContent() {
 
                 {/* ৫. ফুটার লেআউট (স্বাক্ষর এরিয়া এবং সোশ্যাল ও কন্টাক্ট ইনফো) */}
                 <div className="mt-auto pt-2 print-page-break-avoid relative z-10 print-footer-container">
-                  <div className="flex justify-between items-end px-4 sm:px-12 mb-6">
-                    <div className="text-center flex flex-col items-center">
-                      <div className="relative w-28 sm:w-36 h-10 flex items-end justify-center mb-1">
-                        <Image
-                          src={controllerSignatureSrc || "/anarul.png"}
-                          alt="Exam Controller Signature"
-                          width={90}
-                          height={34}
-                          priority
-                          className="signature-controller max-h-10 w-auto object-contain mix-blend-multiply contrast-[800%] brightness-[60%] grayscale -rotate-90 mx-auto"
-                        />
-                      </div>
-                      <div className="w-28 sm:w-36 border-b border-slate-800 mb-1"></div>
-                      <span className="text-[9.5px] sm:text-xs font-bold text-slate-800 block">
-                        পরীক্ষা নিয়ন্ত্রক
-                      </span>
-                    </div>
+                  <PrintSignatures
+                    variant="large"
+                    controllerSignatureSrc={controllerSignatureSrc}
+                    principalSignatureSrc={principalSignatureSrc}
+                    controllerLabel="পরীক্ষা নিয়ন্ত্রক"
+                  />
 
-                    <div className="text-center flex flex-col items-center">
-                      <div className="relative w-28 sm:w-36 h-10 flex items-end justify-center mb-1">
-                        <Image
-                          src={
-                            principalSignatureSrc ||
-                            "/principle's_signature.jpg"
-                          }
-                          alt="Principal Signature"
-                          width={90}
-                          height={34}
-                          priority
-                          className="signature-principal max-h-10 w-auto object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45 mx-auto"
-                        />
-                      </div>
-                      <div className="w-28 sm:w-36 border-b border-slate-800 mb-1"></div>
-                      <span className="text-[9.5px] sm:text-xs font-bold text-slate-800 block">
-                        প্রিন্সিপালের স্বাক্ষর
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="relative z-10 pt-2 border-t border-gray-300 print-social-info">
-                    <div className="flex flex-wrap justify-center items-center gap-x-2.5 gap-y-0.5 text-[8.5px] sm:text-[9px] font-semibold text-gray-800">
-                      <span className="flex items-center gap-0.5">
-                        <Phone className="w-2.5 h-2.5 text-gray-700" />
-                        ০১৩১৬-২০৯২০১
-                      </span>
-
-                      <span className="flex items-center gap-0.5">
-                        <BsWhatsapp className="w-2.5 h-2.5 text-green-600" />
-                        ০১৭৪৮-৮৮৬১৬১
-                      </span>
-
-                      <span className="flex items-center gap-0.5">
-                        <Globe className="w-2.5 h-2.5 text-blue-500" />
-                        www.aimhabiganj.com
-                      </span>
-
-                      <span className="flex items-center gap-0.5">
-                        <Mail className="w-2.5 h-2.5 text-red-500" />
-                        aimhabiganj@gmail.com
-                      </span>
-
-                      <span className="flex items-center gap-0.5">
-                        <FaFacebook className="w-2.5 h-2.5 text-blue-600" />
-                        aimhabiganj
-                      </span>
-
-                      <span className="flex items-center gap-0.5">
-                        <BsYoutube className="w-2.5 h-2.5 text-red-600" />
-                        aimhabiganj
-                      </span>
-                    </div>
-                  </div>
+                  <PrintSocialFooter
+                    className="relative z-10 pt-2 border-t border-gray-300 print-social-info"
+                    innerClassName="flex flex-wrap justify-center items-center gap-x-2.5 gap-y-0.5 text-[8.5px] sm:text-[9px] font-semibold text-gray-800"
+                  />
                 </div>
               </div>
             </div>

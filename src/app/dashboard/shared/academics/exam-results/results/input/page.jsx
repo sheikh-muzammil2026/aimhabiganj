@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth-client";
 import Pagination from "@/components/dashboard/Pagination";
+import useUrlPagination from "@/hooks/useUrlPagination";
 
 const CLASS_SUBJECTS = {
   প্লে: ["আরবি-০১", "ইংরেজি", "বাংলা", "গণিত"],
@@ -129,17 +129,8 @@ const API_BASE_URL = (
 ).replace(/\/$/, "");
 
 function TeacherMarkInputContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-
-  // URL search params থেকে page এবং limit সিঙ্ক (ডিফল্ট limit: 20)
-  const pageParam = parseInt(searchParams.get("page"), 10);
-  const limitParam = parseInt(searchParams.get("limit"), 10);
-
-  const currentPage =
-    Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
-  const currentLimit = [10, 20, 50, 100].includes(limitParam) ? limitParam : 20;
+  const { currentPage, currentLimit, updatePaginationParams, resetPageToFirst } =
+    useUrlPagination();
 
   const { data: session } = authClient.useSession();
   const user = session?.user;
@@ -202,24 +193,6 @@ function TeacherMarkInputContent() {
 
   // ফলাফল প্রকাশিত হলে নন-অ্যাডমিনদের জন্য লক স্টেট
   const isLocked = isPublished && !isAdmin;
-
-  // URL query params আপডেট করার হেলপার ফাংশন
-  const updatePaginationParams = useCallback(
-    (newPage, newLimit) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("page", String(newPage));
-      params.set("limit", String(newLimit || currentLimit));
-      router.push(`${pathname}?${params.toString()}`, { scroll: false });
-    },
-    [searchParams, currentLimit, pathname, router],
-  );
-
-  // ফিল্টার পরিবর্তন হলে পেজ নম্বর ১-এ রিসেট করার হেলপার
-  const resetPageToFirst = useCallback(() => {
-    if (currentPage !== 1) {
-      updatePaginationParams(1, currentLimit);
-    }
-  }, [currentPage, currentLimit, updatePaginationParams]);
 
   // ২. শ্রেণি, বিষয়, পরীক্ষা ও বছর পরিবর্তন হলে শিক্ষার্থীদের তথ্য ও পূর্বের নম্বর ফেচ করা (পেজিনেটেড)
   const fetchClassData = useCallback(async () => {

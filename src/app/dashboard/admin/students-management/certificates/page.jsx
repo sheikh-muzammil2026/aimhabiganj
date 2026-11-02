@@ -1,10 +1,15 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Image from "next/image";
 import { QRCodeSVG } from "qrcode.react";
 import Pagination from "@/components/dashboard/Pagination";
+import useUrlPagination from "@/hooks/useUrlPagination";
+import {
+  getClassOptions,
+  getStudentClassDetails as getBaseStudentClassDetails,
+  SESSION_YEARS,
+} from "@/lib/studentUtils";
 import {
   Award,
   Search,
@@ -73,16 +78,8 @@ const CERTIFICATE_TYPES = [
 ];
 
 function CertificatesContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-
-  // URL pagination params
-  const pageParam = parseInt(searchParams.get("page"), 10);
-  const limitParam = parseInt(searchParams.get("limit"), 10);
-
-  const currentPage = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
-  const currentLimit = [10, 20, 50, 100].includes(limitParam) ? limitParam : 20;
+  const { currentPage, currentLimit, updatePaginationParams, resetPageToFirst } =
+    useUrlPagination();
 
   // Student fetching states
   const [students, setStudents] = useState([]);
@@ -114,23 +111,6 @@ function CertificatesContent() {
   const [mobileActiveTab, setMobileActiveTab] = useState("list"); // 'list' | 'preview'
 
   const certificateRef = useRef(null);
-
-  // Update URL params
-  const updatePaginationParams = useCallback(
-    (newPage, newLimit) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("page", String(newPage));
-      params.set("limit", String(newLimit || currentLimit));
-      router.push(`${pathname}?${params.toString()}`, { scroll: false });
-    },
-    [searchParams, currentLimit, pathname, router]
-  );
-
-  const resetPageToFirst = useCallback(() => {
-    if (currentPage !== 1) {
-      updatePaginationParams(1, currentLimit);
-    }
-  }, [currentPage, currentLimit, updatePaginationParams]);
 
   // Fetch Students API
   const fetchStudents = useCallback(async () => {
@@ -212,63 +192,12 @@ function CertificatesContent() {
     }
   }, [selectedStudent, certType]);
 
-  // Helper for academy classes
-  const getAcademyClasses = (academyType) => {
-    if (academyType === "প্রাক-প্রাথমিক") return ["প্লে", "নার্সারি"];
-    if (academyType === "প্রাথমিক") return ["প্রথম", "দ্বিতীয়", "তৃতীয়", "চতুর্থ", "পঞ্চম"];
-    if (academyType === "মাধ্যমিক") return ["ষষ্ঠ", "সপ্তম", "অষ্টম", "নবম", "দশম"];
-    if (academyType === "উচ্চমাধ্যমিক") return ["১১শ শ্রেণি", "১২শ শ্রেণি"];
-    return [];
-  };
-
-  // Helper for dynamic class options
-  const getClassOptions = () => {
-    if (selectedDivision === "preHifz") return ["কায়দা/আমপারা", "নাজেরা"];
-    if (selectedDivision === "hifz") return ["সবক", "শুনানি"];
-    if (selectedDivision === "academy") {
-      if (selectedAcademyType !== "all") {
-        return getAcademyClasses(selectedAcademyType);
-      }
-      return [
-        "প্লে", "নার্সারি",
-        "প্রথম", "দ্বিতীয়", "তৃতীয়", "চতুর্থ", "পঞ্চম",
-        "ষষ্ঠ", "সপ্তম", "অষ্টম", "নবম", "দশম",
-        "১১শ শ্রেণি", "১২শ শ্রেণি",
-      ];
-    }
-    return [];
-  };
-
   // Helper to extract student's active class & division
-  const getStudentClassDetails = (student) => {
-    if (!student) return { divisionName: "N/A", className: "N/A", type: "N/A" };
-    if (student.divisionPreHifz?.active) {
-      return {
-        divisionName: "প্রি-হিফজ",
-        className: student.divisionPreHifz.class || "N/A",
-        type: student.divisionPreHifz.type || "N/A",
-      };
-    }
-    if (student.divisionHifz?.active) {
-      return {
-        divisionName: "হিফজুল কুরআন",
-        className: student.divisionHifz.class || "N/A",
-        type: student.divisionHifz.type || "N/A",
-      };
-    }
-    if (student.divisionAcademy?.active) {
-      return {
-        divisionName: "একাডেমিক",
-        className: student.divisionAcademy.class || "N/A",
-        type: student.divisionAcademy.type || "N/A",
-      };
-    }
-    return {
-      divisionName: "সাধারণ",
-      className: student.officeUse?.recommendedClass || "N/A",
-      type: "N/A",
-    };
-  };
+  const getStudentClassDetails = (student) =>
+    getBaseStudentClassDetails(student, {
+      hifzLabel: "হিফজুল কুরআন",
+      fallbackLabel: "সাধারণ",
+    });
 
   // Format Bangladesh Date string
   const formatBanglaDate = (dateStr) => {
@@ -301,9 +230,7 @@ function CertificatesContent() {
     resetPageToFirst();
   };
 
-  const sessionYears = [
-    "২০২৬", "২০২৫", "২০২৪", "২০২৩", "২০২২", "২০২১", "২০২০", "২০১৯", "২০১৮"
-  ];
+  const sessionYears = SESSION_YEARS;
 
   const currentClassDetails = selectedStudent ? getStudentClassDetails(selectedStudent) : null;
   const currentCertConfig = CERTIFICATE_TYPES.find((c) => c.id === certType) || CERTIFICATE_TYPES[0];
@@ -481,7 +408,7 @@ function CertificatesContent() {
               <option value="all">
                 {selectedDivision === "all" ? "প্রথমে বিভাগ নির্বাচন করুন" : "সকল শ্রেণি"}
               </option>
-              {getClassOptions().map((cls, idx) => (
+              {getClassOptions(selectedDivision, selectedAcademyType).map((cls, idx) => (
                 <option key={idx} value={cls}>
                   {cls}
                 </option>

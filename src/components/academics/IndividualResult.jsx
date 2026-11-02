@@ -1,38 +1,14 @@
 "use client";
 
-import { Globe, Mail, Phone, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import Image from "next/image";
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import { BsWhatsapp, BsYoutube } from "react-icons/bs";
-import { FaFacebook } from "react-icons/fa";
 import { authClient } from "@/lib/auth-client";
 import { formatSubjectName } from "@/lib/subjectFormatter";
-
-const toBengaliDigits = (num) => {
-  if (num === null || num === undefined) return "";
-  const bengaliDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
-  return String(num).replace(/[0-9]/g, (digit) => bengaliDigits[Number(digit)]);
-};
-
-const toEnglishDigits = (str) => {
-  if (!str) return "";
-  const bengaliDigits = {
-    "০": "0",
-    "১": "1",
-    "২": "2",
-    "৩": "3",
-    "৪": "4",
-    "৫": "5",
-    "৬": "6",
-    "৭": "7",
-    "৮": "8",
-    "৯": "9",
-  };
-  return String(str).replace(
-    /[০-৯]/g,
-    (digit) => bengaliDigits[digit] || digit,
-  );
-};
+import { toBengaliDigits, toEnglishDigits } from "@/lib/studentUtils";
+import PrintInstitutionalHeader from "@/components/shared/print/PrintInstitutionalHeader";
+import PrintSignatures from "@/components/shared/print/PrintSignatures";
+import PrintSocialFooter from "@/components/shared/print/PrintSocialFooter";
 
 /**
  * Grade to remark conversion utility based on institutional academic standards.
@@ -1016,35 +992,16 @@ export default function ResultSheetGenerator() {
                       <div className="flex-1 flex flex-col">
                         {/* হেডার: লোগো ও মাদরাসার নাম */}
                         <div>
-                          <div className="flex justify-between items-center relative gap-2 flex-shrink-0 w-full overflow-hidden">
-                            {/* মাদ্রাসার লোগো */}
-                            <div className="w-20 h-20 md:w-45 md:h-45 print:!w-36 print:!h-36 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-3">
-                              <Image
-                                src={"/aimlogo1.png"}
-                                alt="Institution Logo"
-                                width={200}
-                                height={200}
-                                quality={100}
-                                priority
-                                className="w-full h-full object-cover scale-[1.08] transform-gpu"
-                              />
-                            </div>
-
-                            {/* লোগো ও ছবির মাঝখানে ব্যানার */}
-                            <div className="flex-1 text-center min-w-0">
-                              <div className="flex-grow text-center">
-                                <Image
-                                  src={"/banner_routine.png"}
-                                  alt="Institution Banner"
-                                  width={1000}
-                                  height={400}
-                                  quality={100}
-                                  priority
-                                  className="w-full h-auto max-h-45 object-fill mx-auto print:max-h-45"
-                                />
-                              </div>
-                            </div>
-                          </div>
+                          <PrintInstitutionalHeader
+                            bannerSrc="/banner_routine.png"
+                            logoWrapperClassName="w-20 h-20 md:w-45 md:h-45 print:!w-36 print:!h-36 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-3"
+                            logoWidth={200}
+                            logoHeight={200}
+                            logoClassName="w-full h-full object-cover scale-[1.08] transform-gpu"
+                            bannerWidth={1000}
+                            bannerHeight={400}
+                            bannerClassName="w-full h-auto max-h-45 object-fill mx-auto print:max-h-45"
+                          />
 
                           {/* ডাবল গোল্ডেন লাইন সেপারেটর */}
                           <div className="border-t-2 border-b border-[#C5A059] my-2 py-0.5"></div>
@@ -1460,78 +1417,10 @@ export default function ResultSheetGenerator() {
                       {/* ফুটার লেআউট (স্বাক্ষর এরিয়া এবং সোশ্যাল ও কন্টাক্ট ইনফো) */}
                       <div className="mt-auto flex-shrink-0 pt-2 relative z-10">
                         {/* ৪. স্বাক্ষর সেকশন */}
-                        <div className="flex justify-between items-end my-1 px-4 flex-shrink-0">
-                          {/* পরীক্ষা নিয়ন্ত্রক এর স্বাক্ষর */}
-                          <div className="text-center flex flex-col items-center print:mt-auto relative">
-                            <div className="relative w-28 h-5">
-                              <Image
-                                src={"/anarul.png"}
-                                alt="Controller Signature"
-                                width={100}
-                                height={40}
-                                unoptimized
-                                className="absolute -top-1 right-6 h-6 w-12 object-contain mix-blend-multiply contrast-[800%] brightness-[60%] grayscale -rotate-90"
-                              />
-                            </div>
-                            <div className="w-28 border-b border-gray-800 mb-0.5"></div>
-                            <span className="text-[9.5px] font-bold text-gray-800">
-                              পরীক্ষা নিয়ন্ত্রকের স্বাক্ষর
-                            </span>
-                          </div>
-
-                          {/* প্রিন্সিপাল এর স্বাক্ষর */}
-                          <div className="text-center flex flex-col items-center">
-                            <div className="relative w-28 h-5 print:mt-auto relative">
-                              <Image
-                                src={"/principle's_signature.jpg"}
-                                alt="Principal Signature"
-                                width={100}
-                                height={40}
-                                unoptimized
-                                className="absolute -top-2 right-6 h-6 w-12 object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45"
-                              />
-                            </div>
-                            <div className="w-28 border-b border-gray-800 mb-0.5"></div>
-                            <span className="text-[9.5px] font-bold text-gray-800">
-                              প্রিন্সিপালের স্বাক্ষর
-                            </span>
-                          </div>
-                        </div>
+                        <PrintSignatures principalTopClass="-top-2" />
 
                         {/* সোশ্যাল ও কন্টাক্ট ইনফো */}
-                        <div className="pt-1 border-t border-gray-300">
-                          <div className="flex flex-wrap justify-center items-center gap-x-1 gap-y-0.5 text-[8.5px] font-semibold text-gray-800">
-                            <span className="flex items-center gap-0.5">
-                              <Phone className="w-2.5 h-2.5 text-gray-700" />
-                              ০১৩১৬-২০৯২০১
-                            </span>
-
-                            <span className="flex items-center gap-0.5">
-                              <BsWhatsapp className="w-2.5 h-2.5 text-green-600" />
-                              ০১৭৪৮-৮৮৬১৬১
-                            </span>
-
-                            <span className="flex items-center gap-0.5">
-                              <Globe className="w-2.5 h-2.5 text-blue-500" />
-                              www.aimhabiganj.com
-                            </span>
-
-                            <span className="flex items-center gap-0.5">
-                              <Mail className="w-2.5 h-2.5 text-red-500" />
-                              aimhabiganj@gmail.com
-                            </span>
-
-                            <span className="flex items-center gap-0.5">
-                              <FaFacebook className="w-2.5 h-2.5 text-blue-600" />
-                              aimhabiganj
-                            </span>
-
-                            <span className="flex items-center gap-0.5">
-                              <BsYoutube className="w-2.5 h-2.5 text-red-600" />
-                              aimhabiganj
-                            </span>
-                          </div>
-                        </div>
+                        <PrintSocialFooter />
                       </div>
                     </div>
                   </div>

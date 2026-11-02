@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { getAcademyClasses as getAcademyClassesByType } from "@/lib/studentUtils";
 
 // বাংলাদেশের জেলা এবং তাদের থানার লিস্ট ডেটা
 const bdDistrictsAndThanas = {
@@ -221,13 +222,7 @@ export default function AdmissionFormPage1({ formData, handleChange, handleNeste
   };
 
   // ১০. একাডেমি ক্লাস লিস্ট
-  const getAcademyClasses = () => {
-    if (selectedAcademyType === "প্রাক-প্রাথমিক") return ["প্লে", "নার্সারি"];
-    if (selectedAcademyType === "প্রাথমিক") return ["প্রথম", "দ্বিতীয়", "তৃতীয়", "চতুর্থ", "পঞ্চম"];
-    if (selectedAcademyType === "মাধ্যমিক") return ["ষষ্ঠ", "সপ্তম", "অষ্টম", "নবম", "দশম"];
-    if (selectedAcademyType === "উচ্চমাধ্যমিক") return ["১১শ শ্রেণি", "১২শ শ্রেণি"];
-    return [];
-  };
+  const getAcademyClasses = () => getAcademyClassesByType(selectedAcademyType);
   return (
     <>
       <style jsx global>{`

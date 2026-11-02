@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import Pagination from "@/components/dashboard/Pagination";
 import {
   Users,
   Search,
@@ -561,29 +562,31 @@ export default function AdministrationPage() {
           </div>
 
           {/* Pagination Footer */}
-          <div className="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-            <span>
-              পৃষ্ঠা {page} এর {totalPages} (মোট {totalUsers} জন ইউজার)
-            </span>
-            <div className="flex items-center gap-2">
-              <button
-                disabled={page <= 1 || loading}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
+          <Pagination
+            variant="simple"
+            currentPage={page}
+            totalPages={totalPages}
+            totalItems={totalUsers}
+            disabled={loading}
+            statusText={`পৃষ্ঠা ${page} এর ${totalPages} (মোট ${totalUsers} জন ইউজার)`}
+            prevLabel={
+              <>
                 <ChevronLeft className="w-3.5 h-3.5" />
                 আগের
-              </button>
-              <button
-                disabled={page >= totalPages || loading}
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
+              </>
+            }
+            nextLabel={
+              <>
                 পরের
                 <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
+              </>
+            }
+            containerClassName="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500"
+            statusClassName=""
+            prevButtonClassName="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            nextButtonClassName="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            onPageChange={setPage}
+          />
         </div>
       </div>
 

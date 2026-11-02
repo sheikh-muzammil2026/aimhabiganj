@@ -1,11 +1,18 @@
 "use client";
 
-import { Globe, Mail, Phone } from "lucide-react";
+import Pagination from "@/components/dashboard/Pagination";
+import StudentFilterBar from "@/components/dashboard/students/StudentFilterBar";
+import AutoScaledText from "@/components/shared/AutoScaledText";
+import PrintInstitutionalHeader from "@/components/shared/print/PrintInstitutionalHeader";
+import PrintSignatures from "@/components/shared/print/PrintSignatures";
+import PrintSocialFooter from "@/components/shared/print/PrintSocialFooter";
+import {
+  getStudentClassDetails,
+  RECENT_SESSION_YEARS,
+} from "@/lib/studentUtils";
 import Image from "next/image";
 import { QRCodeSVG } from "qrcode.react";
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { BsWhatsapp, BsYoutube } from "react-icons/bs";
-import { FaFacebook } from "react-icons/fa";
 import { useReactToPrint } from "react-to-print";
 
 const ADMIT_CARD_PAGE_STYLE = `
@@ -204,87 +211,10 @@ export default function AdmitCardGenerator() {
     fetchAdmitCards();
   }, [selectedIds, examName]);
 
-  // একাডেমি টাইপ ভিত্তিক ক্লাসের তালিকা পাওয়ার ফাংশন
-  const getAcademyClasses = (academyType) => {
-    if (academyType === "প্রাক-প্রাথমিক") return ["প্লে", "নার্সারি"];
-    if (academyType === "প্রাথমিক")
-      return ["প্রথম", "দ্বিতীয়", "তৃতীয়", "চতুর্থ", "পঞ্চম"];
-    if (academyType === "মাধ্যমিক")
-      return ["ষষ্ঠ", "সপ্তম", "অষ্টম", "নবম", "দশম"];
-    if (academyType === "উচ্চমাধ্যমিক") return ["১১শ শ্রেণি", "১২ব শ্রেণি"];
-    return [];
-  };
-
-  // বিভাগ অনুযায়ী ক্লাসের ড্রপডাউন অপশন
-  const getClassOptions = () => {
-    if (selectedDivision === "preHifz") {
-      return ["কায়দা/আমপারা", "নাজেরা"];
-    }
-    if (selectedDivision === "hifz") {
-      return ["সবক", "শুনানি"];
-    }
-    if (selectedDivision === "academy") {
-      if (selectedAcademyType !== "all") {
-        return getAcademyClasses(selectedAcademyType);
-      }
-      return [
-        "প্লে",
-        "নার্সারি",
-        "প্রথম",
-        "দ্বিতীয়",
-        "তৃতীয়",
-        "চতুর্থ",
-        "পঞ্চম",
-        "ষষ্ঠ",
-        "সপ্তম",
-        "অষ্টম",
-      ];
-    }
-    return [];
-  };
-
-  // শিক্ষার্থীর একটিভ বিভাগ, ক্লাস ও টাইপ বের করার হেলপার ফাংশন
-  const getStudentClassDetails = (student) => {
-    if (student?.divisionPreHifz?.active) {
-      return {
-        divisionKey: "preHifz",
-        divisionName: "প্রি-হিফজ",
-        className: student.divisionPreHifz.class || "N/A",
-        type: student.divisionPreHifz.type || "N/A",
-        academyType: "",
-      };
-    }
-    if (student?.divisionHifz?.active) {
-      return {
-        divisionKey: "hifz",
-        divisionName: "হিফজ",
-        className: student.divisionHifz.class || "N/A",
-        type: student.divisionHifz.type || "N/A",
-        academyType: "",
-      };
-    }
-    if (student?.divisionAcademy?.active) {
-      return {
-        divisionKey: "academy",
-        divisionName: "একাডেমিক",
-        className: student.divisionAcademy.class || "N/A",
-        type: student.divisionAcademy.type || "N/A",
-        academyType: student.divisionAcademy.academyType || "",
-      };
-    }
-    return {
-      divisionKey: "none",
-      divisionName: "অন্যান্য",
-      className: student?.officeUse?.recommendedClass || "N/A",
-      type: "N/A",
-      academyType: "",
-    };
-  };
-
   // ডায়নামিক ফিল্টারিং লজিক (ব্যাকএন্ড দ্বারা নিয়ন্ত্রিত)
   const filteredStudents = students;
 
-  const sessionYears = ["২০২৬", "২০২৫", "২০২৪", "২০২৩", "২০২২", "২০২১"];
+  const sessionYears = RECENT_SESSION_YEARS;
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
@@ -335,89 +265,6 @@ export default function AdmitCardGenerator() {
   };
 
   const studentsToPrint = students.filter((s) => selectedIds.includes(s._id));
-
-  // অটো-ফিট নাম এবং তথ্যের জন্য SVG টেক্সট কম্পোনেন্ট (ফুল উইডথ নিবে ও অটো ছোট/বড় হবে)
-  const AutoScaledText = ({
-    text,
-    className = "",
-    fontWeight = "bold",
-    fill = "#000",
-  }) => {
-    return (
-      <div
-        className={`w-full h-4 flex items-center overflow-hidden ${className}`}
-      >
-        {/* প্রিন্ট CSS - শুধুমাত্র এই পেজেই কাজ করবে */}
-        <style jsx global>{`
-          @media print {
-            @page {
-              size: A5 portrait;
-              margin: 0mm !important;
-            }
-
-            html,
-            body {
-              width: 100% !important;
-              height: 100% !important;
-              margin: 0 !important;
-              padding: 0 !important;
-              background: #fff !important;
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
-            }
-
-            body * {
-              visibility: hidden;
-            }
-
-            .print-area-container,
-            .print-area-container * {
-              visibility: visible;
-            }
-
-            .print-area-container {
-              position: absolute;
-              left: 0;
-              top: 0;
-              width: 100%;
-            }
-
-            .page-break {
-              width: 148mm !important;
-              height: 209mm !important;
-              margin: 0 auto !important;
-              padding: 6mm !important;
-              box-sizing: border-box !important;
-              page-break-after: always !important;
-              break-after: page !important;
-              page-break-inside: avoid !important;
-              break-inside: avoid !important;
-              overflow: hidden !important;
-            }
-          }
-        `}</style>
-
-        <svg
-          className="w-full h-full"
-          viewBox="0 0 300 24"
-          preserveAspectRatio="none"
-        >
-          <text
-            x="0"
-            y="18"
-            fontSize="18"
-            fontWeight={fontWeight}
-            fill={fill}
-            // fontFamily="sans-serif"
-            textLength="300"
-            lengthAdjust="spacingAndGlyphs"
-          >
-            {text || "N/A"}
-          </text>
-        </svg>
-      </div>
-    );
-  };
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-[#09101d] text-gray-800 dark:text-gray-200 p-3 sm:p-4 md:p-6">
@@ -470,110 +317,23 @@ export default function AdmitCardGenerator() {
         </div>
 
         {/* ফিল্টারিং অপশনসমূহ */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
-              খুঁজুন (নাম/আইডি/মোবাইল)
-            </label>
-            <input
-              type="text"
-              placeholder="নাম, আইডি, রোল বা ফোন..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full border border-gray-300 dark:border-slate-750 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
-              শিক্ষাবর্ষ / সেশন
-            </label>
-            <select
-              value={selectedSession}
-              onChange={(e) => {
-                setSelectedSession(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full border border-gray-300 dark:border-slate-750 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">সকল সেশন</option>
-              {sessionYears.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
-              বিভাগ (Division)
-            </label>
-            <select
-              value={selectedDivision}
-              onChange={(e) => {
-                setSelectedDivision(e.target.value);
-                setSelectedAcademyType("all");
-                setSelectedClass("all");
-                setCurrentPage(1);
-              }}
-              className="w-full border border-gray-300 dark:border-slate-750 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">সকল বিভাগ</option>
-              <option value="preHifz">প্রি-হিফজ</option>
-              <option value="hifz">হিফজ</option>
-              <option value="academy">একাডেমিক</option>
-            </select>
-          </div>
-
-          {selectedDivision === "academy" && (
-            <div>
-              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                একাডেমি টাইপ
-              </label>
-              <select
-                value={selectedAcademyType}
-                onChange={(e) => {
-                  setSelectedAcademyType(e.target.value);
-                  setSelectedClass("all");
-                  setCurrentPage(1);
-                }}
-                className="w-full border border-gray-300 dark:border-slate-750 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="all">সকল টাইপ</option>
-                <option value="প্রাক-প্রাথমিক">প্রাক-প্রাথমিক</option>
-                <option value="প্রাথমিক">প্রাথমিক</option>
-                <option value="মাধ্যমিক">মাধ্যমিক</option>
-                <option value="উচ্চমাধ্যমিক">উচ্চমাধ্যমিক</option>
-              </select>
-            </div>
-          )}
-
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
-              শ্রেণি
-            </label>
-            <select
-              value={selectedClass}
-              onChange={(e) => {
-                setSelectedClass(e.target.value);
-                setCurrentPage(1);
-              }}
-              disabled={selectedDivision === "all"}
-              className="w-full border border-gray-300 dark:border-slate-750 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:disabled:bg-slate-800/40 disabled:opacity-50"
-            >
-              <option value="all">সকল শ্রেণি</option>
-              {getClassOptions().map((cls) => (
-                <option key={cls} value={cls}>
-                  {cls}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+        <StudentFilterBar
+          variant="labeled"
+          sessionLabel="শিক্ষাবর্ষ / সেশন"
+          divisionLabel="বিভাগ (Division)"
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          selectedSession={selectedSession}
+          onSessionChange={setSelectedSession}
+          sessionYears={sessionYears}
+          selectedDivision={selectedDivision}
+          onDivisionChange={setSelectedDivision}
+          selectedAcademyType={selectedAcademyType}
+          onAcademyTypeChange={setSelectedAcademyType}
+          selectedClass={selectedClass}
+          onClassChange={setSelectedClass}
+          onResetPage={() => setCurrentPage(1)}
+        />
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t dark:border-slate-800 pt-4 mb-4">
           <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-semibold text-center sm:text-left">
@@ -719,32 +479,14 @@ export default function AdmitCardGenerator() {
         </div>
 
         {/* ৫. পেজিনেশন কন্ট্রোলস */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white dark:bg-[#0f172a] p-4 border-t border-slate-100 dark:border-slate-800/80 mt-4 rounded-b-lg">
-          <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
-            পেজ {currentPage} এর {totalPages} (মোট {totalStudents} জন
-            শিক্ষার্থী)
-          </span>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              disabled={currentPage <= 1}
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              className="px-4 py-2 text-xs font-bold text-gray-700 dark:text-slate-350 bg-gray-100 dark:bg-slate-900 hover:bg-gray-200 dark:hover:bg-slate-800 border border-gray-200 dark:border-gray-800 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              ◀ পূর্ববর্তী (Previous)
-            </button>
-            <button
-              type="button"
-              disabled={currentPage >= totalPages}
-              onClick={() =>
-                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-              }
-              className="px-4 py-2 text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              পরবর্তী (Next) ▶
-            </button>
-          </div>
-        </div>
+        <Pagination
+          variant="simple"
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalStudents}
+          onPageChange={setCurrentPage}
+          nextButtonClassName="px-4 py-2 text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        />
       </div>
 
       {/* ----------------- ২. এডমিট কার্ড ভিউ (প্রিন্টের সময় শো করবে) ----------------- */}
@@ -808,35 +550,7 @@ export default function AdmitCardGenerator() {
                   {/* মেইন কন্টেন্ট এলাকা */}
                   <div className="relative z-10 flex-1 flex flex-col justify-between overflow-hidden">
                     {/* ১. হেডার সেকশন: Logo + Banner + Student Photo */}
-                    <div className="flex justify-between items-center relative gap-2 flex-shrink-0 w-full overflow-hidden">
-                      {/* মাদ্রাসার লোগো */}
-                      <div className="w-22 h-22 rounded-full overflow-hidden flex-shrink-0 relative flex items-center justify-center">
-                        <Image
-                          src={"/aimlogo1.png"}
-                          alt="Institution Logo"
-                          width={120}
-                          height={120}
-                          quality={100}
-                          priority
-                          className="w-full h-full object-cover scale-[1.05] transform-gpu"
-                        />
-                      </div>
-
-                      {/* লোগো ও ছবির মাঝখানে ব্যানার */}
-                      <div className="flex-1 text-center min-w-0">
-                        <div className="w-full text-center">
-                          <Image
-                            src={"/banner.png"}
-                            alt="Institution Banner"
-                            width={1200}
-                            height={240}
-                            quality={100}
-                            priority
-                            className="w-full h-auto max-h-24 object-contain mx-auto"
-                          />
-                        </div>
-                      </div>
-                    </div>
+                    <PrintInstitutionalHeader />
 
                     <div className="flex justify-between items-center border-t-4 border-double border-[#C5A059] pt-1">
                       {/* ১. বামে QR Code */}
@@ -1067,80 +781,14 @@ export default function AdmitCardGenerator() {
                     </div>
 
                     {/* ৪. স্বাক্ষর সেকশন */}
-                    <div className="flex justify-between items-end my-1 px-4 flex-shrink-0">
-                      {/* পরীক্ষা নিয়ন্ত্রক এর স্বাক্ষর */}
-                      <div className="text-center flex flex-col items-center print:mt-auto relative">
-                        <div className="relative w-28 h-5">
-                          <Image
-                            src={"/anarul.png"}
-                            alt="Controller Signature"
-                            width={100}
-                            height={40}
-                            unoptimized
-                            className="absolute -top-1 right-6 h-6 w-12 object-contain mix-blend-multiply contrast-[800%] brightness-[60%] grayscale -rotate-90"
-                          />
-                        </div>
-                        <div className="w-28 border-b border-gray-800 mb-0.5"></div>
-                        <span className="text-[9.5px] font-bold text-gray-800">
-                          পরীক্ষা নিয়ন্ত্রকের স্বাক্ষর
-                        </span>
-                      </div>
-
-                      {/* প্রিন্সিপাল এর স্বাক্ষর */}
-                      <div className="text-center flex flex-col items-center">
-                        <div className="relative w-28 h-5 print:mt-auto relative">
-                          <Image
-                            src={"/principle's_signature.jpg"}
-                            alt="Principal Signature"
-                            width={100}
-                            height={40}
-                            unoptimized
-                            className="absolute -top-1 right-6 h-6 w-12 object-contain mix-blend-multiply contrast-[800%] brightness-[80%] grayscale -rotate-45"
-                          />
-                        </div>
-                        <div className="w-28 border-b border-gray-800 mb-0.5"></div>
-                        <span className="text-[9.5px] font-bold text-gray-800">
-                          প্রিন্সিপালের স্বাক্ষর
-                        </span>
-                      </div>
-                    </div>
+                    <PrintSignatures />
                   </div>
 
                   {/* ৭. ফুটারে কন্টাক্ট ইনফো ও সোর্স ক্রেডিট */}
-
-                  <div className="relative z-10 mt-auto pt-1 border-t border-gray-300 flex-shrink-0">
-                    <div className="flex flex-wrap justify-center items-center gap-x-1 gap-y-0.5 text-[8.5px] font-semibold text-gray-800">
-                      <span className="flex items-center gap-0.5">
-                        <Phone className="w-2.5 h-2.5 text-gray-700" />
-                        01316-209201
-                      </span>
-
-                      <span className="flex items-center gap-0.5">
-                        <BsWhatsapp className="w-2.5 h-2.5 text-green-600" />
-                        01748-886161
-                      </span>
-
-                      <span className="flex items-center gap-0.5">
-                        <Globe className="w-2.5 h-2.5 text-blue-500" />
-                        www.aimhabiganj.com
-                      </span>
-
-                      <span className="flex items-center gap-0.5">
-                        <Mail className="w-2.5 h-2.5 text-red-500" />
-                        aimhabiganj@gmail.com
-                      </span>
-
-                      <span className="flex items-center gap-0.5">
-                        <FaFacebook className="w-2.5 h-2.5 text-blue-600" />
-                        aimhabiganj
-                      </span>
-
-                      <span className="flex items-center gap-0.5">
-                        <BsYoutube className="w-2.5 h-2.5 text-red-600" />
-                        aimhabiganj
-                      </span>
-                    </div>
-                  </div>
+                  <PrintSocialFooter
+                    className="relative z-10 mt-auto pt-1 border-t border-gray-300 flex-shrink-0"
+                    englishDigits
+                  />
                 </div>
               </div>
             );

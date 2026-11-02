@@ -2,10 +2,11 @@
 
 import React from "react";
 import Image from "next/image";
-import { Phone, Globe, Mail } from "lucide-react";
-import { MdEmail, MdInstallMobile } from "react-icons/md";
-import { BsWhatsapp, BsYoutube } from "react-icons/bs";
-import { FaFacebook } from "react-icons/fa";
+import PrintSocialFooter from "@/components/shared/print/PrintSocialFooter";
+import {
+  resolveVoucherParty,
+  VoucherHeader,
+} from "@/components/dashboard/finance/VoucherSharedParts";
 
 // Single Half for Income Voucher (Office Copy or Donor/Student Copy)
 function VoucherSingleHalf({
@@ -14,26 +15,10 @@ function VoucherSingleHalf({
   formatBanglaNumber,
   parsePayerName,
 }) {
-  const isStudent =
-    tx.payerType === "student" ||
-    Boolean(tx.studentId) ||
-    Boolean(tx.studentName) ||
-    (tx.payerName && tx.payerName.includes(" / "));
-
-  const parsed = parsePayerName
-    ? parsePayerName(tx.payerName)
-    : {
-        donorName: tx.donorName || tx.payerName || "N/A",
-        studentId: tx.studentId || "",
-      };
-
-  const displayName = isStudent
-    ? tx.studentName || parsed.donorName || "N/A"
-    : tx.donorName || parsed.donorName || "N/A";
-
-  const subInfo = isStudent
-    ? `${tx.studentId || parsed.studentId || "N/A"} (${tx.className || "N/A"})`
-    : "দাতা / অনুদানকারী";
+  const { isStudent, displayName, subInfo } = resolveVoucherParty(
+    tx,
+    parsePayerName,
+  );
 
   const copyBadgeText =
     copyType === "office"
@@ -62,37 +47,7 @@ function VoucherSingleHalf({
 
       <div className="relative z-10 flex flex-col justify-between h-full">
         {/* Header Section */}
-        <div className="flex items-center justify-between gap-2 border-b-2 border-[#C5A059] pb-2">
-          {/* Logo on the left */}
-          <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-slate-50 border border-[#C5A059]">
-            <Image
-              src="/aimlogo1.png"
-              alt="Institution Logo"
-              width={40}
-              height={40}
-              className="object-contain"
-            />
-          </div>
-
-          {/* Banner in the center */}
-          <div className="flex-1 text-center min-w-0 px-1">
-            <div className="w-full flex justify-center">
-              <Image
-                src="/banner.png"
-                alt="Institution Banner"
-                width={280}
-                height={40}
-                className="w-auto object-fill mx-auto max-h-45"
-                priority
-              />
-            </div>
-            <p className="text-[9px] text-slate-600 font-semibold mt-0.5">
-              দক্ষিণ শ্যামলী, হবিগঞ্জ সদর, হবিগঞ্জ
-            </p>
-          </div>
-
-          {/* Right Logo placeholder for balanced symmetry */}
-        </div>
+        <VoucherHeader />
 
         {/* Voucher Title and Copy Type Badges */}
         <div className="flex items-center justify-between my-1.5 px-0.5">
@@ -260,39 +215,7 @@ function VoucherSingleHalf({
         </div>
 
         {/* সোশ্যাল ও কন্টাক্ট ইনফো */}
-        <div className="pt-1 border-t border-gray-300 mt-2">
-          <div className="flex flex-wrap justify-center items-center gap-x-1 gap-y-0.5 text-[8.5px] font-semibold text-gray-800">
-            <span className="flex items-center gap-0.5">
-              <Phone className="w-2.5 h-2.5 text-gray-700" />
-              ০১৩১৬-২০৯২০১
-            </span>
-
-            <span className="flex items-center gap-0.5">
-              <BsWhatsapp className="w-2.5 h-2.5 text-green-600" />
-              ০১৭৪৮-৮৮৬১৬১
-            </span>
-
-            <span className="flex items-center gap-0.5">
-              <Globe className="w-2.5 h-2.5 text-blue-500" />
-              www.aimhabiganj.com
-            </span>
-
-            <span className="flex items-center gap-0.5">
-              <Mail className="w-2.5 h-2.5 text-red-500" />
-              aimhabiganj@gmail.com
-            </span>
-
-            <span className="flex items-center gap-0.5">
-              <FaFacebook className="w-2.5 h-2.5 text-blue-600" />
-              aimhabiganj
-            </span>
-
-            <span className="flex items-center gap-0.5">
-              <BsYoutube className="w-2.5 h-2.5 text-red-600" />
-              aimhabiganj
-            </span>
-          </div>
-        </div>
+        <PrintSocialFooter className="pt-1 border-t border-gray-300 mt-2" />
       </div>
     </div>
   );

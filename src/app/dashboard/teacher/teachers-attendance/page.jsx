@@ -40,7 +40,11 @@ import {
   evaluateTeacherShiftCheckIn,
   evaluateTeacherShiftCheckOut,
   getActiveTeacherShift,
+  formatDhakaTimeWithSeconds as formatTimeBD,
+  formatDhakaTimeOnly as formatDisplayTime,
+  formatDhakaDateBangla as formatDisplayDate,
 } from "@/lib/attendance-config";
+import { useAttendanceGeolocation } from "@/hooks/useAttendanceGeolocation";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
@@ -62,18 +66,20 @@ export default function TeacherAttendancePage() {
   const [targetShiftId, setTargetShiftId] = useState(null); // Used when opening comment modal for a specific shift
   const [submittingShiftId, setSubmittingShiftId] = useState(null);
 
-  // Real-time state
-  const [currentTime, setCurrentTime] = useState(new Date());
+  // Real-time & Geolocation state via shared hook
+  const {
+    currentTime,
+    currentCoords,
+    locationError,
+    isLocating,
+    geofenceStatus,
+    requestLocation,
+  } = useAttendanceGeolocation();
+
   const [loadingToday, setLoadingToday] = useState(true);
   const [todayData, setTodayData] = useState(null);
   const [historyList, setHistoryList] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
-
-  // Geolocation state
-  const [currentCoords, setCurrentCoords] = useState(null);
-  const [locationError, setLocationError] = useState(null);
-  const [isLocating, setIsLocating] = useState(false);
-  const [geofenceStatus, setGeofenceStatus] = useState(null);
 
   // Late / Early exit comment modal state
   const [commentModalOpen, setCommentModalOpen] = useState(false);
@@ -84,52 +90,6 @@ export default function TeacherAttendancePage() {
   const [submittingCheckIn, setSubmittingCheckIn] = useState(false);
   const [submittingCheckOut, setSubmittingCheckOut] = useState(false);
   const [expandedHistoryId, setExpandedHistoryId] = useState(null);
-
-  // 1. Live Clock updating every second
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  // Format Bangladesh time string (e.g. "08:04:12 AM")
-  const formatTimeBD = (date) => {
-    return new Intl.DateTimeFormat("en-US", {
-      timeZone: "Asia/Dhaka",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: true,
-    }).format(date);
-  };
-
-  // Format display time for timestamps
-  const formatDisplayTime = (isoString) => {
-    if (!isoString) return "--:--";
-    return new Intl.DateTimeFormat("en-US", {
-      timeZone: "Asia/Dhaka",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    }).format(new Date(isoString));
-  };
-
-  // Format display date
-  const formatDisplayDate = (isoStringOrDate) => {
-    if (!isoStringOrDate) return "";
-    return new Intl.DateTimeFormat("bn-BD", {
-      timeZone: "Asia/Dhaka",
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }).format(
-      typeof isoStringOrDate === "string"
-        ? new Date(isoStringOrDate)
-        : isoStringOrDate
-    );
-  };
 
   // 2. Fetch today's attendance record
   const fetchTodayAttendance = useCallback(async () => {
@@ -175,61 +135,10 @@ export default function TeacherAttendancePage() {
   }, [teacherEmail]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchTodayAttendance();
     fetchHistory();
   }, [fetchTodayAttendance, fetchHistory]);
-
-  // 4. Request and verify browser geolocation
-  const requestLocation = useCallback(() => {
-    if (!navigator.geolocation) {
-      const err = "আপনার ব্রাউজারে Geolocation সমর্থিত নয়।";
-      setLocationError(err);
-      toast.error(err);
-      return;
-    }
-
-    setIsLocating(true);
-    setLocationError(null);
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude, accuracy } = position.coords;
-        const coords = { lat: latitude, lng: longitude, accuracy };
-        setCurrentCoords(coords);
-
-        const check = isWithinMadrasaGeofence(latitude, longitude);
-        setGeofenceStatus({
-          ...check,
-          accuracy: Math.round(accuracy),
-        });
-        setIsLocating(false);
-      },
-      (error) => {
-        setIsLocating(false);
-        let msg = "লোকেশন প্রাপ্তিতে সমস্যা হয়েছে।";
-        if (error.code === error.PERMISSION_DENIED) {
-          msg =
-            "অনুগ্রহ করে ব্রাউজার ও ডিভাইসের GPS/লোকেশন পারমিশন অন করুন।";
-        } else if (error.code === error.POSITION_UNAVAILABLE) {
-          msg = "ডিভাইসের অবস্থান শনাক্ত করা সম্ভব হয়নি।";
-        } else if (error.code === error.TIMEOUT) {
-          msg = "লোকেশন পেতে অতিরিক্ত সময় লাগছে। আবার চেষ্টা করুন।";
-        }
-        setLocationError(msg);
-        toast.warning(msg);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
-      }
-    );
-  }, []);
-
-  // Request location on component mount
-  useEffect(() => {
-    requestLocation();
-  }, [requestLocation]);
 
   // 5. Execute Check-In API call
   const executeCheckIn = async (comment = "") => {

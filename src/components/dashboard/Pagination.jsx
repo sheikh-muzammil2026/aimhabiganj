@@ -3,6 +3,7 @@
 import React from "react";
 
 export default function Pagination({
+  variant = "full", // "full" | "simple"
   currentPage = 1,
   totalPages = 1,
   totalItems = 0,
@@ -12,7 +13,49 @@ export default function Pagination({
   onLimitChange,
   itemName = "items",
   className = "",
+  statusText,
+  prevLabel = "◀ পূর্ববর্তী (Previous)",
+  nextLabel = "পরবর্তী (Next) ▶",
+  nextButtonClassName = "px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed",
+  prevButtonClassName = "px-4 py-2 text-xs font-bold text-gray-700 dark:text-slate-350 bg-gray-100 dark:bg-slate-900 hover:bg-gray-200 dark:hover:bg-slate-800 border border-gray-200 dark:border-gray-800 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed",
+  disabled = false,
 }) {
+  if (variant === "simple") {
+    return (
+      <div
+        className={
+          className ||
+          "flex flex-col sm:flex-row justify-between items-center gap-4 bg-white dark:bg-[#0f172a] p-4 border-t border-slate-100 dark:border-slate-800/80 mt-4 rounded-b-lg"
+        }
+      >
+        <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+          {statusText ||
+            `পেজ ${currentPage} এর ${totalPages} (মোট ${totalItems} জন শিক্ষার্থী)`}
+        </span>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            disabled={disabled || currentPage <= 1}
+            onClick={() => onPageChange?.(Math.max(currentPage - 1, 1))}
+            className={prevButtonClassName}
+          >
+            {prevLabel}
+          </button>
+          <button
+            type="button"
+            disabled={disabled || currentPage >= totalPages}
+            onClick={() =>
+              onPageChange?.(Math.min(currentPage + 1, totalPages))
+            }
+            className={nextButtonClassName}
+          >
+            {nextLabel}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const start = totalItems === 0 ? 0 : (currentPage - 1) * limit + 1;
   const end = Math.min(currentPage * limit, totalItems);
 

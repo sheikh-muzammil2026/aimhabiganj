@@ -22,28 +22,11 @@ import {
   Sparkles,
   BookOpen,
 } from "lucide-react";
-
-// Standard Class List for Madrasah & Academy
-const AVAILABLE_CLASSES = [
-  "প্লে",
-  "নার্সারি",
-  "প্রথম",
-  "দ্বিতীয়",
-  "তৃতীয়",
-  "চতুর্থ",
-  "পঞ্চম",
-  "ষষ্ঠ",
-  "সপ্তম",
-  "অষ্টম",
-  "নবম",
-  "দশম",
-  "১১শ শ্রেণি",
-  "১২শ শ্রেণি",
-  "কায়দা/আমপারা",
-  "নাজেরা",
-  "সবক",
-  "শুনানি",
-];
+import {
+  CLASS_ORDER as AVAILABLE_CLASSES,
+  parseRollNumber,
+  SESSION_YEARS,
+} from "@/lib/studentUtils";
 
 function AttendanceReportContent() {
   // Navigation tab: 'entry' (Daily Marking) | 'report' (Analytics & History)
@@ -76,21 +59,6 @@ function AttendanceReportContent() {
   // History & Report States
   const [reportData, setReportData] = useState({ metrics: null, history: [] });
   const [loadingReport, setLoadingReport] = useState(false);
-
-  // Parse roll helper
-  const parseRollNumber = (r) => {
-    if (!r || r === "N/A") return Infinity;
-    const bnToEn = {
-      "০": "0", "১": "1", "২": "2", "৩": "3", "৪": "4",
-      "৫": "5", "৬": "6", "৭": "7", "৮": "8", "৯": "9",
-    };
-    const enStr = String(r)
-      .split("")
-      .map((char) => bnToEn[char] || char)
-      .join("");
-    const num = parseInt(enStr, 10);
-    return isNaN(num) ? Infinity : num;
-  };
 
   // 1. Fetch Students for Selected Class
   const fetchStudentsForClass = useCallback(async () => {
@@ -354,9 +322,7 @@ function AttendanceReportContent() {
     });
   }, [students, studentSearch]);
 
-  const sessionYears = [
-    "২০২৬", "২০২৫", "২০২৪", "২০২৩", "২০২২", "২০২১", "২০২০", "২০১৯", "২০১৮"
-  ];
+  const sessionYears = SESSION_YEARS;
 
   return (
     <div className="p-3 sm:p-5 lg:p-8 bg-slate-50 dark:bg-slate-950 min-h-screen space-y-6">

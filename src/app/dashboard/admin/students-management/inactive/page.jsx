@@ -1,21 +1,19 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { toast } from "react-toastify";
 import Pagination from "@/components/dashboard/Pagination";
+import StudentFilterBar from "@/components/dashboard/students/StudentFilterBar";
+import useUrlPagination from "@/hooks/useUrlPagination";
+import {
+  getStudentClassDetails,
+  parseRollNumber,
+  SESSION_YEARS,
+} from "@/lib/studentUtils";
 
 function InactiveStudentsContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-
-  // URL search params থেকে page এবং limit সিঙ্ক (ডিফল্ট limit: 20)
-  const pageParam = parseInt(searchParams.get("page"), 10);
-  const limitParam = parseInt(searchParams.get("limit"), 10);
-
-  const currentPage = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
-  const currentLimit = [10, 20, 50, 100].includes(limitParam) ? limitParam : 20;
+  const { currentPage, currentLimit, updatePaginationParams, resetPageToFirst } =
+    useUrlPagination();
 
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,24 +31,6 @@ function InactiveStudentsContent() {
   // পেজিনেশন স্টেটসমূহ
   const [totalPages, setTotalPages] = useState(1);
   const [totalStudents, setTotalStudents] = useState(0);
-
-  // URL query params আপডেট করার হেলপার ফাংশন
-  const updatePaginationParams = useCallback(
-    (newPage, newLimit) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("page", String(newPage));
-      params.set("limit", String(newLimit || currentLimit));
-      router.push(`${pathname}?${params.toString()}`, { scroll: false });
-    },
-    [searchParams, currentLimit, pathname, router]
-  );
-
-  // ফিল্টার পরিবর্তন হলে পেজ নম্বর ১-এ রিসেট করার হেলপার
-  const resetPageToFirst = useCallback(() => {
-    if (currentPage !== 1) {
-      updatePaginationParams(1, currentLimit);
-    }
-  }, [currentPage, currentLimit, updatePaginationParams]);
 
   const fetchInactiveStudents = useCallback(async () => {
     try {
@@ -161,85 +141,6 @@ function InactiveStudentsContent() {
     }
   };
 
-  // একাডেমি টাইপ ভিত্তিক ক্লাসের তালিকা পাওয়ার ফাংশন
-  const getAcademyClasses = (academyType) => {
-    if (academyType === "প্রাক-প্রাথমিক") return ["প্লে", "নার্সারি"];
-    if (academyType === "প্রাথমিক") return ["প্রথম", "দ্বিতীয়", "তৃতীয়", "চতুর্থ", "পঞ্চম"];
-    if (academyType === "মাধ্যমিক") return ["ষষ্ঠ", "সপ্তম", "অষ্টম", "নবম", "দশম"];
-    if (academyType === "উচ্চমাধ্যমিক") return ["১১শ শ্রেণি", "১২শ শ্রেণি"];
-    return [];
-  };
-
-  // বিভাগ অনুযায়ী ক্লাসের ড্রপডাউন অপশন ডায়নামিকভাবে তৈরি করা
-  const getClassOptions = () => {
-    if (selectedDivision === "preHifz") {
-      return ["কায়দা/আমপারা", "নাজেরা"];
-    }
-    if (selectedDivision === "hifz") {
-      return ["সবক", "শুনানি"];
-    }
-    if (selectedDivision === "academy") {
-      if (selectedAcademyType !== "all") {
-        return getAcademyClasses(selectedAcademyType);
-      }
-      return [
-        "প্লে", "নার্সারি",
-        "প্রথম", "দ্বিতীয়", "তৃতীয়", "চতুর্থ", "পঞ্চম",
-        "ষষ্ঠ", "সপ্তম", "অষ্টম", "নবম", "দশম",
-        "১১শ শ্রেণি", "১২শ শ্রেণি"
-      ];
-    }
-    return [];
-  };
-
-  // শিক্ষার্থীর একটিভ বিভাগ, ক্লাস ও টাইপ বের করার হেলপার ফাংশন
-  const getStudentClassDetails = (student) => {
-    if (student.divisionPreHifz?.active) {
-      return {
-        divisionKey: "preHifz",
-        divisionName: "প্রি-হিফজ",
-        className: student.divisionPreHifz.class || "N/A",
-        type: student.divisionPreHifz.type || "N/A",
-      };
-    }
-    if (student.divisionHifz?.active) {
-      return {
-        divisionKey: "hifz",
-        divisionName: "হিফজ",
-        className: student.divisionHifz.class || "N/A",
-        type: student.divisionHifz.type || "N/A",
-      };
-    }
-    if (student.divisionAcademy?.active) {
-      return {
-        divisionKey: "academy",
-        divisionName: "একাডেমিক",
-        className: student.divisionAcademy.class || "N/A",
-        type: student.divisionAcademy.type || "N/A",
-      };
-    }
-    return {
-      divisionKey: "none",
-      divisionName: "অন্যান্য",
-      className: student.officeUse?.recommendedClass || "N/A",
-      type: "N/A",
-    };
-  };
-
-  const parseRollNumber = (r) => {
-    if (!r || r === "N/A") return Infinity;
-    const bnToEn = {
-      "০": "0", "১": "1", "২": "2", "৩": "3", "৪": "4",
-      "৫": "5", "৬": "6", "৭": "7", "৮": "8", "৯": "9",
-    };
-    const enStr = String(r)
-      .split("")
-      .map((char) => bnToEn[char] || char)
-      .join("");
-    const num = parseInt(enStr, 10);
-    return isNaN(num) ? Infinity : num;
-  };
-
   // রোল নম্বর অনুযায়ী ক্রমানুসারে (১, ২, ৩...) গাণিতিক সর্টিং
   const filteredStudents = useMemo(() => {
     return [...students].sort((a, b) => {
@@ -249,11 +150,7 @@ function InactiveStudentsContent() {
     });
   }, [students]);
 
-  const sessionYears = [
-    "২০২৬", "২০২৫", "২০২৪",
-    "২০২৩", "২০২২", "২০২১",
-    "২০২০", "২০১৯", "২০১৮"
-  ];
+  const sessionYears = SESSION_YEARS;
 
   return (
     <div className="p-3 sm:p-5 lg:p-8 bg-slate-50 min-h-screen space-y-5">
@@ -325,121 +222,26 @@ function InactiveStudentsContent() {
       </div>
 
       {/* ৩. ফিল্টারিং সেকশন */}
-      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-rose-900/10 shadow-xs space-y-3">
-        <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">খুঁজুন এবং ফিল্টার করুন:</h3>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
-          {/* নাম / আইডি / সার্চ */}
-          <div className="sm:col-span-2 lg:col-span-2 relative">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 text-sm">🔍</span>
-            <input
-              type="text"
-              placeholder="নাম, আইডি, পিতার নাম, মোবাইল বা জেলা..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                resetPageToFirst();
-              }}
-              className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-rose-600 focus:bg-white transition-all"
-            />
-          </div>
-
-          {/* অ্যাক্টিভিটি স্ট্যাটাস ফিল্টার */}
-          <div>
-            <select
-              value={selectedActivity}
-              onChange={(e) => {
-                setSelectedActivity(e.target.value);
-                resetPageToFirst();
-              }}
-              className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-rose-200 rounded-xl focus:outline-none focus:border-rose-600 focus:bg-white font-bold text-rose-900"
-            >
-              <option value="all">সকল শিক্ষার্থী (সকল স্ট্যাটাস)</option>
-              <option value="active">শুধুমাত্র সক্রিয় (Active)</option>
-              <option value="inactive">সকল নিষ্ক্রিয় (Inactive)</option>
-              <option value="temporary_inactive">সাময়িক নিষ্ক্রিয় (Temporary)</option>
-              <option value="permanent_inactive">স্থায়ী নিষ্ক্রিয় (Permanent)</option>
-            </select>
-          </div>
-
-          {/* সেশন বছর ফিল্টার */}
-          <div>
-            <select
-              value={selectedSession}
-              onChange={(e) => {
-                setSelectedSession(e.target.value);
-                resetPageToFirst();
-              }}
-              className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-rose-600 focus:bg-white font-medium text-slate-700"
-            >
-              <option value="all">সকল শিক্ষাবর্ষ</option>
-              {sessionYears.map((year, idx) => (
-                <option key={idx} value={year}>{year}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* বিভাগ ফিল্টার */}
-          <div>
-            <select
-              value={selectedDivision}
-              onChange={(e) => {
-                setSelectedDivision(e.target.value);
-                setSelectedClass("all");
-                setSelectedAcademyType("all");
-                resetPageToFirst();
-              }}
-              className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-rose-600 focus:bg-white font-medium text-slate-700"
-            >
-              <option value="all">সকল বিভাগ</option>
-              <option value="preHifz">প্রি-হিফজ</option>
-              <option value="hifz">হিফজ</option>
-              <option value="academy">একাডেমিক</option>
-            </select>
-          </div>
-
-          {/* একাডেমি টাইপ ফিল্টার */}
-          {selectedDivision === "academy" && (
-            <div>
-              <select
-                value={selectedAcademyType}
-                onChange={(e) => {
-                  setSelectedAcademyType(e.target.value);
-                  setSelectedClass("all");
-                  resetPageToFirst();
-                }}
-                className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-rose-600 focus:bg-white font-medium text-slate-700"
-              >
-                <option value="all">সকল একাডেমি লেভেল</option>
-                <option value="প্রাক-প্রাথমিক">প্রাক-প্রাথমিক</option>
-                <option value="প্রাথমিক">প্রাথমিক</option>
-                <option value="মাধ্যমিক">মাধ্যমিক</option>
-                <option value="উচ্চমাধ্যমিক">উচ্চমাধ্যমিক</option>
-              </select>
-            </div>
-          )}
-
-          {/* শ্রেণি ফিল্টার */}
-          <div>
-            <select
-              value={selectedClass}
-              onChange={(e) => {
-                setSelectedClass(e.target.value);
-                resetPageToFirst();
-              }}
-              disabled={selectedDivision === "all"}
-              className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-rose-600 focus:bg-white font-medium text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <option value="all">
-                {selectedDivision === "all" ? "প্রথমে বিভাগ নির্বাচন করুন" : "সকল শ্রেণি"}
-              </option>
-              {getClassOptions().map((cls, idx) => (
-                <option key={idx} value={cls}>{cls}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </div>
+      <StudentFilterBar
+        variant="card"
+        theme="rose"
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        showActivity
+        selectedActivity={selectedActivity}
+        onActivityChange={setSelectedActivity}
+        selectedSession={selectedSession}
+        onSessionChange={setSelectedSession}
+        sessionYears={sessionYears}
+        sessionAllLabel="সকল শিক্ষাবর্ষ"
+        selectedDivision={selectedDivision}
+        onDivisionChange={setSelectedDivision}
+        selectedAcademyType={selectedAcademyType}
+        onAcademyTypeChange={setSelectedAcademyType}
+        selectedClass={selectedClass}
+        onClassChange={setSelectedClass}
+        onResetPage={resetPageToFirst}
+      />
 
       {/* ৪. ডাটা টেবিল */}
       <div className="bg-white rounded-2xl border border-rose-900/10 shadow-xs overflow-hidden">

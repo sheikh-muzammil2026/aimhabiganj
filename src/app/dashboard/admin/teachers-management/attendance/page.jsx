@@ -4,18 +4,14 @@ import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  Users,
   UserCheck,
-  UserX,
   Clock,
   AlertCircle,
   Calendar,
-  Search,
   RefreshCw,
   MapPin,
   ExternalLink,
   Shield,
-  Filter,
   CheckCircle2,
   XCircle,
   Clock3,
@@ -34,26 +30,19 @@ import {
   getDhakaTime,
   RESIDENTIAL_ATTENDANCE_RULES,
   HIFZ_ATTENDANCE_RULES,
+  toBengaliNumber,
+  formatMonthBangla as formatMonthBanglaUtil,
+  formatDhakaTimeOnly as formatTime,
+  calculateWorkDuration,
 } from "@/lib/attendance-config";
+import {
+  AttendanceSummaryMetrics,
+  AttendanceFilterBar,
+} from "@/components/dashboard/attendance/AttendanceMetricsAndFilters";
 
 const API_BASE = process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
 
-const toBengaliNumber = (num) => {
-  if (num === null || num === undefined) return "";
-  const banglaDigits = {
-    0: "০",
-    1: "১",
-    2: "২",
-    3: "৩",
-    4: "৪",
-    5: "৫",
-    6: "৬",
-    7: "৭",
-    8: "৮",
-    9: "৯",
-  };
-  return String(num).replace(/[0-9]/g, (digit) => banglaDigits[digit]);
-};
+const formatMonthBangla = (monthStr) => formatMonthBanglaUtil(monthStr, true);
 
 export default function AdminTeachersAttendancePage() {
   const [selectedDate, setSelectedDate] = useState(() => {
@@ -169,27 +158,6 @@ export default function AdminTeachersAttendancePage() {
     }
   };
 
-  const formatMonthBangla = (monthStr) => {
-    if (!monthStr) return "";
-    const [year, month] = monthStr.split("-");
-    const monthNames = [
-      "জানুয়ারি",
-      "ফেব্রুয়ারি",
-      "মার্চ",
-      "এপ্রিল",
-      "মে",
-      "জুন",
-      "জুলাই",
-      "আগস্ট",
-      "সেপ্টেম্বর",
-      "অক্টোবর",
-      "নভেম্বর",
-      "ডিসেম্বর",
-    ];
-    const monthIndex = parseInt(month, 10) - 1;
-    return `${monthNames[monthIndex] || toBengaliNumber(month)} ${toBengaliNumber(year)}`;
-  };
-
   // Fetch Attendance & Metrics
   const fetchData = useCallback(async () => {
     try {
@@ -227,33 +195,6 @@ export default function AdminTeachersAttendancePage() {
     }, 0);
     return () => clearTimeout(timer);
   }, [fetchData]);
-
-  // Format Bangladesh time for display (e.g., "08:04 AM")
-  const formatTime = (isoString) => {
-    if (!isoString) return "--:--";
-    try {
-      return new Intl.DateTimeFormat("en-US", {
-        timeZone: "Asia/Dhaka",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      }).format(new Date(isoString));
-    } catch {
-      return "--:--";
-    }
-  };
-
-  // Calculate working hours between check-in and check-out
-  const calculateWorkDuration = (checkInIso, checkOutIso) => {
-    if (!checkInIso || !checkOutIso) return null;
-    const diffMs = new Date(checkOutIso) - new Date(checkInIso);
-    if (diffMs <= 0) return "০ মি.";
-    const totalMinutes = Math.floor(diffMs / (1000 * 60));
-    const hours = Math.floor(totalMinutes / 60);
-    const mins = totalMinutes % 60;
-    if (hours === 0) return `${mins} মি.`;
-    return `${hours} ঘণ্টা ${mins} মি.`;
-  };
 
   return (
     <div className="space-y-6 pb-12">
@@ -317,165 +258,23 @@ export default function AdminTeachersAttendancePage() {
       </div>
 
       {/* 2. Summary Metrics Cards (5 Key Metrics) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {/* CARD 1: Total Teachers */}
-        <div className="bg-white dark:bg-slate-800/80 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-700/60 shadow-xs flex items-center gap-4">
-          <div className="p-3.5 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">
-            <Users className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-              মোট শিক্ষক (Total)
-            </p>
-            <h3 className="text-2xl font-black text-slate-900 dark:text-white mt-0.5">
-              {metrics.totalTeachers}
-            </h3>
-            <p className="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium">
-              ডাটাবেসে নথিভুক্ত
-            </p>
-          </div>
-        </div>
-
-        {/* CARD 2: Present Today */}
-        <div className="bg-white dark:bg-slate-800/80 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-700/60 shadow-xs flex items-center gap-4">
-          <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400">
-            <UserCheck className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-              {isToday ? "আজ উপস্থিত" : "উপস্থিত"}
-            </p>
-            <h3 className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">
-              {metrics.presentToday}
-            </h3>
-            <p className="text-[11px] text-emerald-600/80 dark:text-emerald-400/80 font-medium">
-              হাজিরা নিশ্চিত করেছেন
-            </p>
-          </div>
-        </div>
-
-        {/* CARD 3: Absent Today */}
-        <div className="bg-white dark:bg-slate-800/80 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-700/60 shadow-xs flex items-center gap-4">
-          <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400">
-            <UserX className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-              {isToday ? "আজ অনুপস্থিত" : "অনুপস্থিত"}
-            </p>
-            <h3 className="text-2xl font-black text-rose-600 dark:text-rose-400 mt-0.5">
-              {metrics.absentToday}
-            </h3>
-            <p className="text-[11px] text-rose-600/80 dark:text-rose-400/80 font-medium">
-              হাজিরা রেকর্ড নেই
-            </p>
-          </div>
-        </div>
-
-        {/* CARD 4: On Time Today */}
-        <div className="bg-white dark:bg-slate-800/80 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-700/60 shadow-xs flex items-center gap-4">
-          <div className="p-3.5 rounded-2xl bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400">
-            <CheckCircle2 className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-              সময়মতো (On Time)
-            </p>
-            <h3 className="text-2xl font-black text-teal-600 dark:text-teal-400 mt-0.5">
-              {metrics.onTimeToday}
-            </h3>
-            <p className="text-[11px] text-teal-600/80 dark:text-teal-400/80 font-medium">
-              নির্ধারিত সময়ে প্রবেশ
-            </p>
-          </div>
-        </div>
-
-        {/* CARD 5: Late Today */}
-        <div className="bg-white dark:bg-slate-800/80 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-700/60 shadow-xs flex items-center gap-4">
-          <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400">
-            <AlertCircle className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-              বিলম্বিত (Late)
-            </p>
-            <h3 className="text-2xl font-black text-amber-600 dark:text-amber-400 mt-0.5">
-              {metrics.lateToday}
-            </h3>
-            <p className="text-[11px] text-amber-600/80 dark:text-amber-400/80 font-medium">
-              নির্ধারিত সময়ের পরে প্রবেশ
-            </p>
-          </div>
-        </div>
-      </div>
+      <AttendanceSummaryMetrics
+        variant="teacher"
+        metrics={metrics}
+        isToday={isToday}
+      />
 
       {/* 3. Controls & Filter Bar */}
-      <div className="bg-white dark:bg-slate-800/80 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-700/60 shadow-xs space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          {/* Left: Date Picker & Today Reset */}
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 px-3.5 py-2 rounded-2xl">
-              <Calendar className="w-4 h-4 text-emerald-600" />
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="bg-transparent text-xs sm:text-sm font-bold text-slate-800 dark:text-white focus:outline-none cursor-pointer"
-              />
-            </div>
-
-            <button
-              onClick={() => setSelectedDate(getDhakaTime().dateStr)}
-              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                selectedDate === getDhakaTime().dateStr
-                  ? "bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300"
-                  : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200"
-              }`}
-            >
-              আজকের তারিখ
-            </button>
-          </div>
-
-          {/* Right: Search Input */}
-          <div className="relative w-full md:w-72">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="শিক্ষক আইডি, পদবি বা ইমেইল দিয়ে খুঁজুন..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
-          </div>
-        </div>
-
-        {/* Status Filter Tabs */}
-        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/50">
-          <span className="text-xs font-semibold text-slate-400 mr-2 flex items-center gap-1">
-            <Filter className="w-3.5 h-3.5" />
-            ফিল্টার:
-          </span>
-          {[
-            { key: "all", label: `সবাই (${metrics.totalTeachers})` },
-            { key: "present", label: `উপস্থিত (${metrics.presentToday})` },
-            { key: "absent", label: `অনুপস্থিত (${metrics.absentToday})` },
-            { key: "onTime", label: `সময়মতো (${metrics.onTimeToday})` },
-            { key: "late", label: `দেরিতে (${metrics.lateToday})` },
-          ].map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setStatusFilter(tab.key)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                statusFilter === tab.key
-                  ? "bg-emerald-600 text-white shadow-xs"
-                  : "bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      <AttendanceFilterBar
+        variant="teacher"
+        selectedDate={selectedDate}
+        onDateChange={setSelectedDate}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        statusFilter={statusFilter}
+        onStatusFilterChange={setStatusFilter}
+        metrics={metrics}
+      />
 
       {/* 4. Full Attendance Table */}
       <div className="bg-white dark:bg-slate-800/80 rounded-3xl border border-slate-200/80 dark:border-slate-700/60 shadow-xs overflow-hidden">

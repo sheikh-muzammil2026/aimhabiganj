@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Printer, Calendar, RefreshCw, Loader2, Phone, Globe, Mail } from "lucide-react";
+import { Printer, Calendar, RefreshCw, Loader2 } from "lucide-react";
 import { MdEmail, MdInstallMobile } from "react-icons/md";
-import { BsWhatsapp, BsYoutube } from "react-icons/bs";
-import { FaFacebook } from "react-icons/fa";
 import Image from "next/image";
+import PrintInstitutionalHeader from "@/components/shared/print/PrintInstitutionalHeader";
+import PrintSocialFooter from "@/components/shared/print/PrintSocialFooter";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_SERVER_API ||
@@ -323,37 +323,17 @@ export default function MonthlyReport({
 
         {/* Logo/Header */}
         <div className="text-center pb-6 sm:pb-8 border-b border-emerald-900/15">
-          <div className="flex items-center justify-between gap-2 border-b-2 border-[#C5A059] pb-2">
-            {/* Logo on the left */}
-            <div className="w-20 h-20 md:w-45 md:h-45 print:!w-36 print:!h-36 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-3">
-              <Image
-                src={"/aimlogo1.png"}
-                alt="Institution Logo"
-                width={200}
-                height={200}
-                quality={100}
-                priority
-                className="w-full h-full object-cover scale-[1.08] transform-gpu"
-              />
-            </div>
-
-            {/* Banner in the center */}
-            <div className="flex-1 text-center min-w-0 px-1">
-              <div className="flex-grow text-center">
-                <Image
-                  src={"/banner_routine.png"}
-                  alt="Institution Banner"
-                  width={1000}
-                  height={400}
-                  quality={100}
-                  priority
-                  className="w-full h-auto max-h-45 object-fill mx-auto print:max-h-45"
-                />
-              </div>
-            </div>
-
-            {/* Right Logo placeholder for balanced symmetry */}
-          </div>
+          <PrintInstitutionalHeader
+            bannerSrc="/banner_routine.png"
+            containerClassName="flex items-center justify-between gap-2 border-b-2 border-[#C5A059] pb-2"
+            logoWrapperClassName="w-20 h-20 md:w-45 md:h-45 print:!w-36 print:!h-36 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-3"
+            logoWidth={200}
+            logoHeight={200}
+            logoClassName="w-full h-full object-cover scale-[1.08] transform-gpu"
+            bannerWidth={1000}
+            bannerHeight={400}
+            bannerClassName="w-full h-auto max-h-45 object-fill mx-auto print:max-h-45"
+          />
           <p className="text-sm text-slate-600 font-semibold mt-2">
             দক্ষিণ শ্যামলী, হবিগঞ্জ সদর, হবিগঞ্জ
           </p>
@@ -603,39 +583,7 @@ export default function MonthlyReport({
         </div>
 
         {/* সোশ্যাল ও কন্টাক্ট ইনফো */}
-        <div className="pt-1 border-t border-gray-300">
-          <div className="flex flex-wrap justify-center items-center gap-x-1 gap-y-0.5 text-[8.5px] font-semibold text-gray-800">
-            <span className="flex items-center gap-0.5">
-              <Phone className="w-2.5 h-2.5 text-gray-700" />
-              ০১৩১৬-২০৯২০১
-            </span>
-
-            <span className="flex items-center gap-0.5">
-              <BsWhatsapp className="w-2.5 h-2.5 text-green-600" />
-              ০১৭৪৮-৮৮৬১৬১
-            </span>
-
-            <span className="flex items-center gap-0.5">
-              <Globe className="w-2.5 h-2.5 text-blue-500" />
-              www.aimhabiganj.com
-            </span>
-
-            <span className="flex items-center gap-0.5">
-              <Mail className="w-2.5 h-2.5 text-red-500" />
-              aimhabiganj@gmail.com
-            </span>
-
-            <span className="flex items-center gap-0.5">
-              <FaFacebook className="w-2.5 h-2.5 text-blue-600" />
-              aimhabiganj
-            </span>
-
-            <span className="flex items-center gap-0.5">
-              <BsYoutube className="w-2.5 h-2.5 text-red-600" />
-              aimhabiganj
-            </span>
-          </div>
-        </div>
+        <PrintSocialFooter />
       </div>
     </div>
   );

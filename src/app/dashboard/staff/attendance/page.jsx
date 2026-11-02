@@ -34,7 +34,11 @@ import {
   evaluateStaffCheckInStatus,
   evaluateStaffCheckOutStatus,
   getStaffShiftPhase,
+  formatDhakaTimeWithSeconds,
+  formatDhakaTimeOnly,
+  formatDhakaDateBangla as formatDisplayDate,
 } from "@/lib/attendance-config";
+import { useAttendanceGeolocation } from "@/hooks/useAttendanceGeolocation";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
@@ -43,8 +47,20 @@ export default function StaffAttendancePage() {
   const { data: session, isPending: sessionLoading } = authClient.useSession();
   const sessionUser = session?.user;
 
-  // Real-time state
-  const [currentTime, setCurrentTime] = useState(new Date());
+  // Real-time & Geolocation state via shared hook
+  const {
+    currentTime,
+    currentCoords,
+    locationError,
+    isLocating,
+    geofenceStatus,
+    requestLocation,
+  } = useAttendanceGeolocation({
+    passAccuracyToGeofence: true,
+    unsupportedMessage: "আপনার ডিভাইসে Geolocation সমর্থিত নয়।",
+    unsupportedToastType: "warning",
+  });
+
   const [loadingToday, setLoadingToday] = useState(true);
   const [todayData, setTodayData] = useState(null);
   const [shiftPhase, setShiftPhase] = useState(null);
@@ -52,12 +68,6 @@ export default function StaffAttendancePage() {
   const [monthlyMetrics, setMonthlyMetrics] = useState(null);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState("");
-
-  // Geolocation state
-  const [currentCoords, setCurrentCoords] = useState(null);
-  const [locationError, setLocationError] = useState(null);
-  const [isLocating, setIsLocating] = useState(false);
-  const [geofenceStatus, setGeofenceStatus] = useState(null);
 
   // Late / Early Comment Modal state
   const [commentModalOpen, setCommentModalOpen] = useState(false);
@@ -67,61 +77,6 @@ export default function StaffAttendancePage() {
   // Submission loading states
   const [submittingCheckIn, setSubmittingCheckIn] = useState(false);
   const [submittingCheckOut, setSubmittingCheckOut] = useState(false);
-
-  // 1. Live Clock updating every second
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const formatDhakaTimeWithSeconds = (date) => {
-    try {
-      return new Intl.DateTimeFormat("en-US", {
-        timeZone: "Asia/Dhaka",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: true,
-      }).format(date);
-    } catch {
-      return "--:--:--";
-    }
-  };
-
-  const formatDhakaTimeOnly = (isoString) => {
-    if (!isoString) return "--:--";
-    try {
-      return new Intl.DateTimeFormat("en-US", {
-        timeZone: "Asia/Dhaka",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      }).format(new Date(isoString));
-    } catch {
-      return "--:--";
-    }
-  };
-
-  const formatDisplayDate = (isoStringOrDate) => {
-    if (!isoStringOrDate) return "";
-    try {
-      return new Intl.DateTimeFormat("bn-BD", {
-        timeZone: "Asia/Dhaka",
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }).format(
-        typeof isoStringOrDate === "string"
-          ? new Date(isoStringOrDate)
-          : isoStringOrDate
-      );
-    } catch {
-      return "";
-    }
-  };
 
   // 2. Fetch today's attendance record
   const fetchTodayAttendance = useCallback(async () => {
@@ -177,73 +132,6 @@ export default function StaffAttendancePage() {
       fetchHistory();
     }
   }, [sessionLoading, fetchTodayAttendance, fetchHistory]);
-
-  // 4. Request GPS Location
-  const requestLocation = useCallback((onSuccess) => {
-    if (!navigator.geolocation) {
-      const err = "আপনার ডিভাইসে Geolocation সমর্থিত নয়।";
-      setLocationError(err);
-      toast.warning(err);
-      return;
-    }
-
-    setIsLocating(true);
-    setLocationError(null);
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude, accuracy } = position.coords;
-        const roundedAccuracy = Math.round(accuracy || 0);
-        const coords = {
-          lat: latitude,
-          lng: longitude,
-          accuracy: roundedAccuracy,
-          timestamp: Date.now(),
-        };
-        setCurrentCoords(coords);
-
-        const check = isWithinMadrasaGeofence(
-          latitude,
-          longitude,
-          MADRASA_LOCATION.RADIUS_METERS,
-          roundedAccuracy
-        );
-        const statusObj = {
-          ...check,
-          accuracy: roundedAccuracy,
-        };
-        setGeofenceStatus(statusObj);
-        setIsLocating(false);
-
-        if (typeof onSuccess === "function") {
-          onSuccess(coords, statusObj);
-        }
-      },
-      (error) => {
-        setIsLocating(false);
-        let msg = "লোকেশন প্রাপ্তিতে সমস্যা হয়েছে।";
-        if (error.code === error.PERMISSION_DENIED) {
-          msg = "অনুগ্রহ করে ব্রাউজার ও ডিভাইসের GPS/লোকেশন পারমিশন অন করুন।";
-        } else if (error.code === error.POSITION_UNAVAILABLE) {
-          msg = "ডিভাইসের অবস্থান শনাক্ত করা সম্ভব হয়নি।";
-        } else if (error.code === error.TIMEOUT) {
-          msg = "লোকেশন পেতে অতিরিক্ত সময় লাগছে। আবার চেষ্টা করুন।";
-        }
-        setLocationError(msg);
-        toast.warning(msg);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
-      }
-    );
-  }, []);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    requestLocation();
-  }, [requestLocation]);
 
   // Verify GPS & Geofence before allowing Check-In or Check-Out
   const verifyGeofenceBeforeAction = () => {

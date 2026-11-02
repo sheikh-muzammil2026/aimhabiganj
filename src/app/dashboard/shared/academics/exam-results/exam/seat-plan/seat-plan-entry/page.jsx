@@ -4,6 +4,11 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { toast } from "react-toastify";
+import StudentFilterBar from "@/components/dashboard/students/StudentFilterBar";
+import {
+    getStudentClassDetails,
+    SESSION_YEARS,
+} from "@/lib/studentUtils";
 
 export default function AllStudentsPage() {
     const [students, setStudents] = useState([]);
@@ -114,70 +119,6 @@ export default function AllStudentsPage() {
         }
     };
 
-    // একাডেমি টাইপ ভিত্তিক ক্লাসের তালিকা পাওয়ার ফাংশন
-    const getAcademyClasses = (academyType) => {
-        if (academyType === "প্রাক-প্রাথমিক") return ["প্লে", "নার্সারি"];
-        if (academyType === "প্রাথমিক") return ["প্রথম", "দ্বিতীয়", "তৃতীয়", "চতুর্থ", "পঞ্চম"];
-        if (academyType === "মাধ্যমিক") return ["ষষ্ঠ", "সপ্তম", "অষ্টম", "নবম", "দশম"];
-
-        return [];
-    };
-
-    // বিভাগ অনুযায়ী ক্লাসের ড্রপডাউন অপশন
-    const getClassOptions = () => {
-        if (selectedDivision === "preHifz") return ["কায়দা/আমপারা", "নাজেরা"];
-        if (selectedDivision === "hifz") return ["সবক", "শুনানি"];
-        if (selectedDivision === "academy") {
-            if (selectedAcademyType !== "all") {
-                return getAcademyClasses(selectedAcademyType);
-            }
-            return [
-                "প্লে", "নার্সারি",
-                "প্রথম", "দ্বিতীয়", "তৃতীয়", "চতুর্থ", "পঞ্চম",
-                "ষষ্ঠ", "সপ্তম", "অষ্টম", "নবম", "দশম",
-            ];
-        }
-        return [];
-    };
-
-    // শিক্ষার্থীর একটিভ বিভাগ, ক্লাস ও টাইপ বের করার হেলপার
-    const getStudentClassDetails = (student) => {
-        if (student.divisionPreHifz?.active) {
-            return {
-                divisionKey: "preHifz",
-                divisionName: "প্রি-হিফজ",
-                className: student.divisionPreHifz.class || "N/A",
-                type: student.divisionPreHifz.type || "N/A",
-                academyType: ""
-            };
-        }
-        if (student.divisionHifz?.active) {
-            return {
-                divisionKey: "hifz",
-                divisionName: "হিফজ",
-                className: student.divisionHifz.class || "N/A",
-                type: student.divisionHifz.type || "N/A",
-                academyType: ""
-            };
-        }
-        if (student.divisionAcademy?.active) {
-            return {
-                divisionKey: "academy",
-                divisionName: "একাডেমিক",
-                className: student.divisionAcademy.class || "N/A",
-                type: student.divisionAcademy.type || "N/A",
-                academyType: student.divisionAcademy.academyType || ""
-            };
-        }
-        return {
-            divisionKey: "none",
-            divisionName: "অন্যান্য",
-            className: student.officeUse?.recommendedClass || "N/A",
-            type: "N/A",
-            academyType: ""
-        };
-    };
-
     // ডায়নামিক ফিল্টারিং লজিক
     const filteredStudents = useMemo(() => {
         return students
@@ -215,11 +156,7 @@ export default function AllStudentsPage() {
             );
     }, [students, searchTerm, selectedSession, selectedDivision, selectedAcademyType, selectedClass]);
 
-    const sessionYears = [
-        "২০২৬", "২০২৫", "২০২৪",
-        "২০২৩", "২০২২", "২০২১",
-        "২০২০", "২০১৯", "২০১৮"
-    ];
+    const sessionYears = SESSION_YEARS;
 
     // প্রিন্ট ফাংশন
     const handlePrint = () => {
@@ -278,87 +215,23 @@ export default function AllStudentsPage() {
             </div>
 
             {/* ৩. এডভান্সড ফিল্টারিং সেকশন */}
-            <div className="bg-white p-4 sm:p-5 rounded-2xl border border-emerald-900/10 shadow-xs space-y-3 print:hidden">
-                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">খুঁজুন এবং ফিল্টার করুন:</h3>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
-                    <div className="sm:col-span-2 lg:col-span-2 relative">
-                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 text-sm">🔍</span>
-                        <input
-                            type="text"
-                            placeholder="নাম, আইডি, পিতার নাম, মোবাইল বা জেলা..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white transition-all"
-                        />
-                    </div>
-
-                    <div>
-                        <select
-                            value={selectedSession}
-                            onChange={(e) => setSelectedSession(e.target.value)}
-                            className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white font-medium text-slate-700"
-                        >
-                            <option value="all">সকল শিক্ষাবর্ষ (২০১৮ - ২০২৬)</option>
-                            {sessionYears.map((year, idx) => (
-                                <option key={idx} value={year}>{year}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div>
-                        <select
-                            value={selectedDivision}
-                            onChange={(e) => {
-                                setSelectedDivision(e.target.value);
-                                setSelectedClass("all");
-                                setSelectedAcademyType("all");
-                            }}
-                            className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white font-medium text-slate-700"
-                        >
-                            <option value="all">সকল বিভাগ</option>
-                            <option value="preHifz">প্রি-হিফজ</option>
-                            <option value="hifz">হিফজ</option>
-                            <option value="academy">একাডেমিক</option>
-                        </select>
-                    </div>
-
-                    {selectedDivision === "academy" && (
-                        <div>
-                            <select
-                                value={selectedAcademyType}
-                                onChange={(e) => {
-                                    setSelectedAcademyType(e.target.value);
-                                    setSelectedClass("all");
-                                }}
-                                className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white font-medium text-slate-700"
-                            >
-                                <option value="all">সকল একাডেমি লেভেল</option>
-                                <option value="প্রাক-প্রাথমিক">প্রাক-প্রাথমিক</option>
-                                <option value="প্রাথমিক">প্রাথমিক</option>
-                                <option value="মাধ্যমিক">মাধ্যমিক</option>
-                                <option value="উচ্চমাধ্যমিক">উচ্চমাধ্যমিক</option>
-                            </select>
-                        </div>
-                    )}
-
-                    <div>
-                        <select
-                            value={selectedClass}
-                            onChange={(e) => setSelectedClass(e.target.value)}
-                            disabled={selectedDivision === "all"}
-                            className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white font-medium text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            <option value="all">
-                                {selectedDivision === "all" ? "প্রথমে বিভাগ নির্বাচন করুন" : "সকল শ্রেণি"}
-                            </option>
-                            {getClassOptions().map((cls, idx) => (
-                                <option key={idx} value={cls}>{cls}</option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
-            </div>
+            <StudentFilterBar
+                variant="card"
+                theme="emerald"
+                className="print:hidden"
+                includeHigherSecondary={false}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                selectedSession={selectedSession}
+                onSessionChange={setSelectedSession}
+                sessionYears={sessionYears}
+                selectedDivision={selectedDivision}
+                onDivisionChange={setSelectedDivision}
+                selectedAcademyType={selectedAcademyType}
+                onAcademyTypeChange={setSelectedAcademyType}
+                selectedClass={selectedClass}
+                onClassChange={setSelectedClass}
+            />
 
             {/* ৪. মেইন ডাটা টেবিল (সিট প্ল্যান / সিট প্ল্যান প্রিভিউ) */}
             <div className="bg-white rounded-2xl border border-emerald-900/10 shadow-xs overflow-hidden print:border-none print:shadow-none">

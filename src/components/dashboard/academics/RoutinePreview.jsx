@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import PrintInstitutionalHeader from "@/components/shared/print/PrintInstitutionalHeader";
 
 export default function RoutinePreview({ routine }) {
     if (!routine) {
@@ -54,30 +55,17 @@ export default function RoutinePreview({ routine }) {
             <div id="printable" className="p-2 print:p-0 w-full mx-auto flex flex-col justify-between min-h-[90vh] print:min-h-[190mm]">
                 <div>
                     {/* Header with separate Logo and Banner */}
-                    <div className="flex items-center justify-center  gap-0 mb-2 border-b-4 border-double border-gray-800 pb-1 pl-2">
-                        <div className="w-20 h-20 md:w-28 md:h-28 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-3">
-                            <Image
-                                src={"/aimlogo1.png"}
-                                alt="Institution Logo"
-                                width={200}
-                                height={200}
-                                quality={100}
-                                priority
-                                className="w-full h-full object-cover scale-[1.05] transform-gpu"
-                            />
-                        </div>
-                        <div className="flex-grow text-center">
-                            <Image
-                                src={"/banner_routine.png"}
-                                alt="Institution Banner"
-                                width={2000}
-                                height={400}
-                                quality={100}
-                                priority
-                                className="w-full h-auto max-h-45 object-fill mx-auto print:max-h-45"
-                            />
-                        </div>
-                    </div>
+                    <PrintInstitutionalHeader
+                        bannerSrc="/banner_routine.png"
+                        containerClassName="flex items-center justify-center gap-0 mb-2 border-b-4 border-double border-gray-800 pb-1 pl-2"
+                        logoWrapperClassName="w-20 h-20 md:w-28 md:h-28 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-3"
+                        logoWidth={200}
+                        logoHeight={200}
+                        logoClassName="w-full h-full object-cover scale-[1.05] transform-gpu"
+                        bannerWidth={2000}
+                        bannerHeight={400}
+                        bannerClassName="w-full h-auto max-h-45 object-fill mx-auto print:max-h-45"
+                    />
 
                     {/* Title Header */}
                     <div className="text-center mb-3 space-y-0.5">
