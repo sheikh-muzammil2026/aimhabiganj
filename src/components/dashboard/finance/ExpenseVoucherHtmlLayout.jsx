@@ -41,50 +41,38 @@ export default function ExpenseVoucherHtmlLayout({
   return (
     <div className="space-y-4 text-black bg-white w-full max-w-full font-sans leading-relaxed text-xs">
       {/* Organisation Header matching Admit Card Branding */}
-      <div className="flex items-center justify-between gap-3 border-b-2 border-[#C5A059] pb-3 text-center">
-        <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-slate-50 border border-[#C5A059]">
-          <Image
-            src="/aimlogo1.png"
-            alt="Logo"
-            width={40}
-            height={40}
-            className="object-contain"
-          />
-        </div>
-        <div className="flex-1 text-center min-w-0">
-          <div className="w-full flex justify-center">
-            <Image
-              src="/banner.png"
-              alt="Banner"
-              width={280}
-              height={40}
-              className="max-h-8 w-auto object-contain mx-auto"
-              priority
-            />
-          </div>
-          <p className="text-[9px] text-slate-600 font-semibold mt-0.5">
-            দক্ষিণ শ্যামলী, হবিগঞ্জ সদর, হবিগঞ্জ
-          </p>
-          <div className="flex items-center justify-center gap-2 text-[8.5px] text-emerald-800 font-medium">
-            <span className="flex items-center gap-0.5">
-              <MdInstallMobile className="text-[10px] shrink-0" /> +880 1748 868161
-            </span>
-            <span className="text-slate-300">|</span>
-            <span className="flex items-center gap-0.5">
-              <MdEmail className="text-[10px] shrink-0" /> aimhabiganj@gmail.com
-            </span>
-          </div>
-        </div>
-        <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-slate-50 border border-[#C5A059]">
-          <Image
-            src="/aimlogo1.png"
-            alt="Logo"
-            width={40}
-            height={40}
-            className="object-contain"
-          />
-        </div>
-      </div>
+      {/* Header Section */}
+             <div className="flex items-center justify-between gap-2 border-b-2 border-[#C5A059] pb-2">
+               {/* Logo on the left */}
+               <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-slate-50 border border-[#C5A059]">
+                 <Image
+                   src="/aimlogo1.png"
+                   alt="Institution Logo"
+                   width={40}
+                   height={40}
+                   className="object-contain"
+                 />
+               </div>
+     
+               {/* Banner in the center */}
+               <div className="flex-1 text-center min-w-0 px-1">
+                 <div className="w-full flex justify-center">
+                   <Image
+                     src="/banner.png"
+                     alt="Institution Banner"
+                     width={280}
+                     height={40}
+                     className="w-auto object-fill mx-auto max-h-45"
+                     priority
+                   />
+                 </div>
+                 <p className="text-[9px] text-slate-600 font-semibold mt-0.5">
+                   দক্ষিণ শ্যামলী, হবিগঞ্জ সদর, হবিগঞ্জ
+                 </p>
+               </div>
+     
+               {/* Right Logo placeholder for balanced symmetry */}
+             </div>
 
       <div className="text-center my-1.5">
         <div className="inline-block bg-emerald-800 text-white px-4 py-0.5 rounded-full border border-emerald-600 shadow-xs text-[10px] font-bold tracking-wider uppercase">

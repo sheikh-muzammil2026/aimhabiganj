@@ -245,12 +245,7 @@ function VoucherSingleHalf({
               স্বাক্ষর ও তারিখ
             </span>
           </div>
-          {/* <div className="border-t border-slate-400 pt-1">
-            <p>হিসাবরক্ষক</p>
-            <span className="text-[7px] text-slate-400 block font-normal">
-              ক্যাশিয়ার
-            </span>
-          </div> */}
+       
           <div className="border-t border-slate-400 pt-1">
             <p>অনুমোদনকারী</p>
             <span className="text-[7px] text-slate-400 block font-normal">
