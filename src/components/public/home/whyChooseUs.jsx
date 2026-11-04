@@ -1,100 +1,302 @@
 "use client";
 
+import {
+  Compass,
+  MonitorPlay,
+  Languages,
+  ShieldCheck,
+  GraduationCap,
+  Trophy,
+  Sparkles,
+  CheckCircle2,
+} from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
+
 export default function WhyChooseUs() {
-    const features = [
-        {
-            icon: "🕌",
-            title: "সহীহ আকিদা ও আমল",
-            description: "কুরআন ও সুন্নাহর সঠিক নির্দেশনায় শিক্ষার্থীদের আত্মশুদ্ধি এবং সুন্নতি জিন্দেগি গঠনে সার্বক্ষণিক তদারকি।",
-        },
-        {
-            icon: "🖥️",
-            title: "স্মার্ট ক্লাসরুম ও মাল্টিমিডিয়া",
-            description: "আধুনিক প্রজেক্টর, লাইভ ক্লাস, ই-বুক এবং ডিজিটাল প্রযুক্তির মাধ্যমে পড়ালেখাকে সহজ ও আকর্ষণীয় করা।",
-        },
-        {
-            icon: "🇬🇧",
-            title: "আরবি ও ইংরেজি ভাষা শিক্ষা",
-            description: "দ্বীনি শিক্ষার পাশাপাশি আন্তর্জাতিক ভাষা হিসেবে আরবি ও ইংরেজিতে অনর্গল কথা বলা ও লেখার বিশেষ প্রশিক্ষণ।",
-        },
-        {
-            icon: "🛌",
-            title: "উন্নত আবাসিক ও নিরাপদ পরিবেশ",
-            description: "সিসিটিভি ক্যামেরায় নিয়ন্ত্রিত ক্যাম্পাস, পুষ্টিকর খাবার এবং অভিজ্ঞ শিক্ষকদের তত্ত্বাবধানে মনোরম হোস্টেল ব্যবস্থা।",
-        },
-        {
-            icon: "👨‍🏫",
-            title: "দক্ষ ও মায়াবিপন্ন উলামায়ে কেরাম",
-            description: "দেশ-বিদেশের স্বনামধন্য বিশ্ববিদ্যালয় ও বড় মাদ্রাসা থেকে পাস করা একঝাঁক আন্তরিক ও অভিজ্ঞ শিক্ষক মণ্ডলী।",
-        },
-        {
-            icon: "📈",
-            title: "ব্যক্তিগত প্রতিভা বিকাশ",
-            description: "বক্তৃতা, ক্যালিগ্রাফি, কুইজ এবং বিভিন্ন সহ-শিক্ষা কার্যক্রমের মাধ্যমে প্রতিটি শিশুর সুপ্ত প্রতিভা প্রকাশ।",
-        },
-    ];
+  const { language } = useLanguage();
 
-    return (
-        <section className="py-16 md:py-24 bg-slate-50 dark:bg-slate-950 transition-colors duration-300" id="features">
-            {/* Global Keyframes definition using standard style tag so it never drops */}
-            <style dangerouslySetInnerHTML={{
-                __html: `
-                @keyframes spinBorder {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
-                .custom-border-spin {
-                    animation: spinBorder 4s linear infinite;
-                    will-change: transform;
-                }
-            `}} />
+  const content = {
+    bn: {
+      badge: "আমাদের বিশেষত্ব ও শ্রেষ্ঠত্ব",
+      titlePrefix: "কেন আপনার সন্তানের জন্য",
+      titleHighlight: "আস-সালাম আইডিয়াল মাদরাসা (এইম)",
+      titleSuffix: "নির্বাচন করবেন?",
+      subtitle:
+        "দ্বীনি ইলম, সুন্নতি আখলাক এবং আধুনিক একাডেমিক শিক্ষার এক অনন্য ও যুগোপযোগী সমন্বয়—যা আপনার সন্তানকে দুনিয়া ও আখিরাতে সফল মানুষ হিসেবে গড়ে তুলবে।",
+      features: [
+        {
+          icon: Compass,
+          tag: "আত্মশুদ্ধি ও আমল",
+          title: "সহীহ আকিদা ও সুন্নতি জিন্দেগি",
+          description:
+            "কুরআন ও সুন্নাহর সঠিক নির্দেশনায় শিক্ষার্থীদের আত্মশুদ্ধি, আদব-আখলাক এবং সুন্নতি জিন্দেগি গঠনে সার্বক্ষণিক নিবিড় তদারকি।",
+        },
+        {
+          icon: MonitorPlay,
+          tag: "ডিজিটাল শিক্ষা",
+          title: "স্মার্ট ক্লাসরুম ও মাল্টিমিডিয়া",
+          description:
+            "আধুনিক প্রজেক্টর, ইন্টারেক্টিভ ক্লাস, ই-বুক এবং ডিজিটাল প্রযুক্তির মাধ্যমে কঠিন পাঠকে সহজ, আনন্দময় ও আকর্ষণীয় করে উপস্থাপন।",
+        },
+        {
+          icon: Languages,
+          tag: "ত্রিভাষিক দক্ষতা",
+          title: "আরবি, বাংলা ও ইংরেজি ভাষা শিক্ষা",
+          description:
+            "দ্বীনি শিক্ষার পাশাপাশি আন্তর্জাতিক ভাষা হিসেবে আরবি ও ইংরেজিতে অনর্গল কথা বলা, শোনা ও লেখার বিশেষ ল্যাঙ্গুয়েজ ক্লাব।",
+        },
+        {
+          icon: ShieldCheck,
+          tag: "নিরাপদ ক্যাম্পাস",
+          title: "উন্নত আবাসিক ও নিরাপদ পরিবেশ",
+          description:
+            "২৪ ঘণ্টা সিসিটিভি ক্যামেরায় নিয়ন্ত্রিত ক্যাম্পাস, স্বাস্থ্যসম্মত পুষ্টিকর খাবার এবং অভিজ্ঞ শিক্ষকদের তত্ত্বাবধানে মনোরম হোস্টেল ব্যবস্থা।",
+        },
+        {
+          icon: GraduationCap,
+          tag: "অভিজ্ঞ শিক্ষকমণ্ডলী",
+          title: "দক্ষ ও মায়াবিপন্ন উলামায়ে কেরাম",
+          description:
+            "দেশ-বিদেশের স্বনামধন্য বিশ্ববিদ্যালয় ও শীর্ষস্থানীয় মাদরাসা থেকে উচ্চশিক্ষাপ্রাপ্ত একঝাঁক আন্তরিক ও মেধাবী শিক্ষক মণ্ডলী।",
+        },
+        {
+          icon: Trophy,
+          tag: "সহ-পাঠ্যক্রম",
+          title: "ব্যক্তিগত প্রতিভা ও নেতৃত্ব বিকাশ",
+          description:
+            "বক্তৃতা, কুরআন তিলাওয়াত, ক্যালিগ্রাফি, কুইজ এবং সৃজনশীল সহ-শিক্ষা কার্যক্রমের মাধ্যমে প্রতিটি শিক্ষার্থীর সুপ্ত প্রতিভা বিকাশ।",
+        },
+      ],
+    },
+    en: {
+      badge: "Why Choose Us",
+      titlePrefix: "Why Select",
+      titleHighlight: "As-Salam Ideal Madrasah (AIM)",
+      titleSuffix: "for Your Child’s Future?",
+      subtitle:
+        "A harmonious blend of authentic Islamic scholarship, prophetic character, and modern academic excellence designed to nurture leaders for both worlds.",
+      features: [
+        {
+          icon: Compass,
+          tag: "Faith & Character",
+          title: "Authentic Aqeedah & Sunnah Lifestyle",
+          description:
+            "Continuous mentorship to instill pure Islamic beliefs, prophetic manners, and spiritual discipline in every student’s daily life.",
+        },
+        {
+          icon: MonitorPlay,
+          tag: "Digital Learning",
+          title: "Smart Classrooms & Multimedia",
+          description:
+            "Interactive multimedia lessons, digital resources, and modern pedagogy that make complex subjects engaging and easy to master.",
+        },
+        {
+          icon: Languages,
+          tag: "Trilingual Fluency",
+          title: "Arabic, English & Bengali Mastery",
+          description:
+            "Dedicated language clubs and practical speaking sessions to build confident communication in Arabic, English, and Bengali.",
+        },
+        {
+          icon: ShieldCheck,
+          tag: "Safe Campus",
+          title: "Premium & Secure Residential Hostel",
+          description:
+            "24/7 CCTV-monitored campus, hygienic nutritious meals, and a caring home-like environment supervised by resident mentors.",
+        },
+        {
+          icon: GraduationCap,
+          tag: "Expert Faculty",
+          title: "Compassionate Ulama & Educators",
+          description:
+            "Taught by accomplished scholars and graduates from renowned universities and premier Islamic institutions.",
+        },
+        {
+          icon: Trophy,
+          tag: "Co-Curricular",
+          title: "Holistic Talent & Leadership Growth",
+          description:
+            "Regular debates, Quranic recitation, calligraphy, quizzes, and leadership programs to unlock every child’s unique potential.",
+        },
+      ],
+    },
+    ar: {
+      badge: "مميزاتنا الفريدة",
+      titlePrefix: "لماذا تختار",
+      titleHighlight: "مدرسة السلام النموذجية (AIM)",
+      titleSuffix: "لمستقبل أبنائك؟",
+      subtitle:
+        "منظومة تربوية متكاملة تجمع بين أصالة العلوم الشرعية والتربية الإيمانية وبين التفوق الأكاديمي الحديث لبناء جيل رائد ومتميز.",
+      features: [
+        {
+          icon: Compass,
+          tag: "العقيدة والأخلاق",
+          title: "عقيدة صحيحة ومنهج نبوي",
+          description:
+            "رعاية مستمرة لغرس العقيدة الإسلامية الصافية والأخلاق النبوية والآداب الإسلامية في نفوس الطلاب عملياً وسلوكياً.",
+        },
+        {
+          icon: MonitorPlay,
+          tag: "التعليم الذكي",
+          title: "فصول ذكية ووسائط متعددة",
+          description:
+            "استخدام أحدث الوسائل التعليمية التفاعلية والعروض المرئية لجعل العملية التعليمية ممتعة وميسرة وعالية الكفاءة.",
+        },
+        {
+          icon: Languages,
+          tag: "إتقان اللغات",
+          title: "إتقان العربية والإنجليزية والبنغالية",
+          description:
+            "برامج تدريبية خاصة لإتقان المحادثة والكتابة باللغتين العربية والإنجليزية إلى جانب اللغة الأم بطلاقة وثقة.",
+        },
+        {
+          icon: ShieldCheck,
+          tag: "بيئة آمنة",
+          title: "سكن طلابي راقٍ وآمن",
+          description:
+            "حرم جامعي مراقب بالكاميرات على مدار الساعة، مع وجبات صحية متوازنة وإشراف تربوي حانٍ يوفر بيئة أسرية مطمئنة.",
+        },
+        {
+          icon: GraduationCap,
+          tag: "نخبة المعلمين",
+          title: "علماء وأساتذة ذوو خبرة وكفاءة",
+          description:
+            "نخبة متميزة من العلماء المربين وخريجي الجامعات والمعاهد الإسلامية العريقة يجمعون بين العلم الغزير والرحمة الأبوية.",
+        },
+        {
+          icon: Trophy,
+          tag: "تنمية المهارات",
+          title: "تنمية المواهب والقيادة الفردية",
+          description:
+            "أنشطة لا صفية متنوعة تشمل الخطابة، التلاوة، الخط العربي، والمسابقات العلمية لصقل شخصية الطالب ومواهبه.",
+        },
+      ],
+    },
+  };
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  const active = content[language] || content.bn;
+  const indexLabels = ["01", "02", "03", "04", "05", "06"];
 
-                {/* সেকশন হেডার */}
-                <div className="text-center max-w-3xl mx-auto mb-16">
-                    <h2 className="text-emerald-700 dark:text-amber-400 font-bold text-xs sm:text-sm uppercase tracking-wider mb-2">
-                        আমাদের বৈশিষ্ট্য
-                    </h2>
-                    <p className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 dark:text-white leading-tight">
-                        কেন আপনার সন্তানের জন্য <br className="hidden sm:inline" /> আস-সালাম আইডিয়াল মাদরাসা (এইম) নির্বাচন করবেন?
+  return (
+    <section
+      id="features"
+      className="relative py-20 md:py-28 bg-gradient-to-b from-[#f6faf8] via-white to-[#f2f8f5] dark:from-[#020611] dark:via-[#050d1d] dark:to-[#020611] transition-colors duration-300 overflow-hidden"
+    >
+      {/* অ্যানিমেটেড বর্ডার কি-ফ্রেম */}
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            @keyframes spinBorder {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+            .custom-border-spin {
+              animation: spinBorder 6s linear infinite;
+              will-change: transform;
+            }
+          `,
+        }}
+      />
+
+      {/* অ্যাম্বিয়েন্ট লাইট গ্লো ও জিওমেট্রিক ব্যাকগ্রাউন্ড */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-32 left-1/4 w-[420px] h-[420px] bg-emerald-500/8 dark:bg-emerald-500/10 rounded-full blur-[120px]" />
+        <div className="absolute -bottom-32 right-1/4 w-[420px] h-[420px] bg-amber-500/8 dark:bg-amber-500/10 rounded-full blur-[120px]" />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* সেকশন হেডার */}
+        <div className="text-center max-w-3xl mx-auto mb-16 md:mb-20 space-y-4">
+          <div className="inline-flex items-center gap-2 bg-emerald-950/5 dark:bg-white/[0.05] border border-emerald-800/15 dark:border-amber-400/25 px-4 py-1.5 rounded-full shadow-xs">
+            <Sparkles className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
+            <span className="text-emerald-900 dark:text-amber-300 font-bold text-xs uppercase tracking-widest">
+              {active.badge}
+            </span>
+          </div>
+
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[42px] font-black text-slate-900 dark:text-white leading-[1.22] tracking-tight">
+            {active.titlePrefix}{" "}
+            <span className="bg-gradient-to-r from-emerald-800 via-emerald-600 to-amber-600 dark:from-amber-200 dark:via-amber-400 dark:to-emerald-300 bg-clip-text text-transparent">
+              {active.titleHighlight}
+            </span>{" "}
+            {active.titleSuffix}
+          </h2>
+
+          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl mx-auto">
+            {active.subtitle}
+          </p>
+
+          {/* অর্নামেন্টাল ডিভাইডার */}
+          <div className="flex items-center justify-center gap-2 pt-2">
+            <div className="h-[1px] w-14 bg-gradient-to-r from-transparent to-amber-500" />
+            <div className="h-2 w-2 rotate-45 bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
+            <div className="h-[1px] w-14 bg-gradient-to-l from-transparent to-amber-500" />
+          </div>
+        </div>
+
+        {/* ৬টি লাক্সারি বৈশিষ্ট্য কার্ড গ্রিড */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 lg:gap-8">
+          {active.features.map((item, index) => {
+            const IconComponent = item.icon;
+            return (
+              <div
+                key={index}
+                className="relative p-[1.5px] rounded-3xl overflow-hidden group hover:-translate-y-2 transition-all duration-500 shadow-[0_10px_35px_-12px_rgba(2,32,20,0.08)] hover:shadow-[0_25px_55px_-12px_rgba(2,32,20,0.18)] dark:shadow-[0_15px_40px_-15px_rgba(0,0,0,0.6)]"
+              >
+                {/* ১. এনিমেটেড ঘূর্ণায়মান বর্ডার লেয়ার (Conic Gradient) */}
+                <div
+                  className="absolute inset-[-100%] custom-border-spin opacity-55 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                  style={{
+                    background: `conic-gradient(from 0deg, transparent 65%, #059669 82%, #f59e0b 100%)`,
+                  }}
+                />
+
+                {/* ২. ভেতরের মূল লাক্সারি কার্ড */}
+                <div className="relative bg-white dark:bg-[#081121] p-7 sm:p-8 rounded-[22.5px] h-full w-full z-10 flex flex-col justify-between overflow-hidden">
+                  {/* সূক্ষ্ম কর্নার গ্লো */}
+                  <div className="pointer-events-none absolute -right-12 -top-12 w-36 h-36 rounded-full bg-gradient-to-br from-emerald-500/8 to-amber-500/8 dark:from-emerald-500/12 dark:to-amber-500/12 blur-2xl group-hover:scale-150 transition-transform duration-500" />
+
+                  <div>
+                    {/* কার্ডের টপ বার: আইকন মেডেলিয়ন ও ইনডেক্স নাম্বার */}
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-[#022014] via-emerald-900 to-emerald-800 dark:from-emerald-950 dark:to-slate-900 text-amber-300 flex items-center justify-center ring-1 ring-amber-400/35 shadow-[0_8px_20px_-4px_rgba(2,32,20,0.35)] group-hover:scale-110 group-hover:ring-amber-400/70 transition-all duration-300">
+                        <IconComponent className="w-6 h-6 text-amber-300 transition-transform duration-300 group-hover:rotate-6" />
+                      </div>
+
+                      <div className="flex flex-col items-end">
+                        <span className="text-2xl font-black font-mono bg-gradient-to-b from-slate-200 to-slate-100 dark:from-slate-800 dark:to-slate-900 bg-clip-text text-transparent group-hover:from-amber-400/40 group-hover:to-emerald-500/20 transition-all select-none">
+                          {indexLabels[index]}
+                        </span>
+                        <span className="text-[11px] font-bold text-emerald-700 dark:text-amber-400/90 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/60 dark:border-emerald-800/50 px-2.5 py-0.5 rounded-full">
+                          {item.tag}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* টাইটেল ও ডেসক্রিপশন */}
+                    <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white mb-3 group-hover:text-emerald-800 dark:group-hover:text-amber-300 transition-colors">
+                      {item.title}
+                    </h3>
+
+                    <p className="text-sm text-slate-600 dark:text-slate-300/90 leading-relaxed">
+                      {item.description}
                     </p>
-                    <div className="w-16 h-1 bg-amber-500 mx-auto mt-4 rounded-full" />
+                  </div>
+
+                  {/* নিচের অর্নামেন্টাল ফুটার লাইন */}
+                  <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                    <span className="inline-flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-amber-500" />
+                      <span>AIM Standard Excellence</span>
+                    </span>
+                    <span className="h-1 w-8 rounded-full bg-gradient-to-r from-emerald-500 to-amber-400 group-hover:w-14 transition-all duration-300" />
+                  </div>
                 </div>
-
-                {/* বৈশিষ্ট্য গ্রিড */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {features.map((item, index) => (
-                        <div
-                            key={index}
-                            className="relative p-[2px] rounded-2xl overflow-hidden group hover:-translate-y-1 transition-all duration-300 shadow-sm hover:shadow-xl"
-                        >
-                            {/* ১. এনিমেটেড ঘূর্ণায়মান বর্ডার লেয়ার (Conic Gradient) */}
-                            <div
-                                className="absolute inset-[-100%] custom-border-spin opacity-80 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                                style={{
-                                    background: `conic-gradient(from 0deg, transparent 70%, #059669 85%, #f59e0b 100%)`
-                                }}
-                            />
-
-                            {/* ২. ভেতরের আসল কার্ড (যা বর্ডারের ওপর বসে আসল কন্টেন্ট দেখাবে) */}
-                            <div className="relative bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-[14px] h-full w-full z-10">
-                                {/* আইকন বক্স */}
-                                <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-slate-950 text-emerald-700 dark:text-amber-400 flex items-center justify-center text-2xl shadow-inner group-hover:bg-emerald-700 group-hover:text-white dark:group-hover:bg-amber-500 dark:group-hover:text-slate-950 transition-all duration-300 mb-6">
-                                    {item.icon}
-                                </div>
-                                <h3 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-gray-100 mb-3">
-                                    {item.title}
-                                </h3>
-                                <p className="text-sm text-slate-600 dark:text-gray-400 leading-relaxed">
-                                    {item.description}
-                                </p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-            </div>
-        </section>
-    );
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
 }
