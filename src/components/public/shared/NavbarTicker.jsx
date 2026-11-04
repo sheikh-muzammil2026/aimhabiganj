@@ -77,7 +77,7 @@ export default function NavbarTicker() {
 
   return (
     <>
-      <div className="w-full bg-gradient-to-r from-[#01160e] via-[#032619] to-[#01160e] dark:from-[#02050b] dark:via-[#07101f] dark:to-[#02050b] text-emerald-50 font-medium py-1.5 px-3 sm:px-5 lg:px-6 flex items-center overflow-hidden border-b border-amber-400/15 dark:border-slate-800/80 transition-colors duration-300 relative z-20 print:hidden shadow-sm">
+      <div className="w-full bg-gradient-to-r from-[#01160e] via-[#032619] to-[#01160e] dark:from-[#010604] dark:via-[#02140d] dark:to-[#010604] text-emerald-50 font-medium py-1.5 px-3 sm:px-5 lg:px-6 flex items-center overflow-hidden border-b border-amber-400/15 dark:border-amber-400/20 transition-colors duration-300 relative z-20 print:hidden shadow-sm">
         <div className="max-w-[1440px] mx-auto w-full flex items-center gap-2.5">
           {/* Ticker Label Badge */}
           <div className="flex-shrink-0 flex items-center gap-1.5 bg-gradient-to-r from-amber-500/20 to-amber-400/10 border border-amber-400/35 text-amber-300 px-2.5 py-0.5 md:py-1 rounded-lg text-[11px] md:text-xs font-bold uppercase tracking-wider select-none z-10 shadow-[0_0_12px_rgba(245,158,11,0.12)]">
@@ -91,8 +91,8 @@ export default function NavbarTicker() {
 
           {/* Marquee Content with Soft Edge Mask */}
           <div className="relative flex-1 overflow-hidden flex items-center select-none group">
-            <div className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-[#01160e] dark:from-[#02050b] to-transparent z-10" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-[#01160e] dark:from-[#02050b] to-transparent z-10" />
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-[#01160e] dark:from-[#010604] to-transparent z-10" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-[#01160e] dark:from-[#010604] to-transparent z-10" />
 
             <div
               style={{ animationDuration: `${dynamicDuration}s` }}

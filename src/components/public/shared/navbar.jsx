@@ -207,11 +207,11 @@ export default function Navbar() {
                 className={`px-2.5 xl:px-3 py-1.5 rounded-xl text-xs xl:text-[13px] font-medium transition-all duration-300 flex items-center gap-1 whitespace-nowrap focus:outline-none cursor-pointer ${
                   item.isAdmission
                     ? active
-                      ? "bg-gradient-to-r from-amber-500/30 to-amber-400/20 text-amber-200 font-semibold border border-amber-400/50 shadow-[0_0_16px_rgba(245,158,11,0.25)]"
-                      : "bg-gradient-to-r from-amber-500/15 to-amber-400/5 text-amber-300 font-semibold border border-amber-400/30 hover:from-amber-500/25 hover:to-amber-400/15 hover:border-amber-300/60 hover:text-amber-200 shadow-[0_0_12px_rgba(245,158,11,0.12)]"
+                      ? "bg-gradient-to-r from-amber-500/30 to-amber-400/20 text-amber-200 font-semibold border border-amber-400/50 shadow-[0_0_16px_rgba(245,158,11,0.28)]"
+                      : "bg-gradient-to-r from-amber-500/15 to-amber-400/5 text-amber-300 font-semibold border border-amber-400/35 hover:from-amber-500/25 hover:to-amber-400/15 hover:border-amber-300/65 hover:text-amber-200 shadow-[0_0_12px_rgba(245,158,11,0.14)]"
                     : active
-                      ? "bg-gradient-to-r from-emerald-500/25 via-emerald-400/15 to-amber-500/15 text-amber-200 font-semibold border border-amber-400/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
-                      : "text-slate-100/95 hover:text-amber-200 hover:bg-white/[0.08] border border-transparent"
+                      ? "bg-gradient-to-r from-emerald-500/25 via-emerald-400/15 to-amber-500/15 text-amber-200 font-semibold border border-amber-400/35 shadow-[0_0_15px_rgba(16,185,129,0.22)]"
+                      : "text-slate-100/95 hover:text-amber-200 hover:bg-white/[0.08] dark:hover:bg-emerald-500/15 border border-transparent"
                 }`}
               >
                 {item.isAdmission && (
@@ -234,7 +234,7 @@ export default function Navbar() {
 
               {/* লাক্সারি গ্লাসমরফিক ড্রপডাউন মেনু */}
               <div className="absolute ltr:left-0 rtl:right-0 pt-2.5 w-60 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 z-[90]">
-                <div className="bg-[#022014]/95 dark:bg-slate-950/95 text-slate-100 rounded-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.75)] border border-emerald-500/25 dark:border-slate-800 backdrop-blur-2xl overflow-hidden">
+                <div className="bg-[#022014]/95 dark:bg-[#02120b]/95 text-slate-100 rounded-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)] border border-emerald-500/25 dark:border-amber-400/25 backdrop-blur-2xl overflow-hidden">
                   <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
                   <div className="p-1.5 max-h-[70vh] overflow-y-auto custom-scrollbar space-y-0.5">
                     {item.dropdown.map((sub, i) => (
@@ -261,8 +261,8 @@ export default function Navbar() {
               onClick={(e) => handleSubmenuClick(e, item.href)}
               className={`px-2.5 xl:px-3 py-1.5 rounded-xl text-xs xl:text-[13px] font-medium transition-all duration-300 block whitespace-nowrap ${
                 active
-                  ? "bg-gradient-to-r from-emerald-500/25 via-emerald-400/15 to-amber-500/15 text-amber-200 font-semibold border border-amber-400/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
-                  : "text-slate-100/95 hover:text-amber-200 hover:bg-white/[0.08] border border-transparent"
+                  ? "bg-gradient-to-r from-emerald-500/25 via-emerald-400/15 to-amber-500/15 text-amber-200 font-semibold border border-amber-400/35 shadow-[0_0_15px_rgba(16,185,129,0.22)]"
+                  : "text-slate-100/95 hover:text-amber-200 hover:bg-white/[0.08] dark:hover:bg-emerald-500/15 border border-transparent"
               }`}
             >
               {item.name}
@@ -275,17 +275,17 @@ export default function Navbar() {
   return (
     <>
       <header
-        className={`sticky top-0 z-50 w-full print:hidden text-white transition-all duration-300 border-b border-amber-400/20 dark:border-slate-800/80 ${
+        className={`sticky top-0 z-50 w-full print:hidden text-white transition-all duration-300 border-b border-amber-400/20 dark:border-amber-400/25 ${
           isScrolled
-            ? "bg-[#021d12]/90 dark:bg-[#030712]/90 backdrop-blur-xl shadow-[0_12px_40px_-10px_rgba(0,0,0,0.65)] py-2"
-            : "bg-gradient-to-r from-[#021d12] via-[#04301f] to-[#021d12] dark:from-[#030712] dark:via-[#081224] dark:to-[#030712] py-2.5 md:py-3 shadow-md"
+            ? "bg-[#021d12]/90 dark:bg-[#010c07]/90 backdrop-blur-xl shadow-[0_12px_40px_-10px_rgba(0,0,0,0.75)] py-2"
+            : "bg-gradient-to-r from-[#021d12] via-[#04301f] to-[#021d12] dark:from-[#010906] dark:via-[#031b11] dark:to-[#010906] py-2.5 md:py-3 shadow-md"
         }`}
       >
         {/* Ambient Top Golden & Emerald Glow */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -top-16 left-1/4 w-96 h-28 bg-emerald-400/10 rounded-full blur-3xl" />
-          <div className="absolute -top-16 right-1/4 w-80 h-28 bg-amber-400/10 rounded-full blur-3xl" />
-          <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/35 to-transparent" />
+          <div className="absolute -top-16 left-1/4 w-96 h-28 bg-emerald-400/10 dark:bg-emerald-400/15 rounded-full blur-3xl" />
+          <div className="absolute -top-16 right-1/4 w-80 h-28 bg-amber-400/10 dark:bg-amber-400/15 rounded-full blur-3xl" />
+          <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/40 to-transparent" />
         </div>
 
         <div className="max-w-[1440px] mx-auto px-3 sm:px-5 lg:px-6 relative z-10">
@@ -295,7 +295,7 @@ export default function Navbar() {
             <div className="w-full md:w-auto flex items-center justify-center md:justify-start gap-2.5 sm:gap-3.5 flex-shrink-0">
               <Link
                 href="/"
-                className="group/logo relative flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 xl:w-12 xl:h-12 rounded-full p-[2px] bg-gradient-to-tr from-amber-500 via-amber-200 to-emerald-400 shadow-[0_0_20px_rgba(245,158,11,0.28)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_25px_rgba(245,158,11,0.45)]"
+                className="group/logo relative flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 xl:w-12 xl:h-12 rounded-full p-[2px] bg-gradient-to-tr from-amber-500 via-amber-200 to-emerald-400 shadow-[0_0_20px_rgba(245,158,11,0.32)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_28px_rgba(245,158,11,0.5)]"
               >
                 <div className="relative w-full h-full rounded-full overflow-hidden bg-[#021d12]">
                   <Image
@@ -335,7 +335,7 @@ export default function Navbar() {
 
                 <div className="flex items-center justify-center md:justify-start gap-1.5 mt-0.5">
                   <span className="hidden sm:inline-block w-3 h-[1px] bg-gradient-to-r from-amber-400 to-transparent" />
-                  <p className="text-[9px] sm:text-[10px] xl:text-[10.5px] font-semibold tracking-[0.14em] text-amber-200/80 italic uppercase dark:text-emerald-300/80 whitespace-nowrap">
+                  <p className="text-[9px] sm:text-[10px] xl:text-[10.5px] font-semibold tracking-[0.14em] text-amber-200/80 italic uppercase dark:text-amber-300/85 whitespace-nowrap">
                     {t("header.slogan")}
                   </p>
                 </div>
@@ -345,7 +345,7 @@ export default function Navbar() {
             {/* ২. মধ্য অংশ: ফ্লোটিং গ্লাসমরফিক নেভিগেশন ক্যাপসুল */}
             <nav
               aria-label="Main Navigation"
-              className="hidden lg:flex items-center justify-center gap-0.5 bg-white/[0.04] dark:bg-slate-900/60 border border-white/12 dark:border-white/10 rounded-2xl p-1 shadow-[inset_0_1px_1px_rgba(255,255,255,0.12),0_8px_24px_rgba(0,0,0,0.25)] backdrop-blur-xl"
+              className="hidden lg:flex items-center justify-center gap-0.5 bg-white/[0.04] dark:bg-[#052418]/70 border border-white/12 dark:border-amber-400/20 rounded-2xl p-1 shadow-[inset_0_1px_1px_rgba(255,255,255,0.12),0_8px_24px_rgba(0,0,0,0.3)] dark:shadow-[inset_0_1px_1px_rgba(251,191,36,0.15),0_10px_30px_rgba(0,0,0,0.6)] backdrop-blur-xl"
             >
               {renderNavItems()}
             </nav>
@@ -361,7 +361,7 @@ export default function Navbar() {
                 onClick={toggleDarkMode}
                 title={darkMode ? "Light Mode" : "Dark Mode"}
                 aria-label="Toggle Dark Mode"
-                className="group p-2 rounded-xl border border-white/15 bg-white/[0.06] hover:bg-white/[0.12] hover:border-amber-400/40 transition-all duration-300 text-amber-300 hover:text-amber-200 focus:outline-none flex-shrink-0 cursor-pointer shadow-sm"
+                className="group p-2 rounded-xl border border-white/15 dark:border-amber-400/30 bg-white/[0.06] dark:bg-amber-400/10 hover:bg-white/[0.12] dark:hover:bg-amber-400/20 hover:border-amber-400/50 transition-all duration-300 text-amber-300 hover:text-amber-200 focus:outline-none flex-shrink-0 cursor-pointer shadow-sm"
               >
                 {darkMode ? (
                   <Sun className="w-4 h-4 transition-transform duration-300 group-hover:rotate-45" />
@@ -371,7 +371,7 @@ export default function Navbar() {
               </button>
 
               {/* ড্যাশবোর্ড ও লগইন/লগআউট অ্যাকশন বাটন */}
-              <div className="flex items-center gap-1.5 sm:gap-2 pl-2 border-s border-white/15 flex-shrink-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 pl-2 border-s border-white/15 dark:border-amber-400/20 flex-shrink-0">
                 {isLoggedIn ? (
                   <>
                     <Link

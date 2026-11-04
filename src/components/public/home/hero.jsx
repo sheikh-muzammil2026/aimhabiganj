@@ -201,8 +201,8 @@ export default function HeroSection() {
         })}
 
         {/* ২. মাল্টি-লেয়ারড রয়েল এমেরাল্ড, অবসিডিয়ান ও গোল্ডেন অ্যাটমস্ফিয়ারিক ওভারলে */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#01140d]/95 via-[#022015]/85 to-[#01140d]/70 dark:from-[#020611]/95 dark:via-[#061022]/85 dark:to-[#020611]/75 z-10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#01140d] via-transparent to-[#01140d]/60 dark:from-[#020611] dark:to-[#020611]/65 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#01140d]/95 via-[#022015]/85 to-[#01140d]/70 dark:from-[#010906]/95 dark:via-[#021910]/85 dark:to-[#010906]/75 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#01140d] via-transparent to-[#01140d]/60 dark:from-[#010a06] dark:to-[#010a06]/65 z-10" />
 
         {/* সূক্ষ্ম ইসলামিক জিওমেট্রিক প্যাটার্ন ও অ্যাম্বিয়েন্ট লাইট গ্লো */}
         <div
@@ -291,19 +291,19 @@ export default function HeroSection() {
 
             {/* ডান কলাম: লাক্সারি গ্লাসমরফিক বেন্টো শোকেস কার্ড (৫ কলাম) */}
             <div className="lg:col-span-5">
-              <div className="relative rounded-3xl p-[1px] bg-gradient-to-b from-amber-400/45 via-white/15 to-emerald-500/30 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.75)]">
-                <div className="bg-[#021d12]/75 dark:bg-slate-950/80 backdrop-blur-2xl rounded-[23px] p-5 sm:p-6 space-y-5">
+              <div className="relative rounded-3xl p-[1.5px] bg-gradient-to-b from-amber-400/50 via-white/15 to-emerald-500/35 dark:from-amber-400/65 dark:via-emerald-500/25 dark:to-amber-500/40 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.75)] dark:shadow-[0_25px_80px_-10px_rgba(0,0,0,0.9),0_0_45px_rgba(16,185,129,0.12)]">
+                <div className="bg-[#021d12]/75 dark:bg-[#02120b]/85 backdrop-blur-2xl rounded-[22.5px] p-5 sm:p-6 space-y-5">
                   {/* কার্ড হেডার */}
-                  <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                  <div className="flex items-center justify-between border-b border-white/10 dark:border-amber-400/15 pb-4">
                     <div>
                       <h2 className="text-base sm:text-lg font-extrabold bg-gradient-to-r from-amber-200 via-amber-300 to-amber-100 bg-clip-text text-transparent">
                         {activeLocale.cardHeader}
                       </h2>
-                      <p className="text-xs text-emerald-200/80 mt-0.5">
+                      <p className="text-xs text-emerald-200/80 dark:text-emerald-200/85 mt-0.5">
                         {activeLocale.cardSub}
                       </p>
                     </div>
-                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400/20 to-emerald-500/20 border border-amber-400/35 flex items-center justify-center text-amber-300 shadow-inner">
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400/20 to-emerald-500/20 border border-amber-400/35 flex items-center justify-center text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
                       <Sparkles className="w-5 h-5" />
                     </div>
                   </div>
@@ -315,15 +315,15 @@ export default function HeroSection() {
                       return (
                         <div
                           key={idx}
-                          className="group/card p-3.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-amber-400/35 transition-all duration-300"
+                          className="group/card p-3.5 rounded-2xl bg-white/[0.04] dark:bg-gradient-to-br dark:from-[#06291b]/70 dark:to-[#02130c]/85 hover:bg-white/[0.08] dark:hover:from-[#083523]/80 dark:hover:to-[#031910]/90 border border-white/10 dark:border-emerald-500/20 hover:border-amber-400/40 dark:hover:border-amber-400/50 transition-all duration-300 shadow-inner"
                         >
-                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400/20 to-emerald-500/15 border border-amber-400/30 flex items-center justify-center text-amber-300 mb-2.5 group-hover/card:scale-110 transition-transform duration-300">
+                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400/20 to-emerald-500/15 border border-amber-400/35 flex items-center justify-center text-amber-300 mb-2.5 group-hover/card:scale-110 transition-transform duration-300 shadow-[0_0_12px_rgba(245,158,11,0.15)]">
                             <IconComponent className="w-4 h-4" />
                           </div>
                           <h3 className="text-xs sm:text-[13px] font-bold text-white group-hover/card:text-amber-200 transition-colors">
                             {feature.title}
                           </h3>
-                          <p className="text-[11px] text-slate-300/80 leading-relaxed mt-1">
+                          <p className="text-[11px] text-slate-300/80 dark:text-emerald-100/75 leading-relaxed mt-1">
                             {feature.desc}
                           </p>
                         </div>

@@ -93,7 +93,7 @@ export default function Footer() {
   const active = content[language] || content.bn;
 
   return (
-    <footer className="relative bg-gradient-to-b from-[#021d12] via-[#01160e] to-[#010e09] dark:from-[#030712] dark:via-[#02050d] dark:to-[#010308] print:hidden text-slate-300 transition-colors duration-300 overflow-hidden">
+    <footer className="relative bg-gradient-to-b from-[#021d12] via-[#01160e] to-[#010e09] dark:from-[#02140d] dark:via-[#010b07] dark:to-[#000503] print:hidden text-slate-300 transition-colors duration-300 overflow-hidden">
       {/* টপ গোল্ডেন অ্যাকসেন্ট বর্ডার ও অ্যাম্বিয়েন্ট লাইট */}
       <div className="h-[2px] w-full bg-gradient-to-r from-emerald-800 via-amber-400 to-emerald-800" />
       <div className="pointer-events-none absolute -top-24 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-[130px]" />

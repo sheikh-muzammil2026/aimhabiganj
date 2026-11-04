@@ -62,7 +62,7 @@ export default function LanguageSwitcher() {
       {/* Dropdown Menu */}
       {isOpen && (
         <div
-          className="absolute ltr:right-0 rtl:left-0 mt-2 w-40 origin-top-right rounded-2xl border border-emerald-500/25 bg-[#032216]/95 text-white shadow-[0_20px_50px_rgba(0,0,0,0.7)] backdrop-blur-2xl focus:outline-none z-[100] dark:bg-slate-950/95 dark:border-slate-800 overflow-hidden"
+          className="absolute ltr:right-0 rtl:left-0 mt-2 w-40 origin-top-right rounded-2xl border border-emerald-500/25 dark:border-amber-400/25 bg-[#032216]/95 dark:bg-[#02120b]/95 text-white shadow-[0_20px_50px_rgba(0,0,0,0.8)] backdrop-blur-2xl focus:outline-none z-[100] overflow-hidden"
           role="menu"
         >
           <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-amber-400 to-transparent" />

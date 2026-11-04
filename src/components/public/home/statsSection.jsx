@@ -192,23 +192,23 @@ export default function StatsSection() {
   const active = content[language] || content.bn;
 
   return (
-    <section className="relative py-20 md:py-24 bg-gradient-to-r from-[#01140d] via-[#03281a] to-[#01140d] dark:from-[#02050c] dark:via-[#071124] dark:to-[#02050c] text-white overflow-hidden border-y border-amber-400/25 transition-colors duration-300">
+    <section className="relative py-20 md:py-24 bg-gradient-to-r from-[#01140d] via-[#03281a] to-[#01140d] dark:from-[#010704] dark:via-[#041d13] dark:to-[#010704] text-white overflow-hidden border-y border-amber-400/25 dark:border-amber-400/35 transition-colors duration-300">
       {/* সূক্ষ্ম ডট প্যাটার্ন ও অ্যাম্বিয়েন্ট গোল্ডেন গ্লো */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.06]"
+        className="pointer-events-none absolute inset-0 opacity-[0.06] dark:opacity-[0.07]"
         style={{
           backgroundImage: `radial-gradient(circle at 2px 2px, rgba(251, 191, 36, 0.85) 1px, transparent 0)`,
           backgroundSize: "30px 30px",
         }}
       />
-      <div className="pointer-events-none absolute -top-24 left-1/4 w-96 h-96 rounded-full bg-emerald-400/15 blur-[120px]" />
-      <div className="pointer-events-none absolute -bottom-24 right-1/4 w-96 h-96 rounded-full bg-amber-400/15 blur-[120px]" />
-      <div className="pointer-events-none absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/50 to-transparent" />
+      <div className="pointer-events-none absolute -top-24 left-1/4 w-96 h-96 rounded-full bg-emerald-400/15 dark:bg-emerald-400/20 blur-[120px]" />
+      <div className="pointer-events-none absolute -bottom-24 right-1/4 w-96 h-96 rounded-full bg-amber-400/15 dark:bg-amber-400/20 blur-[120px]" />
+      <div className="pointer-events-none absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/60 to-transparent" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* সেকশন হেডার */}
         <div className="text-center max-w-2xl mx-auto mb-14 space-y-3">
-          <div className="inline-flex items-center gap-2 bg-white/[0.06] border border-amber-400/30 px-4 py-1.5 rounded-full backdrop-blur-md">
+          <div className="inline-flex items-center gap-2 bg-white/[0.06] dark:bg-amber-400/10 border border-amber-400/35 px-4 py-1.5 rounded-full backdrop-blur-md shadow-[0_0_20px_rgba(245,158,11,0.12)]">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             <span className="text-amber-300 font-bold text-xs uppercase tracking-widest">
               {active.badge}
@@ -230,13 +230,13 @@ export default function StatsSection() {
             return (
               <div
                 key={index}
-                className="group relative rounded-3xl p-[1px] bg-gradient-to-b from-amber-400/40 via-white/10 to-emerald-500/20 transition-all duration-300 hover:-translate-y-2 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.6)]"
+                className="group relative rounded-3xl p-[1.5px] bg-gradient-to-b from-amber-400/45 via-white/10 to-emerald-500/25 dark:from-amber-400/60 dark:via-emerald-500/25 dark:to-amber-500/35 transition-all duration-300 hover:-translate-y-2 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.65)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9),0_0_35px_rgba(16,185,129,0.1)]"
               >
-                <div className="relative h-full bg-[#021d12]/80 dark:bg-slate-950/80 backdrop-blur-2xl p-7 rounded-[23px] text-center flex flex-col items-center justify-between overflow-hidden">
-                  <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400/70 to-transparent opacity-60 group-hover:opacity-100 transition-opacity" />
+                <div className="relative h-full bg-[#021d12]/80 dark:bg-gradient-to-b dark:from-[#052619]/85 dark:to-[#02110b]/95 backdrop-blur-2xl p-7 rounded-[22.5px] text-center flex flex-col items-center justify-between overflow-hidden dark:shadow-[inset_0_1px_1px_rgba(251,191,36,0.18)]">
+                  <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400/80 to-transparent opacity-65 group-hover:opacity-100 transition-opacity" />
 
                   {/* আইকন মেডেলিয়ন */}
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400/20 to-emerald-500/15 border border-amber-400/35 flex items-center justify-center text-amber-300 mb-5 shadow-[0_0_25px_rgba(245,158,11,0.18)] group-hover:scale-110 transition-transform duration-300">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400/20 to-emerald-500/15 border border-amber-400/40 flex items-center justify-center text-amber-300 mb-5 shadow-[0_0_25px_rgba(245,158,11,0.22)] group-hover:scale-110 transition-transform duration-300">
                     <IconComponent className="w-6 h-6" />
                   </div>
 
@@ -255,7 +255,7 @@ export default function StatsSection() {
                   </h3>
 
                   {/* ছোট ডেসক্রিপশন */}
-                  <p className="text-xs text-emerald-100/75 dark:text-slate-400 leading-relaxed">
+                  <p className="text-xs text-emerald-100/75 dark:text-emerald-100/80 leading-relaxed">
                     {stat.desc}
                   </p>
                 </div>
