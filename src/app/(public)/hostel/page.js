@@ -21,6 +21,10 @@ export default function HostelPage() {
       const hash = window.location.hash;
       if (hash) {
         const id = hash.replace("#", "");
+        if (id === "about") {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          return;
+        }
         const element = document.getElementById(id);
         if (element) {
           element.scrollIntoView({ behavior: "smooth", block: "start" });

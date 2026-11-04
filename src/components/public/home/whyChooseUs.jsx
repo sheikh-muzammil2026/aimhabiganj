@@ -23,6 +23,7 @@ export default function WhyChooseUs() {
       titleSuffix: "নির্বাচন করবেন?",
       subtitle:
         "দ্বীনি ইলম, সুন্নতি আখলাক এবং আধুনিক একাডেমিক শিক্ষার এক অনন্য ও যুগোপযোগী সমন্বয়—যা আপনার সন্তানকে দুনিয়া ও আখিরাতে সফল মানুষ হিসেবে গড়ে তুলবে।",
+      cardFooterLabel: "এইম মানদণ্ডের শ্রেষ্ঠত্ব",
       features: [
         {
           icon: Compass,
@@ -75,6 +76,7 @@ export default function WhyChooseUs() {
       titleSuffix: "for Your Child’s Future?",
       subtitle:
         "A harmonious blend of authentic Islamic scholarship, prophetic character, and modern academic excellence designed to nurture leaders for both worlds.",
+      cardFooterLabel: "AIM Standard Excellence",
       features: [
         {
           icon: Compass,
@@ -127,6 +129,7 @@ export default function WhyChooseUs() {
       titleSuffix: "لمستقبل أبنائك؟",
       subtitle:
         "منظومة تربوية متكاملة تجمع بين أصالة العلوم الشرعية والتربية الإيمانية وبين التفوق الأكاديمي الحديث لبناء جيل رائد ومتميز.",
+      cardFooterLabel: "معايير التميز في السلام",
       features: [
         {
           icon: Compass,
@@ -297,7 +300,7 @@ export default function WhyChooseUs() {
                   <div className="mt-6 pt-4 border-t border-slate-100 dark:border-emerald-800/40 flex items-center justify-between text-xs font-semibold text-emerald-700 dark:text-amber-300/90">
                     <span className="inline-flex items-center gap-1.5">
                       <CheckCircle2 className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
-                      <span>AIM Standard Excellence</span>
+                      <span>{active.cardFooterLabel}</span>
                     </span>
                     <span className="h-1 w-8 rounded-full bg-gradient-to-r from-emerald-500 to-amber-400 group-hover:w-14 transition-all duration-300 shadow-[0_0_10px_rgba(245,158,11,0.3)]" />
                   </div>

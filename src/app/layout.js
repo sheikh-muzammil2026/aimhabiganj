@@ -1,4 +1,10 @@
-import { Geist, Geist_Mono, Reem_Kufi, Hind_Siliguri } from "next/font/google";
+import {
+  Geist,
+  Geist_Mono,
+  Reem_Kufi,
+  Hind_Siliguri,
+  Amiri,
+} from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers/providers";
 
@@ -12,7 +18,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// আরবি ফন্ট (variable প্রপার্টি যুক্ত করা হয়েছে)
+// আরবি হেডিং ফন্ট (কুফি - Kufi)
 const reemKufi = Reem_Kufi({
   variable: "--font-reem-kufi",
   subsets: ["arabic"],
@@ -20,7 +26,15 @@ const reemKufi = Reem_Kufi({
   display: "swap",
 });
 
-// বাংলা ফন্ট
+// আরবি বডি টেক্সট ফন্ট (Traditional Arabic / Amiri ফলব্যাক)
+const amiri = Amiri({
+  variable: "--font-amiri",
+  subsets: ["arabic"],
+  weight: ["400", "700"],
+  display: "swap",
+});
+
+// বাংলা ফলব্যাক ফন্ট
 const hindSiliguri = Hind_Siliguri({
   variable: "--font-hind-siliguri",
   subsets: ["bengali"],
@@ -46,11 +60,11 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html
-      lang="en"
+      lang="bn"
       data-scroll-behavior="smooth"
-      className={`${geistSans.variable} ${geistMono.variable} ${reemKufi.variable} ${hindSiliguri.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${reemKufi.variable} ${amiri.variable} ${hindSiliguri.variable} h-full antialiased`}
     >
-      <body className={`${hindSiliguri.className} min-h-full flex flex-col`}>
+      <body className="min-h-full flex flex-col">
         <Providers>{children}</Providers>
       </body>
     </html>

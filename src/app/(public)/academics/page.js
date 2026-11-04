@@ -20,6 +20,10 @@ export default function AcademicsPage() {
       const hash = window.location.hash;
       if (hash) {
         const id = hash.replace("#", "");
+        if (id === "teachers") {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          return;
+        }
         const element = document.getElementById(id);
         if (element) {
           element.scrollIntoView({ behavior: "smooth", block: "start" });

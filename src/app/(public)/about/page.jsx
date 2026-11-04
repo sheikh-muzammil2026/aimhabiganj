@@ -32,6 +32,10 @@ export default function AboutPage() {
     const hash = targetHash || window.location.hash;
     if (hash) {
       const id = hash.replace("#", "");
+      if (id === "profile") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
       const element = document.getElementById(id);
       if (element) {
         requestAnimationFrame(() => {

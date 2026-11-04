@@ -57,7 +57,7 @@ export default function FeaturedSections() {
           watermark: "تحفيظ القرآن",
           tag: "তাহফীযুল কুরআন কারিকুলাম",
           title: "হিফজুল কুরআন বিভাগ",
-          sub: "International Standard Hifz Department",
+          sub: "আন্তর্জাতিক মানের তাহফীযুল কুরআন কারিকুলাম",
           highlightPill: "৬ মাসে হিফজ সম্পন্ন করার বিশেষ তত্ত্বাবধান",
           description:
             "অভিজ্ঞ হাফেজ ও ক্বারীগণের নিবিড় তত্ত্বাবধানে আন্তর্জাতিক মানের তাজবীদ, সুমধুর তিলাওয়াত এবং মানসিক চাপমুক্ত পরিবেশে পবিত্র কুরআন হিফজ সম্পন্ন করার অনন্য বিভাগ।",
@@ -78,7 +78,7 @@ export default function FeaturedSections() {
           watermark: "الأكاديمية",
           tag: "সমন্বিত আধুনিক শিক্ষা",
           title: "একাডেমিক ও জেনারেল বিভাগ",
-          sub: "Integrated Islamic & Modern Academic Wing",
+          sub: "দ্বীনি ও আধুনিক সমন্বিত একাডেমিক শাখা",
           highlightPill: "দ্বীনি শিক্ষার পাশাপাশি জেনারেল শিক্ষায় ১০০% দক্ষতা",
           description:
             "দ্বীনি শিক্ষার পাশাপাশি বাংলা, ইংরেজি, আরবি, গণিত ও বিজ্ঞান বিষয়ে সমান পারদর্শিতা অর্জনের মাধ্যমে শিক্ষার্থীদের যোগ্য আলেম ও আধুনিক পেশাজীবী হিসেবে গড়ে তোলার বিশেষায়িত বিভাগ।",
@@ -163,7 +163,7 @@ export default function FeaturedSections() {
           watermark: "تحفيظ القرآن",
           tag: "قسم تحفيظ القرآن الكريم",
           title: "قسم تحفيظ القرآن الكريم",
-          sub: "International Standard Hifz Department",
+          sub: "منهج عالمي متكامل لتحفيظ القرآن الكريم",
           highlightPill: "إشراف خاص لإتمام حفظ القرآن في ٦ أشهر",
           description:
             "تحت إشراف نخبة من الحفاظ والقراء المتقنين، نقدم بيئة إيمانية محفزة لحفظ كتاب الله عز وجل مع إتقان أحكام التجويد وحسن الأداء.",
@@ -184,7 +184,7 @@ export default function FeaturedSections() {
           watermark: "الأكاديمية",
           tag: "التعليم الأكاديمي المتكامل",
           title: "القسم الأكاديمي والعام",
-          sub: "Integrated Islamic & Modern Academic Wing",
+          sub: "منظومة التعليم الإسلامي والأكاديمي الحديث",
           highlightPill: "كفاءة عالية في العلوم الشرعية والأكاديمية معاً",
           description:
             "منهج متكامل يجمع بين العلوم الإسلامية واللغات والرياضيات والعلوم الحديثة، لإعداد جيل متفوق علمياً وأخلاقياً.",
@@ -346,7 +346,7 @@ export default function FeaturedSections() {
                         {dept.title}
                       </h3>
                       <p
-                        className={`text-xs font-mono font-semibold mt-1 ${
+                        className={`text-xs font-semibold mt-1 ${
                           isHifz
                             ? "text-amber-300/90"
                             : "text-emerald-700 dark:text-amber-300/90"

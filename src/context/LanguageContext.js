@@ -37,21 +37,21 @@ export const LanguageProvider = ({ children }) => {
 
     const dir = language === 'ar' ? 'rtl' : 'ltr';
 
-    // Apply RTL and fonts dynamically to the document
+    // Apply RTL and language-specific font system dynamically to the document
     useEffect(() => {
         const root = document.documentElement;
         root.setAttribute('dir', dir);
         root.setAttribute('lang', language);
 
-        // Apply premium font-family override based on language
+        // Bangla -> ShaldaMJ, English -> BritanicBold, Arabic body -> Traditional Arabic (Headings use Reem Kufi via globals.css)
         const body = document.body;
         if (body) {
             if (language === 'ar') {
-                body.style.fontFamily = 'var(--font-reem-kufi), serif';
+                body.style.fontFamily = '"Traditional Arabic", "Amiri", var(--font-amiri), serif';
             } else if (language === 'bn') {
-                body.style.fontFamily = 'var(--font-hind-siliguri), sans-serif';
+                body.style.fontFamily = '"ShaldaMJ", var(--font-hind-siliguri), sans-serif';
             } else {
-                body.style.fontFamily = 'var(--font-geist-sans), sans-serif';
+                body.style.fontFamily = '"BritanicBold", var(--font-geist-sans), sans-serif';
             }
         }
     }, [language, dir]);

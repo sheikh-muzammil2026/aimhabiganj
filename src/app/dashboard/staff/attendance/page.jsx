@@ -1,49 +1,351 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
 import {
   Clock,
   MapPin,
   CheckCircle2,
   AlertTriangle,
-  XCircle,
   Calendar,
-  User,
-  ShieldCheck,
-  Navigation,
   RefreshCw,
   LogOut,
   LogIn,
-  Info,
   History,
   Sparkles,
-  MessageSquare,
   X,
   Send,
-  ArrowRight,
-  Filter,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "react-toastify";
 import {
   MADRASA_LOCATION,
-  STAFF_ATTENDANCE_RULES,
   isWithinMadrasaGeofence,
-  calculateDistanceMeters,
   evaluateStaffCheckInStatus,
   evaluateStaffCheckOutStatus,
-  getStaffShiftPhase,
   formatDhakaTimeWithSeconds,
   formatDhakaTimeOnly,
   formatDhakaDateBangla as formatDisplayDate,
 } from "@/lib/attendance-config";
 import { useAttendanceGeolocation } from "@/hooks/useAttendanceGeolocation";
+import { useLanguage } from "@/context/LanguageContext";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
 
+const STAFF_I18N = {
+  bn: {
+    badge: "স্টাফ ডিজিটাল হাজিরা ব্যবস্থা • প্রতিদিন ২ টার্ম",
+    title: "দৈনিক হাজিরা পোর্টাল (২ টার্ম)",
+    bdTimeLabel: "বাংলাদেশ সময় (UTC+6)",
+    term1Title: "১ম টার্ম: সকালের প্রবেশ হাজিরা",
+    term1WindowBadge: "ভোর ০৫:৩০ টা পর্যন্ত",
+    term1RuleOnTimeLabel: "সময়মতো (On Time):",
+    term1RuleOnTimeText:
+      "ভোর ৫:৩০ এর পূর্বে বা ৫:৩০ পর্যন্ত হাজিরা দিলে অন-টাইম গণ্য হবে।",
+    term1RuleLateLabel: "দেরিতে (Late):",
+    term1RuleLateText:
+      "ভোর ৫:৩০ এর পর প্রবেশ করলে লেট কাউন্ট হবে এবং দেরির কারণ উল্লেখ করতে হবে।",
+    todayStatusLabel: "আজকের অবস্থা:",
+    completedLabel: "সম্পন্ন",
+    term1OpenOnTime: "উইন্ডো উন্মুক্ত (অন-টাইম চলমান)",
+    term1LateWindow: "ভোর ৫:৩০ অতিক্রান্ত (লেট উইন্ডো)",
+    term2Title: "২য় টার্ম: রাতের প্রস্থান হাজিরা",
+    term2WindowBadge: "রাত ১০:০০ - ১০:১০ টা",
+    term2RuleOnTimeLabel: "নির্ধারিত সময় (On Time):",
+    term2RuleOnTimeText:
+      "রাত ১০:০০ টা থেকে ১০:১০ টার মধ্যে প্রস্থান হাজিরা দেওয়া বাধ্যতামূলক।",
+    term2RuleEarlyLabel: "আগাম প্রস্থান (Early):",
+    term2RuleEarlyText:
+      "রাত ১০:০০ এর পূর্বে প্রস্থান দিলে আর্লি এক্সিট হিসেবে গণ্য হবে।",
+    term2OpenNow: "উইন্ডো উন্মুক্ত! (রাত ১০:০০ - ১০:১০)",
+    term2Waiting: "উইন্ডো শুরু হতে বাকি (রাত ১০:০০ টায়)",
+    term2Overtime: "রাত ১০:১০ অতিক্রান্ত (ওভারটাইম / লেট এক্সিট)",
+    gpsHeader: "মাদরাসা প্রাঙ্গণ ও GPS অবস্থান",
+    gpsErrorBadge: "GPS ত্রুটি / পারমিশন নেই",
+    gpsInsideBadge: "ক্যাম্পাসের ভেতরে অবস্থিত",
+    gpsOutsideBadge: "ক্যাম্পাসের বাইরে",
+    gpsDistanceWord: "দূরত্ব",
+    gpsMeterWord: "মিটার",
+    gpsSearching: "অবস্থান অনুসন্ধান চলছে...",
+    gpsNotVerified: "অবস্থান যাচাই করা হয়নি",
+    allowedRadius: "অনুমোদিত ব্যাসার্ধ",
+    gpsAccuracy: "GPS নির্ভুলতা",
+    locatingBtn: "শনাক্ত হচ্ছে...",
+    refreshGpsBtn: "GPS রিফ্রেশ করুন",
+    subCard1Top: "১ম টার্ম: প্রবেশ হাজিরা (সকাল)",
+    subCard1Deadline: "শেষ সময়: ০৫:৩০ AM",
+    subCard1TitleDone: "১ম টার্ম সফলভাবে সম্পন্ন",
+    subCard1TitlePending: "১ম টার্মের হাজিরা দিন",
+    subCard1DescDonePrefix: "আপনি আজ সকাল",
+    subCard1DescDoneMid: "টায় ১ম টার্মের প্রবেশ হাজিরা দিয়েছেন। স্ট্যাটাস:",
+    subCard1DescPending:
+      "ভোর ৫:৩০ টার মধ্যে আপনার সকালের উপস্থিতি নিশ্চিত করুন। ৫:৩০ এর পর হাজিরা দিলে দেরির কারণসহ লেট হিসেবে লিপিবদ্ধ হবে।",
+    subCard1ConfirmedBanner:
+      "আজকের ১ম টার্মের প্রবেশ হাজিরা ইতিমধ্যে নিশ্চিত করা হয়েছে",
+    verifyingBtn: "যাচাই হচ্ছে...",
+    subCard1Btn: "১ম টার্ম: প্রবেশ হাজিরা সাবমিট করুন",
+    subCard2Top: "২য় টার্ম: প্রস্থান হাজিরা (রাত)",
+    subCard2Window: "উইন্ডো: ১০:০০ - ১০:১০ PM",
+    subCard2TitleDone: "২য় টার্ম সফলভাবে সম্পন্ন",
+    subCard2TitlePending: "২য় টার্মের হাজিরা দিন",
+    subCard2DescDonePrefix: "আপনি আজ রাত",
+    subCard2DescDoneMid: "টায় প্রস্থান হাজিরা দিয়েছেন। স্ট্যাটাস:",
+    totalWorkLabel: "মোট কাজ",
+    subCard2DescPending:
+      "রাতের নির্ধারিত সময়সূচী অনুযায়ী রাত ১০:০০ টা থেকে ১০:১০ টার মধ্যে আপনার প্রস্থান হাজিরা সাবমিট করুন।",
+    subCard2ConfirmedBanner:
+      "আজকের ২য় টার্মের প্রস্থান হাজিরা সফলভাবে নিশ্চিত হয়েছে",
+    subCard2NeedCheckIn:
+      "প্রস্থান হাজিরা দেওয়ার জন্য প্রথমে ১ম টার্মের প্রবেশ হাজিরা সম্পন্ন করুন।",
+    subCard2Btn: "২য় টার্ম: প্রস্থান হাজিরা সাবমিট করুন",
+    onTimeSuffix: "(সময়মতো)",
+    monthlyStatsTitle: "চলতি মাসের সামগ্রিক পরিসংখ্যান",
+    totalWorkingDays: "মোট কর্মদিবস",
+    daysUnit: "দিন",
+    hoursUnit: "ঘণ্টা",
+    onTimeRateLabel: "সময়মতো উপস্থিতি",
+    selectMonthLabel: "মাস নির্বাচন:",
+    metricPresentDays: "উপস্থিত দিন",
+    metricTerm1OnTime: "১ম টার্ম অন-টাইম",
+    metricTerm1Late: "১ম টার্ম লেট",
+    metricTerm2OnTime: "২য় টার্ম অন-টাইম",
+    metricEarlyExit: "সময়ের পূর্বে প্রস্থান",
+    metricTotalHours: "মোট কর্মঘণ্টা",
+    historyTitle: "বিগত দিনগুলোর হাজিরার লগ",
+    historyCountPrefix: "সর্বশেষ",
+    historyCountSuffix: "টি রেকর্ড",
+    historyLoading: "হাজিরা হিস্টোরি লোড হচ্ছে...",
+    historyEmpty: "কোনো পূর্ববর্তী রেকর্ড পাওয়া যায়নি।",
+    colDate: "তারিখ",
+    colTerm1: "১ম টার্ম (সকাল ৫:৩০)",
+    colTerm2: "২য় টার্ম (রাত ১০:০০-১০:১০)",
+    colDuration: "মোট কর্মঘণ্টা",
+    colComment: "মন্তব্য",
+    absentText: "অনুপস্থিত",
+    incompleteText: "অসম্পূর্ণ",
+    modalTitleLate: "১ম টার্ম: দেরিতে চেক-ইন এর কারণ",
+    modalTitleEarly: "২য় টার্ম: সময়ের পূর্বে প্রস্থানের কারণ",
+    modalTitleOvertime: "২য় টার্ম: বিলম্বিত প্রস্থানের কারণ",
+    modalDescLate:
+      "ভোর ৫:৩০ টা অতিক্রান্ত হয়েছে। অনুগ্রহ করে দেরির সুনির্দিষ্ট কারণ উল্লেখ করে হাজিরা সাবমিট করুন।",
+    modalDescEarly:
+      "এখন রাত ১০:০০ টা বাজেনি। অফিসিয়াল সময়সূচীর পূর্বে প্রস্থান করার কারণ উল্লেখ করুন।",
+    modalDescOvertime:
+      "রাত ১০:১০ অতিক্রান্ত হয়েছে। অতিরিক্ত সময়ের কারণ উল্লেখ করুন।",
+    modalPlaceholder: "এখানে কারণ বা মন্তব্য লিখুন...",
+    cancelBtn: "বাতিল",
+    confirmSubmitBtn: "নিশ্চিত করুন ও সাবমিট",
+  },
+  en: {
+    badge: "Staff Digital Attendance System • 2 Terms Daily",
+    title: "Daily Attendance Portal (2 Terms)",
+    bdTimeLabel: "Bangladesh Time (UTC+6)",
+    term1Title: "Term 1: Morning Check-In",
+    term1WindowBadge: "Up to 05:30 AM",
+    term1RuleOnTimeLabel: "On Time:",
+    term1RuleOnTimeText:
+      "Checking in on or before 5:30 AM is recorded as On Time.",
+    term1RuleLateLabel: "Late:",
+    term1RuleLateText:
+      "Checking in after 5:30 AM is marked Late and requires a valid reason.",
+    todayStatusLabel: "Today's Status:",
+    completedLabel: "Completed",
+    term1OpenOnTime: "Window Open (On-Time Active)",
+    term1LateWindow: "Past 5:30 AM (Late Window)",
+    term2Title: "Term 2: Night Check-Out",
+    term2WindowBadge: "10:00 PM - 10:10 PM",
+    term2RuleOnTimeLabel: "Scheduled Window (On Time):",
+    term2RuleOnTimeText:
+      "Check-out must be submitted between 10:00 PM and 10:10 PM.",
+    term2RuleEarlyLabel: "Early Exit:",
+    term2RuleEarlyText:
+      "Checking out before 10:00 PM is recorded as an Early Exit.",
+    term2OpenNow: "Window Open! (10:00 PM - 10:10 PM)",
+    term2Waiting: "Window Opens at 10:00 PM",
+    term2Overtime: "Past 10:10 PM (Overtime / Late Exit)",
+    gpsHeader: "Madrasah Campus & GPS Location",
+    gpsErrorBadge: "GPS Error / No Permission",
+    gpsInsideBadge: "Inside Campus",
+    gpsOutsideBadge: "Outside Campus",
+    gpsDistanceWord: "Distance",
+    gpsMeterWord: "m",
+    gpsSearching: "Locating GPS...",
+    gpsNotVerified: "Location Not Verified",
+    allowedRadius: "Allowed Radius",
+    gpsAccuracy: "GPS Accuracy",
+    locatingBtn: "Locating...",
+    refreshGpsBtn: "Refresh GPS",
+    subCard1Top: "Term 1: Morning Check-In",
+    subCard1Deadline: "Deadline: 05:30 AM",
+    subCard1TitleDone: "Term 1 Completed Successfully",
+    subCard1TitlePending: "Submit Term 1 Attendance",
+    subCard1DescDonePrefix: "You checked in today at",
+    subCard1DescDoneMid: "for Term 1. Status:",
+    subCard1DescPending:
+      "Confirm your morning check-in by 5:30 AM. Entries after 5:30 AM require a reason and are marked Late.",
+    subCard1ConfirmedBanner:
+      "Today's Term 1 Check-In has already been confirmed",
+    verifyingBtn: "Verifying...",
+    subCard1Btn: "Submit Term 1 Check-In",
+    subCard2Top: "Term 2: Night Check-Out",
+    subCard2Window: "Window: 10:00 - 10:10 PM",
+    subCard2TitleDone: "Term 2 Completed Successfully",
+    subCard2TitlePending: "Submit Term 2 Attendance",
+    subCard2DescDonePrefix: "You checked out tonight at",
+    subCard2DescDoneMid: "for Term 2. Status:",
+    totalWorkLabel: "Total Work",
+    subCard2DescPending:
+      "Submit your night check-out between 10:00 PM and 10:10 PM according to the official schedule.",
+    subCard2ConfirmedBanner:
+      "Today's Term 2 Check-Out has been confirmed",
+    subCard2NeedCheckIn:
+      "Please complete Term 1 Morning Check-In first before checking out.",
+    subCard2Btn: "Submit Term 2 Check-Out",
+    onTimeSuffix: "(On Time)",
+    monthlyStatsTitle: "Current Month Summary Statistics",
+    totalWorkingDays: "Present Days",
+    daysUnit: "days",
+    hoursUnit: "hrs",
+    onTimeRateLabel: "On-Time Rate",
+    selectMonthLabel: "Select Month:",
+    metricPresentDays: "Present Days",
+    metricTerm1OnTime: "Term 1 On-Time",
+    metricTerm1Late: "Term 1 Late",
+    metricTerm2OnTime: "Term 2 On-Time",
+    metricEarlyExit: "Early Exit",
+    metricTotalHours: "Total Hours",
+    historyTitle: "Recent Attendance History Log",
+    historyCountPrefix: "Last",
+    historyCountSuffix: "records",
+    historyLoading: "Loading attendance history...",
+    historyEmpty: "No previous attendance records found.",
+    colDate: "Date",
+    colTerm1: "Term 1 (05:30 AM)",
+    colTerm2: "Term 2 (10:00-10:10 PM)",
+    colDuration: "Total Hours",
+    colComment: "Remarks",
+    absentText: "Absent",
+    incompleteText: "Incomplete",
+    modalTitleLate: "Term 1: Reason for Late Check-In",
+    modalTitleEarly: "Term 2: Reason for Early Check-Out",
+    modalTitleOvertime: "Term 2: Reason for Late Check-Out",
+    modalDescLate:
+      "It is past 5:30 AM. Please specify the reason for your late arrival to submit attendance.",
+    modalDescEarly:
+      "It is before 10:00 PM. Please provide the reason for leaving before the scheduled time.",
+    modalDescOvertime:
+      "It is past 10:10 PM. Please specify the reason for overtime/delayed check-out.",
+    modalPlaceholder: "Write your reason or remarks here...",
+    cancelBtn: "Cancel",
+    confirmSubmitBtn: "Confirm & Submit",
+  },
+  ar: {
+    badge: "نظام الحضور الرقمي للموظفين • فترتان يومياً",
+    title: "بوابة الحضور اليومي (فترتان)",
+    bdTimeLabel: "توقيت بنغلاديش (UTC+6)",
+    term1Title: "الفترة الأولى: تسجيل الدخول الصباحي",
+    term1WindowBadge: "حتى ٠٥:٣٠ صباحاً",
+    term1RuleOnTimeLabel: "في الوقت المحدد (On Time):",
+    term1RuleOnTimeText:
+      "التسجيل قبل أو حتى الساعة ٥:٣٠ صباحاً يُحتسب في الموعد المحدد.",
+    term1RuleLateLabel: "متأخر (Late):",
+    term1RuleLateText:
+      "التسجيل بعد الساعة ٥:٣٠ صباحاً يُحتسب تأخراً ويتطلب ذكر السبب.",
+    todayStatusLabel: "حالة اليوم:",
+    completedLabel: "مكتمل",
+    term1OpenOnTime: "النافذة مفتوحة (في الوقت المحدد)",
+    term1LateWindow: "تجاوز ٥:٣٠ صباحاً (فترة التأخير)",
+    term2Title: "الفترة الثانية: تسجيل الانصراف المسائي",
+    term2WindowBadge: "١٠:٠٠ - ١٠:١٠ مساءً",
+    term2RuleOnTimeLabel: "الوقت المحدد (On Time):",
+    term2RuleOnTimeText:
+      "يجب تسجيل الانصراف المسائي بين الساعة ١٠:٠٠ و ١٠:١٠ مساءً.",
+    term2RuleEarlyLabel: "انصراف مبكر (Early):",
+    term2RuleEarlyText:
+      "الانصراف قبل الساعة ١٠:٠٠ مساءً يُسجل كانصراف مبكر.",
+    term2OpenNow: "النافذة مفتوحة الآن! (١٠:٠٠ - ١٠:١٠ م)",
+    term2Waiting: "تفتح النافذة الساعة ١٠:٠٠ مساءً",
+    term2Overtime: "تجاوز ١٠:١٠ مساءً (وقت إضافي)",
+    gpsHeader: "حرم المدرسة وموقع GPS",
+    gpsErrorBadge: "خطأ في GPS / لا يوجد إذن",
+    gpsInsideBadge: "داخل حرم المدرسة",
+    gpsOutsideBadge: "خارج حرم المدرسة",
+    gpsDistanceWord: "المسافة",
+    gpsMeterWord: "متر",
+    gpsSearching: "جاري تحديد الموقع...",
+    gpsNotVerified: "لم يتم التحقق من الموقع",
+    allowedRadius: "النطاق المسموح",
+    gpsAccuracy: "دقة GPS",
+    locatingBtn: "جاري التحديد...",
+    refreshGpsBtn: "تحديث GPS",
+    subCard1Top: "الفترة الأولى: حضور الصباح",
+    subCard1Deadline: "آخر موعد: ٠٥:٣٠ ص",
+    subCard1TitleDone: "اكتملت الفترة الأولى بنجاح",
+    subCard1TitlePending: "تسجيل حضور الفترة الأولى",
+    subCard1DescDonePrefix: "لقد سجلت حضورك اليوم الساعة",
+    subCard1DescDoneMid: "الحالة:",
+    subCard1DescPending:
+      "أكد حضورك الصباحي قبل الساعة ٥:٣٠ صباحاً. التسجيل بعد ذلك يتطلب ذكر سبب التأخير.",
+    subCard1ConfirmedBanner: "تم تأكيد حضور الفترة الأولى لهذا اليوم بنجاح",
+    verifyingBtn: "جاري التحقق...",
+    subCard1Btn: "إرسال حضور الفترة الأولى",
+    subCard2Top: "الفترة الثانية: انصراف المساء",
+    subCard2Window: "النافذة: ١٠:٠٠ - ١٠:١٠ م",
+    subCard2TitleDone: "اكتملت الفترة الثانية بنجاح",
+    subCard2TitlePending: "تسجيل انصراف الفترة الثانية",
+    subCard2DescDonePrefix: "لقد سجلت انصرافك الليلة الساعة",
+    subCard2DescDoneMid: "الحالة:",
+    totalWorkLabel: "إجمالي العمل",
+    subCard2DescPending:
+      "يرجى تسجيل الانصراف المسائي بين الساعة ١٠:٠٠ و ١٠:١٠ مساءً حسب الجدول الرسمي.",
+    subCard2ConfirmedBanner: "تم تأكيد انصراف الفترة الثانية لهذا اليوم بنجاح",
+    subCard2NeedCheckIn:
+      "يرجى إتمام تسجيل حضور الفترة الأولى أولاً قبل تسجيل الانصراف.",
+    subCard2Btn: "إرسال انصراف الفترة الثانية",
+    onTimeSuffix: "(في الموعد)",
+    monthlyStatsTitle: "إحصائيات الشهر الحالي",
+    totalWorkingDays: "أيام الحضور",
+    daysUnit: "يوم",
+    hoursUnit: "ساعة",
+    onTimeRateLabel: "نسبة الانضباط",
+    selectMonthLabel: "اختر الشهر:",
+    metricPresentDays: "أيام الحضور",
+    metricTerm1OnTime: "فترة ١ في الموعد",
+    metricTerm1Late: "فترة ١ متأخر",
+    metricTerm2OnTime: "فترة ٢ في الموعد",
+    metricEarlyExit: "انصراف مبكر",
+    metricTotalHours: "إجمالي الساعات",
+    historyTitle: "سجل الحضور للأيام السابقة",
+    historyCountPrefix: "آخر",
+    historyCountSuffix: "سجلات",
+    historyLoading: "جاري تحميل سجل الحضور...",
+    historyEmpty: "لا توجد سجلات حضور سابقة.",
+    colDate: "التاريخ",
+    colTerm1: "الفترة الأولى (٠٥:٣٠ ص)",
+    colTerm2: "الفترة الثانية (١٠:٠٠-١٠:١٠ م)",
+    colDuration: "ساعات العمل",
+    colComment: "ملاحظات",
+    absentText: "غائب",
+    incompleteText: "غير مكتمل",
+    modalTitleLate: "الفترة الأولى: سبب التأخير في الحضور",
+    modalTitleEarly: "الفترة الثانية: سبب الانصراف المبكر",
+    modalTitleOvertime: "الفترة الثانية: سبب تأخر الانصراف",
+    modalDescLate:
+      "لقد تجاوزت الساعة ٥:٣٠ صباحاً. يرجى كتابة سبب التأخير لتأكيد الحضور.",
+    modalDescEarly:
+      "لم تحن الساعة ١٠:٠٠ مساءً بعد. يرجى ذكر سبب الانصراف المبكر.",
+    modalDescOvertime:
+      "تجاوزت الساعة ١٠:١٠ مساءً. يرجى ذكر سبب العمل الإضافي أو التأخير.",
+    modalPlaceholder: "اكتب السبب أو الملاحظة هنا...",
+    cancelBtn: "إلغاء",
+    confirmSubmitBtn: "تأكيد وإرسال",
+  },
+};
+
 export default function StaffAttendancePage() {
+  const { language } = useLanguage();
+  const text = STAFF_I18N[language] || STAFF_I18N.bn;
+
   const { data: session, isPending: sessionLoading } = authClient.useSession();
   const sessionUser = session?.user;
 
@@ -110,9 +412,12 @@ export default function StaffAttendancePage() {
       if (selectedMonth) queryParams.append("month", selectedMonth);
       queryParams.append("limit", "30");
 
-      const res = await fetch(`${API_BASE}/api/staff/attendance/history?${queryParams.toString()}`, {
-        headers: email ? { "x-user-email": email } : {},
-      });
+      const res = await fetch(
+        `${API_BASE}/api/staff/attendance/history?${queryParams.toString()}`,
+        {
+          headers: email ? { "x-user-email": email } : {},
+        }
+      );
       const json = await res.json();
       if (json.success) {
         setHistoryList(json.history || []);
@@ -136,7 +441,9 @@ export default function StaffAttendancePage() {
   // Verify GPS & Geofence before allowing Check-In or Check-Out
   const verifyGeofenceBeforeAction = () => {
     if (!currentCoords) {
-      toast.info("আপনার GPS অবস্থান যাচাই করা হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...");
+      toast.info(
+        "আপনার GPS অবস্থান যাচাই করা হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন..."
+      );
       requestLocation();
       return false;
     }
@@ -220,7 +527,9 @@ export default function StaffAttendancePage() {
         return;
       }
 
-      toast.success(data.message || "১ম টার্মের প্রবেশ হাজিরা সফলভাবে নিশ্চিত হয়েছে!");
+      toast.success(
+        data.message || "১ম টার্মের প্রবেশ হাজিরা সফলভাবে নিশ্চিত হয়েছে!"
+      );
       setTodayData(data.attendance);
       fetchHistory();
       setCommentModalOpen(false);
@@ -287,7 +596,9 @@ export default function StaffAttendancePage() {
         return;
       }
 
-      toast.success(data.message || "২য় টার্মের প্রস্থান হাজিরা সফলভাবে নিশ্চিত হয়েছে!");
+      toast.success(
+        data.message || "২য় টার্মের প্রস্থান হাজিরা সফলভাবে নিশ্চিত হয়েছে!"
+      );
       setTodayData(data.attendance);
       fetchHistory();
       setCommentModalOpen(false);
@@ -322,36 +633,40 @@ export default function StaffAttendancePage() {
   const hasCheckedOut = Boolean(todayData?.checkOutTime);
 
   return (
-    <div className="space-y-6 sm:space-y-8 animate-fade-in font-sans">
+    <div className="space-y-6 sm:space-y-8 animate-fade-in">
       {/* ================= 1. TOP HEADER & LIVE DHAKA CLOCK ================= */}
-      <div className="bg-gradient-to-r from-emerald-950 via-teal-900 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-emerald-800/40 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -mr-16 -mt-16" />
+      <div className="relative rounded-3xl p-[1.5px] bg-gradient-to-r from-amber-400/60 via-emerald-500/40 to-amber-500/50 shadow-[0_20px_60px_-15px_rgba(2,32,20,0.35)] dark:shadow-[0_25px_70px_-15px_rgba(0,0,0,0.9),0_0_40px_rgba(16,185,129,0.12)] overflow-hidden">
+        <div className="relative bg-gradient-to-r from-[#021d12] via-[#04301f] to-[#021d12] dark:from-[#010906] dark:via-[#031b11] dark:to-[#010906] text-white rounded-[22.5px] p-6 sm:p-8 overflow-hidden">
+          <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/70 to-transparent" />
+          <div className="absolute -top-20 -right-20 w-72 h-72 bg-amber-400/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20 text-xs font-semibold text-emerald-200">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>স্টাফ ডিজিটাল হাজিরা ব্যবস্থা • প্রতিদিন ২ টার্ম</span>
+          <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div className="space-y-2.5">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-white/[0.07] backdrop-blur-md rounded-full border border-amber-400/35 text-xs font-bold text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.12)]">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span>{text.badge}</span>
+              </div>
+
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-black bg-gradient-to-r from-white via-amber-50 to-amber-200 bg-clip-text text-transparent tracking-tight">
+                {text.title}
+              </h1>
+
+              <p className="text-xs sm:text-sm text-emerald-100/90 flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-amber-400" />
+                <span>{formatDisplayDate(currentTime)}</span>
+              </p>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-              দৈনিক হাজিরা পোর্টাল (২ টার্ম)
-            </h1>
-
-            <p className="text-xs sm:text-sm text-emerald-200/90 flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-amber-400" />
-              <span>{formatDisplayDate(currentTime)}</span>
-            </p>
-          </div>
-
-          {/* Live Clock Card */}
-          <div className="bg-black/40 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/15 text-center md:text-right shrink-0 w-full md:w-auto">
-            <div className="flex items-center justify-center md:justify-end gap-2 text-xs font-bold text-emerald-300 uppercase tracking-wider mb-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-              <span>বাংলাদেশ সময় (UTC+6)</span>
-            </div>
-            <div className="font-mono text-3xl sm:text-4xl font-black text-amber-400 tracking-wider">
-              {formatDhakaTimeWithSeconds(currentTime)}
+            {/* Live Clock Card */}
+            <div className="bg-[#01110b]/75 dark:bg-[#010805]/85 backdrop-blur-xl rounded-2xl p-4 sm:p-5 border border-amber-400/30 shadow-[inset_0_1px_1px_rgba(251,191,36,0.2),0_10px_30px_rgba(0,0,0,0.4)] text-center md:text-end shrink-0 w-full md:w-auto">
+              <div className="flex items-center justify-center md:justify-end gap-2 text-xs font-bold text-emerald-300 uppercase tracking-wider mb-1">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+                <span>{text.bdTimeLabel}</span>
+              </div>
+              <div className="font-mono text-3xl sm:text-4xl font-black bg-gradient-to-r from-amber-200 via-amber-400 to-amber-200 bg-clip-text text-transparent tracking-wider">
+                {formatDhakaTimeWithSeconds(currentTime)}
+              </div>
             </div>
           </div>
         </div>
@@ -360,520 +675,581 @@ export default function StaffAttendancePage() {
       {/* ================= 2. TWO-TERM POLICY & SCHEDULE CARDS ================= */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Term 1 Card */}
-        <div className="bg-white dark:bg-[#0f172a] rounded-2xl p-5 sm:p-6 border-t-4 border-t-emerald-600 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
-              <LogIn className="w-4 h-4" />
-              <span>১ম টার্ম: সকালের প্রবেশ হাজিরা</span>
-            </span>
-            <span className="text-xs px-2.5 py-1 rounded-full font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-              ভোর ০৫:৩০ টা পর্যন্ত
-            </span>
-          </div>
+        <div className="group relative rounded-3xl p-[1.5px] bg-gradient-to-b from-amber-400/45 via-emerald-600/20 to-slate-200 dark:from-amber-400/50 dark:via-emerald-500/20 dark:to-amber-500/25 shadow-[0_12px_35px_-12px_rgba(2,32,20,0.08)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.85)]">
+          <div className="relative h-full bg-white dark:bg-gradient-to-br dark:from-[#041e14] dark:via-[#02120c] dark:to-[#010906] rounded-[22.5px] p-5 sm:p-6 space-y-3.5 overflow-hidden dark:shadow-[inset_0_1px_1px_rgba(251,191,36,0.15)]">
+            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-600 via-amber-400 to-emerald-600" />
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-black uppercase tracking-wider text-emerald-800 dark:text-amber-300 flex items-center gap-1.5">
+                <LogIn className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+                <span>{text.term1Title}</span>
+              </span>
+              <span className="text-xs px-3 py-1 rounded-full font-bold bg-emerald-50 dark:bg-amber-400/10 text-emerald-900 dark:text-amber-300 border border-emerald-200 dark:border-amber-400/30">
+                {text.term1WindowBadge}
+              </span>
+            </div>
 
-          <div className="space-y-1 text-xs text-slate-600 dark:text-slate-300">
-            <p>
-              • <strong>সময়মতো (On Time):</strong> ভোর ৫:৩০ এর পূর্বে বা ৫:৩০ পর্যন্ত হাজিরা দিলে অন-টাইম গণ্য হবে।
-            </p>
-            <p>
-              • <strong>দেরিতে (Late):</strong> ভোর ৫:৩০ এর পর প্রবেশ করলে লেট কাউন্ট হবে এবং দেরির কারণ উল্লেখ করতে হবে।
-            </p>
-          </div>
+            <div className="space-y-1.5 text-xs text-slate-600 dark:text-emerald-100/80 leading-relaxed">
+              <p>
+                • <strong className="text-slate-900 dark:text-amber-200">{text.term1RuleOnTimeLabel}</strong>{" "}
+                {text.term1RuleOnTimeText}
+              </p>
+              <p>
+                • <strong className="text-slate-900 dark:text-amber-200">{text.term1RuleLateLabel}</strong>{" "}
+                {text.term1RuleLateText}
+              </p>
+            </div>
 
-          <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
-            <span className="text-slate-500 font-semibold">আজকের অবস্থা:</span>
-            {hasCheckedIn ? (
-              <span
-                className={`font-black flex items-center gap-1 ${
-                  todayData.checkInStatus === "On Time"
-                    ? "text-emerald-600 dark:text-emerald-400"
-                    : "text-amber-600 dark:text-amber-400"
-                }`}
-              >
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>
-                  সম্পন্ন ({formatDhakaTimeOnly(todayData.checkInTime)}) - {todayData.checkInStatus}
+            <div className="pt-3 border-t border-slate-100 dark:border-emerald-800/40 flex items-center justify-between text-xs">
+              <span className="text-slate-500 dark:text-emerald-200/70 font-semibold">
+                {text.todayStatusLabel}
+              </span>
+              {hasCheckedIn ? (
+                <span
+                  className={`font-black flex items-center gap-1 ${
+                    todayData.checkInStatus === "On Time"
+                      ? "text-emerald-600 dark:text-emerald-300"
+                      : "text-amber-600 dark:text-amber-300"
+                  }`}
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>
+                    {text.completedLabel} ({formatDhakaTimeOnly(todayData.checkInTime)}) -{" "}
+                    {todayData.checkInStatus}
+                  </span>
                 </span>
-              </span>
-            ) : liveCheckInStatus === "On Time" ? (
-              <span className="text-emerald-600 font-bold flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                উইন্ডো উন্মুক্ত (অন-টাইম চলমান)
-              </span>
-            ) : (
-              <span className="text-amber-600 font-bold flex items-center gap-1">
-                <AlertTriangle className="w-3.5 h-3.5" />
-                ভোর ৫:৩০ অতিক্রান্ত (লেট উইন্ডো)
-              </span>
-            )}
+              ) : liveCheckInStatus === "On Time" ? (
+                <span className="text-emerald-600 dark:text-emerald-300 font-bold flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  {text.term1OpenOnTime}
+                </span>
+              ) : (
+                <span className="text-amber-600 dark:text-amber-300 font-bold flex items-center gap-1">
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  {text.term1LateWindow}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Term 2 Card */}
-        <div className="bg-white dark:bg-[#0f172a] rounded-2xl p-5 sm:p-6 border-t-4 border-t-teal-600 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-black uppercase tracking-wider text-teal-700 dark:text-teal-400 flex items-center gap-1.5">
-              <LogOut className="w-4 h-4" />
-              <span>২য় টার্ম: রাতের প্রস্থান হাজিরা</span>
-            </span>
-            <span className="text-xs px-2.5 py-1 rounded-full font-bold bg-teal-50 dark:bg-teal-950/40 text-teal-800 dark:text-teal-300 border border-teal-200 dark:border-teal-800">
-              রাত ১০:০০ - ১০:১০ টা
-            </span>
-          </div>
+        <div className="group relative rounded-3xl p-[1.5px] bg-gradient-to-b from-amber-400/45 via-emerald-600/20 to-slate-200 dark:from-amber-400/50 dark:via-emerald-500/20 dark:to-amber-500/25 shadow-[0_12px_35px_-12px_rgba(2,32,20,0.08)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.85)]">
+          <div className="relative h-full bg-white dark:bg-gradient-to-br dark:from-[#041e14] dark:via-[#02120c] dark:to-[#010906] rounded-[22.5px] p-5 sm:p-6 space-y-3.5 overflow-hidden dark:shadow-[inset_0_1px_1px_rgba(251,191,36,0.15)]">
+            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-teal-600 via-amber-400 to-teal-600" />
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-black uppercase tracking-wider text-teal-800 dark:text-amber-300 flex items-center gap-1.5">
+                <LogOut className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+                <span>{text.term2Title}</span>
+              </span>
+              <span className="text-xs px-3 py-1 rounded-full font-bold bg-teal-50 dark:bg-amber-400/10 text-teal-900 dark:text-amber-300 border border-teal-200 dark:border-amber-400/30">
+                {text.term2WindowBadge}
+              </span>
+            </div>
 
-          <div className="space-y-1 text-xs text-slate-600 dark:text-slate-300">
-            <p>
-              • <strong>নির্ধারিত সময় (On Time):</strong> রাত ১০:০০ টা থেকে ১০:১০ টার মধ্যে প্রস্থান হাজিরা দেওয়া বাধ্যতামূলক।
-            </p>
-            <p>
-              • <strong>আগাম প্রস্থান (Early):</strong> রাত ১০:০০ এর পূর্বে প্রস্থান দিলে আর্লি এক্সিট হিসেবে গণ্য হবে।
-            </p>
-          </div>
+            <div className="space-y-1.5 text-xs text-slate-600 dark:text-emerald-100/80 leading-relaxed">
+              <p>
+                • <strong className="text-slate-900 dark:text-amber-200">{text.term2RuleOnTimeLabel}</strong>{" "}
+                {text.term2RuleOnTimeText}
+              </p>
+              <p>
+                • <strong className="text-slate-900 dark:text-amber-200">{text.term2RuleEarlyLabel}</strong>{" "}
+                {text.term2RuleEarlyText}
+              </p>
+            </div>
 
-          <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
-            <span className="text-slate-500 font-semibold">আজকের অবস্থা:</span>
-            {hasCheckedOut ? (
-              <span
-                className={`font-black flex items-center gap-1 ${
-                  todayData.checkOutStatus === "On Time"
-                    ? "text-emerald-600 dark:text-emerald-400"
-                    : todayData.checkOutStatus === "Early"
-                    ? "text-rose-600 dark:text-rose-400"
-                    : "text-amber-600 dark:text-amber-400"
-                }`}
-              >
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>
-                  সম্পন্ন ({formatDhakaTimeOnly(todayData.checkOutTime)}) - {todayData.checkOutStatus}
+            <div className="pt-3 border-t border-slate-100 dark:border-emerald-800/40 flex items-center justify-between text-xs">
+              <span className="text-slate-500 dark:text-emerald-200/70 font-semibold">
+                {text.todayStatusLabel}
+              </span>
+              {hasCheckedOut ? (
+                <span
+                  className={`font-black flex items-center gap-1 ${
+                    todayData.checkOutStatus === "On Time"
+                      ? "text-emerald-600 dark:text-emerald-300"
+                      : todayData.checkOutStatus === "Early"
+                        ? "text-rose-600 dark:text-rose-300"
+                        : "text-amber-600 dark:text-amber-300"
+                  }`}
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>
+                    {text.completedLabel} ({formatDhakaTimeOnly(todayData.checkOutTime)}) -{" "}
+                    {todayData.checkOutStatus}
+                  </span>
                 </span>
-              </span>
-            ) : liveCheckOutStatus === "On Time" ? (
-              <span className="text-emerald-600 font-bold flex items-center gap-1 animate-pulse">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                উইন্ডো উন্মুক্ত! (রাত ১০:০০ - ১০:১০)
-              </span>
-            ) : liveCheckOutStatus === "Early" ? (
-              <span className="text-slate-500 font-semibold">
-                উইন্ডো শুরু হতে বাকি (রাত ১০:০০ টায়)
-              </span>
-            ) : (
-              <span className="text-amber-600 font-bold">
-                রাত ১০:১০ অতিক্রান্ত (ওভারটাইম / লেট এক্সিট)
-              </span>
-            )}
+              ) : liveCheckOutStatus === "On Time" ? (
+                <span className="text-emerald-600 dark:text-emerald-300 font-bold flex items-center gap-1.5 animate-pulse">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  {text.term2OpenNow}
+                </span>
+              ) : liveCheckOutStatus === "Early" ? (
+                <span className="text-slate-500 dark:text-emerald-200/60 font-semibold">
+                  {text.term2Waiting}
+                </span>
+              ) : (
+                <span className="text-amber-600 dark:text-amber-300 font-bold">
+                  {text.term2Overtime}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
       {/* ================= 3. GPS LOCATION / GEOFENCE STATUS ================= */}
-      <div className="bg-white dark:bg-[#0f172a] rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-xs">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div
-              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                locationError
-                  ? "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-400"
-                  : geofenceStatus?.isInside
-                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-400"
-                  : currentCoords
-                  ? "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-400"
-                  : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
-              }`}
-            >
-              <MapPin className="w-5 h-5" />
-            </div>
+      <div className="relative rounded-3xl p-[1.5px] bg-gradient-to-b from-amber-400/40 via-emerald-600/15 to-slate-200 dark:from-amber-400/45 dark:via-emerald-500/20 dark:to-amber-500/25 shadow-[0_12px_35px_-12px_rgba(2,32,20,0.07)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.85)]">
+        <div className="relative bg-white dark:bg-gradient-to-br dark:from-[#041e14] dark:via-[#02120c] dark:to-[#010906] rounded-[22.5px] p-4 sm:p-5 overflow-hidden dark:shadow-[inset_0_1px_1px_rgba(251,191,36,0.15)]">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div
+                className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ring-1 ${
+                  locationError
+                    ? "bg-rose-100 text-rose-800 ring-rose-300 dark:bg-rose-950/60 dark:text-rose-300 dark:ring-rose-500/40"
+                    : geofenceStatus?.isInside
+                      ? "bg-emerald-100 text-emerald-800 ring-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:ring-emerald-500/40"
+                      : currentCoords
+                        ? "bg-amber-100 text-amber-800 ring-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:ring-amber-400/40"
+                        : "bg-slate-100 text-slate-600 ring-slate-200 dark:bg-white/[0.06] dark:text-amber-300 dark:ring-amber-400/30"
+                }`}
+              >
+                <MapPin className="w-5 h-5" />
+              </div>
 
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <h4 className="text-sm font-black text-slate-900 dark:text-white">
-                  মাদরাসা প্রাঙ্গণ ও GPS অবস্থান
-                </h4>
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h4 className="text-sm font-black text-slate-900 dark:text-white">
+                    {text.gpsHeader}
+                  </h4>
+                  {locationError ? (
+                    <span className="px-2.5 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/50 text-rose-800 dark:text-rose-300 text-[10px] font-black border border-rose-300 dark:border-rose-500/40">
+                      {text.gpsErrorBadge}
+                    </span>
+                  ) : geofenceStatus?.isInside ? (
+                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 text-[10px] font-black border border-emerald-300 dark:border-emerald-500/40">
+                      {text.gpsInsideBadge} ({geofenceStatus.distance} {text.gpsMeterWord})
+                    </span>
+                  ) : currentCoords ? (
+                    <span className="px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 text-[10px] font-black border border-amber-300 dark:border-amber-400/40">
+                      {text.gpsOutsideBadge} ({text.gpsDistanceWord}:{" "}
+                      {geofenceStatus?.distance} {text.gpsMeterWord})
+                    </span>
+                  ) : (
+                    <span className="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-emerald-100/75 text-[10px] font-bold">
+                      {isLocating ? text.gpsSearching : text.gpsNotVerified}
+                    </span>
+                  )}
+                </div>
                 {locationError ? (
-                  <span className="px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 text-[10px] font-black border border-rose-300">
-                    GPS ত্রুটি / পারমিশন নেই
-                  </span>
-                ) : geofenceStatus?.isInside ? (
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 text-[10px] font-black border border-emerald-300">
-                    ক্যাম্পাসের ভেতরে অবস্থিত ({geofenceStatus.distance} মিটার)
-                  </span>
-                ) : currentCoords ? (
-                  <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 text-[10px] font-black border border-amber-300">
-                    ক্যাম্পাসের বাইরে (দূরত্ব: {geofenceStatus?.distance} মিটার)
-                  </span>
+                  <p className="text-xs text-rose-600 dark:text-rose-400 font-semibold mt-0.5">
+                    {locationError}
+                  </p>
                 ) : (
-                  <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold">
-                    {isLocating ? "অবস্থান অনুসন্ধান চলছে..." : "অবস্থান যাচাই করা হয়নি"}
-                  </span>
+                  <p className="text-xs text-slate-500 dark:text-emerald-100/70 mt-0.5">
+                    {MADRASA_LOCATION.NAME} • {text.allowedRadius}:{" "}
+                    {MADRASA_LOCATION.RADIUS_METERS} {text.gpsMeterWord}
+                    {geofenceStatus?.accuracy
+                      ? ` • ${text.gpsAccuracy}: ±${geofenceStatus.accuracy} ${text.gpsMeterWord}`
+                      : ""}
+                  </p>
                 )}
               </div>
-              {locationError ? (
-                <p className="text-xs text-rose-600 dark:text-rose-400 font-semibold mt-0.5">
-                  {locationError}
-                </p>
-              ) : (
-                <p className="text-xs text-slate-500 mt-0.5">
-                  {MADRASA_LOCATION.NAME} • অনুমোদিত ব্যাসার্ধ: {MADRASA_LOCATION.RADIUS_METERS} মিটার
-                  {geofenceStatus?.accuracy ? ` • GPS নির্ভুলতা: ±${geofenceStatus.accuracy} মিটার` : ""}
-                </p>
-              )}
             </div>
-          </div>
 
-          <button
-            onClick={() => requestLocation()}
-            disabled={isLocating}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-xs font-bold transition-colors shrink-0"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLocating ? "animate-spin" : ""}`} />
-            <span>{isLocating ? "শনাক্ত হচ্ছে..." : "GPS রিফ্রেশ করুন"}</span>
-          </button>
+            <button
+              onClick={() => requestLocation()}
+              disabled={isLocating}
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-[#022014] to-emerald-900 dark:from-amber-400/15 dark:to-emerald-500/15 hover:from-emerald-900 hover:to-emerald-800 text-amber-200 dark:text-amber-300 border border-amber-400/35 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer shadow-xs"
+            >
+              <RefreshCw
+                className={`w-3.5 h-3.5 ${isLocating ? "animate-spin" : ""}`}
+              />
+              <span>{isLocating ? text.locatingBtn : text.refreshGpsBtn}</span>
+            </button>
+          </div>
         </div>
       </div>
 
       {/* ================= 4. ATTENDANCE SUBMISSION ACTION CARDS ================= */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Term 1 Submission Card */}
-        <div className="bg-gradient-to-br from-white to-emerald-50/40 dark:from-[#0f172a] dark:to-emerald-950/20 rounded-3xl p-6 sm:p-7 border border-emerald-200 dark:border-emerald-900/50 shadow-sm flex flex-col justify-between space-y-5">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-emerald-800 dark:text-emerald-400">
-                <LogIn className="w-4 h-4" />
-                ১ম টার্ম: প্রবেশ হাজিরা (সকাল)
-              </span>
-              <span className="text-[11px] font-mono font-bold text-slate-500">
-                শেষ সময়: ০৫:৩০ AM
-              </span>
-            </div>
-
-            <h3 className="text-xl font-black text-slate-900 dark:text-white">
-              {hasCheckedIn ? "১ম টার্ম সফলভাবে সম্পন্ন" : "১ম টার্মের হাজিরা দিন"}
-            </h3>
-
-            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              {hasCheckedIn ? (
-                <>
-                  আপনি আজ সকাল <strong>{formatDhakaTimeOnly(todayData.checkInTime)}</strong> টায় ১ম টার্মের প্রবেশ হাজিরা দিয়েছেন। স্ট্যাটাস:{" "}
-                  <strong className={todayData.checkInStatus === "On Time" ? "text-emerald-600" : "text-amber-600"}>
-                    {todayData.checkInStatus}
-                  </strong>
-                  {todayData.checkInComment && ` (${todayData.checkInComment})`}
-                </>
-              ) : (
-                "ভোর ৫:৩০ টার মধ্যে আপনার সকালের উপস্থিতি নিশ্চিত করুন। ৫:৩০ এর পর হাজিরা দিলে দেরির কারণসহ লেট হিসেবে লিপিবদ্ধ হবে।"
-              )}
-            </p>
-          </div>
-
-          <div>
-            {hasCheckedIn ? (
-              <div className="p-3 bg-emerald-100/80 dark:bg-emerald-950/50 rounded-2xl border border-emerald-200 dark:border-emerald-800 flex items-center gap-2 text-xs font-bold text-emerald-900 dark:text-emerald-300">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>আজকের ১ম টার্মের প্রবেশ হাজিরা ইতিমধ্যে নিশ্চিত করা হয়েছে</span>
+        <div className="relative rounded-3xl p-[1.5px] bg-gradient-to-b from-amber-400/55 via-emerald-500/30 to-emerald-700/30 shadow-[0_18px_50px_-15px_rgba(2,32,20,0.14)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9),0_0_35px_rgba(16,185,129,0.1)]">
+          <div className="relative h-full bg-gradient-to-br from-white via-[#f9fcfb] to-emerald-50/40 dark:from-[#052619] dark:via-[#031810] dark:to-[#010a06] rounded-[22.5px] p-6 sm:p-7 flex flex-col justify-between space-y-5 overflow-hidden dark:shadow-[inset_0_1px_1px_rgba(251,191,36,0.2)]">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-emerald-800 dark:text-amber-300">
+                  <LogIn className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+                  {text.subCard1Top}
+                </span>
+                <span className="text-[11px] font-mono font-bold text-slate-500 dark:text-emerald-200/75">
+                  {text.subCard1Deadline}
+                </span>
               </div>
-            ) : (
-              <button
-                onClick={handleCheckInClick}
-                disabled={submittingCheckIn}
-                className="w-full py-3.5 px-5 bg-gradient-to-r from-emerald-700 to-teal-700 hover:from-emerald-800 hover:to-teal-800 text-white font-black rounded-2xl text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                {submittingCheckIn ? (
+
+              <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+                {hasCheckedIn ? text.subCard1TitleDone : text.subCard1TitlePending}
+              </h3>
+
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-emerald-100/80 leading-relaxed">
+                {hasCheckedIn ? (
                   <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>যাচাই হচ্ছে...</span>
+                    {text.subCard1DescDonePrefix}{" "}
+                    <strong className="text-slate-900 dark:text-amber-200">
+                      {formatDhakaTimeOnly(todayData.checkInTime)}
+                    </strong>{" "}
+                    {text.subCard1DescDoneMid}{" "}
+                    <strong
+                      className={
+                        todayData.checkInStatus === "On Time"
+                          ? "text-emerald-600 dark:text-emerald-300"
+                          : "text-amber-600 dark:text-amber-300"
+                      }
+                    >
+                      {todayData.checkInStatus}
+                    </strong>
+                    {todayData.checkInComment && ` (${todayData.checkInComment})`}
                   </>
                 ) : (
-                  <>
-                    <LogIn className="w-4 h-4" />
-                    <span>১ম টার্ম: প্রবেশ হাজিরা সাবমিট করুন</span>
-                  </>
+                  text.subCard1DescPending
                 )}
-              </button>
-            )}
+              </p>
+            </div>
+
+            <div>
+              {hasCheckedIn ? (
+                <div className="p-3.5 bg-emerald-100/80 dark:bg-emerald-500/15 rounded-2xl border border-emerald-300 dark:border-emerald-500/35 flex items-center gap-2 text-xs font-bold text-emerald-900 dark:text-emerald-200">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-300 shrink-0" />
+                  <span>{text.subCard1ConfirmedBanner}</span>
+                </div>
+              ) : (
+                <button
+                  onClick={handleCheckInClick}
+                  disabled={submittingCheckIn}
+                  className="w-full py-3.5 px-5 bg-gradient-to-r from-[#022014] via-emerald-900 to-emerald-800 dark:from-amber-400 dark:via-amber-500 dark:to-amber-400 hover:from-emerald-900 hover:to-emerald-700 text-amber-200 dark:text-slate-950 font-black rounded-2xl text-sm shadow-[0_10px_25px_rgba(2,32,20,0.25)] dark:shadow-[0_10px_30px_rgba(245,158,11,0.35)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                >
+                  {submittingCheckIn ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>{text.verifyingBtn}</span>
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="w-4 h-4" />
+                      <span>{text.subCard1Btn}</span>
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Term 2 Submission Card */}
-        <div className="bg-gradient-to-br from-white to-teal-50/40 dark:from-[#0f172a] dark:to-teal-950/20 rounded-3xl p-6 sm:p-7 border border-teal-200 dark:border-teal-900/50 shadow-sm flex flex-col justify-between space-y-5">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-teal-800 dark:text-teal-400">
-                <LogOut className="w-4 h-4" />
-                ২য় টার্ম: প্রস্থান হাজিরা (রাত)
-              </span>
-              <span className="text-[11px] font-mono font-bold text-slate-500">
-                উইন্ডো: ১০:০০ - ১০:১০ PM
-              </span>
-            </div>
-
-            <h3 className="text-xl font-black text-slate-900 dark:text-white">
-              {hasCheckedOut ? "২য় টার্ম সফলভাবে সম্পন্ন" : "২য় টার্মের হাজিরা দিন"}
-            </h3>
-
-            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              {hasCheckedOut ? (
-                <>
-                  আপনি আজ রাত <strong>{formatDhakaTimeOnly(todayData.checkOutTime)}</strong> টায় প্রস্থান হাজিরা দিয়েছেন। স্ট্যাটাস:{" "}
-                  <strong className={todayData.checkOutStatus === "On Time" ? "text-emerald-600" : "text-amber-600"}>
-                    {todayData.checkOutStatus}
-                  </strong>
-                  {todayData.durationText && ` • মোট কাজ: ${todayData.durationText}`}
-                </>
-              ) : (
-                "রাতের নির্ধারিত সময়সূচী অনুযায়ী রাত ১০:০০ টা থেকে ১০:১০ টার মধ্যে আপনার প্রস্থান হাজিরা সাবমিট করুন।"
-              )}
-            </p>
-          </div>
-
-          <div>
-            {hasCheckedOut ? (
-              <div className="p-3 bg-teal-100/80 dark:bg-teal-950/50 rounded-2xl border border-teal-200 dark:border-teal-800 flex items-center gap-2 text-xs font-bold text-teal-900 dark:text-teal-300">
-                <CheckCircle2 className="w-4 h-4 text-teal-600 shrink-0" />
-                <span>আজকের ২য় টার্মের প্রস্থান হাজিরা সফলভাবে নিশ্চিত হয়েছে</span>
+        <div className="relative rounded-3xl p-[1.5px] bg-gradient-to-b from-amber-400/55 via-teal-500/30 to-emerald-700/30 shadow-[0_18px_50px_-15px_rgba(2,32,20,0.14)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9),0_0_35px_rgba(16,185,129,0.1)]">
+          <div className="relative h-full bg-gradient-to-br from-white via-[#f9fcfb] to-teal-50/40 dark:from-[#042418] dark:via-[#02160f] dark:to-[#010906] rounded-[22.5px] p-6 sm:p-7 flex flex-col justify-between space-y-5 overflow-hidden dark:shadow-[inset_0_1px_1px_rgba(251,191,36,0.2)]">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-teal-800 dark:text-amber-300">
+                  <LogOut className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+                  {text.subCard2Top}
+                </span>
+                <span className="text-[11px] font-mono font-bold text-slate-500 dark:text-emerald-200/75">
+                  {text.subCard2Window}
+                </span>
               </div>
-            ) : !hasCheckedIn ? (
-              <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-2xl text-xs font-semibold text-slate-500 text-center">
-                প্রস্থান হাজিরা দেওয়ার জন্য প্রথমে ১ম টার্মের প্রবেশ হাজিরা সম্পন্ন করুন।
-              </div>
-            ) : (
-              <button
-                onClick={handleCheckOutClick}
-                disabled={submittingCheckOut}
-                className={`w-full py-3.5 px-5 text-white font-black rounded-2xl text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 ${
-                  liveCheckOutStatus === "On Time"
-                    ? "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 ring-2 ring-emerald-400"
-                    : "bg-gradient-to-r from-teal-800 to-slate-800 hover:from-teal-900 hover:to-slate-900"
-                }`}
-              >
-                {submittingCheckOut ? (
+
+              <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+                {hasCheckedOut ? text.subCard2TitleDone : text.subCard2TitlePending}
+              </h3>
+
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-emerald-100/80 leading-relaxed">
+                {hasCheckedOut ? (
                   <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>যাচাই হচ্ছে...</span>
+                    {text.subCard2DescDonePrefix}{" "}
+                    <strong className="text-slate-900 dark:text-amber-200">
+                      {formatDhakaTimeOnly(todayData.checkOutTime)}
+                    </strong>{" "}
+                    {text.subCard2DescDoneMid}{" "}
+                    <strong
+                      className={
+                        todayData.checkOutStatus === "On Time"
+                          ? "text-emerald-600 dark:text-emerald-300"
+                          : "text-amber-600 dark:text-amber-300"
+                      }
+                    >
+                      {todayData.checkOutStatus}
+                    </strong>
+                    {todayData.durationText &&
+                      ` • ${text.totalWorkLabel}: ${todayData.durationText}`}
                   </>
                 ) : (
-                  <>
-                    <LogOut className="w-4 h-4" />
-                    <span>
-                      ২য় টার্ম: প্রস্থান হাজিরা সাবমিট করুন{" "}
-                      {liveCheckOutStatus === "On Time" && "(সময়মতো)"}
-                    </span>
-                  </>
+                  text.subCard2DescPending
                 )}
-              </button>
-            )}
+              </p>
+            </div>
+
+            <div>
+              {hasCheckedOut ? (
+                <div className="p-3.5 bg-teal-100/80 dark:bg-teal-500/15 rounded-2xl border border-teal-300 dark:border-teal-500/35 flex items-center gap-2 text-xs font-bold text-teal-900 dark:text-teal-200">
+                  <CheckCircle2 className="w-4 h-4 text-teal-600 dark:text-teal-300 shrink-0" />
+                  <span>{text.subCard2ConfirmedBanner}</span>
+                </div>
+              ) : !hasCheckedIn ? (
+                <div className="p-3.5 bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 rounded-2xl text-xs font-semibold text-slate-500 dark:text-emerald-100/60 text-center">
+                  {text.subCard2NeedCheckIn}
+                </div>
+              ) : (
+                <button
+                  onClick={handleCheckOutClick}
+                  disabled={submittingCheckOut}
+                  className={`w-full py-3.5 px-5 font-black rounded-2xl text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer ${
+                    liveCheckOutStatus === "On Time"
+                      ? "bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 text-slate-950 ring-2 ring-amber-300"
+                      : "bg-gradient-to-r from-[#022014] via-teal-900 to-emerald-900 text-amber-200 border border-amber-400/35"
+                  }`}
+                >
+                  {submittingCheckOut ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>{text.verifyingBtn}</span>
+                    </>
+                  ) : (
+                    <>
+                      <LogOut className="w-4 h-4" />
+                      <span>
+                        {text.subCard2Btn}{" "}
+                        {liveCheckOutStatus === "On Time" && text.onTimeSuffix}
+                      </span>
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
       {/* ================= 5. MONTHLY STATS SUMMARY ================= */}
       {monthlyMetrics && (
-        <div className="bg-white dark:bg-[#0f172a] rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h3 className="text-base font-black text-slate-900 dark:text-white">
-                চলতি মাসের সামগ্রিক পরিসংখ্যান
-              </h3>
-              <p className="text-xs text-slate-500">
-                মোট কর্মদিবস: {monthlyMetrics.presentDays} দিন • সময়মতো উপস্থিতি:{" "}
-                {monthlyMetrics.onTimeRate}%
-              </p>
+        <div className="relative rounded-3xl p-[1.5px] bg-gradient-to-b from-amber-400/40 via-emerald-600/15 to-slate-200 dark:from-amber-400/45 dark:via-emerald-500/20 dark:to-amber-500/25 shadow-[0_12px_35px_-12px_rgba(2,32,20,0.07)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.85)]">
+          <div className="relative bg-white dark:bg-gradient-to-br dark:from-[#041e14] dark:via-[#02120c] dark:to-[#010906] rounded-[22.5px] p-6 space-y-4 overflow-hidden dark:shadow-[inset_0_1px_1px_rgba(251,191,36,0.15)]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+                  {text.monthlyStatsTitle}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-emerald-100/75">
+                  {text.totalWorkingDays}: {monthlyMetrics.presentDays}{" "}
+                  {text.daysUnit} • {text.onTimeRateLabel}:{" "}
+                  {monthlyMetrics.onTimeRate}%
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-slate-500 dark:text-amber-300/85 font-bold">
+                  {text.selectMonthLabel}
+                </span>
+                <input
+                  type="month"
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                  className="px-3.5 py-1.5 bg-[#f4f9f6] dark:bg-[#02140d] border border-emerald-800/15 dark:border-amber-400/30 rounded-xl text-xs font-bold text-slate-800 dark:text-amber-100 focus:outline-none cursor-pointer"
+                />
+              </div>
             </div>
 
-            <div className="flex items-center gap-2 text-xs">
-              <span className="text-slate-500 font-bold">মাস নির্বাচন:</span>
-              <input
-                type="month"
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(e.target.value)}
-                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-100 dark:border-slate-800 text-center">
-              <span className="text-[11px] font-bold text-slate-500 block">উপস্থিত দিন</span>
-              <span className="text-lg font-black text-slate-900 dark:text-white mt-0.5 block">
-                {monthlyMetrics.presentDays} দিন
-              </span>
-            </div>
-            <div className="bg-emerald-50 dark:bg-emerald-950/30 p-3 rounded-2xl border border-emerald-100 dark:border-emerald-900/40 text-center">
-              <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-400 block">
-                ১ম টার্ম অন-টাইম
-              </span>
-              <span className="text-lg font-black text-emerald-700 dark:text-emerald-300 mt-0.5 block">
-                {monthlyMetrics.onTimeCheckIns} দিন
-              </span>
-            </div>
-            <div className="bg-amber-50 dark:bg-amber-950/30 p-3 rounded-2xl border border-amber-100 dark:border-amber-900/40 text-center">
-              <span className="text-[11px] font-bold text-amber-800 dark:text-amber-400 block">
-                ১ম টার্ম লেট
-              </span>
-              <span className="text-lg font-black text-amber-700 dark:text-amber-300 mt-0.5 block">
-                {monthlyMetrics.lateCheckIns} দিন
-              </span>
-            </div>
-            <div className="bg-teal-50 dark:bg-teal-950/30 p-3 rounded-2xl border border-teal-100 dark:border-teal-900/40 text-center">
-              <span className="text-[11px] font-bold text-teal-800 dark:text-teal-400 block">
-                ২য় টার্ম অন-টাইম
-              </span>
-              <span className="text-lg font-black text-teal-700 dark:text-teal-300 mt-0.5 block">
-                {monthlyMetrics.onTimeCheckOuts} দিন
-              </span>
-            </div>
-            <div className="bg-rose-50 dark:bg-rose-950/30 p-3 rounded-2xl border border-rose-100 dark:border-rose-900/40 text-center">
-              <span className="text-[11px] font-bold text-rose-800 dark:text-rose-400 block">
-                সময়ের পূর্বে প্রস্থান
-              </span>
-              <span className="text-lg font-black text-rose-700 dark:text-rose-300 mt-0.5 block">
-                {monthlyMetrics.earlyCheckOuts} দিন
-              </span>
-            </div>
-            <div className="bg-indigo-50 dark:bg-indigo-950/30 p-3 rounded-2xl border border-indigo-100 dark:border-indigo-900/40 text-center">
-              <span className="text-[11px] font-bold text-indigo-800 dark:text-indigo-400 block">
-                মোট কর্মঘণ্টা
-              </span>
-              <span className="text-lg font-black text-indigo-700 dark:text-indigo-300 mt-0.5 block">
-                {monthlyMetrics.totalHoursWorked} ঘণ্টা
-              </span>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              <div className="bg-[#f4f9f6] dark:bg-white/[0.04] p-3.5 rounded-2xl border border-emerald-800/10 dark:border-amber-400/20 text-center">
+                <span className="text-[11px] font-bold text-slate-500 dark:text-emerald-100/70 block">
+                  {text.metricPresentDays}
+                </span>
+                <span className="text-lg font-black text-slate-900 dark:text-white mt-0.5 block">
+                  {monthlyMetrics.presentDays} {text.daysUnit}
+                </span>
+              </div>
+              <div className="bg-emerald-50 dark:bg-emerald-500/10 p-3.5 rounded-2xl border border-emerald-200/70 dark:border-emerald-500/25 text-center">
+                <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 block">
+                  {text.metricTerm1OnTime}
+                </span>
+                <span className="text-lg font-black text-emerald-700 dark:text-emerald-200 mt-0.5 block">
+                  {monthlyMetrics.onTimeCheckIns} {text.daysUnit}
+                </span>
+              </div>
+              <div className="bg-amber-50 dark:bg-amber-500/10 p-3.5 rounded-2xl border border-amber-200/70 dark:border-amber-400/25 text-center">
+                <span className="text-[11px] font-bold text-amber-800 dark:text-amber-300 block">
+                  {text.metricTerm1Late}
+                </span>
+                <span className="text-lg font-black text-amber-700 dark:text-amber-200 mt-0.5 block">
+                  {monthlyMetrics.lateCheckIns} {text.daysUnit}
+                </span>
+              </div>
+              <div className="bg-teal-50 dark:bg-teal-500/10 p-3.5 rounded-2xl border border-teal-200/70 dark:border-teal-400/25 text-center">
+                <span className="text-[11px] font-bold text-teal-800 dark:text-teal-300 block">
+                  {text.metricTerm2OnTime}
+                </span>
+                <span className="text-lg font-black text-teal-700 dark:text-teal-200 mt-0.5 block">
+                  {monthlyMetrics.onTimeCheckOuts} {text.daysUnit}
+                </span>
+              </div>
+              <div className="bg-rose-50 dark:bg-rose-500/10 p-3.5 rounded-2xl border border-rose-200/70 dark:border-rose-400/25 text-center">
+                <span className="text-[11px] font-bold text-rose-800 dark:text-rose-300 block">
+                  {text.metricEarlyExit}
+                </span>
+                <span className="text-lg font-black text-rose-700 dark:text-rose-200 mt-0.5 block">
+                  {monthlyMetrics.earlyCheckOuts} {text.daysUnit}
+                </span>
+              </div>
+              <div className="bg-amber-50/70 dark:bg-amber-400/10 p-3.5 rounded-2xl border border-amber-300/60 dark:border-amber-400/30 text-center">
+                <span className="text-[11px] font-bold text-emerald-900 dark:text-amber-300 block">
+                  {text.metricTotalHours}
+                </span>
+                <span className="text-lg font-black text-emerald-800 dark:text-amber-200 mt-0.5 block">
+                  {monthlyMetrics.totalHoursWorked} {text.hoursUnit}
+                </span>
+              </div>
             </div>
           </div>
         </div>
       )}
 
       {/* ================= 6. RECENT ATTENDANCE HISTORY LOG ================= */}
-      <div className="bg-white dark:bg-[#0f172a] rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-          <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-            <History className="w-4 h-4 text-teal-600" />
-            <span>বিগত দিনগুলোর হাজিরার লগ</span>
-          </h3>
-          <span className="text-xs text-slate-500 font-semibold">
-            সর্বশেষ {historyList.length} টি রেকর্ড
-          </span>
-        </div>
-
-        {loadingHistory ? (
-          <div className="py-8 text-center text-xs text-slate-500">
-            হাজিরা হিস্টোরি লোড হচ্ছে...
+      <div className="relative rounded-3xl p-[1.5px] bg-gradient-to-b from-amber-400/40 via-emerald-600/15 to-slate-200 dark:from-amber-400/45 dark:via-emerald-500/20 dark:to-amber-500/25 shadow-[0_12px_35px_-12px_rgba(2,32,20,0.07)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.85)]">
+        <div className="relative bg-white dark:bg-gradient-to-br dark:from-[#041e14] dark:via-[#02120c] dark:to-[#010906] rounded-[22.5px] p-6 space-y-4 overflow-hidden dark:shadow-[inset_0_1px_1px_rgba(251,191,36,0.15)]">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-emerald-800/40 pb-3">
+            <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+              <History className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+              <span>{text.historyTitle}</span>
+            </h3>
+            <span className="text-xs text-slate-500 dark:text-amber-300/80 font-semibold">
+              {text.historyCountPrefix} {historyList.length}{" "}
+              {text.historyCountSuffix}
+            </span>
           </div>
-        ) : historyList.length === 0 ? (
-          <div className="py-8 text-center text-xs text-slate-500">
-            কোনো পূর্ববর্তী রেকর্ড পাওয়া যায়নি।
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="bg-slate-50 dark:bg-slate-850 text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider text-[11px]">
-                  <th className="py-3 px-4 rounded-l-xl">তারিখ</th>
-                  <th className="py-3 px-4">১ম টার্ম (সকাল ৫:৩০)</th>
-                  <th className="py-3 px-4">২য় টার্ম (রাত ১০:০০-১০:১০)</th>
-                  <th className="py-3 px-4">মোট কর্মঘণ্টা</th>
-                  <th className="py-3 px-4 rounded-r-xl">মন্তব্য</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {historyList.map((row, idx) => (
-                  <tr
-                    key={row._id || idx}
-                    className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors"
-                  >
-                    <td className="py-3 px-4 font-mono font-bold text-slate-900 dark:text-white">
-                      {row.date}
-                    </td>
 
-                    {/* Term 1 */}
-                    <td className="py-3 px-4">
-                      {row.checkInTime ? (
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
-                            {formatDhakaTimeOnly(row.checkInTime)}
-                          </span>
-                          <span
-                            className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
-                              row.checkInStatus === "On Time"
-                                ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400"
-                                : "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400"
-                            }`}
-                          >
-                            {row.checkInStatus}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-slate-400">অনুস্থিত</span>
-                      )}
-                    </td>
-
-                    {/* Term 2 */}
-                    <td className="py-3 px-4">
-                      {row.checkOutTime ? (
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
-                            {formatDhakaTimeOnly(row.checkOutTime)}
-                          </span>
-                          <span
-                            className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
-                              row.checkOutStatus === "On Time"
-                                ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400"
-                                : row.checkOutStatus === "Early"
-                                ? "bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-400"
-                                : "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400"
-                            }`}
-                          >
-                            {row.checkOutStatus}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-slate-400">অসম্পূর্ণ</span>
-                      )}
-                    </td>
-
-                    {/* Duration */}
-                    <td className="py-3 px-4 font-mono text-slate-600 dark:text-slate-300">
-                      {row.durationText || "--"}
-                    </td>
-
-                    {/* Comments */}
-                    <td className="py-3 px-4 text-slate-500 max-w-xs truncate">
-                      {row.checkInComment || row.checkOutComment || "--"}
-                    </td>
+          {loadingHistory ? (
+            <div className="py-8 text-center text-xs text-slate-500 dark:text-emerald-100/70">
+              {text.historyLoading}
+            </div>
+          ) : historyList.length === 0 ? (
+            <div className="py-8 text-center text-xs text-slate-500 dark:text-emerald-100/70">
+              {text.historyEmpty}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-start border-collapse text-xs">
+                <thead>
+                  <tr className="bg-[#f4f9f6] dark:bg-[#02140d] text-slate-600 dark:text-amber-300 font-bold uppercase tracking-wider text-[11px] border-b border-emerald-800/10 dark:border-amber-400/20">
+                    <th className="py-3.5 px-4 text-start">{text.colDate}</th>
+                    <th className="py-3.5 px-4 text-start">{text.colTerm1}</th>
+                    <th className="py-3.5 px-4 text-start">{text.colTerm2}</th>
+                    <th className="py-3.5 px-4 text-start">{text.colDuration}</th>
+                    <th className="py-3.5 px-4 text-start">{text.colComment}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-emerald-800/30">
+                  {historyList.map((row, idx) => (
+                    <tr
+                      key={row._id || idx}
+                      className="hover:bg-emerald-50/40 dark:hover:bg-white/[0.04] transition-colors"
+                    >
+                      <td className="py-3.5 px-4 font-mono font-bold text-slate-900 dark:text-white">
+                        {row.date}
+                      </td>
+
+                      {/* Term 1 */}
+                      <td className="py-3.5 px-4">
+                        {row.checkInTime ? (
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
+                              {formatDhakaTimeOnly(row.checkInTime)}
+                            </span>
+                            <span
+                              className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                                row.checkInStatus === "On Time"
+                                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300/60 dark:border-emerald-500/30"
+                                  : "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300/60 dark:border-amber-400/30"
+                              }`}
+                            >
+                              {row.checkInStatus}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-slate-400">{text.absentText}</span>
+                        )}
+                      </td>
+
+                      {/* Term 2 */}
+                      <td className="py-3.5 px-4">
+                        {row.checkOutTime ? (
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
+                              {formatDhakaTimeOnly(row.checkOutTime)}
+                            </span>
+                            <span
+                              className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                                row.checkOutStatus === "On Time"
+                                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300/60 dark:border-emerald-500/30"
+                                  : row.checkOutStatus === "Early"
+                                    ? "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-300/60 dark:border-rose-500/30"
+                                    : "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300/60 dark:border-amber-400/30"
+                              }`}
+                            >
+                              {row.checkOutStatus}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-slate-400">
+                            {text.incompleteText}
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Duration */}
+                      <td className="py-3.5 px-4 font-mono text-slate-600 dark:text-emerald-100/80">
+                        {row.durationText || "--"}
+                      </td>
+
+                      {/* Comments */}
+                      <td className="py-3.5 px-4 text-slate-500 dark:text-emerald-100/70 max-w-xs truncate">
+                        {row.checkInComment || row.checkOutComment || "--"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ================= 7. COMMENT / REASON MODAL ================= */}
       {commentModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white dark:bg-[#0f172a] rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-[#031810] rounded-3xl max-w-md w-full p-6 shadow-2xl border border-emerald-800/15 dark:border-amber-400/30 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-emerald-800/40 pb-3">
               <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-amber-500" />
                 <span>
                   {commentModalType === "late"
-                    ? "১ম টার্ম: দেরিতে চেক-ইন এর কারণ"
+                    ? text.modalTitleLate
                     : commentModalType === "early"
-                    ? "২য় টার্ম: সময়ের পূর্বে প্রস্থানের কারণ"
-                    : "২য় টার্ম: বিলম্বিত প্রস্থানের কারণ"}
+                      ? text.modalTitleEarly
+                      : text.modalTitleOvertime}
                 </span>
               </h3>
               <button
                 onClick={() => setCommentModalOpen(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 transition-colors"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-amber-300 transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+            <p className="text-xs text-slate-600 dark:text-emerald-100/80 leading-relaxed">
               {commentModalType === "late"
-                ? "ভোর ৫:৩০ টা অতিক্রান্ত হয়েছে। অনুগ্রহ করে দেরির সুনির্দিষ্ট কারণ উল্লেখ করে হাজিরা সাবমিট করুন।"
+                ? text.modalDescLate
                 : commentModalType === "early"
-                ? "এখন রাত ১০:০০ টা বাজেনি। অফিসিয়াল সময়সূচীর পূর্বে প্রস্থান করার কারণ উল্লেখ করুন।"
-                : "রাত ১০:১০ অতিক্রান্ত হয়েছে। অতিরিক্ত সময়ের কারণ উল্লেখ করুন।"}
+                  ? text.modalDescEarly
+                  : text.modalDescOvertime}
             </p>
 
             <form onSubmit={handleModalSubmit} className="space-y-4">
@@ -882,25 +1258,25 @@ export default function StaffAttendancePage() {
                 required
                 value={attendanceComment}
                 onChange={(e) => setAttendanceComment(e.target.value)}
-                placeholder="এখানে কারণ বা মন্তব্য লিখুন..."
-                className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                placeholder={text.modalPlaceholder}
+                className="w-full p-3 bg-[#f4f9f6] dark:bg-[#02120b] border border-emerald-800/15 dark:border-amber-400/25 rounded-xl text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-400/50"
               />
 
               <div className="flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setCommentModalOpen(false)}
-                  className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold"
+                  className="px-4 py-2 bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold cursor-pointer"
                 >
-                  বাতিল
+                  {text.cancelBtn}
                 </button>
                 <button
                   type="submit"
                   disabled={submittingCheckIn || submittingCheckOut}
-                  className="px-5 py-2 bg-emerald-800 hover:bg-emerald-900 text-white rounded-xl text-xs font-black shadow-md flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-5 py-2 bg-gradient-to-r from-[#022014] to-emerald-800 dark:from-amber-400 dark:to-amber-500 text-amber-200 dark:text-slate-950 rounded-xl text-xs font-black shadow-md flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
                 >
                   <Send className="w-3.5 h-3.5" />
-                  <span>নিশ্চিত করুন ও সাবমিট</span>
+                  <span>{text.confirmSubmitBtn}</span>
                 </button>
               </div>
             </form>

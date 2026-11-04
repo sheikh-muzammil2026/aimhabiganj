@@ -157,13 +157,13 @@ export default function HeroSection() {
 
   const nextSlide = useCallback(() => {
     setCurrentSlide((prev) =>
-      prev === carouselImages.length - 1 ? 0 : prev + 1
+      prev === carouselImages.length - 1 ? 0 : prev + 1,
     );
   }, [carouselImages.length]);
 
   const prevSlide = useCallback(() => {
     setCurrentSlide((prev) =>
-      prev === 0 ? carouselImages.length - 1 : prev - 1
+      prev === 0 ? carouselImages.length - 1 : prev - 1,
     );
   }, [carouselImages.length]);
 
@@ -227,7 +227,7 @@ export default function HeroSection() {
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-400" />
                 </span>
                 <span
-                  className="text-xs sm:text-sm font-bold text-amber-300 tracking-wide"
+                  className="text-xs sm:text-sm font-bold text-amber-300 tracking-wide font-arabic-traditional"
                   dir="rtl"
                   lang="ar"
                 >
@@ -290,10 +290,9 @@ export default function HeroSection() {
             </div>
 
             {/* ডান কলাম: লাক্সারি গ্লাসমরফিক বেন্টো শোকেস কার্ড (৫ কলাম) */}
-            <div className="lg:col-span-5">
+            <div className="md:hidden">
               <div className="relative rounded-3xl p-[1.5px] bg-gradient-to-b from-amber-400/50 via-white/15 to-emerald-500/35 dark:from-amber-400/65 dark:via-emerald-500/25 dark:to-amber-500/40 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.75)] dark:shadow-[0_25px_80px_-10px_rgba(0,0,0,0.9),0_0_45px_rgba(16,185,129,0.12)]">
                 <div className="bg-[#021d12]/75 dark:bg-[#02120b]/85 backdrop-blur-2xl rounded-[22.5px] p-5 sm:p-6 space-y-5">
-                  {/* কার্ড হেডার */}
                   <div className="flex items-center justify-between border-b border-white/10 dark:border-amber-400/15 pb-4">
                     <div>
                       <h2 className="text-base sm:text-lg font-extrabold bg-gradient-to-r from-amber-200 via-amber-300 to-amber-100 bg-clip-text text-transparent">
@@ -308,7 +307,6 @@ export default function HeroSection() {
                     </div>
                   </div>
 
-                  {/* ৪টি মূল বৈশিষ্ট্য গ্রিড */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {activeLocale.items.map((feature, idx) => {
                       const IconComponent = feature.icon;
@@ -331,7 +329,6 @@ export default function HeroSection() {
                     })}
                   </div>
 
-                  {/* নিচের লাইভ ভর্তি স্ট্যাটাস বার */}
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-gradient-to-r from-emerald-900/60 via-emerald-950/80 to-amber-950/40 border border-amber-400/25">
                     <div className="space-y-1">
                       <div className="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-300 uppercase tracking-wider">

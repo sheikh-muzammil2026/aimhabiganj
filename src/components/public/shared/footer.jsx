@@ -117,12 +117,24 @@ export default function Footer() {
                 </div>
               </div>
               <div className="flex flex-col">
-                <span className="font-black text-xs text-amber-300 tracking-wide leading-tight">
+                <span className="font-black text-xs text-amber-300 tracking-wide leading-tight font-britanic">
                   As-Salam Ideal Madrasah (AIM)
                 </span>
-                <span className="text-sm font-bold text-white mt-0.5 font-shalda">
-                  আস-সালাম আইডিয়াল মাদরাসা (এইম)
-                </span>
+                {language === "ar" ? (
+                  <h2
+                    className="text-sm font-bold text-white mt-0.5 kufi-custom"
+                    dir="rtl"
+                    lang="ar"
+                  >
+                    مدرس<span className="font-sans">ة</span> الس
+                    <span className="font-sans">لا</span>م النموذجي
+                    <span className="font-sans">ة</span>
+                  </h2>
+                ) : (
+                  <span className="text-sm font-bold text-white mt-0.5 font-shalda">
+                    আস-সালাম আইডিয়াল মাদরাসা (এইম)
+                  </span>
+                )}
               </div>
             </Link>
 

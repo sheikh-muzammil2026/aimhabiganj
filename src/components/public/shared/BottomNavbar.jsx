@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
@@ -23,6 +23,14 @@ import {
   LogIn,
   LogOut,
 } from "lucide-react";
+
+const FIRST_SECTION_HASHES = new Set([
+  "profile",
+  "teachers",
+  "timeline",
+  "about",
+  "hifz",
+]);
 
 export default function BottomNavbar() {
   const { t } = useLanguage();
@@ -52,28 +60,46 @@ export default function BottomNavbar() {
     });
   };
 
-  const handleSubmenuClick = (e, href) => {
+  const handleSubmenuClick = useCallback((e, href) => {
     setIsMenuOpen(false);
     setActiveDropdown(null);
 
-    if (href && href.includes("#")) {
-      const [targetPath, hash] = href.split("#");
-      const currentPath =
-        typeof window !== "undefined" ? window.location.pathname : "";
+    if (!href) return;
 
-      if (
-        currentPath === targetPath ||
-        (targetPath === "" && currentPath === "/")
-      ) {
-        const element = document.getElementById(hash);
-        if (element) {
-          e.preventDefault();
-          element.scrollIntoView({ behavior: "smooth", block: "start" });
-          window.history.pushState(null, "", href);
-        }
+    const currentPath =
+      typeof window !== "undefined" ? window.location.pathname : pathname;
+
+    if (!href.includes("#")) {
+      if (currentPath === href) {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      return;
+    }
+
+    const [targetPath, hash] = href.split("#");
+    const normalizedTarget = targetPath || "/";
+
+    if (currentPath === normalizedTarget) {
+      if (FIRST_SECTION_HASHES.has(hash)) {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        window.history.pushState(null, "", href);
+        return;
+      }
+
+      const element = document.getElementById(hash);
+      if (element) {
+        e.preventDefault();
+        const header = document.querySelector("header");
+        const headerHeight = header ? header.offsetHeight : 70;
+        const top =
+          element.getBoundingClientRect().top + window.scrollY - headerHeight - 16;
+        window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+        window.history.pushState(null, "", href);
       }
     }
-  };
+  }, [pathname]);
 
   const menuItems = [
     { name: t("menu.home"), href: "/", icon: <Home className="w-4 h-4" /> },
@@ -103,7 +129,7 @@ export default function BottomNavbar() {
         { name: t("menu.syllabus"), href: "/academics#syllabus" },
         { name: t("menu.co_curricular"), href: "/academics#co-curricular" },
         { name: t("menu.class_routine"), href: "/academics#class-routine" },
-        { name: t("menu.exam_routine"), href: "/academics#exam-routine" },
+        { name: t("menu.exam_routine"), href: "/academics/routine/class-wise" },
       ],
     },
     {
@@ -224,6 +250,7 @@ export default function BottomNavbar() {
               <Link
                 key={idx}
                 href={item.href}
+                onClick={(e) => handleSubmenuClick(e, item.href)}
                 className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative group ${
                   isActive
                     ? "text-emerald-800 dark:text-amber-300 font-bold"
@@ -252,7 +279,7 @@ export default function BottomNavbar() {
           <button
             type="button"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative group ${
+            className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative group cursor-pointer ${
               isMenuOpen
                 ? "text-amber-600 dark:text-amber-300 font-bold"
                 : "text-slate-500 dark:text-emerald-100/65 hover:text-emerald-700 dark:hover:text-amber-200"
@@ -312,7 +339,7 @@ export default function BottomNavbar() {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="flex items-center gap-1.5 bg-rose-500/20 hover:bg-rose-500 text-rose-100 px-3 py-1.5 rounded-xl text-xs font-semibold border border-rose-400/30 transition-all active:scale-95"
+                  className="flex items-center gap-1.5 bg-rose-500/20 hover:bg-rose-500 text-rose-100 px-3 py-1.5 rounded-xl text-xs font-semibold border border-rose-400/30 transition-all active:scale-95 cursor-pointer"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>{t("menu.logout") || "Logout"}</span>
@@ -342,7 +369,7 @@ export default function BottomNavbar() {
                         <button
                           type="button"
                           onClick={() => toggleDropdown(idx)}
-                          className={`w-full flex justify-between items-center p-3.5 text-left font-medium transition-colors ${
+                          className={`w-full flex justify-between items-center p-3.5 text-left font-medium transition-colors cursor-pointer ${
                             isDropdownOpen
                               ? "bg-emerald-50 dark:bg-emerald-900/50 text-emerald-900 dark:text-amber-300"
                               : "text-slate-700 dark:text-slate-100 hover:bg-emerald-50/40 dark:hover:bg-emerald-900/30"

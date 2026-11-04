@@ -33,6 +33,10 @@ export default function AdmissionGuidelinePage() {
                 const hash = window.location.hash;
                 if (hash) {
                     const id = hash.replace("#", "");
+                    if (id === "timeline") {
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                        return;
+                    }
                     const element = document.getElementById(id);
                     if (element) {
                         element.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -205,7 +209,7 @@ export default function AdmissionGuidelinePage() {
             <div className="pt-4 text-center">
                 <Link
                     href="/admission/form"
-                    className="inline-flex items-center justify-center gap-2 bg-emerald-800 hover:bg-emerald-900 text-white font-black px-8 py-4 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 text-sm sm:text-base tracking-wide border border-emerald-950/20"
+                    className="inline-flex items-center justify-center gap-2 bg-emerald-800 hover:bg-emerald-900 text-white font-black px-8 py-4 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 text-sm sm:text-base tracking-wide border border-emerald-950/20 cursor-pointer"
                 >
                     <span>📝 অনলাইন ভর্তি আবেদন ফরম</span>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">

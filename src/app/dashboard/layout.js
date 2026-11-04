@@ -4,6 +4,8 @@ import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { useLanguage } from "@/context/LanguageContext";
+import LanguageSwitcher from "@/components/public/shared/LanguageSwitcher";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
@@ -18,6 +20,7 @@ const DashboardLayout = ({ children }) => {
 
   const [currentTime, setCurrentTime] = useState("");
   const [theme, setTheme] = useState("light");
+  const { language } = useLanguage();
 
   // Live user & permissions sync from DB
   const syncUserData = React.useCallback(async () => {
@@ -318,7 +321,7 @@ const DashboardLayout = ({ children }) => {
     }
   };
 
-  // ইসলামিক পরিবেশের সাথে সামঞ্জস্য রেখে রিয়েল-টাইম ঘড়ি ও বাংলা তারিখের ব্যবস্থা
+  // ইসলামিক পরিবেশের সাথে সামঞ্জস্য রেখে রিয়েল-টাইম ঘড়ি ও নির্বাচিত ভাষায় তারিখের ব্যবস্থা
   useEffect(() => {
     const updateTime = () => {
       const options = {
@@ -328,26 +331,32 @@ const DashboardLayout = ({ children }) => {
         day: "numeric",
       };
       const today = new Date();
-      setCurrentTime(today.toLocaleDateString("bn-BD", options));
+      const localeCode =
+        language === "ar" ? "ar-SA" : language === "en" ? "en-US" : "bn-BD";
+      setCurrentTime(today.toLocaleDateString(localeCode, options));
     };
     updateTime();
-    const timer = setInterval(updateTime, 60000); // প্রতি মিনিটে আপডেট হবে
+    const timer = setInterval(updateTime, 60000);
     return () => clearInterval(timer);
-  }, []);
+  }, [language]);
 
   if (
     (isPending || (!session?.user && isVerifying)) &&
     pathname !== "/dashboard/unauthorized"
   ) {
     return (
-      <div className="min-h-screen bg-slate-50/80 flex flex-col justify-center items-center px-6 transition-colors duration-300 dark:bg-slate-900/80 backdrop-blur-sm">
+      <div className="min-h-screen bg-[#f6faf8] flex flex-col justify-center items-center px-6 transition-colors duration-300 dark:bg-[#010a06] backdrop-blur-sm">
         <div className="relative flex flex-col items-center">
           <div className="w-16 h-16 rounded-full border-4 border-t-amber-500 border-r-transparent border-b-emerald-800 border-l-transparent animate-spin dark:border-b-emerald-400"></div>
-          <div className="absolute top-3 bg-white text-emerald-950 font-black text-xs w-10 h-10 rounded-full flex items-center justify-center shadow-md animate-pulse border border-emerald-100 dark:bg-slate-800 dark:text-emerald-400 dark:border-slate-700">
+          <div className="absolute top-3 bg-white text-emerald-950 font-black text-xs w-10 h-10 rounded-full flex items-center justify-center shadow-md animate-pulse border border-emerald-100 dark:bg-[#031810] dark:text-amber-300 dark:border-amber-400/30">
             AS
           </div>
-          <p className="mt-5 text-sm font-bold text-emerald-950 tracking-wide dark:text-emerald-400 animate-pulse">
-            অনুগ্রহ করে অপেক্ষা করুন...
+          <p className="mt-5 text-sm font-bold text-emerald-950 tracking-wide dark:text-amber-300 animate-pulse">
+            {language === "ar"
+              ? "يرجى الانتظار..."
+              : language === "en"
+                ? "Please wait..."
+                : "অনুগ্রহ করে অপেক্ষা করুন..."}
           </p>
         </div>
       </div>
@@ -355,73 +364,94 @@ const DashboardLayout = ({ children }) => {
   }
 
   return (
-    <div className="flex h-screen bg-[#f4f6f4] dark:bg-[#09101d] text-slate-800 dark:text-slate-200 antialiased font-sans w-full selection:bg-emerald-800 selection:text-white overflow-hidden">
+    <div className="flex h-screen bg-[#f4f8f6] dark:bg-[#010a06] text-slate-800 dark:text-slate-100 antialiased font-sans w-full selection:bg-emerald-800 selection:text-white overflow-hidden">
       {/* ১. সাইডবার কম্পোনেন্ট */}
       <Sidebar />
 
       {/* ২. মেইন কন্টেন্ট এরিয়া */}
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-        {/* ৩. প্রফেশনাল টপ নেভিগেশন বার */}
-        <header className="bg-white dark:bg-[#0f172a] border-b border-emerald-900/10 dark:border-emerald-950/30 h-16 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs flex-shrink-0 print:hidden">
+        {/* ৩. প্রফেশনাল রয়্যাল টপ নেভিগেশন বার */}
+        <header className="relative bg-gradient-to-r from-[#021d12] via-[#04301f] to-[#021d12] dark:from-[#010906] dark:via-[#031b11] dark:to-[#010906] border-b border-amber-400/25 h-16 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-md flex-shrink-0 print:hidden text-white">
+          <div className="pointer-events-none absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/50 to-transparent" />
+
           {/* বাম পাশ: মূল ওয়েবসাইটে ফিরে যাওয়ার প্রফেশনাল বাটন এবং টাইটেল */}
           <div className="flex items-center gap-3">
-            {/* হ্যামবার্গার সরিয়ে ব্যাক টু হোম বাটন যুক্ত করা হয়েছে */}
             <Link
               href="/"
-              className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-emerald-800 dark:text-emerald-350 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-900/30 rounded-xl transition-all shadow-xs"
-              title="মূল হোম পেজে ফিরে যান"
+              className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-amber-200 bg-white/[0.06] hover:bg-amber-400/15 border border-white/15 hover:border-amber-400/40 rounded-xl transition-all shadow-xs"
+              title={
+                language === "ar"
+                  ? "العودة إلى الصفحة الرئيسية"
+                  : language === "en"
+                    ? "Back to Home Page"
+                    : "মূল হোম পেজে ফিরে যান"
+              }
             >
               <span>🏠</span>
             </Link>
 
             <div className="flex flex-col">
-              <h2 className="font-black text-sm sm:text-base text-emerald-900 dark:text-emerald-400 tracking-wide lg:block hidden">
-                Control panel
+              <h2 className="font-black text-sm sm:text-base bg-gradient-to-r from-white via-amber-100 to-amber-300 bg-clip-text text-transparent tracking-wide lg:block hidden">
+                {language === "ar"
+                  ? "لوحة التحكم"
+                  : language === "en"
+                    ? "Control Panel"
+                    : "কন্ট্রোল প্যানেল"}
               </h2>
             </div>
           </div>
 
-          {/* ডান পাশ: ইসলামিক ক্যালেন্ডার/তারিখ এবং প্রোফাইল কুইক অ্যাকশন */}
-          <div className="flex items-center gap-4">
+          {/* ডান পাশ: ভাষা পরিবর্তন, তারিখ, ডার্ক মোড ও প্রোফাইল কুইক অ্যাকশন */}
+          <div className="flex items-center gap-2.5 sm:gap-3.5">
             {/* বর্তমান তারিখ */}
-            <div className="hidden md:flex items-center gap-2 bg-emerald-50/60 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/30 px-3 py-1.5 rounded-xl text-xs font-bold text-emerald-800 dark:text-emerald-300">
+            <div className="hidden md:flex items-center gap-2 bg-white/[0.06] border border-amber-400/25 px-3 py-1.5 rounded-xl text-xs font-bold text-amber-200">
               <span>📅</span>
-              <span>{currentTime || "আজকের তারিখ"}</span>
+              <span>
+                {currentTime ||
+                  (language === "ar"
+                    ? "تاريخ اليوم"
+                    : language === "en"
+                      ? "Today's Date"
+                      : "আজকের তারিখ")}
+              </span>
             </div>
+
+            {/* ৩-ভাষা পরিবর্তনকারী (বাংলা, English, العربية) */}
+            <LanguageSwitcher />
 
             {/* ডার্ক মোড টগল বাটন */}
             <button
               onClick={toggleTheme}
-              className="p-2 text-slate-500 dark:text-slate-400 hover:text-emerald-800 dark:hover:text-emerald-400 transition-colors focus:outline-none"
+              className="p-2 rounded-xl border border-white/15 bg-white/[0.06] hover:bg-amber-400/15 hover:border-amber-400/40 text-amber-300 transition-all focus:outline-none cursor-pointer"
               title={
                 theme === "light" ? "ডার্ক মোড চালু করুন" : "লাইট মোড চালু করুন"
               }
             >
-              <span className="text-lg">{theme === "light" ? "🌙" : "☀️"}</span>
+              <span className="text-sm">{theme === "light" ? "🌙" : "☀️"}</span>
             </button>
 
             {/* কুইক নোটিফিকেশন আইকন */}
             <button
-              className="relative p-2 text-slate-500 dark:text-slate-400 hover:text-emerald-800 dark:hover:text-emerald-400 transition-colors focus:outline-hidden"
+              className="relative p-2 rounded-xl border border-white/15 bg-white/[0.06] hover:bg-amber-400/15 hover:border-amber-400/40 text-amber-300 transition-all focus:outline-hidden cursor-pointer"
               title="নোটিফিকেশন"
             >
-              <span className="text-lg">🔔</span>
-              <span className="absolute top-1 right-1 w-2 h-2 bg-amber-500 rounded-full ring-2 ring-white"></span>
+              <span className="text-sm">🔔</span>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-400 rounded-full ring-2 ring-[#021d12]"></span>
             </button>
 
             {/* প্রোফাইল সেটিংস লিংক */}
             <Link
               href="/dashboard/profile-settings"
-              className="p-2 text-slate-500 dark:text-slate-400 hover:text-emerald-800 dark:hover:text-emerald-400 transition-colors focus:outline-hidden"
+              className="p-2 rounded-xl border border-white/15 bg-white/[0.06] hover:bg-amber-400/15 hover:border-amber-400/40 text-amber-300 transition-all focus:outline-hidden"
               title="প্রোফাইল সেটিংস"
             >
-              <span className="text-lg">⚙️</span>
+              <span className="text-sm">⚙️</span>
             </Link>
           </div>
         </header>
 
         {/* ৪. ড্যাশবোর্ড পেজের স্ক্রলযোগ্য কন্টেন্ট বডি */}
-        <main className="flex-1 overflow-y-auto p-4 pb-28 sm:p-6 sm:pb-24 lg:p-8 bg-[#f8faf8] dark:bg-[#09101d] scroll-smooth">
+        <main className="flex-1 overflow-y-auto p-4 pb-28 sm:p-6 sm:pb-24 lg:p-8 bg-gradient-to-b from-[#f6faf8] via-white to-[#f2f8f5] dark:from-[#010a06] dark:via-[#02140c] dark:to-[#010a06] scroll-smooth transition-colors duration-300">
           <div className="max-w-7xl mx-auto space-y-6">{children}</div>
         </main>
       </div>
