@@ -1,11 +1,9 @@
 import Footer from '@/components/public/shared/footer';
-import TopHeader from '@/components/public/shared/topHeader';
 import BottomNavbar from '@/components/public/shared/BottomNavbar';
 import AIChatbot from "@/components/AIChatbot";
 import React from 'react';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import Navbar from '@/components/public/shared/navbar';
-
 
 export const metadata = {
   // মেটাডাটা বেস URL (ওপেন গ্রাফ ইমেজের জন্য আবশ্যক)
@@ -72,7 +70,7 @@ export const metadata = {
     images: ["/og-image.png"],
   },
 
-  // ডুप्लिकেট ইউআরএল সমস্যা দূর করতে
+  // ডুপ্লিকেট ইউআরএল সমস্যা দূর করতে
   alternates: {
     canonical: "https://aimhabiganj.vercel.app",
   },
@@ -81,8 +79,7 @@ export const metadata = {
 const layout = ({ children }) => {
   return (
     <div>
-      <TopHeader />
- <Navbar />
+      <Navbar />
 
       <main className="min-h-screen pb-24 md:pb-28">
         {children}
