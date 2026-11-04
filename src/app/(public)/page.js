@@ -12,7 +12,7 @@ const page = () => {
     <div>
 
       <HeroSection />
-      <Navbar />
+     
       <WhyChooseUs />
       <FeaturedSections />
       <StatsSection />

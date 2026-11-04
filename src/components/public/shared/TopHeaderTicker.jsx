@@ -69,11 +69,11 @@ export default function TopHeaderTicker() {
 
   return (
     <>
-      <div className="w-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-slate-950 font-medium py-1.5 px-3 shadow-inner flex items-center overflow-hidden border-t border-amber-600/30 transition-colors duration-300 relative z-20">
+      <div className="w-full bg-[#032617] dark:bg-slate-950 text-emerald-50 font-medium py-1.5 px-3 flex items-center overflow-hidden border-b border-emerald-800/50 dark:border-slate-800 transition-colors duration-300 relative z-20">
         <div className="max-w-7xl mx-auto w-full flex items-center">
           {/* Ticker Label Badge */}
-          <div className="flex-shrink-0 flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white px-2.5 py-0.5 md:py-1 rounded-md text-xs font-bold uppercase tracking-wider mr-3 shadow-sm select-none z-10 transition-colors">
-            <Megaphone className="w-3.5 h-3.5 animate-bounce" />
+          <div className="flex-shrink-0 flex items-center gap-1.5 bg-amber-500/15 border border-amber-400/30 text-amber-300 px-2.5 py-0.5 md:py-1 rounded-md text-xs font-bold uppercase tracking-wider mr-3 select-none z-10 transition-colors">
+            <Megaphone className="w-3.5 h-3.5 text-amber-400" />
             <span className="whitespace-nowrap">সর্বশেষ নোটিশ</span>
           </div>
 
@@ -81,20 +81,20 @@ export default function TopHeaderTicker() {
           <div className="relative w-full overflow-hidden flex items-center select-none group">
             <div
               style={{ animationDuration: `${dynamicDuration}s` }}
-              className="animate-ticker text-xs md:text-sm font-semibold tracking-wide items-center gap-8 py-0.5 cursor-pointer group-hover:[animation-play-state:paused] hover:[animation-play-state:paused]"
+              className="animate-ticker text-xs md:text-sm font-medium tracking-wide items-center gap-8 py-0.5 cursor-pointer group-hover:[animation-play-state:paused] hover:[animation-play-state:paused]"
             >
               {items.map((notice, idx) => (
                 <span
                   key={notice._id || idx}
                   onClick={() => setSelectedNotice(notice)}
-                  className="inline-flex items-center gap-2 hover:text-red-800 transition-colors"
+                  className="inline-flex items-center gap-2 text-emerald-50/90 hover:text-amber-300 transition-colors"
                 >
-                  <span className="text-red-600 font-bold">❖</span>
+                  <span className="text-amber-400 font-bold">❖</span>
                   <span className="font-medium tracking-wide">
                     {notice.description || notice.title}
                   </span>
                   {notice.publishDate && (
-                    <span className="text-[11px] bg-amber-600/20 text-slate-900 px-2 py-0.5 rounded font-normal whitespace-nowrap">
+                    <span className="text-[11px] bg-emerald-900/80 text-emerald-200/90 border border-emerald-700/50 px-2 py-0.5 rounded font-normal whitespace-nowrap">
                       ({new Date(notice.publishDate).toLocaleDateString("bn-BD")})
                     </span>
                   )}
@@ -107,7 +107,7 @@ export default function TopHeaderTicker() {
           <div className="flex-shrink-0 ml-2 z-10 hidden sm:block">
             <Link
               href="/notices"
-              className="text-[11px] font-bold text-slate-800 hover:text-red-700 underline flex items-center gap-0.5 whitespace-nowrap bg-amber-300/60 hover:bg-amber-300 px-2 py-0.5 rounded transition-all"
+              className="text-[11px] font-semibold text-emerald-200 hover:text-amber-300 flex items-center gap-0.5 whitespace-nowrap bg-white/5 hover:bg-white/10 border border-white/10 px-2.5 py-1 rounded-md transition-all"
             >
               <span>সকল নোটিশ</span>
               <ChevronRight className="w-3 h-3" />
@@ -127,7 +127,7 @@ export default function TopHeaderTicker() {
               <X className="w-5 h-5" />
             </button>
 
-            <div className="flex items-center gap-2 text-red-600 font-bold text-xs uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-bold text-xs uppercase tracking-wider">
               <Megaphone className="w-4 h-4" />
               <span>জরুরি নোটিশ বিবরণ</span>
             </div>

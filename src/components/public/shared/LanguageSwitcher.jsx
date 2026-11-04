@@ -39,24 +39,24 @@ export default function LanguageSwitcher() {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-amber-400/30 bg-emerald-950/20 text-emerald-50 hover:bg-emerald-800/40 hover:text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-amber-400/50 shadow-sm cursor-pointer"
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-white/15 bg-white/5 text-slate-100 hover:bg-white/10 hover:text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-400/40 shadow-sm cursor-pointer"
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
-        <Globe className="w-3.5 h-3.5 text-amber-400" />
+        <Globe className="w-3.5 h-3.5 text-emerald-300" />
         <span className="text-[11px] sm:text-xs font-semibold tracking-wide flex items-center gap-1">
           <span className="hidden sm:inline">{activeLang.name}</span>
           <span className="inline sm:hidden uppercase">{activeLang.code}</span>
         </span>
         <ChevronDown
-          className={`w-3 h-3 text-amber-300 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+          className={`w-3 h-3 text-slate-300 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
         />
       </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
         <div
-          className="absolute right-0 mt-2 w-36 origin-top-right rounded-xl border border-emerald-800/50 bg-emerald-950/95 text-white shadow-2xl backdrop-blur-lg focus:outline-none z-[100] dark:bg-slate-900/95 dark:border-slate-800/50"
+          className="absolute ltr:right-0 rtl:left-0 mt-2 w-36 origin-top-right rounded-xl border border-emerald-800/50 bg-emerald-950/95 text-white shadow-2xl backdrop-blur-lg focus:outline-none z-[100] dark:bg-slate-900/95 dark:border-slate-800/50"
           style={{ animation: "fadeIn 0.2s ease-out" }}
           role="menu"
         >
@@ -77,9 +77,9 @@ export default function LanguageSwitcher() {
               <button
                 key={lang.code}
                 onClick={() => handleLanguageChange(lang.code)}
-                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 hover:bg-amber-400/15 hover:text-amber-300 cursor-pointer ${
+                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 hover:bg-white/10 hover:text-amber-200 cursor-pointer ${
                   language === lang.code
-                    ? "bg-amber-500/20 text-amber-300 font-bold"
+                    ? "bg-emerald-800/60 text-amber-300 font-bold"
                     : "text-slate-100"
                 }`}
                 role="menuitem"
