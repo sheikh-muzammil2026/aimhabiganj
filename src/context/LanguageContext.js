@@ -43,13 +43,13 @@ export const LanguageProvider = ({ children }) => {
         root.setAttribute('dir', dir);
         root.setAttribute('lang', language);
 
-        // Bangla -> ShaldaMJ, English -> BritanicBold, Arabic body -> Traditional Arabic (Headings use Reem Kufi via globals.css)
+        // Bangla body -> Siliguri (headings use ShaldaMJ via globals.css), English -> BritanicBold, Arabic body -> Traditional Arabic (Headings use Reem Kufi via globals.css)
         const body = document.body;
         if (body) {
             if (language === 'ar') {
                 body.style.fontFamily = '"Traditional Arabic", "Amiri", var(--font-amiri), serif';
             } else if (language === 'bn') {
-                body.style.fontFamily = '"ShaldaMJ", var(--font-hind-siliguri), sans-serif';
+                body.style.fontFamily = '"Siliguri", "Hind Siliguri", var(--font-hind-siliguri), sans-serif';
             } else {
                 body.style.fontFamily = '"BritanicBold", var(--font-geist-sans), sans-serif';
             }

@@ -43,3 +43,5 @@ export function useUrlPagination(
     resetPageToFirst,
   };
 }
+
+export default useUrlPagination;

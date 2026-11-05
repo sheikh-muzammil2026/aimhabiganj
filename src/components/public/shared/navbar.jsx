@@ -476,7 +476,7 @@ export default function Navbar() {
                 )}
               </button>
 
-              <div className="hidden flex items-center gap-1.5 sm:gap-2 pl-2 border-s border-white/15 dark:border-amber-400/20 flex-shrink-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 pl-2 border-s border-white/15 dark:border-amber-400/20 flex-shrink-0">
                 {isLoggedIn ? (
                   <>
                     <Link
