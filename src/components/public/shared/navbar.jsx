@@ -459,7 +459,7 @@ export default function Navbar() {
             </nav>
 
             {/* 3. Right Section: Switchers & Auth */}
-            <div className="justify-between w-full md:w-auto flex md:items-center md:justify-center md:justify-end gap-1.5 sm:gap-2 pt-2 md:pt-0 border-t border-white/10 md:border-t-0 flex-shrink-0">
+            <div className=" justify-between w-full md:w-auto flex md:items-center md:justify-center md:justify-end gap-1.5 sm:gap-2 pt-2 md:pt-0 border-t border-white/10 md:border-t-0 flex-shrink-0">
               <LanguageSwitcher />
 
               <button
@@ -476,7 +476,7 @@ export default function Navbar() {
                 )}
               </button>
 
-              <div className="flex items-center gap-1.5 sm:gap-2 pl-2 border-s border-white/15 dark:border-amber-400/20 flex-shrink-0">
+              <div className="md:hidden flex items-center gap-1.5 sm:gap-2 pl-2 border-s border-white/15 dark:border-amber-400/20 flex-shrink-0">
                 {isLoggedIn ? (
                   <>
                     <Link

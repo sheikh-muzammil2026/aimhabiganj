@@ -110,6 +110,11 @@ h3,
 h4,
 h5,
 h6,
+.font-heading,
+.heading,
+.header-title,
+.title,
+.font-shalda,
 html[lang="bn"] h1,
 html[lang="bn"] h2,
 html[lang="bn"] h3,
@@ -133,6 +138,9 @@ html[lang="bn"] header h4,
 html[lang="bn"] header h5,
 html[lang="bn"] header h6 {
   font-family: "ShaldaMJ", var(--font-hind-siliguri), sans-serif;
+  line-height: 1.35;
+  padding-top: 0.15em;
+  overflow: visible;
 }
 
 /* ইংরেজি ভাষার জন্য: ব্রিটানিক (BritanicBold) */

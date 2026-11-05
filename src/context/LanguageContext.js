@@ -12,19 +12,13 @@ const LanguageContext = createContext();
 export const LanguageProvider = ({ children }) => {
     const [language, setLanguageState] = useState('bn'); // default to Bangla
 
-    // Load language preference on mount
+    // Load language preference on mount (default Bengali)
     useEffect(() => {
         const storedLang = localStorage.getItem('lang');
         if (storedLang && ['en', 'bn', 'ar'].includes(storedLang)) {
             setLanguageState(storedLang);
         } else {
-            // Optional: detect browser language
-            if (typeof navigator !== 'undefined') {
-                const browserLang = navigator.language.split('-')[0];
-                if (['en', 'bn', 'ar'].includes(browserLang)) {
-                    setLanguageState(browserLang);
-                }
-            }
+            setLanguageState('bn');
         }
     }, []);
 
@@ -66,13 +60,13 @@ export const LanguageProvider = ({ children }) => {
             if (val && typeof val === 'object' && k in val) {
                 val = val[k];
             } else {
-                // Fallback to English translation if key is missing in active language
-                let fallbackVal = translations['en'];
+                // Fallback to Bengali translation if key is missing in active language
+                let fallbackVal = translations['bn'] || translations['en'];
                 for (const fallbackKey of keys) {
                     if (fallbackVal && typeof fallbackVal === 'object' && fallbackKey in fallbackVal) {
                         fallbackVal = fallbackVal[fallbackKey];
                     } else {
-                        fallbackVal = null;
+                        fallbackVal = (translations['en'] && typeof translations['en'] === 'object') ? translations['en'][fallbackKey] : null;
                         break;
                     }
                 }
