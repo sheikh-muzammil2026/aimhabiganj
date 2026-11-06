@@ -14,7 +14,7 @@ export default function HeroSection() {
         {/* Background Image: Static /assembly.jpg */}
         <div className="absolute inset-0 z-0">
           <Image
-            src="/assembly2.jpg"
+            src="/Assembly2.jpg"
             alt="AIM Campus Assembly"
             fill
             sizes="100vw"
