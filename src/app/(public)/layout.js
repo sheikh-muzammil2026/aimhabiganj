@@ -1,9 +1,9 @@
-import Footer from '@/components/public/shared/footer';
-import BottomNavbar from '@/components/public/shared/BottomNavbar';
+import Footer from "@/components/public/shared/footer";
+import BottomNavbar from "@/components/public/shared/BottomNavbar";
 import AIChatbot from "@/components/AIChatbot";
-import React from 'react';
-import WhatsAppButton from '@/components/WhatsAppButton';
-import Navbar from '@/components/public/shared/navbar';
+import React from "react";
+import WhatsAppButton from "@/components/WhatsAppButton";
+import Navbar from "@/components/public/shared/navbar";
 
 export const metadata = {
   // মেটাডাটা বেস URL (ওপেন গ্রাফ ইমেজের জন্য আবশ্যক)
@@ -15,7 +15,7 @@ export const metadata = {
   },
   description:
     "আধুনিক ও সুশৃঙ্খল আবাসন ব্যবস্থাসহ একাডেমিক শিক্ষা ও ৬ মাসে হিফজ করার এক অনন্য প্রতিষ্ঠান, হবিগঞ্জ।",
-  
+
   // কিওয়ার্ড সংখ্যা ও প্রাসঙ্গিকতা বৃদ্ধি
   keywords: [
     "aimhabiganj",
@@ -81,13 +81,10 @@ const layout = ({ children }) => {
     <div>
       <Navbar />
 
-      <main className="min-h-screen pb-24 md:pb-28">
-        {children}
-      </main>
+      <main className="min-h-screen">{children}</main>
 
       <BottomNavbar />
-      <AIChatbot />
-      <WhatsAppButton />
+
       <Footer />
     </div>
   );

@@ -2,7 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Megaphone, ExternalLink, X, ChevronRight, Sparkles } from "lucide-react";
+import {
+  Megaphone,
+  ExternalLink,
+  X,
+  ChevronRight,
+  Sparkles,
+} from "lucide-react";
 
 const API_BASE = (
   process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000"
@@ -26,7 +32,11 @@ export default function NavbarTicker() {
         }
         const data = await res.json();
         if (!isMounted) return;
-        if (data?.success && data.tickerNotices && data.tickerNotices.length > 0) {
+        if (
+          data?.success &&
+          data.tickerNotices &&
+          data.tickerNotices.length > 0
+        ) {
           setTickerNotices(data.tickerNotices);
         } else if (data?.latestNotice) {
           setTickerNotices([data.latestNotice]);
@@ -68,17 +78,17 @@ export default function NavbarTicker() {
 
   const totalTextLength = items.reduce(
     (acc, n) => acc + (n.description || n.title || "").length,
-    0
+    0,
   );
   const dynamicDuration = Math.max(
     14,
-    Math.min(24, Math.round(totalTextLength * 0.08) + 10)
+    Math.min(24, Math.round(totalTextLength * 0.08) + 10),
   );
 
   return (
     <>
-      <div className="w-full bg-gradient-to-r from-[#01160e] via-[#032619] to-[#01160e] dark:from-[#010604] dark:via-[#02140d] dark:to-[#010604] text-emerald-50 font-medium py-1.5 px-3 sm:px-5 lg:px-6 flex items-center overflow-hidden border-b border-amber-400/15 dark:border-amber-400/20 transition-colors duration-300 relative z-20 print:hidden shadow-sm">
-        <div className="max-w-[1440px] mx-auto w-full flex items-center gap-2.5">
+      <div className="w-full  text-emerald-50 font-medium py-1.5 px-3 sm:px-5 lg:px-6 flex items-center overflow-hidden  transition-colors duration-300 relative z-20 print:hidden">
+        <div className="max-w-[1140px] mx-auto w-full flex items-center gap-2.5">
           {/* Ticker Label Badge */}
           <div className="flex-shrink-0 flex items-center gap-1.5 bg-gradient-to-r from-amber-500/20 to-amber-400/10 border border-amber-400/35 text-amber-300 px-2.5 py-0.5 md:py-1 rounded-lg text-[11px] md:text-xs font-bold uppercase tracking-wider select-none z-10 shadow-[0_0_12px_rgba(245,158,11,0.12)]">
             <span className="relative flex h-2 w-2">
@@ -110,7 +120,9 @@ export default function NavbarTicker() {
                   </span>
                   {notice.publishDate && (
                     <span className="text-[10.5px] bg-emerald-950/90 text-amber-200/90 border border-amber-400/25 px-2 py-0.5 rounded-md font-normal whitespace-nowrap">
-                      ({new Date(notice.publishDate).toLocaleDateString("bn-BD")})
+                      (
+                      {new Date(notice.publishDate).toLocaleDateString("bn-BD")}
+                      )
                     </span>
                   )}
                 </span>
@@ -158,7 +170,7 @@ export default function NavbarTicker() {
                   প্রকাশের তারিখ:{" "}
                   <strong className="text-slate-700 dark:text-slate-300">
                     {new Date(selectedNotice.publishDate).toLocaleDateString(
-                      "bn-BD"
+                      "bn-BD",
                     )}
                   </strong>
                 </p>

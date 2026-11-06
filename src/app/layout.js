@@ -1,46 +1,7 @@
-import {
-  Geist,
-  Geist_Mono,
-  Reem_Kufi,
-  Hind_Siliguri,
-  Amiri,
-} from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers/providers";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-// আরবি হেডিং ফন্ট (কুফি - Kufi)
-const reemKufi = Reem_Kufi({
-  variable: "--font-reem-kufi",
-  subsets: ["arabic"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
-
-// আরবি বডি টেক্সট ফন্ট (Traditional Arabic / Amiri ফলব্যাক)
-const amiri = Amiri({
-  variable: "--font-amiri",
-  subsets: ["arabic"],
-  weight: ["400", "700"],
-  display: "swap",
-});
-
-// বাংলা ফলব্যাক ফন্ট
-const hindSiliguri = Hind_Siliguri({
-  variable: "--font-hind-siliguri",
-  subsets: ["bengali"],
-  weight: ["300", "400", "500", "600", "700"],
-  display: "swap",
-});
+import AIChatbot from "@/components/AIChatbot";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 export const metadata = {
   title: "As-Salam Ideal Madrasah  (AIM)",
@@ -62,10 +23,37 @@ export default function RootLayout({ children }) {
     <html
       lang="bn"
       data-scroll-behavior="smooth"
-      className={`${geistSans.variable} ${geistMono.variable} ${reemKufi.variable} ${amiri.variable} ${hindSiliguri.variable} h-full antialiased`}
+      className="h-full antialiased"
     >
-      <body className="min-h-full flex flex-col">
-        <Providers>{children}</Providers>
+      <head>
+        <link
+          rel="preload"
+          href="/fonts/Bornomala-Regular.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/Bornomala-Bold.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/UbuntuSans.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+      </head>
+      <body className="min-h-full flex flex-col bg-[#01160e] dark:bg-[#010604]">
+        <Providers>
+          <main>{children}</main>
+          <AIChatbot />
+          <WhatsAppButton />
+        </Providers>
       </body>
     </html>
   );

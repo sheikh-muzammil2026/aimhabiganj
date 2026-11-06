@@ -2,95 +2,61 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-shalda: "ShaldaMJ", var(--font-hind-siliguri), sans-serif;
-  --font-siliguri: "Siliguri", "Hind Siliguri", var(--font-hind-siliguri), sans-serif;
+  --font-sans: "Ubuntu Sans", "Bornomala", sans-serif;
+  --font-bornomala: "Bornomala", "Ubuntu Sans", sans-serif;
+  --font-ubuntu: "Ubuntu Sans", "Bornomala", sans-serif;
 }
 
-/* --- কাস্টম ফন্ট ডিক্লেয়ারেশন --- */
-/* ১. বাংলা হেডিং ফন্ট: সালদা (ShaldaMJ) */
+/* --- Custom Font Declarations --- */
+/* 1. Bengali Font: Bornomala */
 @font-face {
-  font-family: "ShaldaMJ";
-  src: url("/ShaldaMJ.ttf") format("truetype"),
-       url("/shaldaMJ.ttf") format("truetype");
+  font-family: "Bornomala";
+  src: url("/fonts/Bornomala-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Bornomala";
+  src: url("/fonts/Bornomala-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 2. English / UI Font: Ubuntu Sans */
+@font-face {
+  font-family: "Ubuntu Sans";
+  src: url("/fonts/UbuntuSans.woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
 
-/* ২. বাংলা সাধারণ/বডি ফন্ট: শিলিগুড়ি (Siliguri / Hind Siliguri) */
-@font-face {
-  font-family: "Siliguri";
-  src: url("/fonts/HindSiliguri-Regular.ttf") format("truetype");
-  font-weight: 100 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Siliguri";
-  src: url("/fonts/HindSiliguri-Bold.ttf") format("truetype");
-  font-weight: 600 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Hind Siliguri";
-  src: url("/fonts/HindSiliguri-Regular.ttf") format("truetype");
-  font-weight: 100 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Hind Siliguri";
-  src: url("/fonts/HindSiliguri-Bold.ttf") format("truetype");
-  font-weight: 600 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* ৩. ইংরেজি ফন্ট: ব্রিটানিক (BritanicBold) */
-@font-face {
-  font-family: "BritanicBold";
-  src: url("/britanic.ttf") format("truetype");
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-.font-shalda {
-  font-family: "ShaldaMJ", var(--font-hind-siliguri), sans-serif !important;
-}
-
-.font-siliguri {
-  font-family: "Siliguri", "Hind Siliguri", var(--font-hind-siliguri), sans-serif !important;
-}
-
-.font-britanic {
-  font-family: "BritanicBold", var(--font-geist-sans), sans-serif !important;
-}
-
-.font-arabic-traditional {
-  font-family: "Traditional Arabic", "Amiri", var(--font-amiri), serif !important;
-}
-
-/* কাস্টম রিমি কুফিক ক্লাস (আরবি হেডিংয়ের জন্য) */
-.kufi-custom {
-  font-family: var(--font-reem-kufi), "Traditional Arabic", var(--font-amiri), sans-serif !important;
-  font-feature-settings: normal;
-  font-variant-alternates: normal;
-}
-
-/* --- ভাষা অনুযায়ী সমগ্র ওয়েবসাইটের ইউনিফাইড ফন্ট সিস্টেম --- */
-
-/* ডিফল্ট ও বাংলা ভাষার সাধারণ টেক্সট / বডি: শিলিগুড়ি (Siliguri / Hind Siliguri) */
+/* Primary Base UI / English Font Stack */
+html,
 body,
+.font-sans,
+:lang(en),
+html[lang="en"],
+html[lang="en"] body {
+  font-family: "Ubuntu Sans", "Bornomala", sans-serif;
+}
+
+/* Primary Bengali Font Configuration */
+:lang(bn),
 html[lang="bn"],
 html[lang="bn"] body,
 html[lang="bn"] .font-sans,
+html[lang="bn"] h1,
+html[lang="bn"] h2,
+html[lang="bn"] h3,
+html[lang="bn"] h4,
+html[lang="bn"] h5,
+html[lang="bn"] h6,
 html[lang="bn"] p,
-html[lang="bn"] span:not(.kufi-custom):not(.font-britanic):not(.font-arabic-traditional):not(.font-shalda),
+html[lang="bn"] span,
 html[lang="bn"] a,
 html[lang="bn"] button,
 html[lang="bn"] li,
@@ -100,106 +66,23 @@ html[lang="bn"] label,
 html[lang="bn"] input,
 html[lang="bn"] textarea,
 html[lang="bn"] select {
-  font-family: "Siliguri", "Hind Siliguri", var(--font-hind-siliguri), sans-serif;
+  font-family: "Bornomala", "Ubuntu Sans", sans-serif;
 }
 
-/* বাংলা ভাষার হেডিং ও টাইটেল (h1-h6, হেডার ক্লাস): সালদা (ShaldaMJ) */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
+/* Utility classes preserved for existing component class names */
+.font-bornomala,
+.font-shalda,
+.font-siliguri,
 .font-heading,
 .heading,
 .header-title,
-.title,
-.font-shalda,
-html[lang="bn"] h1,
-html[lang="bn"] h2,
-html[lang="bn"] h3,
-html[lang="bn"] h4,
-html[lang="bn"] h5,
-html[lang="bn"] h6,
-html[lang="bn"] h1 span:not(.font-sans):not(.kufi-custom):not(.font-britanic):not(.font-arabic-traditional):not(.font-siliguri),
-html[lang="bn"] h2 span:not(.font-sans):not(.kufi-custom):not(.font-britanic):not(.font-arabic-traditional):not(.font-siliguri),
-html[lang="bn"] h3 span:not(.font-sans):not(.kufi-custom):not(.font-britanic):not(.font-arabic-traditional):not(.font-siliguri),
-html[lang="bn"] h4 span:not(.font-sans):not(.kufi-custom):not(.font-britanic):not(.font-arabic-traditional):not(.font-siliguri),
-html[lang="bn"] h5 span:not(.font-sans):not(.kufi-custom):not(.font-britanic):not(.font-arabic-traditional):not(.font-siliguri),
-html[lang="bn"] h6 span:not(.font-sans):not(.kufi-custom):not(.font-britanic):not(.font-arabic-traditional):not(.font-siliguri),
-html[lang="bn"] .font-heading,
-html[lang="bn"] .heading,
-html[lang="bn"] .header-title,
-html[lang="bn"] .title,
-html[lang="bn"] header h1,
-html[lang="bn"] header h2,
-html[lang="bn"] header h3,
-html[lang="bn"] header h4,
-html[lang="bn"] header h5,
-html[lang="bn"] header h6 {
-  font-family: "ShaldaMJ", var(--font-hind-siliguri), sans-serif;
-  line-height: 1.35;
-  padding-top: 0.15em;
-  overflow: visible;
+.title {
+  font-family: "Bornomala", "Ubuntu Sans", sans-serif;
 }
 
-/* ইংরেজি ভাষার জন্য: ব্রিটানিক (BritanicBold) */
-html[lang="en"],
-html[lang="en"] body,
-html[lang="en"] .font-sans,
-html[lang="en"] h1,
-html[lang="en"] h2,
-html[lang="en"] h3,
-html[lang="en"] h4,
-html[lang="en"] h5,
-html[lang="en"] h6,
-html[lang="en"] p,
-html[lang="en"] span:not(.kufi-custom):not(.font-shalda):not(.font-arabic-traditional):not(.font-siliguri),
-html[lang="en"] a,
-html[lang="en"] button,
-html[lang="en"] li,
-html[lang="en"] td,
-html[lang="en"] th,
-html[lang="en"] label,
-html[lang="en"] input,
-html[lang="en"] textarea,
-html[lang="en"] select {
-  font-family: "BritanicBold", var(--font-geist-sans), sans-serif;
-}
-
-/* আরবি ভাষার জন্য: বাকি সকল টেক্সট হবে Traditional Arabic */
-html[lang="ar"],
-html[lang="ar"] body,
-html[lang="ar"] .font-sans,
-html[lang="ar"] p,
-html[lang="ar"] span:not(.kufi-custom),
-html[lang="ar"] a,
-html[lang="ar"] button,
-html[lang="ar"] li,
-html[lang="ar"] td,
-html[lang="ar"] th,
-html[lang="ar"] label,
-html[lang="ar"] input,
-html[lang="ar"] textarea,
-html[lang="ar"] select {
-  font-family: "Traditional Arabic", "Amiri", var(--font-amiri), serif;
-}
-
-/* আরবি ভাষার জন্য: সকল হেডিং (h1 - h6) হবে কুফি (Kufi) */
-html[lang="ar"] h1,
-html[lang="ar"] h2,
-html[lang="ar"] h3,
-html[lang="ar"] h4,
-html[lang="ar"] h5,
-html[lang="ar"] h6,
-html[lang="ar"] h1 span:not(.font-sans),
-html[lang="ar"] h2 span:not(.font-sans),
-html[lang="ar"] h3 span:not(.font-sans),
-html[lang="ar"] h4 span:not(.font-sans),
-html[lang="ar"] h5 span:not(.font-sans),
-html[lang="ar"] h6 span:not(.font-sans),
-html[lang="ar"] .font-heading {
-  font-family: var(--font-reem-kufi), "Traditional Arabic", var(--font-amiri), serif;
+.font-ubuntu,
+.font-britanic {
+  font-family: "Ubuntu Sans", "Bornomala", sans-serif;
 }
 
 /* --- Notice Board Marquee Animation --- */
