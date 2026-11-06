@@ -74,7 +74,7 @@ export default function HeroSection() {
               {/* Primary button: solid green (#008744) with rounded-md edges */}
               <Link
                 href="/admission/form"
-                className="inline-flex items-center justify-center bg-[#008744] hover:bg-[#00733a] text-white font-semibold px-6 py-2.5 rounded-md shadow-md transition-colors text-sm sm:text-base cursor-pointer"
+                className="inline-flex items-center justify-center bg-[#00733a] hover:bg-[#fec2d5] hover:text-black text-white font-semibold px-6 py-2.5 rounded-md shadow-md transition-colors text-sm sm:text-base cursor-pointer"
               >
                 {language === "bn"
                   ? "অনলাইন ভর্তি"

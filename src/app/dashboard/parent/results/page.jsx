@@ -1,44 +1,140 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { Check, Copy } from 'lucide-react';
+import { toast } from 'react-toastify';
 import { authClient } from '@/lib/auth-client';
 
-export default function StudentResultSearch() {
+function StudentResultSearchContent() {
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+
     const { data: session } = authClient.useSession();
     const user = session?.user;
+    const userRef = useRef(user);
+    useEffect(() => {
+        userRef.current = user;
+    }, [user]);
 
     const [searchId, setSearchId] = useState('');
     const [year, setYear] = useState('২০২৬');
     const [result, setResult] = useState(null);
     const [loading, setLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
+    const [copiedLink, setCopiedLink] = useState(false);
 
-    const handleSearch = async (e) => {
-        e.preventDefault();
-        if (!searchId.trim()) return;
+    const requestIdRef = useRef(0);
+    const lastExecutedQueryRef = useRef('');
 
+    const executeSearch = useCallback(async (targetId, targetYear, syncUrl = true) => {
+        const trimmedId = (targetId || '').trim();
+        if (!trimmedId) return;
+
+        const currentReqId = ++requestIdRef.current;
         setLoading(true);
         setErrorMsg('');
+        setResult(null);
+
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/results/student/${searchId.trim()}?year=${encodeURIComponent(year)}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/results/student/${trimmedId}?year=${encodeURIComponent(targetYear)}`, {
                 headers: {
-                    'x-user-email': user?.email || '',
-                    'x-user-role': user?.role || '',
+                    'x-user-email': userRef.current?.email || '',
+                    'x-user-role': userRef.current?.role || '',
                 }
             });
             const data = await res.json();
+            if (currentReqId !== requestIdRef.current) return;
 
             if (data.success) {
                 setResult(data);
+                if (syncUrl) {
+                    const params = new URLSearchParams(searchParams.toString());
+                    params.delete('studentId');
+                    params.delete('id');
+                    params.set('roll', trimmedId);
+                    if (targetYear) {
+                        params.set('year', targetYear);
+                    }
+                    const nextQs = params.toString();
+                    if (nextQs !== searchParams.toString()) {
+                        router.replace(`${pathname}?${nextQs}`, { scroll: false });
+                    }
+                }
             } else {
                 setResult(null);
                 setErrorMsg(data.message || 'শিক্ষার্থীর কোনো রেজাল্ট তথ্য পাওয়া যায়নি।');
             }
         } catch (err) {
+            if (currentReqId !== requestIdRef.current) return;
             console.error("Student Result Fetch Error:", err);
             setErrorMsg('সার্ভারে সমস্যা হয়েছে, আবার চেষ্টা করুন।');
         } finally {
-            setLoading(false);
+            if (currentReqId === requestIdRef.current) {
+                setLoading(false);
+            }
+        }
+    }, [pathname, router, searchParams]);
+
+    useEffect(() => {
+        const urlRoll = (
+            searchParams.get('roll') ||
+            searchParams.get('studentId') ||
+            searchParams.get('id') ||
+            ''
+        ).trim();
+        const urlYear = (searchParams.get('year') || '২০২৬').trim();
+
+        if (!urlRoll) return;
+
+        const queryKey = `${urlRoll}|${urlYear}`;
+        if (lastExecutedQueryRef.current === queryKey) return;
+
+        lastExecutedQueryRef.current = queryKey;
+        setSearchId(urlRoll);
+        setYear(urlYear);
+        executeSearch(urlRoll, urlYear, true);
+    }, [searchParams, executeSearch]);
+
+    const handleSearch = async (e) => {
+        e.preventDefault();
+        const trimmedId = searchId.trim();
+        if (!trimmedId) return;
+
+        const queryKey = `${trimmedId}|${year}`;
+        lastExecutedQueryRef.current = queryKey;
+        await executeSearch(trimmedId, year, true);
+    };
+
+    const handleCopyLink = async () => {
+        if (typeof window === 'undefined') return;
+        try {
+            const params = new URLSearchParams();
+            const resolvedId = String(result?.student?.studentId || searchId.trim() || '').trim();
+            if (resolvedId) params.set('roll', resolvedId);
+            if (year) params.set('year', year);
+            const qs = params.toString();
+            const shareUrl = `${window.location.origin}${pathname}${qs ? `?${qs}` : ''}`;
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(shareUrl);
+            } else {
+                const textArea = document.createElement('textarea');
+                textArea.value = shareUrl;
+                textArea.style.position = 'fixed';
+                textArea.style.opacity = '0';
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+            }
+            setCopiedLink(true);
+            toast.success('ফলাফলের লিংক কপি করা হয়েছে! (Copied!)');
+            setTimeout(() => setCopiedLink(false), 2500);
+        } catch (err) {
+            console.error('Copy link error:', err);
+            toast.error('লিংক কপি করা সম্ভব হয়নি।');
         }
     };
 
@@ -125,12 +221,29 @@ export default function StudentResultSearch() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-200 text-center">
-                                    {result.results.length === 0 ? (
-                                        <tr>
-                                            <td colSpan="4" className="p-4 text-slate-500">কোনো বিষয়ের নম্বর এখনও ইনপুট দেওয়া হয়নি।</td>
-                                        </tr>
-                                    ) : (
-                                        result.results.map((item, idx) => {
+                                    {(() => {
+                                        const uniqueSubjects = Array.from(
+                                            new Map(
+                                                (result.results || []).map((item, idx) => [
+                                                    String(
+                                                        item?.subjectCode ||
+                                                            item?.subjectId ||
+                                                            item?.subjectName ||
+                                                            item?.subject ||
+                                                            `subject-${idx}`
+                                                    ).trim(),
+                                                    item,
+                                                ])
+                                            ).values()
+                                        );
+                                        if (uniqueSubjects.length === 0) {
+                                            return (
+                                                <tr>
+                                                    <td colSpan="4" className="p-4 text-slate-500">কোনো বিষয়ের নম্বর এখনও ইনপুট দেওয়া হয়নি।</td>
+                                                </tr>
+                                            );
+                                        }
+                                        return uniqueSubjects.map((item, idx) => {
                                             const renderMarkCell = (term, isAnnual = false) => {
                                                 if (!term || (term.ct === undefined && term.exam === undefined)) {
                                                     return <span className="text-slate-400 font-semibold">-</span>;
@@ -154,15 +267,24 @@ export default function StudentResultSearch() {
                                             };
 
                                             return (
-                                                <tr key={idx} className="hover:bg-slate-50">
+                                                <tr
+                                                    key={String(
+                                                        item.subjectCode ||
+                                                            item.subjectId ||
+                                                            item.subjectName ||
+                                                            item.subject ||
+                                                            idx
+                                                    ).trim()}
+                                                    className="hover:bg-slate-50"
+                                                >
                                                     <td className="border border-slate-300 p-2.5 text-left font-bold text-slate-800">{item.subject}</td>
                                                     <td className="border border-slate-300 p-2.5">{renderMarkCell(item.term1)}</td>
                                                     <td className="border border-slate-300 p-2.5">{renderMarkCell(item.term2)}</td>
                                                     <td className="border border-slate-300 p-2.5">{renderMarkCell(item.annual, true)}</td>
                                                 </tr>
                                             );
-                                        })
-                                    )}
+                                        });
+                                    })()}
                                 </tbody>
                             </table>
                         </div>
@@ -174,11 +296,30 @@ export default function StudentResultSearch() {
                             <div className="text-center"><p className="border-t border-slate-400 pt-1 w-28 sm:w-32">অধ্যক্ষ / মুহতামিম</p></div>
                         </div>
 
-                        {/* প্রিন্ট বাটন */}
-                        <div className="print:hidden mt-8 text-center">
+                        {/* প্রিন্ট ও লিংক কপি বাটন */}
+                        <div className="print:hidden mt-8 flex flex-wrap items-center justify-center gap-3">
                             <button
+                                type="button"
+                                onClick={handleCopyLink}
+                                aria-label="Copy shareable result link"
+                                className="bg-[#043e30] hover:bg-emerald-900 text-amber-300 font-bold px-5 py-2.5 rounded-xl shadow-md transition-colors text-xs sm:text-sm inline-flex items-center gap-2 cursor-pointer"
+                            >
+                                {copiedLink ? (
+                                    <>
+                                        <Check className="w-4 h-4" />
+                                        <span>Copied! (কপি হয়েছে)</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Copy className="w-4 h-4" />
+                                        <span>Copy Link / শেয়ার</span>
+                                    </>
+                                )}
+                            </button>
+                            <button
+                                type="button"
                                 onClick={handlePrint}
-                                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition-colors text-xs sm:text-sm"
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition-colors text-xs sm:text-sm cursor-pointer"
                             >
                                 🖨️ মার্কশিট প্রিন্ট / পিডিএফ ডাউনলোড
                             </button>
@@ -188,4 +329,18 @@ export default function StudentResultSearch() {
             </div>
         </div>
     );
-                                                                               }
+}
+
+export default function StudentResultSearch() {
+    return (
+        <Suspense
+            fallback={
+                <div className="p-6 text-center text-slate-500 font-bold">
+                    লোড হচ্ছে...
+                </div>
+            }
+        >
+            <StudentResultSearchContent />
+        </Suspense>
+    );
+}
