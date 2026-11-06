@@ -11,10 +11,10 @@ export default function HeroSection() {
     <section className="relative w-full overflow-hidden -mt-[104px] sm:-mt-[112px]">
       {/* 1. Main Hero Container with Static Background Image & Overlay */}
       <div className="relative min-h-[620px] sm:min-h-[680px] lg:min-h-[740px] w-full flex flex-col justify-between pt-32 sm:pt-36 lg:pt-40 pb-12 sm:pb-16">
-        {/* Background Image: Static /assembly.jpg */}
+        {/* Background Image: Static /Assembly2.jpg */}
         <div className="absolute inset-0 z-0">
           <Image
-            src="/assembly2.jpg"
+            src="/Assembly2.jpg"
             alt="AIM Campus Assembly"
             fill
             sizes="100vw"
