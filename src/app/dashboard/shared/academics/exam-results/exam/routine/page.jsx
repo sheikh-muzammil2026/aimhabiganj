@@ -3,6 +3,145 @@ import { useState, useEffect } from "react";
 import RoutinePreview from "@/components/dashboard/academics/RoutinePreview";
 import { toast } from "react-toastify";
 
+// ডিফল্ট শ্রেণি ও বিষয় ম্যাপিং (সেন্ট্রাল সিলেবাস ফেচ হওয়ার পূর্বের ফলব্যাক)
+const DEFAULT_CLASS_SUBJECTS = {
+  প্লে: ["আরবি-০১", "ইংরেজি", "বাংলা", "গণিত"],
+  নার্সারি: ["আরবি-০২", "ইংরেজি", "বাংলা", "গণিত"],
+  প্রথম: [
+    "কুরআন ও তাজভীদ-০১",
+    "আরবি",
+    "তাওহীদ ও ফিকহ-১",
+    "ইংরেজি",
+    "স্পোকেন ইংলিশ",
+    "বাংলা",
+    "গণিত",
+    "সাধারণ জ্ঞান",
+  ],
+  দ্বিতীয়: [
+    "কুরআন ও তাজভীদ-০২",
+    "আরবি",
+    "তাওহীদ ও ফিকহ-২",
+    "ইংরেজি",
+    "স্পোকেন ইংলিশ",
+    "বাংলা",
+    "গণিত",
+    "সাধারণ জ্ঞান",
+  ],
+  তৃতীয়: [
+    "কুরআন ও তাজভীদ-০৩",
+    "আরবি",
+    "আদব ও দোয়া",
+    "তাওহীদ ও ফিকহ-৩",
+    "ইংরেজি",
+    "স্পোকেন ইংলিশ",
+    "বাংলা",
+    "গণিত",
+    "বাংলাদেশ ও বিশ্বপরিচয়",
+    "বিজ্ঞান",
+    "হাতের লেখা",
+  ],
+  চতুর্থ: [
+    "কুরআন ও তাজভীদ-০৪",
+    "এসো আরবি শিখি",
+    "এসো তামরিন শিখি",
+    "আদাব ও দোয়া",
+    "তাওহীদ ও ফিকহ-৪",
+    "ইংরেজি",
+    "স্পোকেন ইংলিশ",
+    "বাংলা",
+    "গণিত",
+    "বিজ্ঞান",
+  ],
+  পঞ্চম: [
+    "কুরআন ও তাজভীদ-০৫",
+    "এসো আরবি শিখি",
+    "এসো তামরিন শিখি",
+    "সরফ",
+    "তাওহীদ ও ফিকহ-৫",
+    "ইংরেজি",
+    "স্পোকেন ইংলিশ",
+    "বাংলা",
+    "গণিত",
+    "বিজ্ঞান",
+  ],
+  ষষ্ঠ: [
+    "হিফজুল কুরআন ও তাজভীদ-০১",
+    "কুরআন অনুবাদ-০১",
+    "হাদিস আরবাঈন",
+    "আরবি",
+    "সরফ",
+    "নাহু",
+    "তাওহীদ ও ফিকহ-৫",
+    "ইংরেজি ১ম ও ২য়",
+    "স্পোকেন ইংলিশ",
+    "বাংলা ১ম ও ২য়",
+    "গণিত",
+    "বিজ্ঞান",
+  ],
+  সপ্তম: [
+    "হিফজুল কুরআন ও তাজভীদ-০২",
+    "কুরআন অনুবাদ-০২",
+    "হাদিস",
+    "আরবি",
+    "সরফ",
+    "নাহু",
+    "তাওহীদ",
+    "ফিকহ",
+    "ইংরেজি ১ম ও ২য়",
+    "স্পোকেন ইংলিশ",
+    "বাংলা ১ম ও ২য়",
+    "গণিত",
+    "বিজ্ঞান",
+  ],
+  অষ্টম: [
+    "হিফজুল কুরআন ও তাজভীদ-০৩",
+    "কুরআন অনুবাদ-০৩",
+    "হাদিস",
+    "উসুলুল হাদিস",
+    "আরবি",
+    "সরফ",
+    "নাহু",
+    "তাওহীদ",
+    "ফিকহ",
+    "ইংরেজি ১ম ও ২য়",
+    "স্পোকেন ইংলিশ",
+    "বাংলা ১ম ও ২য়",
+    "গণিত",
+    "বিজ্ঞান",
+  ],
+  নবম: [
+    "বাংলা ১ম ও ২য়",
+    "ইংরেজি ১ম ও ২য়",
+    "গণিত",
+    "বিজ্ঞান",
+    "বাংলাদেশ ও বিশ্বপরিচয়",
+    "ইসলাম ও নৈতিক শিক্ষা",
+    "আরবি",
+    "ফিকহ",
+  ],
+  দশম: [
+    "বাংলা ১ম ও ২য়",
+    "ইংরেজি ১ম ও ২য়",
+    "গণিত",
+    "বিজ্ঞান",
+    "বাংলাদেশ ও বিশ্বপরিচয়",
+    "ইসলাম ও নৈতিক শিক্ষা",
+    "আরবি",
+    "ফিকহ",
+  ],
+  "কায়দা/আমপারা": [
+    "কুরআন",
+    "তাজভীদ ও দোয়া",
+    "আরবি",
+    "ইংরেজি",
+    "বাংলা",
+    "গণিত",
+  ],
+  নাজেরা: ["কুরআন", "তাজভীদ ও দোয়া", "আরবি", "ইংরেজি", "বাংলা", "গণিত"],
+  সবক: ["কুরআন", "তাজভীদ ও দোয়া"],
+  শুনানি: ["কুরআন", "তাজভীদ ও দোয়া"],
+};
+
 export default function AdminRoutineForm() {
   const [activeTab, setActiveTab] = useState("form");
   const [examTitle, setExamTitle] = useState("প্রথম সাময়িক পরীক্ষা");
@@ -46,6 +185,30 @@ export default function AdminRoutineForm() {
   ]);
 
   const [routineMatrix, setRoutineMatrix] = useState({});
+  const [syllabusMap, setSyllabusMap] = useState(DEFAULT_CLASS_SUBJECTS);
+  const [customCells, setCustomCells] = useState({});
+
+  // 🟢 সেন্ট্রাল সিলেবাস কালেকশন (/api/syllabus) থেকে শ্রেণিভিত্তিক বিষয় ডাইনামিকালি লোড ও ক্যাশ করা
+  useEffect(() => {
+    const fetchSyllabus = async () => {
+      try {
+        const apiBase =
+          process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
+        const res = await fetch(`${apiBase}/api/syllabus`);
+        const result = await res.json();
+        if (result.success && result.classSubjects) {
+          setSyllabusMap((prev) => ({
+            ...prev,
+            ...result.classSubjects,
+          }));
+        }
+      } catch (err) {
+        console.warn("Could not load dynamic syllabus, using defaults:", err);
+      }
+    };
+
+    fetchSyllabus();
+  }, []);
 
   // 🟢 ডাটাবেস থেকে পূর্বের রুটিন চেক ও অটো-ফিল করার লজিক
   useEffect(() => {
@@ -503,6 +666,12 @@ export default function AdminRoutineForm() {
             </div>
 
             <div className="overflow-x-auto border rounded">
+              <datalist id="routine-syllabus-classes">
+                {Object.keys(syllabusMap).map((cName) => (
+                  <option key={cName} value={cName} />
+                ))}
+              </datalist>
+
               <table className="w-full border-collapse text-sm">
                 <thead>
                   <tr className="bg-gray-100 border-b">
@@ -512,7 +681,7 @@ export default function AdminRoutineForm() {
                     {dates.map((d, idx) => (
                       <th
                         key={d.id}
-                        className="p-2 border border-gray-300 text-center min-w-[120px]"
+                        className="p-2 border border-gray-300 text-center min-w-[135px]"
                       >
                         <div>কলাম {idx + 1}</div>
                         <div className="text-xs text-gray-500">
@@ -529,26 +698,107 @@ export default function AdminRoutineForm() {
                       <td className="p-2 border border-gray-300">
                         <input
                           type="text"
+                          list="routine-syllabus-classes"
                           value={cls}
                           onChange={(e) =>
                             updateClassName(cIdx, e.target.value)
                           }
-                          className="w-full border p-1 font-bold rounded"
+                          className="w-full border p-1 font-bold rounded bg-white text-gray-800 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                          placeholder="শ্রেণির নাম"
                         />
                       </td>
-                      {dates.map((d) => (
-                        <td key={d.id} className="p-1 border border-gray-300">
-                          <input
-                            type="text"
-                            placeholder="বিষয়"
-                            value={routineMatrix[cls]?.[d.id] || ""}
-                            onChange={(e) =>
-                              handleSubjectChange(cls, d.id, e.target.value)
-                            }
-                            className="w-full border p-1 rounded text-center text-xs"
-                          />
-                        </td>
-                      ))}
+                      {dates.map((d) => {
+                        const cellKey = `${cls}_${d.id}`;
+                        const currentVal = routineMatrix[cls]?.[d.id] || "";
+                        const availableSubjects = syllabusMap[cls] || [];
+                        const isCustom =
+                          customCells[cellKey] ||
+                          availableSubjects.length === 0;
+
+                        // যদি পূর্বে সেভ করা কোনো বিষয় থাকে যা সিলেবাসে নেই, তাও অপশনে দেখানো
+                        const hasCustomExistingVal =
+                          currentVal &&
+                          !availableSubjects.includes(currentVal) &&
+                          currentVal !== "__custom__";
+
+                        return (
+                          <td key={d.id} className="p-1 border border-gray-300">
+                            {isCustom ? (
+                              <div className="flex items-center gap-1">
+                                <input
+                                  type="text"
+                                  placeholder={
+                                    availableSubjects.length === 0
+                                      ? "বিষয় (কাস্টম)"
+                                      : "কাস্টম বিষয়"
+                                  }
+                                  value={currentVal}
+                                  onChange={(e) =>
+                                    handleSubjectChange(
+                                      cls,
+                                      d.id,
+                                      e.target.value,
+                                    )
+                                  }
+                                  className="w-full border border-gray-300 p-1 rounded text-center text-xs bg-white text-gray-800 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                  autoFocus={customCells[cellKey]}
+                                />
+                                {availableSubjects.length > 0 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setCustomCells((prev) => {
+                                        const next = { ...prev };
+                                        delete next[cellKey];
+                                        return next;
+                                      });
+                                    }}
+                                    title="সিলেবাস ড্রপডাউনে ফিরে যান"
+                                    className="text-gray-400 hover:text-emerald-600 px-1 text-xs"
+                                  >
+                                    ↩
+                                  </button>
+                                )}
+                              </div>
+                            ) : (
+                              <select
+                                value={currentVal}
+                                onChange={(e) => {
+                                  const selected = e.target.value;
+                                  if (selected === "__custom__") {
+                                    setCustomCells((prev) => ({
+                                      ...prev,
+                                      [cellKey]: true,
+                                    }));
+                                    handleSubjectChange(cls, d.id, "");
+                                  } else {
+                                    handleSubjectChange(cls, d.id, selected);
+                                  }
+                                }}
+                                className="w-full border border-gray-300 p-1 rounded text-xs bg-white text-gray-800 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer text-center font-medium"
+                              >
+                                <option value="">—</option>
+                                {availableSubjects.map((sub, sIdx) => (
+                                  <option key={sIdx} value={sub}>
+                                    {sub}
+                                  </option>
+                                ))}
+                                {hasCustomExistingVal && (
+                                  <option value={currentVal}>
+                                    {currentVal} (সংরক্ষিত)
+                                  </option>
+                                )}
+                                <option
+                                  value="__custom__"
+                                  className="text-emerald-700 font-semibold"
+                                >
+                                  ✏️ কাস্টম বিষয় লিখুন...
+                                </option>
+                              </select>
+                            )}
+                          </td>
+                        );
+                      })}
                       <td className="p-2 border border-gray-300 text-center">
                         <button
                           type="button"
