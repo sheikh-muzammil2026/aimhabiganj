@@ -451,8 +451,8 @@ const DashboardLayout = ({ children }) => {
         </header>
 
         {/* ৪. ড্যাশবোর্ড পেজের স্ক্রলযোগ্য কন্টেন্ট বডি */}
-        <main className="flex-1 overflow-y-auto p-4 pb-28 sm:p-6 sm:pb-24 lg:p-8 bg-gradient-to-b from-[#f6faf8] via-white to-[#f2f8f5] dark:from-[#010a06] dark:via-[#02140c] dark:to-[#010a06] scroll-smooth transition-colors duration-300">
-          <div className="max-w-7xl mx-auto space-y-6">{children}</div>
+        <main className="flex-1 overflow-y-auto pb-28 sm:pb-24 lg:p-8 dark:via-[#02140c] dark:to-[#010a06] scroll-smooth transition-colors duration-300">
+          {children}
         </main>
       </div>
     </div>
