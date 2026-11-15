@@ -145,7 +145,7 @@ function TeacherMarkInputContent() {
 
   const [selectedClass, setSelectedClass] = useState("প্রথম");
   const [selectedSubject, setSelectedSubject] = useState("কুরআন ও তাজভীদ-০১");
-  const [examType, setExamType] = useState("term2");
+  const [examType, setExamType] = useState("annual");
   const [year, setYear] = useState("২০২৬");
 
   // ডায়নামিক সিলেবাস স্টেট (MongoDB syllabus কালেকশন থেকে)
