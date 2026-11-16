@@ -303,7 +303,7 @@ export default function Navbar() {
                 <Link
                   href={item.href}
                   onClick={(e) => handleSubmenuClick(e, item.href)}
-                  className={`text-[13px]  xl:text-[14px] transition-colors cursor-pointer pb-0.5 border-b-2 whitespace-nowrap ${
+                  className={`text-[15px]  xl:text-[14px] transition-colors cursor-pointer pb-0.5 border-b-2 whitespace-nowrap ${
                     active
                       ? "text-[#008744] border-[#008744] font-semibold"
                       : "text-slate-700 hover:text-[#008744] border-transparent font-medium"
