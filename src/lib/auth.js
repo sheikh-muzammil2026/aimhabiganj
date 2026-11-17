@@ -52,6 +52,11 @@ const dbProxy = new Proxy({}, {
 const isReplicaSet =
   uri.includes("replicaSet") || uri.includes("mongodb+srv");
 
+export function getDatabase() {
+  const client = getMongoClient();
+  return client.db("aimhabiganj");
+}
+
 export const auth = betterAuth({
   database: mongodbAdapter(dbProxy, {
     client: clientProxy,

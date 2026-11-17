@@ -1,6 +1,7 @@
 "use client";
 
-import { Star, Quote, Sparkles, BadgeCheck } from "lucide-react";
+import Link from "next/link";
+import { Star, Quote, Sparkles, BadgeCheck, MessageSquarePlus } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 
 export default function ReviewsTestimonial() {
@@ -14,6 +15,7 @@ export default function ReviewsTestimonial() {
       subtitle:
         "আমাদের শিক্ষা, আবাসন ও সার্বিক পরিবেশ সম্পর্কে সম্মানিত অভিভাবক ও বিশিষ্ট শিক্ষাবিদদের আন্তরিক মূল্যায়ন।",
       verifiedLabel: "যাচাইকৃত মতামত",
+      feedbackBtnText: "মতামত দিন / Give Feedback",
       reviews: [
         {
           name: "মাওলানা মাহমুদুল হাসান",
@@ -48,6 +50,7 @@ export default function ReviewsTestimonial() {
       subtitle:
         "Heartfelt reflections from parents, scholars, and community leaders on our academic standards and spiritual environment.",
       verifiedLabel: "Verified Review",
+      feedbackBtnText: "Give Feedback / মতামত দিন",
       reviews: [
         {
           name: "Mawlana Mahmudul Hasan",
@@ -82,6 +85,7 @@ export default function ReviewsTestimonial() {
       subtitle:
         "انطباعات صادقة من أولياء الأمور والعلماء حول المستوى العلمي والتربوي والبيئة الإيمانية في مدرستنا.",
       verifiedLabel: "تقييم موثوق",
+      feedbackBtnText: "شارك برأيك / Give Feedback",
       reviews: [
         {
           name: "الشيخ محمود الحسن",
@@ -240,6 +244,17 @@ export default function ReviewsTestimonial() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* অভিভাবক মতামত বাটন */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 text-center">
+        <Link
+          href="/parent-feedback"
+          className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-full bg-[#00733a] hover:bg-emerald-800 text-white font-bold text-sm sm:text-base shadow-[0_10px_25px_-5px_rgba(0,115,58,0.4)] hover:shadow-[0_15px_30px_-5px_rgba(0,115,58,0.55)] ring-1 ring-amber-400/50 transition-all duration-300 hover:-translate-y-0.5 active:scale-95"
+        >
+          <MessageSquarePlus className="w-4 h-4 text-amber-300" />
+          <span>{active.feedbackBtnText}</span>
+        </Link>
       </div>
     </section>
   );

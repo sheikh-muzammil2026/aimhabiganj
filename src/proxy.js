@@ -83,6 +83,13 @@ export async function proxy(request) {
 
   // Check /dashboard/admin routes
   if (pathname.startsWith("/dashboard/admin")) {
+    // Strictly Admin-Only: Parent Portal cannot be accessed by any non-admin role or permission
+    if (pathname.startsWith("/dashboard/admin/parent-portal")) {
+      return NextResponse.redirect(
+        new URL("/dashboard/unauthorized", request.url),
+      );
+    }
+
     // If not admin, check specific granted permissions
     if (
       pathname.startsWith("/dashboard/admin/admission") &&

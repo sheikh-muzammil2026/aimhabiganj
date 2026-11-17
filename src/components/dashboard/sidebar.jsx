@@ -17,6 +17,7 @@ import {
   UserCheck,
   Shield,
   Settings,
+  MessageSquareQuote,
 } from "lucide-react";
 import { IoNotificationsCircle } from "react-icons/io5";
 
@@ -431,6 +432,14 @@ export default function Sidebar() {
       roles: ["admin"],
     },
     {
+      id: "parent-portal",
+      title: "Parent Portal (অভিভাবক মতামত)",
+      icon: "💬",
+      lucideIcon: <MessageSquareQuote className="w-5 h-5" />,
+      href: "/dashboard/admin/parent-portal",
+      roles: ["admin"],
+    },
+    {
       id: "staff-corner",
       title: "স্টাফ কর্নার",
       icon: "👤",
@@ -475,6 +484,10 @@ export default function Sidebar() {
   ];
 
   const isItemAllowed = (item) => {
+    // Parent Portal is strictly isolated to Admin role only
+    if (item.id === "parent-portal") {
+      return userRole === "admin" || userRole === "superadmin";
+    }
     // Parent Corner and Staff Corner are strictly isolated to their respective roles
     if (item.id === "parent-corner") {
       return userRole === "parent";
