@@ -72,10 +72,149 @@ const Q9_IMPROVEMENT_OPTIONS = [
   "অবকাঠামো ও পরিবেশ",
 ];
 
+// ডিফল্ট শ্রেণি ও বিষয় ম্যাপিং (ডাটাবেস সিলেবাসের পাশাপাশি ফলব্যাক হিসেবে ব্যবহৃত হবে)
+const DEFAULT_CLASS_SUBJECTS = {
+  প্লে: ["আরবি-০১", "ইংরেজি", "বাংলা", "গণিত"],
+  নার্সারি: ["আরবি-০২", "ইংরেজি", "বাংলা", "গণিত"],
+  প্রথম: [
+    "কুরআন ও তাজভীদ-০১",
+    "আরবি",
+    "তাওহীদ ও ফিকহ-১",
+    "ইংরেজি",
+    "স্পোকেন ইংলিশ",
+    "বাংলা",
+    "গণিত",
+    "সাধারণ জ্ঞান",
+  ],
+  দ্বিতীয়: [
+    "কুরআন ও তাজভীদ-০২",
+    "আরবি",
+    "তাওহীদ ও ফিকহ-২",
+    "ইংরেজি",
+    "স্পোকেন ইংলিশ",
+    "বাংলা",
+    "গণিত",
+    "সাধারণ জ্ঞান",
+  ],
+  তৃতীয়: [
+    "কুরআন ও তাজভীদ-০৩",
+    "আরবি",
+    "আদব ও দোয়া",
+    "তাওহীদ ও ফিকহ-৩",
+    "ইংরেজি",
+    "স্পোকেন ইংলিশ",
+    "বাংলা",
+    "গণিত",
+    "বাংলাদেশ ও বিশ্বপরিচয়",
+    "বিজ্ঞান",
+    "হাতের লেখা",
+  ],
+  চতুর্থ: [
+    "কুরআন ও তাজভীদ-০৪",
+    "এসো আরবি শিখি",
+    "এসো তামরিন শিখি",
+    "আদাব ও দোয়া",
+    "তাওহীদ ও ফিকহ-৪",
+    "ইংরেজি",
+    "স্পোকেন ইংলিশ",
+    "বাংলা",
+    "গণিত",
+    "বিজ্ঞান",
+  ],
+  পঞ্চম: [
+    "কুরআন ও তাজভীদ-০৫",
+    "এসো আরবি শিখি",
+    "এসো তামরিন শিখি",
+    "সরফ",
+    "তাওহীদ ও ফিকহ-৫",
+    "ইংরেজি",
+    "স্পোকেন ইংলিশ",
+    "বাংলা",
+    "গণিত",
+    "বিজ্ঞান",
+  ],
+  ষষ্ঠ: [
+    "হিফজুল কুরআন ও তাজভীদ-০১",
+    "কুরআন অনুবাদ-০১",
+    "হাদিস আরবাঈন",
+    "আরবি",
+    "সরফ",
+    "নাহু",
+    "তাওহীদ ও ফিকহ-৫",
+    "ইংরেজি ১ম ও ২য়",
+    "স্পোকেন ইংলিশ",
+    "বাংলা ১ম ও ২য়",
+    "গণিত",
+    "বিজ্ঞান",
+  ],
+  সপ্তম: [
+    "হিফজুল কুরআন ও তাজভীদ-০২",
+    "কুরআন অনুবাদ-০২",
+    "হাদিস",
+    "আরবি",
+    "সরফ",
+    "নাহু",
+    "তাওহীদ",
+    "ফিকহ",
+    "ইংরেজি ১ম ও ২য়",
+    "স্পোকেন ইংলিশ",
+    "বাংলা ১ম ও ২য়",
+    "গণিত",
+    "বিজ্ঞান",
+  ],
+  অষ্টম: [
+    "হিফজুল কুরআন ও তাজভীদ-০৩",
+    "কুরআন অনুবাদ-০৩",
+    "হাদিস",
+    "উসুলুল হাদিস",
+    "আরবি",
+    "সরফ",
+    "নাহু",
+    "তাওহীদ",
+    "ফিকহ",
+    "ইংরেজি ১ম ও ২য়",
+    "স্পোকেন ইংলিশ",
+    "বাংলা ১ম ও ২য়",
+    "গণিত",
+    "বিজ্ঞান",
+  ],
+  নবম: [
+    "বাংলা ১ম ও ২য়",
+    "ইংরেজি ১ম ও ২য়",
+    "গণিত",
+    "বিজ্ঞান",
+    "বাংলাদেশ ও বিশ্বপরিচয়",
+    "ইসলাম ও নৈতিক শিক্ষা",
+    "আরবি",
+    "ফিকহ",
+  ],
+  দশম: [
+    "বাংলা ১ম ও ২য়",
+    "ইংরেজি ১ম ও ২য়",
+    "গণিত",
+    "বিজ্ঞান",
+    "বাংলাদেশ ও বিশ্বপরিচয়",
+    "ইসলাম ও নৈতিক শিক্ষা",
+    "আরবি",
+    "ফিকহ",
+  ],
+  "কায়দা/আমপারা": [
+    "কুরআন",
+    "তাজভীদ ও দোয়া",
+    "আরবি",
+    "ইংরেজি",
+    "বাংলা",
+    "গণিত",
+  ],
+  নাজেরা: ["কুরআন", "তাজভীদ ও দোয়া", "আরবি", "ইংরেজি", "বাংলা", "গণিত"],
+  সবক: ["কুরআন", "তাজভীদ ও দোয়া"],
+  শুনানি: ["কুরআন", "তাজভীদ ও দোয়া"],
+};
+
 export default function ParentFeedbackPage() {
   // Dynamic DB Syllabus State (Classes & Class-wise Subjects)
-  const [dbClasses, setDbClasses] = useState([]);
-  const [classSubjectsMap, setClassSubjectsMap] = useState({});
+  const [dbClasses, setDbClasses] = useState(Object.keys(DEFAULT_CLASS_SUBJECTS));
+  const [classSubjectsMap, setClassSubjectsMap] = useState(DEFAULT_CLASS_SUBJECTS);
   const [loadingMeta, setLoadingMeta] = useState(true);
 
   // Student Lookup State
@@ -105,8 +244,7 @@ export default function ParentFeedbackPage() {
     q7_moralBehavioralChange: "",
     q8_overallSatisfaction: "",
     q9_improvementAreas: [],
-    q10_selectedSubject: "", // ১০. বিষয় নির্বাচন করুন
-    q10_teacherComment: "", // ১০. মতামত লিখুন
+    q10_subjectComments: {}, // ১০. বিষয়ভিত্তিক শিক্ষকদের মন্তব্য ({ [subjectName]: comment })
     q11_suggestionsOrComplaints: "", // ১১. পরামর্শ, অভিযোগ বা প্রত্যাশা
   });
 
@@ -118,8 +256,15 @@ export default function ParentFeedbackPage() {
         const res = await fetch("/api/parent-feedback?mode=meta");
         const result = await res.json();
         if (result.success) {
-          setDbClasses(Array.isArray(result.classes) ? result.classes : []);
-          setClassSubjectsMap(result.classSubjects || {});
+          const apiClasses = Array.isArray(result.classes) ? result.classes : [];
+          const mergedClasses = Array.from(
+            new Set([...apiClasses, ...Object.keys(DEFAULT_CLASS_SUBJECTS)]),
+          );
+          setDbClasses(mergedClasses);
+          setClassSubjectsMap((prev) => ({
+            ...prev,
+            ...(result.classSubjects || {}),
+          }));
         }
       } catch (err) {
         console.error("Failed to load syllabus classes/subjects:", err);
@@ -130,10 +275,31 @@ export default function ParentFeedbackPage() {
     fetchMeta();
   }, []);
 
-  // Available subjects for currently selected class (from DB syllabus)
+  // Available normalized subjects [{ subject, teacherName }] for currently selected class
   const availableSubjectsForClass = useMemo(() => {
     if (!formData.className) return [];
-    return classSubjectsMap[formData.className] || [];
+    const rawList =
+      classSubjectsMap[formData.className] ||
+      DEFAULT_CLASS_SUBJECTS[formData.className] ||
+      [];
+    return rawList
+      .map((item) => {
+        if (typeof item === "string") {
+          return { subject: item.trim(), teacherName: "" };
+        }
+        if (item && typeof item === "object") {
+          return {
+            subject: String(
+              item.subject || item.subjectName || item.name || "",
+            ).trim(),
+            teacherName: String(
+              item.teacherName || item.teacher || "",
+            ).trim(),
+          };
+        }
+        return null;
+      })
+      .filter((item) => item && item.subject);
   }, [formData.className, classSubjectsMap]);
 
   // Controlled Student Lookup Handler
@@ -211,8 +377,10 @@ export default function ParentFeedbackPage() {
         student.studentName ||
         prev.studentName,
       className: matchedClass || prev.className,
-      q10_selectedSubject: "",
-      q10_teacherComment: "",
+      q10_subjectComments:
+        matchedClass && matchedClass !== prev.className
+          ? {}
+          : prev.q10_subjectComments,
     }));
   };
 
@@ -221,18 +389,31 @@ export default function ParentFeedbackPage() {
     setFormData((prev) => ({
       ...prev,
       className: newClass,
-      q10_selectedSubject: "",
-      q10_teacherComment: "",
+      q10_subjectComments: {},
     }));
   };
 
-  // Handle Q9 Checkboxes
+  // Handle Individual Subject Comment Change in Q10
+  const handleSubjectCommentChange = (subjectName, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      q10_subjectComments: {
+        ...(prev.q10_subjectComments || {}),
+        [subjectName]: value,
+      },
+    }));
+  };
+
+  // Handle Q9 Multi-Select Toggle
   const handleCheckboxToggle = (option) => {
     setFormData((prev) => {
-      const exists = prev.q9_improvementAreas.includes(option);
+      const currentList = Array.isArray(prev.q9_improvementAreas)
+        ? prev.q9_improvementAreas
+        : [];
+      const exists = currentList.includes(option);
       const next = exists
-        ? prev.q9_improvementAreas.filter((item) => item !== option)
-        : [...prev.q9_improvementAreas, option];
+        ? currentList.filter((item) => item !== option)
+        : [...currentList, option];
       return { ...prev, q9_improvementAreas: next };
     });
   };
@@ -276,17 +457,25 @@ export default function ParentFeedbackPage() {
     try {
       setIsSubmitting(true);
 
+      // Build array of non-empty subject feedbacks [{ subject, teacherName, comment }]
+      const subjectFeedbacks = availableSubjectsForClass
+        .map(({ subject, teacherName }) => {
+          const comment = String(
+            formData.q10_subjectComments?.[subject] || "",
+          ).trim();
+          return {
+            subject,
+            teacherName: teacherName || "",
+            comment,
+          };
+        })
+        .filter((item) => item.subject && item.comment.length > 0);
+
       const payload = {
         ...formData,
-        q10_subjectFeedbacks:
-          formData.q10_selectedSubject && formData.q10_teacherComment.trim()
-            ? [
-                {
-                  subject: formData.q10_selectedSubject,
-                  comment: formData.q10_teacherComment.trim(),
-                },
-              ]
-            : [],
+        q10_selectedSubject: subjectFeedbacks[0]?.subject || "",
+        q10_teacherComment: subjectFeedbacks[0]?.comment || "",
+        q10_subjectFeedbacks: subjectFeedbacks,
       };
 
       const res = await fetch("/api/parent-feedback", {
@@ -330,8 +519,7 @@ export default function ParentFeedbackPage() {
       q7_moralBehavioralChange: "",
       q8_overallSatisfaction: "",
       q9_improvementAreas: [],
-      q10_selectedSubject: "",
-      q10_teacherComment: "",
+      q10_subjectComments: {},
       q11_suggestionsOrComplaints: "",
     });
   };
@@ -614,27 +802,19 @@ export default function ParentFeedbackPage() {
                     {q.options.map((opt) => {
                       const isSelected = formData[q.id] === opt;
                       return (
-                        <label
+                        <button
                           key={opt}
+                          type="button"
                           onClick={() =>
                             setFormData((prev) => ({ ...prev, [q.id]: opt }))
                           }
-                          className={`cursor-pointer flex items-center gap-3 p-3.5 rounded-2xl border text-xs sm:text-sm font-bold transition-all select-none ${
+                          aria-pressed={isSelected}
+                          className={`cursor-pointer w-full text-left flex items-center gap-3 p-3.5 rounded-2xl border text-xs sm:text-sm font-bold transition-all select-none ${
                             isSelected
                               ? "bg-[#00733a] text-white border-[#00733a] shadow-md"
                               : "bg-slate-50 dark:bg-[#02130c] text-slate-700 dark:text-emerald-100 border-slate-200 dark:border-emerald-800/50 hover:border-emerald-500/60"
                           }`}
                         >
-                          <input
-                            type="radio"
-                            name={q.id}
-                            value={opt}
-                            checked={isSelected}
-                            onChange={() =>
-                              setFormData((prev) => ({ ...prev, [q.id]: opt }))
-                            }
-                            className="sr-only"
-                          />
                           <span
                             className={`w-4 h-4 rounded-full flex items-center justify-center border shrink-0 ${
                               isSelected
@@ -647,7 +827,7 @@ export default function ParentFeedbackPage() {
                             )}
                           </span>
                           <span>{opt}</span>
-                        </label>
+                        </button>
                       );
                     })}
                   </div>
@@ -656,14 +836,25 @@ export default function ParentFeedbackPage() {
 
               {/* Question 9: Checkboxes (Multiple Selection) */}
               <div className="bg-white dark:bg-[#041e14] rounded-3xl p-6 sm:p-7 border border-emerald-800/15 dark:border-emerald-800/40 shadow-sm space-y-4">
-                <div>
-                  <label className="block text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">
-                    ৯. আগামী শিক্ষাবর্ষে প্রতিষ্ঠানের কোন বিষয়গুলোর উন্নয়ন বেশি
-                    প্রয়োজন বলে মনে করেন?
-                  </label>
-                  <p className="text-xs text-emerald-700 dark:text-amber-300/90 font-semibold mt-1">
-                    (একাধিক নির্বাচন করা যাবে)
-                  </p>
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div>
+                    <label className="block text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">
+                      ৯. আগামী শিক্ষাবর্ষে প্রতিষ্ঠানের কোন বিষয়গুলোর উন্নয়ন বেশি
+                      প্রয়োজন বলে মনে করেন?
+                    </label>
+                    <p className="text-xs text-emerald-700 dark:text-amber-300/90 font-semibold mt-1">
+                      (একাধিক নির্বাচন করা যাবে)
+                    </p>
+                  </div>
+
+                  {formData.q9_improvementAreas.length > 0 && (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-[#00733a] dark:text-amber-300 text-xs font-extrabold border border-emerald-200 dark:border-emerald-800">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>
+                        {formData.q9_improvementAreas.length} টি নির্বাচিত
+                      </span>
+                    </span>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -671,92 +862,128 @@ export default function ParentFeedbackPage() {
                     const isChecked =
                       formData.q9_improvementAreas.includes(option);
                     return (
-                      <label
+                      <button
                         key={option}
+                        type="button"
                         onClick={() => handleCheckboxToggle(option)}
-                        className={`cursor-pointer flex items-center gap-3 p-3.5 rounded-2xl border text-xs sm:text-sm font-bold transition-all select-none ${
+                        aria-pressed={isChecked}
+                        className={`cursor-pointer w-full text-left flex items-center gap-3 p-3.5 rounded-2xl border text-xs sm:text-sm font-bold transition-all select-none ${
                           isChecked
-                            ? "bg-emerald-50 dark:bg-emerald-900/50 text-[#00733a] dark:text-amber-300 border-[#00733a] dark:border-amber-400/60 shadow-xs"
+                            ? "bg-emerald-50 dark:bg-emerald-900/60 text-[#00733a] dark:text-amber-300 border-[#00733a] dark:border-amber-400/80 ring-2 ring-[#00733a]/15 dark:ring-amber-400/20 shadow-xs"
                             : "bg-slate-50 dark:bg-[#02130c] text-slate-700 dark:text-emerald-100 border-slate-200 dark:border-emerald-800/50 hover:border-emerald-500/50"
                         }`}
                       >
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => {}}
-                          className="sr-only"
-                        />
                         <span
-                          className={`w-4 h-4 rounded-md flex items-center justify-center border shrink-0 ${
+                          className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors ${
                             isChecked
-                              ? "bg-[#00733a] border-[#00733a] text-white"
+                              ? "bg-[#00733a] dark:bg-amber-400 border-[#00733a] dark:border-amber-400 text-white dark:text-[#022c1b]"
                               : "border-slate-400 dark:border-emerald-600 bg-white dark:bg-transparent"
                           }`}
                         >
-                          {isChecked && <Check className="w-3 h-3" />}
+                          {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                         </span>
-                        <span>{option}</span>
-                      </label>
+                        <span className="flex-1">{option}</span>
+                      </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Question 10: Subject-Wise Teacher Comment (Optional, Dynamic DB Subjects, NO Teacher Names) */}
+              {/* Question 10: Auto-Display Comment Fields for All Class Subjects / Subject Teachers (Optional) */}
               <div className="bg-white dark:bg-[#041e14] rounded-3xl p-6 sm:p-7 border border-emerald-800/15 dark:border-emerald-800/40 shadow-sm space-y-4">
-                <div className="flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-[#00733a] dark:text-amber-300 shrink-0" />
-                  <label className="block text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">
-                    ১০. বিষয়ভিত্তিক শিক্ষক সম্পর্কে আপনার মতামত (ঐচ্ছিক)
-                  </label>
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="w-5 h-5 text-[#00733a] dark:text-amber-300 shrink-0" />
+                      <label className="block text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">
+                        ১০. বিষয়ভিত্তিক শিক্ষক সম্পর্কে আপনার মতামত (ঐচ্ছিক)
+                      </label>
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-emerald-200/75 pl-7">
+                      আপনার সন্তানের শ্রেণির সকল বিষয়ের তালিকা নিচে দেওয়া হলো। যে সকল
+                      বিষয়ের শিক্ষকের ব্যাপারে মতামত দিতে চান, শুধুমাত্র সেই ঘরগুলোতে
+                      লিখুন (বাকিগুলো খালি রাখা যাবে)।
+                    </p>
+                  </div>
+
+                  {formData.className && (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-200 dark:border-emerald-800 text-xs font-extrabold text-[#00733a] dark:text-amber-300">
+                      শ্রেণি: {formData.className} (
+                      {availableSubjectsForClass.length} টি বিষয়)
+                    </span>
+                  )}
                 </div>
 
-                <div>
-                  <label className="block text-xs sm:text-sm font-bold text-slate-700 dark:text-emerald-200 mb-2">
-                    বিষয় নির্বাচন করুন:
-                  </label>
-                  <select
-                    value={formData.q10_selectedSubject}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        q10_selectedSubject: e.target.value,
-                      }))
-                    }
-                    disabled={!formData.className}
-                    className="w-full sm:w-80 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-emerald-800/60 bg-slate-50 dark:bg-[#02130c] text-xs sm:text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00733a] disabled:opacity-60"
-                  >
-                    <option value="">
-                      {!formData.className
-                        ? "-- প্রথমে ২ নং প্রশ্নে শ্রেণি নির্বাচন করুন --"
-                        : "-- বিষয় নির্বাচন করুন --"}
-                    </option>
-                    {availableSubjectsForClass.map((subj) => (
-                      <option key={subj} value={subj}>
-                        {subj}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {!formData.className ? (
+                  <div className="p-5 sm:p-6 rounded-2xl border border-dashed border-emerald-300 dark:border-emerald-800/70 bg-emerald-50/40 dark:bg-[#02130c]/80 text-center space-y-1.5">
+                    <BookOpen className="w-7 h-7 text-[#00733a]/70 dark:text-amber-300/70 mx-auto" />
+                    <p className="text-xs sm:text-sm font-bold text-slate-700 dark:text-emerald-100">
+                      বিষয়ভিত্তিক শিক্ষকদের তালিকা দেখতে অনুগ্রহ করে প্রথমে ২ নং প্রশ্নে
+                      শিক্ষার্থীর শ্রেণি নির্বাচন করুন।
+                    </p>
+                    <p className="text-[11px] text-slate-500 dark:text-emerald-200/60">
+                      শ্রেণি নির্বাচন করার সাথে সাথেই উক্ত শ্রেণির সকল বিষয়ের মন্তব্যের
+                      ঘর স্বয়ংক্রিয়ভাবে প্রদর্শিত হবে।
+                    </p>
+                  </div>
+                ) : availableSubjectsForClass.length === 0 ? (
+                  <div className="p-5 rounded-2xl border border-slate-200 dark:border-emerald-800/50 bg-slate-50 dark:bg-[#02130c] text-center text-xs sm:text-sm text-slate-500 dark:text-emerald-200/70">
+                    এই শ্রেণির জন্য কোনো বিষয় তালিকা পাওয়া যায়নি।
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
+                    {availableSubjectsForClass.map(
+                      ({ subject, teacherName }, index) => {
+                        const commentVal =
+                          formData.q10_subjectComments?.[subject] || "";
+                        const hasText = commentVal.trim().length > 0;
+                        return (
+                          <div
+                            key={subject}
+                            className={`p-4 rounded-2xl border transition-all space-y-2.5 ${
+                              hasText
+                                ? "bg-emerald-50/50 dark:bg-emerald-950/40 border-[#00733a]/60 dark:border-amber-400/50 shadow-xs"
+                                : "bg-slate-50/80 dark:bg-[#02130c] border-slate-200 dark:border-emerald-800/50"
+                            }`}
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white">
+                                  <span className="w-5 h-5 rounded-full bg-[#00733a]/10 dark:bg-emerald-900 text-[#00733a] dark:text-amber-300 text-[11px] flex items-center justify-center shrink-0">
+                                    {index + 1}
+                                  </span>
+                                  <span>{subject}</span>
+                                </span>
+                                {teacherName && (
+                                  <p className="text-[11px] font-semibold text-emerald-700 dark:text-amber-300/90 mt-0.5 pl-6">
+                                    শিক্ষক: {teacherName}
+                                  </p>
+                                )}
+                              </div>
 
-                {/* Reveal comment textarea when a subject is selected */}
-                {formData.q10_selectedSubject && (
-                  <div className="pt-2 space-y-2 transition-all">
-                    <label className="block text-xs sm:text-sm font-bold text-[#00733a] dark:text-amber-300">
-                      মতামত লিখুন ({formData.q10_selectedSubject}):
-                    </label>
-                    <textarea
-                      rows={4}
-                      value={formData.q10_teacherComment}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          q10_teacherComment: e.target.value,
-                        }))
-                      }
-                      placeholder={`${formData.q10_selectedSubject} বিষয়ের পাঠদান ও শিক্ষক সম্পর্কে আপনার মূল্যবান মতামত লিখুন...`}
-                      className="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-emerald-800/60 bg-slate-50 dark:bg-[#02130c] text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00733a]"
-                    />
+                              {hasText && (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#00733a] text-white shrink-0">
+                                  মতামত যুক্ত
+                                </span>
+                              )}
+                            </div>
+
+                            <textarea
+                              rows={2}
+                              value={commentVal}
+                              onChange={(e) =>
+                                handleSubjectCommentChange(
+                                  subject,
+                                  e.target.value,
+                                )
+                              }
+                              placeholder={`${subject}${teacherName ? ` (${teacherName})` : ""} বিষয়ের শিক্ষক ও পাঠদান সম্পর্কে মতামত লিখুন (ঐচ্ছিক)...`}
+                              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-emerald-800/60 bg-white dark:bg-[#041e14] text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00733a]"
+                            />
+                          </div>
+                        );
+                      },
+                    )}
                   </div>
                 )}
               </div>

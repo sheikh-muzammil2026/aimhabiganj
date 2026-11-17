@@ -12,6 +12,144 @@ function escapeRegex(str) {
   return String(str).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+const DEFAULT_CLASS_SUBJECTS = {
+  প্লে: ["আরবি-০১", "ইংরেজি", "বাংলা", "গণিত"],
+  নার্সারি: ["আরবি-০২", "ইংরেজি", "বাংলা", "গণিত"],
+  প্রথম: [
+    "কুরআন ও তাজভীদ-০১",
+    "আরবি",
+    "তাওহীদ ও ফিকহ-১",
+    "ইংরেজি",
+    "স্পোকেন ইংলিশ",
+    "বাংলা",
+    "গণিত",
+    "সাধারণ জ্ঞান",
+  ],
+  দ্বিতীয়: [
+    "কুরআন ও তাজভীদ-০২",
+    "আরবি",
+    "তাওহীদ ও ফিকহ-২",
+    "ইংরেজি",
+    "স্পোকেন ইংলিশ",
+    "বাংলা",
+    "গণিত",
+    "সাধারণ জ্ঞান",
+  ],
+  তৃতীয়: [
+    "কুরআন ও তাজভীদ-০৩",
+    "আরবি",
+    "আদব ও দোয়া",
+    "তাওহীদ ও ফিকহ-৩",
+    "ইংরেজি",
+    "স্পোকেন ইংলিশ",
+    "বাংলা",
+    "গণিত",
+    "বাংলাদেশ ও বিশ্বপরিচয়",
+    "বিজ্ঞান",
+    "হাতের লেখা",
+  ],
+  চতুর্থ: [
+    "কুরআন ও তাজভীদ-০৪",
+    "এসো আরবি শিখি",
+    "এসো তামরিন শিখি",
+    "আদাব ও দোয়া",
+    "তাওহীদ ও ফিকহ-৪",
+    "ইংরেজি",
+    "স্পোকেন ইংলিশ",
+    "বাংলা",
+    "গণিত",
+    "বিজ্ঞান",
+  ],
+  পঞ্চম: [
+    "কুরআন ও তাজভীদ-০৫",
+    "এসো আরবি শিখি",
+    "এসো তামরিন শিখি",
+    "সরফ",
+    "তাওহীদ ও ফিকহ-৫",
+    "ইংরেজি",
+    "স্পোকেন ইংলিশ",
+    "বাংলা",
+    "গণিত",
+    "বিজ্ঞান",
+  ],
+  ষষ্ঠ: [
+    "হিফজুল কুরআন ও তাজভীদ-০১",
+    "কুরআন অনুবাদ-০১",
+    "হাদিস আরবাঈন",
+    "আরবি",
+    "সরফ",
+    "নাহু",
+    "তাওহীদ ও ফিকহ-৫",
+    "ইংরেজি ১ম ও ২য়",
+    "স্পোকেন ইংলিশ",
+    "বাংলা ১ম ও ২য়",
+    "গণিত",
+    "বিজ্ঞান",
+  ],
+  সপ্তম: [
+    "হিফজুল কুরআন ও তাজভীদ-০২",
+    "কুরআন অনুবাদ-০২",
+    "হাদিস",
+    "আরবি",
+    "সরফ",
+    "নাহু",
+    "তাওহীদ",
+    "ফিকহ",
+    "ইংরেজি ১ম ও ২য়",
+    "স্পোকেন ইংলিশ",
+    "বাংলা ১ম ও ২য়",
+    "গণিত",
+    "বিজ্ঞান",
+  ],
+  অষ্টম: [
+    "হিফজুল কুরআন ও তাজভীদ-০৩",
+    "কুরআন অনুবাদ-০৩",
+    "হাদিস",
+    "উসুলুল হাদিস",
+    "আরবি",
+    "সরফ",
+    "নাহু",
+    "তাওহীদ",
+    "ফিকহ",
+    "ইংরেজি ১ম ও ২য়",
+    "স্পোকেন ইংলিশ",
+    "বাংলা ১ম ও ২য়",
+    "গণিত",
+    "বিজ্ঞান",
+  ],
+  নবম: [
+    "বাংলা ১ম ও ২য়",
+    "ইংরেজি ১ম ও ২য়",
+    "গণিত",
+    "বিজ্ঞান",
+    "বাংলাদেশ ও বিশ্বপরিচয়",
+    "ইসলাম ও নৈতিক শিক্ষা",
+    "আরবি",
+    "ফিকহ",
+  ],
+  দশম: [
+    "বাংলা ১ম ও ২য়",
+    "ইংরেজি ১ম ও ২য়",
+    "গণিত",
+    "বিজ্ঞান",
+    "বাংলাদেশ ও বিশ্বপরিচয়",
+    "ইসলাম ও নৈতিক শিক্ষা",
+    "আরবি",
+    "ফিকহ",
+  ],
+  "কায়দা/আমপারা": [
+    "কুরআন",
+    "তাজভীদ ও দোয়া",
+    "আরবি",
+    "ইংরেজি",
+    "বাংলা",
+    "গণিত",
+  ],
+  নাজেরা: ["কুরআন", "তাজভীদ ও দোয়া", "আরবি", "ইংরেজি", "বাংলা", "গণিত"],
+  সবক: ["কুরআন", "তাজভীদ ও দোয়া"],
+  শুনানি: ["কুরআন", "তাজভীদ ও দোয়া"],
+};
+
 async function getSyllabusData(db) {
   const syllabusCollection = db.collection("syllabus");
   const allSyllabus = await syllabusCollection
@@ -20,16 +158,22 @@ async function getSyllabusData(db) {
     .toArray();
 
   const classes = [];
-  const classSubjects = {};
+  const classSubjects = { ...DEFAULT_CLASS_SUBJECTS };
 
   allSyllabus.forEach((item) => {
     if (item.class) {
       if (!classes.includes(item.class)) {
         classes.push(item.class);
       }
-      classSubjects[item.class] = Array.isArray(item.subjects)
-        ? item.subjects
-        : [];
+      if (Array.isArray(item.subjects) && item.subjects.length > 0) {
+        classSubjects[item.class] = item.subjects;
+      }
+    }
+  });
+
+  Object.keys(DEFAULT_CLASS_SUBJECTS).forEach((cls) => {
+    if (!classes.includes(cls)) {
+      classes.push(cls);
     }
   });
 
@@ -314,7 +458,7 @@ export async function POST(request) {
       }
     }
 
-    // Normalize subject-wise teacher comments (Subject Name ONLY — no teacher names)
+    // Normalize subject-wise teacher comments [{ subject, teacherName, comment }]
     let subjectFeedbacks = [];
     if (Array.isArray(body.q10_subjectFeedbacks)) {
       subjectFeedbacks = body.q10_subjectFeedbacks
@@ -326,6 +470,7 @@ export async function POST(request) {
         )
         .map((item) => ({
           subject: String(item.subject).trim(),
+          teacherName: String(item.teacherName || "").trim(),
           comment: String(item.comment).trim(),
         }));
     }
@@ -340,6 +485,7 @@ export async function POST(request) {
     ) {
       subjectFeedbacks.unshift({
         subject: selectedSubject,
+        teacherName: "",
         comment: teacherComment,
       });
     }

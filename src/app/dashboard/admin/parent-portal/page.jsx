@@ -112,13 +112,23 @@ export default function AdminParentPortalPage() {
 
   // Dynamic Subjects Filter Options (from DB syllabus collection)
   const subjectOptions = useMemo(() => {
+    const extractSubjectName = (s) =>
+      typeof s === "string"
+        ? s.trim()
+        : String(s?.subject || s?.subjectName || s?.name || "").trim();
+
     if (selectedClass !== "all") {
-      return classSubjectsMap[selectedClass] || [];
+      return (classSubjectsMap[selectedClass] || [])
+        .map(extractSubjectName)
+        .filter(Boolean);
     }
     const allSubjects = new Set();
     Object.values(classSubjectsMap).forEach((arr) => {
       if (Array.isArray(arr)) {
-        arr.forEach((s) => allSubjects.add(s));
+        arr.forEach((s) => {
+          const name = extractSubjectName(s);
+          if (name) allSubjects.add(name);
+        });
       }
     });
     return Array.from(allSubjects);
@@ -538,26 +548,52 @@ export default function AdminParentPortalPage() {
                 {/* Q10 & Q11 Highlighted Written Comments */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
                   {/* Q10 Subject-Wise Comment */}
-                  <div className="p-3.5 rounded-2xl bg-amber-50/60 dark:bg-amber-950/25 border border-amber-200/70 dark:border-amber-800/40 space-y-1">
+                  <div className="p-3.5 rounded-2xl bg-amber-50/60 dark:bg-amber-950/25 border border-amber-200/70 dark:border-amber-800/40 space-y-2">
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-xs font-extrabold text-amber-900 dark:text-amber-300">
                         ১০. বিষয়ভিত্তিক শিক্ষক সম্পর্কে মতামত
                       </span>
-                      {item.q10_selectedSubject && (
+                      {Array.isArray(item.q10_subjectFeedbacks) &&
+                      item.q10_subjectFeedbacks.length > 0 ? (
                         <span className="px-2.5 py-0.5 rounded-full bg-amber-200/80 dark:bg-amber-900 text-amber-950 dark:text-amber-200 text-[11px] font-black">
-                          বিষয়: {item.q10_selectedSubject}
+                          {item.q10_subjectFeedbacks.length} টি বিষয়ে মতামত
                         </span>
+                      ) : (
+                        item.q10_selectedSubject && (
+                          <span className="px-2.5 py-0.5 rounded-full bg-amber-200/80 dark:bg-amber-900 text-amber-950 dark:text-amber-200 text-[11px] font-black">
+                            বিষয়: {item.q10_selectedSubject}
+                          </span>
+                        )
                       )}
                     </div>
-                    <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed">
-                      {item.q10_teacherComment ? (
-                        item.q10_teacherComment
-                      ) : (
-                        <span className="text-slate-400 italic">
-                          কোনো বিষয়ভিত্তিক মন্তব্য প্রদান করা হয়নি
-                        </span>
-                      )}
-                    </p>
+
+                    {Array.isArray(item.q10_subjectFeedbacks) &&
+                    item.q10_subjectFeedbacks.length > 0 ? (
+                      <div className="space-y-1.5">
+                        {item.q10_subjectFeedbacks.map((sf, sIdx) => (
+                          <div
+                            key={sIdx}
+                            className="p-2 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-amber-200/50 dark:border-amber-800/30 text-xs"
+                          >
+                            <span className="font-bold text-amber-900 dark:text-amber-300">
+                              {sf.subject}
+                              {sf.teacherName ? ` (${sf.teacherName})` : ""}:{" "}
+                            </span>
+                            <span className="text-slate-700 dark:text-slate-200">
+                              {sf.comment}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : item.q10_teacherComment ? (
+                      <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed">
+                        {item.q10_teacherComment}
+                      </p>
+                    ) : (
+                      <p className="text-xs sm:text-sm text-slate-400 italic">
+                        কোনো বিষয়ভিত্তিক মন্তব্য প্রদান করা হয়নি
+                      </p>
+                    )}
                   </div>
 
                   {/* Q11 Suggestions / Complaints */}
@@ -687,15 +723,38 @@ export default function AdminParentPortalPage() {
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200/70 space-y-1">
+              <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200/70 space-y-2">
                 <span className="font-extrabold text-amber-900 dark:text-amber-300 block">
-                  ১০. বিষয়ভিত্তিক শিক্ষক সম্পর্কে আপনার মতামত{" "}
-                  {activeFeedback.q10_selectedSubject &&
-                    `(বিষয়: ${activeFeedback.q10_selectedSubject})`}
+                  ১০. বিষয়ভিত্তিক শিক্ষক সম্পর্কে আপনার মতামত
                 </span>
-                <p className="text-slate-800 dark:text-slate-200 whitespace-pre-wrap">
-                  {activeFeedback.q10_teacherComment || "কোনো মন্তব্য লেখা হয়নি"}
-                </p>
+                {Array.isArray(activeFeedback.q10_subjectFeedbacks) &&
+                activeFeedback.q10_subjectFeedbacks.length > 0 ? (
+                  <div className="space-y-2">
+                    {activeFeedback.q10_subjectFeedbacks.map((sf, sIdx) => (
+                      <div
+                        key={sIdx}
+                        className="p-2.5 rounded-lg bg-white/80 dark:bg-slate-900/60 border border-amber-200/60 dark:border-amber-800/40"
+                      >
+                        <p className="font-bold text-amber-900 dark:text-amber-300 text-xs">
+                          বিষয়: {sf.subject}
+                          {sf.teacherName ? ` (${sf.teacherName})` : ""}
+                        </p>
+                        <p className="text-slate-800 dark:text-slate-200 whitespace-pre-wrap mt-0.5">
+                          {sf.comment}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : activeFeedback.q10_teacherComment ? (
+                  <p className="text-slate-800 dark:text-slate-200 whitespace-pre-wrap">
+                    {activeFeedback.q10_selectedSubject
+                      ? `[${activeFeedback.q10_selectedSubject}] `
+                      : ""}
+                    {activeFeedback.q10_teacherComment}
+                  </p>
+                ) : (
+                  <p className="text-slate-400">কোনো মন্তব্য লেখা হয়নি</p>
+                )}
               </div>
 
               <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200/70 space-y-1">
