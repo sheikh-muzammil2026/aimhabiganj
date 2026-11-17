@@ -5,7 +5,7 @@ import React from 'react';
 
 export default function WhatsAppButton() {
 
-  const phoneNumber = "8801992757431";
+  const phoneNumber = "8801748868161";
 
   const message = encodeURIComponent(
     "আস-সালামু আলাইকুম, আমি আস-সালাম আইডিয়াল মাদরাসা (এইম) এর অনলাইন পোর্টাল থেকে যোগাযোগ করছি। কিছু তথ্য জানতে চাচ্ছিলাম।"

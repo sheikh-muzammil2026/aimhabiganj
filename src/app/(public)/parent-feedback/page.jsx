@@ -424,7 +424,7 @@ export default function ParentFeedbackPage() {
       const shareUrl =
         typeof window !== "undefined"
           ? `${window.location.origin}/parent-feedback`
-          : "https://aimhabiganj.vercel.app/parent-feedback";
+          : "https://aimpurbachal.com/parent-feedback";
       await navigator.clipboard.writeText(shareUrl);
       setCopiedLink(true);
       toast.success("ফরমের লিংক কপি করা হয়েছে!");
@@ -550,7 +550,7 @@ export default function ParentFeedbackPage() {
             ) : (
               <>
                 <Copy className="w-4 h-4 text-[#00733a] dark:text-amber-300" />
-                <span>লিংক কপি করুন / Copy Form Link</span>
+                <span>লিংক কপি করুন</span>
               </>
             )}
           </button>
@@ -572,11 +572,11 @@ export default function ParentFeedbackPage() {
 
             <div className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-amber-400/20 border border-amber-300/40 text-amber-200 text-xs sm:text-sm font-bold">
               <Sparkles className="w-4 h-4 text-amber-300" />
-              <span>Annual Parents Feedback Form – 2026</span>
+              <span>Parents Feedback</span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white pt-1">
-              বার্ষিক অভিভাবক মতামত ফরম – ২০২৬
+              অভিভাবক মতামত
             </h1>
 
             <div className="max-w-3xl mx-auto mt-4 pt-4 border-t border-white/15 text-xs sm:text-sm md:text-base text-emerald-50/95 leading-relaxed text-left bg-black/15 rounded-2xl p-4 sm:p-5">
@@ -809,18 +809,16 @@ export default function ParentFeedbackPage() {
                             setFormData((prev) => ({ ...prev, [q.id]: opt }))
                           }
                           aria-pressed={isSelected}
-                          className={`cursor-pointer w-full text-left flex items-center gap-3 p-3.5 rounded-2xl border text-xs sm:text-sm font-bold transition-all select-none ${
-                            isSelected
+                          className={`cursor-pointer w-full text-left flex items-center gap-3 p-3.5 rounded-2xl border text-xs sm:text-sm font-bold transition-all select-none ${isSelected
                               ? "bg-[#00733a] text-white border-[#00733a] shadow-md"
                               : "bg-slate-50 dark:bg-[#02130c] text-slate-700 dark:text-emerald-100 border-slate-200 dark:border-emerald-800/50 hover:border-emerald-500/60"
-                          }`}
+                            }`}
                         >
                           <span
-                            className={`w-4 h-4 rounded-full flex items-center justify-center border shrink-0 ${
-                              isSelected
+                            className={`w-4 h-4 rounded-full flex items-center justify-center border shrink-0 ${isSelected
                                 ? "border-white bg-white text-[#00733a]"
                                 : "border-slate-400 dark:border-emerald-600"
-                            }`}
+                              }`}
                           >
                             {isSelected && (
                               <span className="w-2 h-2 rounded-full bg-[#00733a]" />
@@ -867,18 +865,16 @@ export default function ParentFeedbackPage() {
                         type="button"
                         onClick={() => handleCheckboxToggle(option)}
                         aria-pressed={isChecked}
-                        className={`cursor-pointer w-full text-left flex items-center gap-3 p-3.5 rounded-2xl border text-xs sm:text-sm font-bold transition-all select-none ${
-                          isChecked
+                        className={`cursor-pointer w-full text-left flex items-center gap-3 p-3.5 rounded-2xl border text-xs sm:text-sm font-bold transition-all select-none ${isChecked
                             ? "bg-emerald-50 dark:bg-emerald-900/60 text-[#00733a] dark:text-amber-300 border-[#00733a] dark:border-amber-400/80 ring-2 ring-[#00733a]/15 dark:ring-amber-400/20 shadow-xs"
                             : "bg-slate-50 dark:bg-[#02130c] text-slate-700 dark:text-emerald-100 border-slate-200 dark:border-emerald-800/50 hover:border-emerald-500/50"
-                        }`}
+                          }`}
                       >
                         <span
-                          className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors ${
-                            isChecked
+                          className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors ${isChecked
                               ? "bg-[#00733a] dark:bg-amber-400 border-[#00733a] dark:border-amber-400 text-white dark:text-[#022c1b]"
                               : "border-slate-400 dark:border-emerald-600 bg-white dark:bg-transparent"
-                          }`}
+                            }`}
                         >
                           {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                         </span>
@@ -940,11 +936,10 @@ export default function ParentFeedbackPage() {
                         return (
                           <div
                             key={subject}
-                            className={`p-4 rounded-2xl border transition-all space-y-2.5 ${
-                              hasText
+                            className={`p-4 rounded-2xl border transition-all space-y-2.5 ${hasText
                                 ? "bg-emerald-50/50 dark:bg-emerald-950/40 border-[#00733a]/60 dark:border-amber-400/50 shadow-xs"
                                 : "bg-slate-50/80 dark:bg-[#02130c] border-slate-200 dark:border-emerald-800/50"
-                            }`}
+                              }`}
                           >
                             <div className="flex items-start justify-between gap-2">
                               <div>
