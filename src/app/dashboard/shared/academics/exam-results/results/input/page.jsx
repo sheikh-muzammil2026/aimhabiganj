@@ -3,6 +3,12 @@
 import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react";
 import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth-client";
+import { formatAcademicYear } from "@/lib/academicYear";
+import {
+  RECENT_SESSION_YEARS,
+  toBengaliDigits,
+  toEnglishDigits,
+} from "@/lib/studentUtils";
 import Pagination from "@/components/dashboard/Pagination";
 import useUrlPagination from "@/hooks/useUrlPagination";
 
@@ -128,6 +134,15 @@ const API_BASE_URL = (
   process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000"
 ).replace(/\/$/, "");
 
+const normalizeMarkValue = (val) => {
+  if (val === undefined || val === null) return "";
+  const str = toEnglishDigits(String(val)).trim();
+  if (!str) return "";
+  if (/^(a|abs|absent|অনুঃ)$/i.test(str)) return "A";
+  const num = Number(str);
+  return Number.isFinite(num) && num >= 0 ? num : NaN;
+};
+
 function TeacherMarkInputContent() {
   const { currentPage, currentLimit, updatePaginationParams, resetPageToFirst } =
     useUrlPagination();
@@ -155,7 +170,9 @@ function TeacherMarkInputContent() {
   useEffect(() => {
     const fetchSyllabus = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/syllabus`);
+        const res = await fetch(`${API_BASE_URL}/api/syllabus`, {
+          cache: "no-store",
+        });
         const result = await res.json();
         if (result.success && result.classSubjects) {
           setSyllabusMap(result.classSubjects);
@@ -181,11 +198,19 @@ function TeacherMarkInputContent() {
       ? selectedSubject
       : availableSubjects[0] || "";
 
+  const normalizedYear = useMemo(() => {
+    return toBengaliDigits(formatAcademicYear(year)) || "২০২৬";
+  }, [year]);
+
   const [studentsMarksList, setStudentsMarksList] = useState([]);
+  const [isDirty, setIsDirty] = useState(false);
 
   const [isPublished, setIsPublished] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // রেস কন্ডিশন রোধ করার জন্য রিকোয়েস্ট ট্র্যাকার
+  const fetchReqIdRef = useRef(0);
 
   // পেজিনেশন স্টেটসমূহ
   const [totalPages, setTotalPages] = useState(1);
@@ -194,10 +219,33 @@ function TeacherMarkInputContent() {
   // ফলাফল প্রকাশিত হলে নন-অ্যাডমিনদের জন্য লক স্টেট
   const isLocked = isPublished && !isAdmin;
 
+  // অসংরক্ষিত পরিবর্তনের ক্ষেত্রে সতর্কবার্তা হেলপার
+  const confirmDiscardIfNeeded = useCallback(() => {
+    if (!isDirty) return true;
+    const confirmed = window.confirm(
+      "আপনার পরিবর্তনগুলো এখনো সংরক্ষণ করা হয়নি। পেজ বা ফিল্টার পরিবর্তন করলে অসংরক্ষিত নম্বরগুলো মুছে যাবে। আপনি কি নিশ্চিত?",
+    );
+    if (confirmed) {
+      setIsDirty(false);
+    }
+    return confirmed;
+  }, [isDirty]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (!isDirty) return;
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
+
   // ২. শ্রেণি, বিষয়, পরীক্ষা ও বছর পরিবর্তন হলে শিক্ষার্থীদের তথ্য ও পূর্বের নম্বর ফেচ করা (পেজিনেটেড)
   const fetchClassData = useCallback(async () => {
     if (!selectedClass) return;
 
+    const reqId = ++fetchReqIdRef.current;
     setLoading(true);
     try {
       // ১ম ধাপ: ব্যাকএন্ড থেকে Approved ও Active শিক্ষার্থীদের তালিকা নিয়ে আসা (পেজিনেটেড)
@@ -210,15 +258,21 @@ function TeacherMarkInputContent() {
       });
       const studentRes = await fetch(
         `${API_BASE_URL}/api/students?${params.toString()}`,
+        { cache: "no-store" },
       );
+      if (!studentRes.ok) {
+        throw new Error(`Failed to fetch students: ${studentRes.status}`);
+      }
       const studentData = await studentRes.json();
+
+      if (reqId !== fetchReqIdRef.current) return;
 
       let rawStudents = [];
       if (studentData.success && Array.isArray(studentData.data)) {
         rawStudents = [...studentData.data].sort(
           (a, b) =>
-            (parseInt(a.roll, 10) || Infinity) -
-            (parseInt(b.roll, 10) || Infinity),
+            (parseInt(toEnglishDigits(a.roll), 10) || Infinity) -
+            (parseInt(toEnglishDigits(b.roll), 10) || Infinity),
         );
         setTotalPages(studentData.totalPages || 1);
         setTotalStudents(studentData.total || studentData.totalCount || 0);
@@ -238,7 +292,7 @@ function TeacherMarkInputContent() {
           examMark: "",
         }));
         setStudentsMarksList(initialList);
-        setLoading(false);
+        setIsDirty(false);
         return;
       }
 
@@ -246,20 +300,26 @@ function TeacherMarkInputContent() {
       const markQueryParams = new URLSearchParams({
         class: selectedClass,
         subject: activeSubject,
-        year: year,
+        year: normalizedYear,
         examType: examType,
       });
 
       const marksRes = await fetch(
         `${API_BASE_URL}/api/marks/get?${markQueryParams.toString()}`,
         {
+          cache: "no-store",
           headers: {
             "x-user-email": userRef.current?.email || "",
             "x-user-role": userRef.current?.role || "",
           },
         },
       );
+      if (!marksRes.ok) {
+        throw new Error(`Failed to fetch marks: ${marksRes.status}`);
+      }
       const marksResult = await marksRes.json();
+
+      if (reqId !== fetchReqIdRef.current) return;
 
       setIsPublished(Boolean(marksResult.isPublished));
 
@@ -268,7 +328,9 @@ function TeacherMarkInputContent() {
       if (marksResult.success && Array.isArray(marksResult.data)) {
         marksResult.data.forEach((item) => {
           const termData = item[examType] || {};
-          existingMarksMap[item.studentId] = {
+          const rawKey = String(item.studentId ?? "").trim();
+          const normKey = toEnglishDigits(rawKey);
+          const entry = {
             ctMark:
               termData.ct !== undefined && termData.ct !== null
                 ? termData.ct
@@ -278,16 +340,19 @@ function TeacherMarkInputContent() {
                 ? termData.exam
                 : "",
           };
+          if (rawKey) existingMarksMap[rawKey] = entry;
+          if (normKey) existingMarksMap[normKey] = entry;
         });
       }
 
       // ৩য় ধাপ: শিক্ষার্থীদের লিস্ট এবং মার্কস মার্জ করা
       const mergedList = rawStudents.map((student) => {
-        const id = student.studentId;
-        const existing = existingMarksMap[id];
+        const id = String(student.studentId ?? "").trim();
+        const existing =
+          existingMarksMap[id] || existingMarksMap[toEnglishDigits(id)];
 
         return {
-          studentId: id,
+          studentId: student.studentId,
           studentName:
             student.studentNameBangla || student.studentNameEnglish || "N/A",
           roll: student.roll || "N/A",
@@ -297,17 +362,21 @@ function TeacherMarkInputContent() {
       });
 
       setStudentsMarksList(mergedList);
+      setIsDirty(false);
     } catch (error) {
+      if (reqId !== fetchReqIdRef.current) return;
       console.error("Data fetch error:", error);
       toast.error("শিক্ষার্থীদের তথ্য পেতে সমস্যা হয়েছে!");
     } finally {
-      setLoading(false);
+      if (reqId === fetchReqIdRef.current) {
+        setLoading(false);
+      }
     }
   }, [
     selectedClass,
     activeSubject,
     examType,
-    year,
+    normalizedYear,
     currentPage,
     currentLimit,
   ]);
@@ -322,6 +391,7 @@ function TeacherMarkInputContent() {
   // ইনপুট টাইপ পরিবর্তন হ্যান্ডেল করা
   const handleMarkChange = (index, field, value) => {
     if (isLocked) return;
+    setIsDirty(true);
     setStudentsMarksList((prevList) => {
       const updated = [...prevList];
       updated[index] = {
@@ -342,14 +412,41 @@ function TeacherMarkInputContent() {
       return;
     }
 
+    if (!selectedClass || !activeSubject) {
+      toast.error("অনুগ্রহ করে শ্রেণি এবং বিষয় নির্বাচন করুন।");
+      return;
+    }
+
+    // সাবমিট করার পূর্বে বাংলা ডিজিটকে ইংরেজি ডিজিটে রূপান্তর ও ভ্যালিডেশন চেক
+    const normalizedMarksData = [];
+    for (let i = 0; i < studentsMarksList.length; i++) {
+      const st = studentsMarksList[i];
+      const normCt = normalizeMarkValue(st.ctMark);
+      const normExam = normalizeMarkValue(st.examMark);
+
+      if (Number.isNaN(normCt) || Number.isNaN(normExam)) {
+        toast.error(
+          `শিক্ষার্থী "${st.studentName}" (রোল: ${st.roll}, আইডি: ${st.studentId})-এর জন্য সঠিক নম্বর অথবা অনুপস্থিত হলে 'A' লিখুন।`,
+        );
+        return;
+      }
+
+      normalizedMarksData.push({
+        ...st,
+        studentId: String(st.studentId ?? "").trim(),
+        ctMark: normCt,
+        examMark: normExam,
+      });
+    }
+
     setSaving(true);
     try {
       const payload = {
-        class: selectedClass,
-        subject: activeSubject,
+        class: selectedClass.trim(),
+        subject: activeSubject.trim(),
         examType: examType,
-        year: year,
-        marksData: studentsMarksList,
+        year: normalizedYear,
+        marksData: normalizedMarksData,
         teacher: userRef.current?.email || "",
         teacherEmail: userRef.current?.email || "",
         userRole: userRef.current?.role || "",
@@ -357,6 +454,7 @@ function TeacherMarkInputContent() {
 
       const response = await fetch(`${API_BASE_URL}/api/marks/input`, {
         method: "POST",
+        cache: "no-store",
         headers: {
           "Content-Type": "application/json",
           "x-user-email": userRef.current?.email || "",
@@ -365,13 +463,20 @@ function TeacherMarkInputContent() {
         body: JSON.stringify(payload),
       });
 
-      const result = await response.json();
+      const result = await response.json().catch(() => null);
 
-      if (result.success) {
-        toast.success(result.message || "মার্কস সফলভাবে সংরক্ষণ করা হয়েছে!");
-      } else {
-        toast.error(result.message || "সংরক্ষণ করতে ব্যর্থ হয়েছে।");
+      if (!response.ok || !result || result.success !== true) {
+        toast.error(
+          result?.message ||
+            `সংরক্ষণ করতে ব্যর্থ হয়েছে (স্ট্যাটাস: ${response.status})।`,
+        );
+        return;
       }
+
+      // ডেটাবেজে সঠিকভাবে সংরক্ষিত হয়েছে কিনা তা নিশ্চিত করতে পুনরায় ডাটা ফেচ করা
+      await fetchClassData();
+      setIsDirty(false);
+      toast.success(result.message || "মার্কস সফলভাবে সংরক্ষণ করা হয়েছে!");
     } catch (error) {
       console.error("Submit error:", error);
       toast.error("সার্ভার কানেকশনে সমস্যা হয়েছে!");
@@ -462,6 +567,7 @@ function TeacherMarkInputContent() {
             <select
               value={selectedClass}
               onChange={(e) => {
+                if (!confirmDiscardIfNeeded()) return;
                 const newClass = e.target.value;
                 setSelectedClass(newClass);
                 const subs =
@@ -531,6 +637,7 @@ function TeacherMarkInputContent() {
             <select
               value={activeSubject}
               onChange={(e) => {
+                if (!confirmDiscardIfNeeded()) return;
                 setSelectedSubject(e.target.value);
                 resetPageToFirst();
               }}
@@ -557,6 +664,7 @@ function TeacherMarkInputContent() {
             <select
               value={examType}
               onChange={(e) => {
+                if (!confirmDiscardIfNeeded()) return;
                 setExamType(e.target.value);
                 resetPageToFirst();
               }}
@@ -571,17 +679,23 @@ function TeacherMarkInputContent() {
           {/* শিক্ষাবর্ষ */}
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-350 mb-1.5">
-              শিক্ষাবর্ষ
+              শিক্ষাবর্ষ *
             </label>
-            <input
-              type="text"
-              value={year}
+            <select
+              value={normalizedYear}
               onChange={(e) => {
-                setYear(e.target.value);
+                if (!confirmDiscardIfNeeded()) return;
+                setYear(toBengaliDigits(formatAcademicYear(e.target.value)));
                 resetPageToFirst();
               }}
               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-750 text-slate-800 dark:text-slate-200 text-xs sm:text-sm rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-600 focus:outline-none"
-            />
+            >
+              {RECENT_SESSION_YEARS.map((yr) => (
+                <option key={yr} value={yr}>
+                  {yr}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
@@ -679,12 +793,14 @@ function TeacherMarkInputContent() {
                 totalItems={totalStudents}
                 limit={currentLimit}
                 limitOptions={[10, 20, 50, 100]}
-                onPageChange={(newPage) =>
-                  updatePaginationParams(newPage, currentLimit)
-                }
-                onLimitChange={(newLimit) =>
-                  updatePaginationParams(1, newLimit)
-                }
+                onPageChange={(newPage) => {
+                  if (!confirmDiscardIfNeeded()) return;
+                  updatePaginationParams(newPage, currentLimit);
+                }}
+                onLimitChange={(newLimit) => {
+                  if (!confirmDiscardIfNeeded()) return;
+                  updatePaginationParams(1, newLimit);
+                }}
                 itemName="items"
               />
             </div>

@@ -189,7 +189,7 @@ export default function AdminParentPortalPage() {
       <div className="p-12 max-w-xl mx-auto text-center space-y-4 bg-white rounded-3xl border border-rose-200 shadow-sm mt-10">
         <ShieldAlert className="w-12 h-12 text-rose-500 mx-auto" />
         <h2 className="text-xl font-black text-slate-900">
-          অ্যাক্সেস সংরক্ষিত (Admin Only)
+          অ্যাক্সেস সংরক্ষিত
         </h2>
         <p className="text-xs sm:text-sm text-slate-500">
           শুধুমাত্র অ্যাডমিন ব্যবহারকারীরা অভিভাবকদের মতামত ও মন্তব্য দেখতে পারবেন।
@@ -207,36 +207,20 @@ export default function AdminParentPortalPage() {
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
           <div className="space-y-1.5">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/20 border border-amber-300/30 text-amber-200 text-xs font-bold">
-              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              <span>Admin-Only Parent Portal • ২০২৬</span>
+
+              <span>Admin-Only Parent Portal</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-              Parent Portal (বার্ষিক অভিভাবক মতামত পোর্টাল)
+              অভিভাবক মতামত পোর্টাল
             </h1>
             <p className="text-emerald-100/90 text-xs sm:text-sm max-w-2xl">
-              সম্মানিত অভিভাবকদের প্রদত্ত বার্ষিক মূল্যায়ন, বিষয়ভিত্তিক শিক্ষক সম্পর্কে মতামত
+              সম্মানিত অভিভাবকদের প্রদত্ত মূল্যায়ন, বিষয়ভিত্তিক শিক্ষক সম্পর্কে মতামত
               এবং পরামর্শসমূহ (শুধুমাত্র অ্যাডমিনদের জন্য সংরক্ষিত)।
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            <button
-              type="button"
-              onClick={handleCopyPublicLink}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-[#022c1b] font-black text-xs sm:text-sm shadow-lg transition-all active:scale-95"
-            >
-              {copiedLink ? (
-                <>
-                  <Check className="w-4 h-4" />
-                  <span>পাবলিক লিংক কপি হয়েছে!</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-4 h-4" />
-                  <span>Copy Public Feedback Link / লিংক কপি করুন</span>
-                </>
-              )}
-            </button>
+
 
             <Link
               href="/parent-feedback"
@@ -422,10 +406,10 @@ export default function AdminParentPortalPage() {
           {feedbacks.map((item) => {
             const submittedDate = item.createdAt
               ? new Date(item.createdAt).toLocaleDateString("bn-BD", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })
               : "—";
 
             return (
@@ -554,7 +538,7 @@ export default function AdminParentPortalPage() {
                         ১০. বিষয়ভিত্তিক শিক্ষক সম্পর্কে মতামত
                       </span>
                       {Array.isArray(item.q10_subjectFeedbacks) &&
-                      item.q10_subjectFeedbacks.length > 0 ? (
+                        item.q10_subjectFeedbacks.length > 0 ? (
                         <span className="px-2.5 py-0.5 rounded-full bg-amber-200/80 dark:bg-amber-900 text-amber-950 dark:text-amber-200 text-[11px] font-black">
                           {item.q10_subjectFeedbacks.length} টি বিষয়ে মতামত
                         </span>
@@ -568,7 +552,7 @@ export default function AdminParentPortalPage() {
                     </div>
 
                     {Array.isArray(item.q10_subjectFeedbacks) &&
-                    item.q10_subjectFeedbacks.length > 0 ? (
+                      item.q10_subjectFeedbacks.length > 0 ? (
                       <div className="space-y-1.5">
                         {item.q10_subjectFeedbacks.map((sf, sIdx) => (
                           <div
@@ -708,7 +692,7 @@ export default function AdminParentPortalPage() {
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {Array.isArray(activeFeedback.q9_improvementAreas) &&
-                  activeFeedback.q9_improvementAreas.length > 0 ? (
+                    activeFeedback.q9_improvementAreas.length > 0 ? (
                     activeFeedback.q9_improvementAreas.map((area, i) => (
                       <span
                         key={i}
@@ -728,7 +712,7 @@ export default function AdminParentPortalPage() {
                   ১০. বিষয়ভিত্তিক শিক্ষক সম্পর্কে আপনার মতামত
                 </span>
                 {Array.isArray(activeFeedback.q10_subjectFeedbacks) &&
-                activeFeedback.q10_subjectFeedbacks.length > 0 ? (
+                  activeFeedback.q10_subjectFeedbacks.length > 0 ? (
                   <div className="space-y-2">
                     {activeFeedback.q10_subjectFeedbacks.map((sf, sIdx) => (
                       <div

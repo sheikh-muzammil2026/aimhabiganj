@@ -50,7 +50,7 @@ export default function ReviewsTestimonial() {
       subtitle:
         "Heartfelt reflections from parents, scholars, and community leaders on our academic standards and spiritual environment.",
       verifiedLabel: "Verified Review",
-      feedbackBtnText: "Give Feedback / মতামত দিন",
+      feedbackBtnText: "মতামত দিন",
       reviews: [
         {
           name: "Mawlana Mahmudul Hasan",
@@ -85,7 +85,7 @@ export default function ReviewsTestimonial() {
       subtitle:
         "انطباعات صادقة من أولياء الأمور والعلماء حول المستوى العلمي والتربوي والبيئة الإيمانية في مدرستنا.",
       verifiedLabel: "تقييم موثوق",
-      feedbackBtnText: "شارك برأيك / Give Feedback",
+      feedbackBtnText: "شارك برأيك",
       reviews: [
         {
           name: "الشيخ محمود الحسن",
@@ -140,7 +140,7 @@ export default function ReviewsTestimonial() {
         {/* সেকশন হেডার */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 bg-emerald-950/5 dark:bg-gradient-to-r dark:from-amber-500/15 dark:to-emerald-500/10 border border-emerald-800/15 dark:border-amber-400/35 px-4 py-1.5 rounded-full shadow-xs dark:shadow-[0_0_20px_rgba(245,158,11,0.12)]">
-            <Sparkles className="w-3.5 h-3.5 text-amber-500 dark:text-amber-300" />
+
             <span className="text-emerald-900 dark:text-amber-300 font-bold text-xs uppercase tracking-widest">
               {active.badge}
             </span>
