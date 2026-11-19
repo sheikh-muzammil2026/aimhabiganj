@@ -303,11 +303,10 @@ export default function Navbar() {
                 <Link
                   href={item.href}
                   onClick={(e) => handleSubmenuClick(e, item.href)}
-                  className={`text-[15px]  xl:text-[14px] transition-colors cursor-pointer pb-0.5 border-b-2 whitespace-nowrap ${
-                    active
-                      ? "text-[#008744] border-[#008744] font-semibold"
-                      : "text-slate-700 hover:text-[#008744] border-transparent font-medium"
-                  }`}
+                  className={`text-[15px]  xl:text-[14px] transition-colors cursor-pointer pb-0.5 border-b-2 whitespace-nowrap ${active
+                    ? "text-[#008744] border-[#008744] font-semibold"
+                    : "text-slate-700 hover:text-[#008744] border-transparent font-medium"
+                    }`}
                 >
                   {item.name}
                 </Link>
@@ -321,22 +320,20 @@ export default function Navbar() {
                   className="p-0.5 text-slate-500 hover:text-[#008744] focus:outline-none cursor-pointer transition-transform duration-200"
                 >
                   <ChevronDown
-                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                      isOpen
-                        ? "rotate-180 text-[#008744]"
-                        : "group-hover:rotate-180"
-                    }`}
+                    className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen
+                      ? "rotate-180 text-[#008744]"
+                      : "group-hover:rotate-180"
+                      }`}
                   />
                 </button>
               </div>
 
               {/* Glass Dropdown Popover */}
               <div
-                className={`absolute ltr:left-0 rtl:right-0 top-full pt-2 w-56 z-[90] transition-all duration-200 ${
-                  isOpen
-                    ? "opacity-100 visible translate-y-0 pointer-events-auto"
-                    : "opacity-0 invisible translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:pointer-events-auto"
-                }`}
+                className={`absolute ltr:left-0 rtl:right-0 top-full pt-2 w-56 z-[90] transition-all duration-200 ${isOpen
+                  ? "opacity-100 visible translate-y-0 pointer-events-auto"
+                  : "opacity-0 invisible translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:pointer-events-auto"
+                  }`}
               >
                 <div className="bg-white text-slate-800 rounded-lg shadow-xl border border-gray-100 p-1.5 space-y-0.5">
                   {item.dropdown.map((sub, i) => (
@@ -357,11 +354,10 @@ export default function Navbar() {
             <Link
               href={item.href}
               onClick={(e) => handleSubmenuClick(e, item.href)}
-              className={`text-[13px] xl:text-[14px] transition-colors block pb-0.5 border-b-2 whitespace-nowrap py-1 ${
-                active
-                  ? "text-[#008744] border-[#008744] font-bold"
-                  : "text-slate-700 hover:text-[#008744] border-transparent font-medium"
-              }`}
+              className={`text-[13px] xl:text-[14px] transition-colors block pb-0.5 border-b-2 whitespace-nowrap py-1 ${active
+                ? "text-[#008744] border-[#008744] font-bold"
+                : "text-slate-700 hover:text-[#008744] border-transparent font-medium"
+                }`}
             >
               {item.name}
             </Link>
@@ -374,15 +370,14 @@ export default function Navbar() {
     <>
       <header
         ref={headerRef}
-        className="absolute md:sticky top-2 sm:top-3 z-50 w-full px-2 sm:px-4 lg:px-6 print:hidden transition-all duration-300  mb-4"
+        className="absolute md:sticky top-2 sm:top-3 z-50 w-full px-2 sm:px-4 lg:px-6 print:hidden transition-all duration-300"
       >
         {/* Floating rounded container centered horizontally with pure white background */}
         <div
-          className={`max-w-[1380px] mx-auto bg-white rounded-xl shadow-md border border-gray-100/90 px-3 sm:px-5 py-2.5 md:py-4 transition-all duration-300 ${
-            isScrolled ? "shadow-lg bg-white/95 backdrop-blur-md" : ""
-          }`}
+          className={`mx-auto bg-white rounded-xl shadow-md border border-gray-100/90 px-3 sm:px-5 py-2.5 md:py-4 transition-all duration-300 ${isScrolled ? "shadow-lg bg-white/95 backdrop-blur-md" : ""
+            }`}
         >
-          <div className="flex items-center justify-between gap-3 lg:gap-4 xl:gap-6">
+          <div className="max-w-[1380] flex items-center justify-between gap-3 lg:gap-4 xl:gap-6">
             {/* 1. Left Section: Logo & Branding */}
             <div className="flex-shrink-0">
               <Link
@@ -413,65 +408,67 @@ export default function Navbar() {
 
             {/* 3. Right Actions */}
             <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
-              <LanguageSwitcher />
+              <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
+                <LanguageSwitcher />
 
-              {/* Theme Toggle Button */}
-              <button
-                type="button"
-                onClick={toggleDarkMode}
-                title={darkMode ? "Light Mode" : "Dark Mode"}
-                aria-label="Toggle Dark Mode"
-                className="p-1.5 sm:p-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-600 hover:text-[#008744] hover:bg-[#e6f4ea] transition-colors cursor-pointer shadow-xs"
-              >
-                {darkMode ? (
-                  <Sun className="w-4 h-4 text-amber-500" />
+                {/* Theme Toggle Button */}
+                <button
+                  type="button"
+                  onClick={toggleDarkMode}
+                  title={darkMode ? "Light Mode" : "Dark Mode"}
+                  aria-label="Toggle Dark Mode"
+                  className="p-1.5 sm:p-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-600 hover:text-[#008744] hover:bg-[#e6f4ea] transition-colors cursor-pointer shadow-xs"
+                >
+                  {darkMode ? (
+                    <Sun className="w-4 h-4 text-amber-500" />
+                  ) : (
+                    <Moon className="w-4 h-4 text-slate-600" />
+                  )}
+                </button>
+              </div>
+
+              <div className="hidden md:flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
+                {/* Auth actions: */}
+                {isLoggedIn ? (
+                  <div className=" relative group/user">
+                    <Link
+                      href={getDashboardPath()}
+                      title={t("menu.dashboard")}
+                      className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[#fef3c7] hover:bg-[#fde68a] border border-[#fde047] text-[#92400e] transition-colors cursor-pointer shadow-xs"
+                    >
+                      <User className="w-4 h-4" />
+                    </Link>
+
+                    <div className="absolute right-0 top-full pt-1.5 hidden group-hover/user:block z-50">
+                      <div className="bg-white rounded-lg shadow-xl border border-gray-100 py-1.5 w-36 text-xs overflow-hidden">
+                        <Link
+                          href={getDashboardPath()}
+                          className="flex items-center gap-2 px-3 py-2 text-slate-700 hover:bg-[#e6f4ea] hover:text-[#008744] transition-colors"
+                        >
+                          <LayoutDashboard className="w-3.5 h-3.5" />
+                          <span>{t("menu.dashboard")}</span>
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={handleLogout}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-rose-600 hover:bg-rose-50 text-left transition-colors cursor-pointer"
+                        >
+                          <LogOut className="w-3.5 h-3.5" />
+                          <span>{t("menu.logout")}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 ) : (
-                  <Moon className="w-4 h-4 text-slate-600" />
-                )}
-              </button>
-            </div>
-
-            <div className="hidden md:flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
-              {/* Auth actions: */}
-              {isLoggedIn ? (
-                <div className=" relative group/user">
                   <Link
-                    href={getDashboardPath()}
-                    title={t("menu.dashboard")}
+                    href="/login"
+                    title={t("menu.login")}
                     className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[#fef3c7] hover:bg-[#fde68a] border border-[#fde047] text-[#92400e] transition-colors cursor-pointer shadow-xs"
                   >
                     <User className="w-4 h-4" />
                   </Link>
-
-                  <div className="absolute right-0 top-full pt-1.5 hidden group-hover/user:block z-50">
-                    <div className="bg-white rounded-lg shadow-xl border border-gray-100 py-1.5 w-36 text-xs overflow-hidden">
-                      <Link
-                        href={getDashboardPath()}
-                        className="flex items-center gap-2 px-3 py-2 text-slate-700 hover:bg-[#e6f4ea] hover:text-[#008744] transition-colors"
-                      >
-                        <LayoutDashboard className="w-3.5 h-3.5" />
-                        <span>{t("menu.dashboard")}</span>
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={handleLogout}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-rose-600 hover:bg-rose-50 text-left transition-colors cursor-pointer"
-                      >
-                        <LogOut className="w-3.5 h-3.5" />
-                        <span>{t("menu.logout")}</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <Link
-                  href="/login"
-                  title={t("menu.login")}
-                  className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[#fef3c7] hover:bg-[#fde68a] border border-[#fde047] text-[#92400e] transition-colors cursor-pointer shadow-xs"
-                >
-                  <User className="w-4 h-4" />
-                </Link>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>

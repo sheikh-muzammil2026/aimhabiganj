@@ -71,10 +71,12 @@ export default function Sidebar() {
   const { data: session, isPending, refetch } = authClient.useSession();
   const [liveUser, setLiveUser] = useState(null);
 
+  const userEmail = session?.user?.email || "";
+
   // Sync user role and permissions from DB
   const syncUserData = useCallback(async () => {
     try {
-      const email = session?.user?.email || "";
+      const email = userEmail;
       const query = email ? `?email=${encodeURIComponent(email)}` : "";
       const res = await fetch(`${API_BASE}/api/user/me${query}`, {
         headers: email ? { "x-user-email": email } : {},
@@ -88,13 +90,16 @@ export default function Sidebar() {
     } catch (e) {
       console.warn("Failed to sync user data in sidebar:", e);
     }
-  }, [session?.user?.email]);
+  }, [userEmail]);
 
   useEffect(() => {
-    if (session?.user) {
-      syncUserData();
+    if (userEmail) {
+      const timer = setTimeout(() => {
+        syncUserData();
+      }, 0);
+      return () => clearTimeout(timer);
     }
-  }, [session, syncUserData]);
+  }, [userEmail, syncUserData]);
 
   // Reactive listener for permission changes across tabs and windows
   useEffect(() => {
@@ -224,16 +229,20 @@ export default function Sidebar() {
                   title: "সীট প্ল্যান",
                   submenu: [
                     {
-                      title: "সীট প্ল্যান এন্ট্রি",
-                      href: "/dashboard/shared/academics/exam-results/exam/seat-plan/seat-plan-entry",
+                      title: "সীট এন্ট্রি",
+                      href: "/dashboard/shared/academics/exam-results/exam/seat-plan/seat-entry",
                     },
                     {
-                      title: "হল ও ক্লাস ভিত্তিক সামারি",
+                      title: "হল ভিত্তিক ছাত্র সংখ্যা",
                       href: "/dashboard/shared/academics/exam-results/exam/seat-plan/Hall&Class-wise-summary",
                     },
                     {
-                      title: "হল ভিত্তিক ম্যাপ",
-                      href: "/dashboard/shared/academics/exam-results/exam/seat-plan/hall-wise-map",
+                      title: "হলের ম্যাপ",
+                      href: "/dashboard/shared/academics/exam-results/exam/seat-plan/hall-map",
+                    },
+                    {
+                      title: "আসন স্টিকার",
+                      href: "/dashboard/shared/academics/exam-results/exam/seat-plan/seat-stickers",
                     },
                   ],
                 },
@@ -432,11 +441,11 @@ export default function Sidebar() {
       roles: ["admin"],
     },
     {
-      id: "parent-portal",
-      title: "Parent Portal",
+      id: "parent-management",
+      title: "অভিভাবক ব্যবস্থাপনা",
       icon: "💬",
       lucideIcon: <MessageSquareQuote className="w-5 h-5" />,
-      href: "/dashboard/admin/parent-portal",
+      href: "/dashboard/admin/parent-management",
       roles: ["admin"],
     },
     {
@@ -613,8 +622,8 @@ export default function Sidebar() {
             type="button"
             onClick={() => toggleNestedSubmenu(node.title, node)}
             className={`w-full flex items-center justify-between py-2 px-3 text-[11px] sm:text-xs rounded-lg transition-all duration-200 font-semibold ${isOpen || isActive
-                ? "text-amber-350 bg-emerald-900/40 text-amber-300"
-                : "text-emerald-200/80 hover:text-white hover:bg-emerald-800/20"
+              ? "text-amber-350 bg-emerald-900/40 text-amber-300"
+              : "text-emerald-200/80 hover:text-white hover:bg-emerald-800/20"
               }`}
             style={{ paddingLeft: `${12 + level * 8}px` }}
           >
@@ -644,8 +653,8 @@ export default function Sidebar() {
         key={node.href || index}
         href={node.href || "#"}
         className={`block py-1.5 px-3 text-[10px] sm:text-[11px] rounded-md transition-all duration-200 font-medium ${isChildActive
-            ? "text-amber-400 font-bold bg-emerald-900/60 border-l-2 border-amber-400 pl-2"
-            : "text-emerald-300/70 hover:text-white hover:bg-emerald-800/10 hover:pl-4"
+          ? "text-amber-400 font-bold bg-emerald-900/60 border-l-2 border-amber-400 pl-2"
+          : "text-emerald-300/70 hover:text-white hover:bg-emerald-800/10 hover:pl-4"
           }`}
         style={{ paddingLeft: `${12 + level * 6}px` }}
       >
@@ -666,8 +675,8 @@ export default function Sidebar() {
             type="button"
             onClick={() => toggleNestedSubmenu(node.title, node)}
             className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs font-bold transition-all ${isOpen || isAnyChildActive
-                ? "bg-emerald-900 text-amber-300 border-amber-400"
-                : "bg-emerald-950/50 text-emerald-100 border-emerald-800/40"
+              ? "bg-emerald-900 text-amber-300 border-amber-400"
+              : "bg-emerald-950/50 text-emerald-100 border-emerald-800/40"
               }`}
             style={{ paddingLeft: `${12 + level * 8}px` }}
           >
@@ -701,8 +710,8 @@ export default function Sidebar() {
         href={node.href || "#"}
         onClick={() => setActiveMobileDrawer(null)}
         className={`flex items-center gap-3 p-2.5 rounded-lg border text-[11px] font-semibold transition-all ${isChildActive
-            ? "bg-amber-400 text-[#043e30] border-amber-400 font-bold"
-            : "bg-emerald-950/30 text-emerald-200 border-emerald-800/30 hover:bg-emerald-900/40"
+          ? "bg-amber-400 text-[#043e30] border-amber-400 font-bold"
+          : "bg-emerald-950/30 text-emerald-200 border-emerald-800/30 hover:bg-emerald-900/40"
           }`}
         style={{ paddingLeft: `${12 + level * 8}px` }}
       >
@@ -758,8 +767,8 @@ export default function Sidebar() {
         href={node.href || "#"}
         onClick={() => setActiveMobileDrawer(null)}
         className={`flex items-center gap-2 p-2 text-[11px] font-medium transition-colors ${isChildActive
-            ? "text-amber-400 font-bold bg-emerald-900/30"
-            : "text-emerald-300/80 hover:text-white"
+          ? "text-amber-400 font-bold bg-emerald-900/30"
+          : "text-emerald-300/80 hover:text-white"
           }`}
         style={{ paddingLeft: `${16 + level * 8}px` }}
       >
@@ -853,8 +862,8 @@ export default function Sidebar() {
                         setOpenDropdown(isDropdownOpen ? null : item.id)
                       }
                       className={`w-full flex items-center justify-between px-3 py-2.5 text-xs sm:text-sm rounded-xl transition-all duration-300 group/btn ${isDropdownOpen
-                          ? "bg-emerald-900/80 text-amber-300 shadow-inner border-l-4 border-amber-400 pl-2"
-                          : "text-emerald-100/90 hover:bg-emerald-800/40 hover:text-white hover:translate-x-1"
+                        ? "bg-emerald-900/80 text-amber-300 shadow-inner border-l-4 border-amber-400 pl-2"
+                        : "text-emerald-100/90 hover:bg-emerald-800/40 hover:text-white hover:translate-x-1"
                         }`}
                     >
                       <div className="flex items-center gap-3">
@@ -875,8 +884,8 @@ export default function Sidebar() {
                     <Link
                       href={item.href || "#"}
                       className={`flex items-center gap-3 px-3 py-2.5 text-xs sm:text-sm rounded-xl transition-all duration-300 group/link ${isActive
-                          ? "bg-amber-400 text-[#043e30] font-black shadow-md border-r-4 border-emerald-900 scale-[1.02]"
-                          : "text-emerald-100/90 hover:bg-emerald-800/40 hover:text-white hover:translate-x-1"
+                        ? "bg-amber-400 text-[#043e30] font-black shadow-md border-r-4 border-emerald-900 scale-[1.02]"
+                        : "text-emerald-100/90 hover:bg-emerald-800/40 hover:text-white hover:translate-x-1"
                         }`}
                     >
                       <span className="text-base transform group-hover/link:scale-110 transition-transform">
@@ -892,8 +901,8 @@ export default function Sidebar() {
                   {hasDropdown && (
                     <div
                       className={`pl-4 space-y-1 border-l-2 border-emerald-800/50 ml-5 transition-all duration-300 ${isDropdownOpen
-                          ? "max-h-[2000px] opacity-100 py-1"
-                          : "max-h-0 opacity-0 overflow-hidden"
+                        ? "max-h-[2000px] opacity-100 py-1"
+                        : "max-h-0 opacity-0 overflow-hidden"
                         }`}
                     >
                       {item.dropdown.map((sub, subIdx) =>
@@ -989,8 +998,8 @@ export default function Sidebar() {
                   key={item.id}
                   onClick={() => handleBottomNavItemClick(item)}
                   className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative ${isDrawerActive || isRouteActive
-                      ? "text-amber-400 font-bold"
-                      : "text-emerald-200/70 hover:text-white"
+                    ? "text-amber-400 font-bold"
+                    : "text-emerald-200/70 hover:text-white"
                     }`}
                 >
                   {Content}
@@ -1004,8 +1013,8 @@ export default function Sidebar() {
                 href={item.href || "#"}
                 onClick={() => setActiveMobileDrawer(null)}
                 className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative ${isRouteActive
-                    ? "text-amber-400 font-bold"
-                    : "text-emerald-200/70 hover:text-white"
+                  ? "text-amber-400 font-bold"
+                  : "text-emerald-200/70 hover:text-white"
                   }`}
               >
                 {Content}
@@ -1021,8 +1030,8 @@ export default function Sidebar() {
               )
             }
             className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative ${activeMobileDrawer === "full"
-                ? "text-amber-400 font-bold"
-                : "text-emerald-200/70 hover:text-white"
+              ? "text-amber-400 font-bold"
+              : "text-emerald-200/70 hover:text-white"
               }`}
           >
             {activeMobileDrawer === "full" && (
@@ -1128,8 +1137,8 @@ export default function Sidebar() {
                                 setOpenDropdown(isDropdownOpen ? null : item.id)
                               }
                               className={`w-full flex justify-between items-center p-3 text-left font-medium transition-colors ${isDropdownOpen
-                                  ? "bg-emerald-900/60 text-amber-300"
-                                  : "text-emerald-100"
+                                ? "bg-emerald-900/60 text-amber-300"
+                                : "text-emerald-100"
                                 }`}
                             >
                               <div className="flex items-center gap-3">
@@ -1156,8 +1165,8 @@ export default function Sidebar() {
                             href={item.href || "#"}
                             onClick={() => setActiveMobileDrawer(null)}
                             className={`flex items-center gap-3 p-3 text-xs font-semibold transition-colors ${isActive
-                                ? "text-amber-400 bg-emerald-900/60"
-                                : "text-emerald-100 hover:text-white"
+                              ? "text-amber-400 bg-emerald-900/60"
+                              : "text-emerald-100 hover:text-white"
                               }`}
                           >
                             <span className="text-base">{item.icon}</span>

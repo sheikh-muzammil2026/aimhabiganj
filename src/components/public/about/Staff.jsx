@@ -4,8 +4,8 @@
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { ArrowRight, Pause, Play } from "lucide-react";
-import PersonDetailsModal from "@/components/public/shared/PersonDetailsModal";
-import StaffCard from "@/components/public/shared/StaffCard";
+import PersonDetailsModal from "@/components/shared/PersonDetailsModal";
+import StaffCard from "@/components/shared/StaffCard";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";

@@ -10,6 +10,11 @@ import PrintSignatures from "@/components/shared/print/PrintSignatures";
 import PrintSocialFooter from "@/components/shared/print/PrintSocialFooter";
 import useUrlPagination from "@/hooks/useUrlPagination";
 import { toBengaliDigits } from "@/lib/studentUtils";
+import { useReactToPrint } from "react-to-print";
+import { Printer, Loader2 } from "lucide-react";
+import CTResultPrintView, {
+  CT_PAGE_STYLE,
+} from "@/components/dashboard/academics/CTResultPrintView";
 
 const API_BASE_URL = (
   process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000"
@@ -70,6 +75,18 @@ function ClassWiseResultContent() {
 
   const [principalSignatureSrc] = useState("/principle's_signature.jpg");
   const [controllerSignatureSrc] = useState("/anarul.png");
+
+  // ট্যাব স্টেট: 'term' (বর্তমান সাময়িক ফলাফল শিট) অথবা 'ct' (ক্লাস টেস্ট ফলাফল শিট)
+  const [activeTab, setActiveTab] = useState("term");
+  const [fullClassResultsForPrint, setFullClassResultsForPrint] = useState([]);
+  const [isPreparingCTPrint, setIsPreparingCTPrint] = useState(false);
+  const ctPrintRef = useRef(null);
+
+  const reactToPrintCT = useReactToPrint({
+    contentRef: ctPrintRef,
+    documentTitle: `CT-Result-${selectedClass}-${examType}-${year}`,
+    pageStyle: CT_PAGE_STYLE,
+  });
 
   const fetchClassResults = useCallback(async () => {
     if (!selectedClass) return;
@@ -524,6 +541,229 @@ function ClassWiseResultContent() {
     window.print();
   };
 
+  // --- ক্লাস টেস্ট (সিটি) গণনা ও মেধা তালিকা লজিক ---
+  const getStudentCTCalculations = useCallback(
+    (student) => {
+      const subjects = student.allSubjects || [];
+      const totalSubs = subjects.length;
+
+      if (totalSubs === 0) {
+        return {
+          totalCTMarks: 0,
+          averageCT: "0.00",
+          validCount: 0,
+          isAbsentAll: true,
+        };
+      }
+
+      let totalCT = 0;
+      let validCount = 0;
+      let absentCount = 0;
+
+      subjects.forEach((sub) => {
+        const termData = sub[examType] || {};
+        const ctVal = termData.ct;
+        const isAbsent =
+          Boolean(termData.isAbsent) ||
+          ctVal === "A" ||
+          ctVal === "a" ||
+          ctVal === "ABS" ||
+          ctVal === "Abs" ||
+          ctVal === "অনুঃ";
+
+        if (isAbsent) {
+          absentCount++;
+        } else if (
+          ctVal !== undefined &&
+          ctVal !== null &&
+          String(ctVal).trim() !== ""
+        ) {
+          const num = parseFloat(ctVal);
+          if (!isNaN(num)) {
+            totalCT += num;
+            validCount++;
+          }
+        }
+      });
+
+      const isAbsentAll = absentCount === totalSubs && totalSubs > 0;
+      const averageCT =
+        totalSubs > 0 ? (totalCT / totalSubs).toFixed(2) : "0.00";
+
+      return {
+        totalCTMarks: totalCT,
+        averageCT,
+        validCount,
+        isAbsentAll,
+      };
+    },
+    [examType],
+  );
+
+  const computeCTData = useCallback(
+    (studentList = []) => {
+      const calcsMap = new Map();
+      studentList.forEach((s) => {
+        calcsMap.set(s.studentId, getStudentCTCalculations(s));
+      });
+
+      const rankMap = new Map();
+      const validStudents = studentList
+        .filter((s) => {
+          const calc = calcsMap.get(s.studentId);
+          return calc && !calc.isAbsentAll && calc.totalCTMarks > 0;
+        })
+        .sort((a, b) => {
+          const calcA = calcsMap.get(a.studentId);
+          const calcB = calcsMap.get(b.studentId);
+          const markDiff = (calcB?.totalCTMarks || 0) - (calcA?.totalCTMarks || 0);
+          if (markDiff !== 0) return markDiff;
+          const rollA = parseInt(a.roll, 10) || 999999;
+          const rollB = parseInt(b.roll, 10) || 999999;
+          return rollA - rollB;
+        });
+
+      validStudents.forEach((student, idx) => {
+        if (idx > 0) {
+          const prevStudent = validStudents[idx - 1];
+          const prevCalc = calcsMap.get(prevStudent.studentId);
+          const currCalc = calcsMap.get(student.studentId);
+          if ((currCalc?.totalCTMarks || 0) === (prevCalc?.totalCTMarks || 0)) {
+            rankMap.set(student.studentId, rankMap.get(prevStudent.studentId));
+          } else {
+            rankMap.set(student.studentId, idx + 1);
+          }
+        } else {
+          rankMap.set(student.studentId, 1);
+        }
+      });
+
+      const counts = {};
+      studentList.forEach((s) => {
+        const calc = calcsMap.get(s.studentId);
+        if (calc && !calc.isAbsentAll && calc.totalCTMarks > 0) {
+          counts[calc.totalCTMarks] = (counts[calc.totalCTMarks] || 0) + 1;
+        }
+      });
+      const tied = new Set();
+      Object.entries(counts).forEach(([mark, count]) => {
+        if (count > 1) tied.add(Number(mark));
+      });
+
+      let highestMarks = 0;
+      let sumTotalMarks = 0;
+      let presentStudents = 0;
+      let absentCount = 0;
+
+      studentList.forEach((s) => {
+        const calc = calcsMap.get(s.studentId);
+        if (calc) {
+          if (calc.isAbsentAll) {
+            absentCount++;
+          } else {
+            presentStudents++;
+            sumTotalMarks += calc.totalCTMarks;
+            if (calc.totalCTMarks > highestMarks) {
+              highestMarks = calc.totalCTMarks;
+            }
+          }
+        }
+      });
+
+      const classAverage =
+        presentStudents > 0
+          ? (sumTotalMarks / presentStudents).toFixed(2)
+          : "0.00";
+
+      return {
+        calcsMap,
+        rankMap,
+        tied,
+        stats: {
+          totalStudents: studentList.length,
+          presentStudents,
+          absentCount,
+          highestMarks,
+          classAverage,
+        },
+      };
+    },
+    [getStudentCTCalculations],
+  );
+
+  const activeCTData = useMemo(() => {
+    return computeCTData(results);
+  }, [results, computeCTData]);
+
+  const printCTData = useMemo(() => {
+    const targetList =
+      fullClassResultsForPrint.length > 0
+        ? fullClassResultsForPrint
+        : results;
+    return computeCTData(targetList);
+  }, [fullClassResultsForPrint, results, computeCTData]);
+
+  // সিটি রেজাল্ট শিট প্রিন্ট হ্যান্ডলার (পেজিনেশন বাইপাস সহ)
+  const handleCTPrintClick = async () => {
+    if (results.length === 0) {
+      toast.error("প্রিন্ট করার মতো কোনো তথ্য নেই!");
+      return;
+    }
+
+    if (totalResults <= results.length) {
+      setFullClassResultsForPrint(results);
+      setTimeout(() => {
+        reactToPrintCT();
+      }, 50);
+      return;
+    }
+
+    setIsPreparingCTPrint(true);
+    try {
+      const queryParams = new URLSearchParams({
+        class: selectedClass,
+        year: year,
+        term: examType,
+        page: "1",
+        limit: "1000",
+      });
+
+      const res = await fetch(
+        `${API_BASE_URL}/api/results/class?${queryParams.toString()}`,
+        {
+          headers: {
+            "x-user-email": userRef.current?.email || "",
+            "x-user-role": userRef.current?.role || "",
+          },
+        },
+      );
+
+      if (!res.ok) {
+        throw new Error(`Failed to fetch records: ${res.status}`);
+      }
+
+      const data = await res.json();
+      if (data?.success && Array.isArray(data.data)) {
+        const sorted = [...data.data].sort(
+          (a, b) =>
+            (parseInt(a.roll, 10) || Infinity) -
+            (parseInt(b.roll, 10) || Infinity),
+        );
+        setFullClassResultsForPrint(sorted);
+      } else {
+        setFullClassResultsForPrint(results);
+      }
+    } catch (err) {
+      console.error("Error fetching full class records for print:", err);
+      setFullClassResultsForPrint(results);
+    } finally {
+      setIsPreparingCTPrint(false);
+      setTimeout(() => {
+        reactToPrintCT();
+      }, 100);
+    }
+  };
+
   return (
     <>
       <style jsx global>{`
@@ -750,35 +990,74 @@ function ClassWiseResultContent() {
 
       <div className="p-1 sm:p-6 bg-slate-50 min-h-screen">
         <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-7 relative print-container">
+          {/* ট্যাব সুইচ বার (সাময়িক ফলাফল বনাম ক্লাস টেস্ট ফলাফল) */}
+          <div className="flex items-center gap-2 mb-5 p-1 bg-slate-100/90 rounded-xl border border-slate-200/80 w-fit no-print">
+            <button
+              type="button"
+              onClick={() => setActiveTab("term")}
+              className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 flex items-center gap-2 cursor-pointer ${
+                activeTab === "term"
+                  ? "bg-[#043e30] text-amber-300 shadow-sm"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+              }`}
+            >
+              <span>📄</span>
+              <span>সাময়িক পরীক্ষার ফলাফল শিট</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("ct")}
+              className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 flex items-center gap-2 cursor-pointer ${
+                activeTab === "ct"
+                  ? "bg-[#043e30] text-amber-300 shadow-sm"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+              }`}
+            >
+              <span>📝</span>
+              <span>সিটি (Class Test) ফলাফল শিট</span>
+            </button>
+          </div>
+
           <div className="border-b border-slate-100 pb-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
             <div>
               <div className="flex items-center gap-3 flex-wrap">
                 <h1 className="text-xl sm:text-2xl font-black text-[#043e30]">
-                  শ্রেণিভিত্তিক ফলাফল ও মেরিট তালিকা
+                  {activeTab === "ct"
+                    ? "শ্রেণিভিত্তিক ক্লাস টেস্ট (সিটি) ফলাফল"
+                    : "শ্রেণিভিত্তিক ফলাফল ও মেরিট তালিকা"}
                 </h1>
-                <span
-                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition-colors ${
-                    isPublished
-                      ? "bg-emerald-50 text-emerald-700 border-emerald-300"
-                      : "bg-rose-50 text-rose-700 border-rose-300"
-                  }`}
-                >
+                {activeTab === "term" && (
                   <span
-                    className={`w-2 h-2 rounded-full ${
-                      isPublished ? "bg-emerald-500" : "bg-rose-500"
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition-colors ${
+                      isPublished
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-300"
+                        : "bg-rose-50 text-rose-700 border-rose-300"
                     }`}
-                  ></span>
-                  {isPublished ? "প্রকাশিত" : "অপ্রকাশিত"}
-                </span>
+                  >
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        isPublished ? "bg-emerald-500" : "bg-rose-500"
+                      }`}
+                    ></span>
+                    {isPublished ? "প্রকাশিত" : "অপ্রকাশিত"}
+                  </span>
+                )}
+                {activeTab === "ct" && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border bg-emerald-50 text-emerald-800 border-emerald-200">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    ক্লাস টেস্ট (CT)
+                  </span>
+                )}
               </div>
               <p className="text-xs text-slate-500 mt-1">
-                শ্রেণি, পরীক্ষার ধরন এবং শিক্ষাবর্ষ অনুযায়ী সম্পূর্ণ ক্লাসের
-                ফলাফল এক নজরে দেখুন।
+                {activeTab === "ct"
+                  ? "শ্রেণি, পরীক্ষার ধরন এবং শিক্ষাবর্ষ অনুযায়ী ক্লাস টেস্টের নম্বর ও সিটি মেধা তালিকা।"
+                  : "শ্রেণি, পরীক্ষার ধরন এবং শিক্ষাবর্ষ অনুযায়ী সম্পূর্ণ ক্লাসের ফলাফল এক নজরে দেখুন।"}
               </p>
             </div>
 
             <div className="flex items-center gap-2.5 flex-wrap">
-              {isAdmin && (
+              {activeTab === "term" && isAdmin && (
                 <button
                   type="button"
                   onClick={handleTogglePublish}
@@ -808,12 +1087,33 @@ function ClassWiseResultContent() {
                 </button>
               )}
 
-              {results.length > 0 && (
+              {activeTab === "term" && results.length > 0 && (
                 <button
                   onClick={handlePrint}
                   className="inline-flex items-center justify-center gap-2 bg-[#043e30] hover:bg-[#065c47] text-amber-300 px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all shadow-md active:scale-95 cursor-pointer"
                 >
                   🖨️ প্রিন্ট করুন
+                </button>
+              )}
+
+              {activeTab === "ct" && results.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleCTPrintClick}
+                  disabled={isPreparingCTPrint}
+                  className="inline-flex items-center justify-center gap-2 bg-[#043e30] hover:bg-[#065c47] text-amber-300 px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-60"
+                >
+                  {isPreparingCTPrint ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>প্রস্তুত হচ্ছে...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Printer className="w-4 h-4" />
+                      <span>CT ফলাফল প্রিন্ট করুন</span>
+                    </>
+                  )}
                 </button>
               )}
             </div>
@@ -938,7 +1238,346 @@ function ClassWiseResultContent() {
             </div>
           ) : (
             <div className="relative">
-              {isAdmin && !isPublished && (
+              {activeTab === "ct" ? (
+                <div>
+                  {/* মোবাইল ভিউ (স্ক্রিন অনলি) */}
+                  <div className="block sm:hidden divide-y divide-slate-200 bg-white/90 no-print relative z-10">
+                    {results.map((student) => {
+                      const calc =
+                        activeCTData.calcsMap.get(student.studentId) || {
+                          totalCTMarks: 0,
+                          averageCT: "0.00",
+                          isAbsentAll: true,
+                        };
+                      const merit =
+                        calc.isAbsentAll
+                          ? "-"
+                          : activeCTData.rankMap.get(student.studentId) || "-";
+                      const isTied =
+                        !calc.isAbsentAll &&
+                        calc.totalCTMarks > 0 &&
+                        activeCTData.tied.has(calc.totalCTMarks);
+
+                      return (
+                        <div
+                          key={student.studentId}
+                          className={`p-4 space-y-3 ${
+                            isTied
+                              ? "bg-emerald-50/70 border-l-4 border-emerald-500"
+                              : ""
+                          }`}
+                        >
+                          <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                            <div className="flex items-center gap-2">
+                              <span className="bg-[#043e30] text-amber-300 font-bold px-2 py-0.5 rounded text-xs">
+                                রোল:{" "}
+                                {student.roll
+                                  ? toBengaliDigits(student.roll)
+                                  : "প্রযোজ্য নয়"}
+                              </span>
+                              <span className="font-mono font-bold text-slate-700 text-xs">
+                                আইডি: {toBengaliDigits(student.studentId)}
+                              </span>
+                            </div>
+                            <div className="text-right">
+                              <span className="text-[10px] text-slate-500 block leading-tight">
+                                সিটি মেধাস্থান
+                              </span>
+                              <span className="font-extrabold text-[#043e30] text-sm">
+                                {merit !== "-" ? toBengaliDigits(merit) : "-"}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div>
+                            <span className="text-[11px] font-semibold text-slate-500 block">
+                              শিক্ষার্থীর নাম
+                            </span>
+                            <h4 className="font-bold text-slate-800 text-sm">
+                              {student.studentName || "প্রযোজ্য নয়"}
+                            </h4>
+                          </div>
+
+                          <div>
+                            <span className="text-[11px] font-semibold text-slate-500 block mb-1.5">
+                              বিষয়ভিত্তিক সিটি নম্বর
+                            </span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {allSubjectsList.map((subjName, idx) => {
+                                const matchedSub = student.allSubjects?.find(
+                                  (s) => s.subject === subjName,
+                                );
+                                const termData = matchedSub?.[examType] || {};
+                                const ctVal = termData.ct;
+                                const isAbsent =
+                                  Boolean(termData.isAbsent) ||
+                                  ctVal === "A" ||
+                                  ctVal === "a" ||
+                                  ctVal === "ABS" ||
+                                  ctVal === "Abs" ||
+                                  ctVal === "অনুঃ";
+
+                                return (
+                                  <span
+                                    key={idx}
+                                    className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs border ${
+                                      isAbsent
+                                        ? "bg-rose-50 text-rose-700 border-rose-200 font-bold"
+                                        : "bg-slate-100 text-slate-800 border-slate-200/60 font-semibold"
+                                    }`}
+                                  >
+                                    <span className="font-semibold">
+                                      {formatSubjectName(subjName)}:
+                                    </span>
+                                    <span>
+                                      {isAbsent
+                                        ? "অনুঃ"
+                                        : ctVal !== undefined &&
+                                          ctVal !== null &&
+                                          String(ctVal).trim() !== ""
+                                        ? toBengaliDigits(ctVal)
+                                        : "-"}
+                                    </span>
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-center text-xs">
+                            <div className="bg-slate-50 p-1.5 rounded">
+                              <span className="text-[10px] text-slate-500 block">
+                                মোট সিটি নম্বর
+                              </span>
+                              <span className="font-bold text-slate-800">
+                                {calc.isAbsentAll
+                                  ? "অনুঃ"
+                                  : toBengaliDigits(calc.totalCTMarks)}
+                              </span>
+                            </div>
+                            <div className="bg-slate-50 p-1.5 rounded">
+                              <span className="text-[10px] text-slate-500 block">
+                                সিটি গড়
+                              </span>
+                              <span className="font-bold text-slate-800">
+                                {calc.isAbsentAll
+                                  ? "-"
+                                  : toBengaliDigits(calc.averageCT)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* ডেস্কটপ ভিউ */}
+                  <div className="hidden sm:block overflow-x-auto relative z-10">
+                    <table className="w-full text-center border-collapse text-[11px] sm:text-xs">
+                      <thead>
+                        <tr className="bg-[#043e30] text-amber-300">
+                          <th className="p-2 border border-emerald-900 font-bold text-center w-12">
+                            রোল
+                          </th>
+                          <th className="p-2 border border-emerald-900 font-bold text-center w-16">
+                            আইডি
+                          </th>
+                          <th className="p-2 border border-emerald-900 font-bold text-left min-w-[130px] px-3">
+                            শিক্ষার্থীর নাম
+                          </th>
+
+                          {allSubjectsList.map((subjectName, i) => (
+                            <th
+                              key={i}
+                              className="p-1.5 border border-emerald-900 font-bold text-center whitespace-nowrap min-w-[50px]"
+                            >
+                              {formatSubjectName(subjectName)}
+                            </th>
+                          ))}
+
+                          <th className="p-2 border border-emerald-900 font-bold text-center whitespace-nowrap w-20">
+                            মোট নম্বর
+                          </th>
+                          <th className="p-2 border border-emerald-900 font-bold text-center whitespace-nowrap w-16">
+                            গড়
+                          </th>
+                          <th className="p-2 border border-emerald-900 font-bold text-center whitespace-nowrap w-20">
+                            সিটি মেধা
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white/95">
+                        {results.map((student) => {
+                          const calc =
+                            activeCTData.calcsMap.get(student.studentId) || {
+                              totalCTMarks: 0,
+                              averageCT: "0.00",
+                              isAbsentAll: true,
+                            };
+                          const merit =
+                            calc.isAbsentAll
+                              ? "-"
+                              : activeCTData.rankMap.get(student.studentId) || "-";
+                          const isTied =
+                            !calc.isAbsentAll &&
+                            calc.totalCTMarks > 0 &&
+                            activeCTData.tied.has(calc.totalCTMarks);
+
+                          return (
+                            <tr
+                              key={student.studentId}
+                              className={`border-b border-slate-200 transition-colors ${
+                                isTied
+                                  ? "bg-emerald-50/80 font-medium"
+                                  : "hover:bg-slate-50 bg-white/90"
+                              }`}
+                            >
+                              <td className="p-2 border border-slate-300 font-bold text-slate-700 text-center">
+                                {student.roll
+                                  ? toBengaliDigits(student.roll)
+                                  : "প্রযোজ্য নয়"}
+                              </td>
+                              <td className="p-2 border border-slate-300 font-mono font-bold text-slate-800 text-center">
+                                {toBengaliDigits(student.studentId)}
+                              </td>
+                              <td className="p-2 border border-slate-300 font-bold text-slate-900 text-left px-3 whitespace-nowrap">
+                                {student.studentName || "প্রযোজ্য নয়"}
+                              </td>
+
+                              {allSubjectsList.map((subjName, idx) => {
+                                const matchedSub = student.allSubjects?.find(
+                                  (s) => s.subject === subjName,
+                                );
+                                if (!matchedSub) {
+                                  return (
+                                    <td
+                                      key={idx}
+                                      className="p-1.5 border border-slate-300 text-center text-slate-400"
+                                    >
+                                      -
+                                    </td>
+                                  );
+                                }
+
+                                const termData = matchedSub[examType] || {};
+                                const ctVal = termData.ct;
+                                const isAbsent =
+                                  Boolean(termData.isAbsent) ||
+                                  ctVal === "A" ||
+                                  ctVal === "a" ||
+                                  ctVal === "ABS" ||
+                                  ctVal === "Abs" ||
+                                  ctVal === "অনুঃ";
+
+                                if (isAbsent) {
+                                  return (
+                                    <td
+                                      key={idx}
+                                      className="p-1.5 border border-slate-300 text-center font-bold text-rose-600 bg-rose-50"
+                                    >
+                                      অনুঃ
+                                    </td>
+                                  );
+                                }
+
+                                if (
+                                  ctVal === undefined ||
+                                  ctVal === null ||
+                                  String(ctVal).trim() === ""
+                                ) {
+                                  return (
+                                    <td
+                                      key={idx}
+                                      className="p-1.5 border border-slate-300 text-center text-slate-400"
+                                    >
+                                      -
+                                    </td>
+                                  );
+                                }
+
+                                const num = parseFloat(ctVal);
+                                const displayVal = Number.isFinite(num)
+                                  ? toBengaliDigits(num)
+                                  : toBengaliDigits(ctVal);
+
+                                return (
+                                  <td
+                                    key={idx}
+                                    className="p-1.5 border border-slate-300 text-center font-bold text-slate-800"
+                                  >
+                                    {displayVal}
+                                  </td>
+                                );
+                              })}
+
+                              <td className="p-2 border border-slate-300 font-extrabold text-center text-slate-900 bg-slate-50/50">
+                                {calc.isAbsentAll
+                                  ? "অনুঃ"
+                                  : toBengaliDigits(calc.totalCTMarks)}
+                              </td>
+                              <td className="p-2 border border-slate-300 font-semibold text-center text-slate-800">
+                                {calc.isAbsentAll
+                                  ? "-"
+                                  : toBengaliDigits(calc.averageCT)}
+                              </td>
+                              <td className="p-2 border border-slate-300 font-black text-center text-[#043e30] bg-emerald-50/40">
+                                {merit !== "-" ? toBengaliDigits(merit) : "-"}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* CT এক নজরে পরিসংখ্যান */}
+                  <div className="text-[10px] sm:text-xs font-bold text-slate-800 bg-emerald-50/60 border border-emerald-100 rounded-lg mt-3 py-2 px-4 flex flex-wrap items-center justify-between gap-2 no-print">
+                    <div className="flex items-center gap-3">
+                      <span>
+                        মোট পরীক্ষার্থী:{" "}
+                        <strong className="text-slate-900 font-extrabold">
+                          {toBengaliDigits(results.length)}
+                        </strong>{" "}
+                        জন
+                      </span>
+                      <span>•</span>
+                      <span>
+                        উপস্থিত:{" "}
+                        <strong className="text-emerald-700 font-extrabold">
+                          {toBengaliDigits(activeCTData.stats.presentStudents)}
+                        </strong>{" "}
+                        জন
+                      </span>
+                      <span>•</span>
+                      <span>
+                        অনুপস্থিত:{" "}
+                        <strong className="text-rose-600 font-extrabold">
+                          {toBengaliDigits(activeCTData.stats.absentCount)}
+                        </strong>{" "}
+                        জন
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <span>
+                        সর্বোচ্চ সিটি মার্ক:{" "}
+                        <strong className="text-[#043e30] font-black">
+                          {toBengaliDigits(activeCTData.stats.highestMarks)}
+                        </strong>
+                      </span>
+                      <span>•</span>
+                      <span>
+                        ক্লাস গড়:{" "}
+                        <strong className="text-slate-900 font-extrabold">
+                          {toBengaliDigits(activeCTData.stats.classAverage)}
+                        </strong>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {isAdmin && !isPublished && (
                 <div className="bg-amber-100/70 border border-amber-300 rounded-lg p-3 text-xs text-amber-900 font-bold flex items-center gap-2 mb-4 no-print">
                   <span>⚠️</span>
                   এটি একটি অপ্রকাশিত ফলাফল। অ্যাডমিন প্রিভিউ হিসেবে আপনি এটি
@@ -1473,6 +2112,8 @@ function ClassWiseResultContent() {
                   />
                 </div>
               </div>
+                </>
+              )}
             </div>
           )}
 
@@ -1495,6 +2136,37 @@ function ClassWiseResultContent() {
               />
             </div>
           )}
+
+          {/* অফস্ক্রিন সিটি প্রিন্ট ভিউ (react-to-print) */}
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              left: "-9999px",
+              top: "-9999px",
+              width: "297mm",
+              overflow: "hidden",
+            }}
+          >
+            <CTResultPrintView
+              ref={ctPrintRef}
+              results={
+                fullClassResultsForPrint.length > 0
+                  ? fullClassResultsForPrint
+                  : results
+              }
+              selectedClass={selectedClass}
+              examType={examType}
+              year={year}
+              allSubjectsList={allSubjectsList}
+              ctCalculationsMap={printCTData.calcsMap}
+              ctMeritRankMap={printCTData.rankMap}
+              tiedMarksSet={printCTData.tied}
+              stats={printCTData.stats}
+              principalSignatureSrc={principalSignatureSrc}
+              controllerSignatureSrc={controllerSignatureSrc}
+            />
+          </div>
         </div>
       </div>
     </>

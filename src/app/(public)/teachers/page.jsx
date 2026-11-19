@@ -10,8 +10,8 @@ import {
   Users,
   RotateCcw,
 } from "lucide-react";
-import PersonDetailsModal from "@/components/public/shared/PersonDetailsModal";
-import TeacherCard from "@/components/public/shared/TeacherCard";
+import PersonDetailsModal from "@/components/shared/PersonDetailsModal";
+import TeacherCard from "@/components/shared/TeacherCard";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
@@ -142,11 +142,10 @@ export default function TeachersPage() {
               <button
                 type="button"
                 onClick={() => setSelectedDept("all")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
-                  selectedDept === "all"
-                    ? "bg-emerald-800 text-white"
-                    : "bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200"
-                }`}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${selectedDept === "all"
+                  ? "bg-emerald-800 text-white"
+                  : "bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200"
+                  }`}
               >
                 সকল ({teachers.length})
               </button>
@@ -155,11 +154,10 @@ export default function TeachersPage() {
                   key={dept}
                   type="button"
                   onClick={() => setSelectedDept(dept)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
-                    selectedDept === dept
-                      ? "bg-emerald-800 text-white"
-                      : "bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200"
-                  }`}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${selectedDept === dept
+                    ? "bg-emerald-800 text-white"
+                    : "bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200"
+                    }`}
                 >
                   {dept}
                 </button>

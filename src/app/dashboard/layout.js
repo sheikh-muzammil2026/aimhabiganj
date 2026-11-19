@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { useLanguage } from "@/context/LanguageContext";
-import LanguageSwitcher from "@/components/public/shared/LanguageSwitcher";
+import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
@@ -65,7 +65,7 @@ const DashboardLayout = ({ children }) => {
           if (typeof refetch === "function") refetch();
         }
       };
-    } catch (_) {}
+    } catch (_) { }
 
     const handleCustomSync = () => {
       syncUserData();
@@ -132,10 +132,10 @@ const DashboardLayout = ({ children }) => {
       Array.isArray(liveUser?.permissions) && liveUser.permissions.length > 0
         ? liveUser.permissions
         : Array.isArray(session.user?.permissions)
-        ? session.user.permissions
-        : Array.isArray(liveUser?.permissions)
-        ? liveUser.permissions
-        : [];
+          ? session.user.permissions
+          : Array.isArray(liveUser?.permissions)
+            ? liveUser.permissions
+            : [];
 
     const hasPerm = (p) => {
       if (permissions.includes(p)) return true;
@@ -177,14 +177,14 @@ const DashboardLayout = ({ children }) => {
         userRole === "admin" || userRole === "superadmin"
           ? "/dashboard/admin"
           : userRole === "teacher"
-          ? "/dashboard/teacher"
-          : userRole === "staff"
-          ? "/dashboard/staff"
-          : userRole === "accountant"
-          ? "/dashboard/accountant"
-          : userRole === "parent"
-          ? "/dashboard/parent"
-          : "/dashboard/student";
+            ? "/dashboard/teacher"
+            : userRole === "staff"
+              ? "/dashboard/staff"
+              : userRole === "accountant"
+                ? "/dashboard/accountant"
+                : userRole === "parent"
+                  ? "/dashboard/parent"
+                  : "/dashboard/student";
       router.replace(targetDashboard);
       return;
     }

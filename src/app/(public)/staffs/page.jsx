@@ -10,8 +10,8 @@ import {
   UserCheck,
   RotateCcw,
 } from "lucide-react";
-import PersonDetailsModal from "@/components/public/shared/PersonDetailsModal";
-import StaffCard from "@/components/public/shared/StaffCard";
+import PersonDetailsModal from "@/components/shared/PersonDetailsModal";
+import StaffCard from "@/components/shared/StaffCard";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000";
@@ -141,11 +141,10 @@ export default function StaffsPage() {
               <button
                 type="button"
                 onClick={() => setSelectedRole("all")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
-                  selectedRole === "all"
-                    ? "bg-amber-600 text-white"
-                    : "bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200"
-                }`}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${selectedRole === "all"
+                  ? "bg-amber-600 text-white"
+                  : "bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200"
+                  }`}
               >
                 সকল ({staffList.length})
               </button>
@@ -154,11 +153,10 @@ export default function StaffsPage() {
                   key={r}
                   type="button"
                   onClick={() => setSelectedRole(r)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
-                    selectedRole === r
-                      ? "bg-amber-600 text-white"
-                      : "bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200"
-                  }`}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${selectedRole === r
+                    ? "bg-amber-600 text-white"
+                    : "bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200"
+                    }`}
                 >
                   {r}
                 </button>

@@ -1,16 +1,40 @@
 "use client";
 
-import React, { useState } from "react";
-import { pdf, PDFDownloadLink } from "@react-pdf/renderer";
-import { Printer, Download, RefreshCw, FileText } from "lucide-react";
-import ParentsPdfDocument from "./ParentsPdfDocument";
+import React, { useRef, useState } from "react";
+import { useReactToPrint } from "react-to-print";
+import { Printer, Loader2 } from "lucide-react";
+import ParentsPrintView from "./ParentsPrintView";
+
+const PARENTS_PAGE_STYLE = `
+  @media print {
+    @page {
+      size: A4 portrait;
+      margin: 8mm 6mm 10mm 6mm;
+    }
+    html, body {
+      background: #ffffff !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    .parents-directory-print-root {
+      position: static !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+  }
+`;
 
 export default function ParentsPrintButton({
   classGroups = [],
   sessionYear = "সকল শিক্ষাবর্ষ",
   disabled = false,
 }) {
-  const [isGenerating, setIsGenerating] = useState(false);
+  const printRef = useRef(null);
+  const [isPrinting, setIsPrinting] = useState(false);
 
   const getPrintDate = () => {
     try {
@@ -24,82 +48,68 @@ export default function ParentsPrintButton({
     }
   };
 
-  const handlePrintView = async () => {
-    if (disabled || classGroups.length === 0) return;
-    setIsGenerating(true);
+  const reactToPrintFn = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: `AIM-Parents-Directory-${sessionYear}`,
+    pageStyle: PARENTS_PAGE_STYLE,
+    onBeforePrint: () => {
+      setIsPrinting(true);
+      return Promise.resolve();
+    },
+    onAfterPrint: () => {
+      setIsPrinting(false);
+    },
+    onPrintError: () => {
+      setIsPrinting(false);
+    },
+  });
 
-    try {
-      const doc = (
-        <ParentsPdfDocument
-          classGroups={classGroups}
-          sessionYear={sessionYear}
-          printDate={getPrintDate()}
-        />
-      );
-
-      const blob = await pdf(doc).toBlob();
-      const blobUrl = URL.createObjectURL(blob);
-      const printWindow = window.open(blobUrl, "_blank");
-      if (printWindow) {
-        printWindow.focus();
-      }
-    } catch (error) {
-      console.error("PDF Print View generation error:", error);
-      // Fallback to standard browser print if popup or blob fails
-      window.print();
-    } finally {
-      setIsGenerating(false);
-    }
+  const handlePrint = () => {
+    if (disabled || classGroups.length === 0 || !printRef.current) return;
+    reactToPrintFn();
   };
 
   return (
     <div className="flex items-center gap-2">
-      {/* 1. Direct A4 PDF Print Viewer Button */}
+      {/* 1. react-to-print Trigger Button */}
       <button
-        onClick={handlePrintView}
-        disabled={disabled || isGenerating || classGroups.length === 0}
-        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition-all active:scale-95 disabled:opacity-50"
-        title="A4 সাইজ PDF প্রিন্ট ভিউ খুলুন"
+        type="button"
+        onClick={handlePrint}
+        disabled={disabled || isPrinting || classGroups.length === 0}
+        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+        title="A4 সাইজ ডিরেক্টরি প্রিন্ট বা PDF সংরক্ষণ করুন"
       >
-        {isGenerating ? (
+        {isPrinting ? (
           <>
-            <RefreshCw className="w-4 h-4 animate-spin" />
-            <span>PDF তৈরি হচ্ছে...</span>
+            <Loader2 className="w-4 h-4 animate-spin text-emerald-200" />
+            <span>প্রিন্ট প্রস্তুত হচ্ছে...</span>
           </>
         ) : (
           <>
             <Printer className="w-4 h-4" />
-            <span>A4 প্রিন্ট ভিউ</span>
+            <span>A4 প্রিন্ট / PDF</span>
           </>
         )}
       </button>
 
-      {/* 2. Direct A4 PDF File Download Link */}
-      {classGroups.length > 0 && !disabled && (
-        <PDFDownloadLink
-          document={
-            <ParentsPdfDocument
-              classGroups={classGroups}
-              sessionYear={sessionYear}
-              printDate={getPrintDate()}
-            />
-          }
-          fileName={`AIM-Parents-Directory-${sessionYear}.pdf`}
-          className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition-all"
-          title="A4 PDF ফাইল সরাসরি ডাউনলোড করুন"
-        >
-          {({ loading }) =>
-            loading ? (
-              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <>
-                <Download className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span className="hidden sm:inline">PDF ডাউনলোড</span>
-              </>
-            )
-          }
-        </PDFDownloadLink>
-      )}
+      {/* 2. Hidden Offscreen Printable Component */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          left: "-9999px",
+          top: "-9999px",
+          width: "210mm",
+          overflow: "hidden",
+        }}
+      >
+        <ParentsPrintView
+          ref={printRef}
+          classGroups={classGroups}
+          sessionYear={sessionYear}
+          printDate={getPrintDate()}
+        />
+      </div>
     </div>
   );
 }

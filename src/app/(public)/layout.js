@@ -1,9 +1,9 @@
-import Footer from "@/components/public/shared/footer";
-import BottomNavbar from "@/components/public/shared/BottomNavbar";
-import AIChatbot from "@/components/AIChatbot";
+import Footer from "@/components/shared/footer";
+import BottomNavbar from "@/components/shared/BottomNavbar";
+import AIChatbot from "@/components/shared/AIChatbot";
 import React from "react";
-import WhatsAppButton from "@/components/WhatsAppButton";
-import Navbar from "@/components/public/shared/navbar";
+import WhatsAppButton from "@/components/shared/WhatsAppButton";
+import Navbar from "@/components/shared/navbar";
 
 export const metadata = {
   // মেটাডাটা বেস URL (ওপেন গ্রাফ ইমেজের জন্য আবশ্যক)

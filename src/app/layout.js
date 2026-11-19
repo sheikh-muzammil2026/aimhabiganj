@@ -1,7 +1,7 @@
 import "./globals.css";
 import Providers from "@/components/Providers/providers";
-import AIChatbot from "@/components/AIChatbot";
-import WhatsAppButton from "@/components/WhatsAppButton";
+import AIChatbot from "@/components/shared/AIChatbot";
+import WhatsAppButton from "@/components/shared/WhatsAppButton";
 
 export const metadata = {
   title: "As-Salam Ideal Madrasah  (AIM)",

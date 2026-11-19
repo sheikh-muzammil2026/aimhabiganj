@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react";
 import Image from "next/image";
+import { useReactToPrint } from "react-to-print";
 import { QRCodeSVG } from "qrcode.react";
 import Pagination from "@/components/dashboard/Pagination";
 import useUrlPagination from "@/hooks/useUrlPagination";
@@ -174,7 +175,10 @@ function CertificatesContent() {
   ]);
 
   useEffect(() => {
-    fetchStudents();
+    const timer = setTimeout(() => {
+      fetchStudents();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchStudents]);
 
   // Update default reference number and note when student or certType changes
@@ -183,12 +187,14 @@ function CertificatesContent() {
       const year = selectedStudent.sessionYear?.split(/[-–/]/)[0] || new Date().getFullYear();
       const stId = selectedStudent.studentId || selectedStudent.roll || "001";
       const certCode = certType.toUpperCase().slice(0, 3);
-      setRefNumber(`AIM/${year}/${certCode}-${stId}`);
-
-      const foundType = CERTIFICATE_TYPES.find((c) => c.id === certType);
-      if (foundType) {
-        setCustomRemarks(foundType.defaultNote);
-      }
+      const timer = setTimeout(() => {
+        setRefNumber(`AIM/${year}/${certCode}-${stId}`);
+        const foundType = CERTIFICATE_TYPES.find((c) => c.id === certType);
+        if (foundType) {
+          setCustomRemarks(foundType.defaultNote);
+        }
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [selectedStudent, certType]);
 
@@ -214,9 +220,43 @@ function CertificatesContent() {
     }
   };
 
-  // Trigger browser print
+  // react-to-print setup for certificates
+  const certificatePageStyle = `
+    @media print {
+      @page {
+        size: ${certificateOrientation === "landscape" ? "A4 landscape" : "A4 portrait"};
+        margin: 6mm !important;
+      }
+      html, body {
+        background: #ffffff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        font-family: 'Bornomala', 'Ubuntu Sans', sans-serif !important;
+      }
+      .printable-certificate-wrapper {
+        box-shadow: none !important;
+        border-width: 5px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 auto !important;
+      }
+    }
+  `;
+
+  const reactToPrintFn = useReactToPrint({
+    contentRef: certificateRef,
+    documentTitle: `Certificate-${selectedStudent?.studentNameBangla || selectedStudent?.studentNameEnglish || "Student"}-${certType}`,
+    pageStyle: certificatePageStyle,
+  });
+
+  // Trigger print via react-to-print
   const handlePrint = () => {
-    window.print();
+    if (!certificateRef.current) return;
+    reactToPrintFn();
   };
 
   // Reset all filters
@@ -237,46 +277,6 @@ function CertificatesContent() {
 
   return (
     <div className="p-3 sm:p-5 lg:p-8 bg-slate-50 dark:bg-slate-950 min-h-screen space-y-6">
-      {/* ---------------- CSS FOR PRINT MEDIA ---------------- */}
-      <style jsx global>{`
-        @media print {
-          /* Hide all surrounding app chrome, navigation, headers, and buttons */
-          body * {
-            visibility: hidden !important;
-          }
-          html, body {
-            background: #ffffff !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-          /* Only the certificate container is made visible */
-          .printable-certificate-wrapper,
-          .printable-certificate-wrapper * {
-            visibility: visible !important;
-          }
-          .printable-certificate-wrapper {
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            box-shadow: none !important;
-            border: none !important;
-          }
-          @page {
-            size: ${certificateOrientation === "landscape" ? "A4 landscape" : "A4 portrait"};
-            margin: 8mm !important;
-          }
-          .no-print {
-            display: none !important;
-          }
-        }
-      `}</style>
 
       {/* 1. Header Banner */}
       <div className="no-print bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-3xl border border-emerald-900/10 dark:border-slate-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">

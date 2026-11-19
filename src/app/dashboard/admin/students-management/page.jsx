@@ -1,16 +1,43 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react";
 import Link from "next/link";
+import { Printer, Loader2 } from "lucide-react";
+import { useReactToPrint } from "react-to-print";
 import Pagination from "@/components/dashboard/Pagination";
 import StudentFilterBar from "@/components/dashboard/students/StudentFilterBar";
+import StudentListPrintView from "@/components/dashboard/students/print/StudentListPrintView";
 import useUrlPagination from "@/hooks/useUrlPagination";
 import {
   FEE_CATEGORIES,
   getStudentClassDetails,
   parseRollNumber,
   SESSION_YEARS,
+  compareStudentsByClassAndRoll,
 } from "@/lib/studentUtils";
+
+const STUDENT_LIST_PAGE_STYLE = `
+  @media print {
+    @page {
+      size: A4 portrait;
+      margin: 8mm 6mm 10mm 6mm;
+    }
+    html, body {
+      background: #ffffff !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    .student-list-print-root {
+      position: static !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+  }
+`;
 
 function StudentsContent() {
   const { currentPage, currentLimit, updatePaginationParams, resetPageToFirst } =
@@ -29,9 +56,53 @@ function StudentsContent() {
   const [selectedType, setSelectedType] = useState("all"); // আবাসিক, অনাবাসিক, ডে-কেয়ার
   const [selectedFeeCategory, setSelectedFeeCategory] = useState("all");
 
-  // পেজিনেশন স্টেটসমূহ
+  // পেজিনেশন ও স্ট্যাটস স্টেটসমূহ
   const [totalPages, setTotalPages] = useState(1);
   const [totalStudents, setTotalStudents] = useState(0);
+  const [divisionStats, setDivisionStats] = useState({
+    preHifzHifz: 0,
+    academy: 0,
+  });
+
+  // বিভাগভিত্তিক শিক্ষার্থী সংখ্যা ফেচ করার ফলব্যাক ফাংশন
+  const fetchDivisionCounts = useCallback(async (session) => {
+    try {
+      const baseParams = new URLSearchParams({
+        status: "Approved",
+        activity: "active",
+        limit: "1",
+      });
+      if (session && session !== "all") {
+        baseParams.append("sessionYear", session);
+      }
+
+      const preHifzParams = new URLSearchParams(baseParams);
+      preHifzParams.append("division", "preHifz");
+
+      const hifzParams = new URLSearchParams(baseParams);
+      hifzParams.append("division", "hifz");
+
+      const academyParams = new URLSearchParams(baseParams);
+      academyParams.append("division", "academy");
+
+      const [resPreHifz, resHifz, resAcademy] = await Promise.all([
+        fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/students?${preHifzParams.toString()}`).then((r) => r.json()).catch(() => ({})),
+        fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/students?${hifzParams.toString()}`).then((r) => r.json()).catch(() => ({})),
+        fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/students?${academyParams.toString()}`).then((r) => r.json()).catch(() => ({})),
+      ]);
+
+      const preHifzCount = (resPreHifz.total !== undefined ? resPreHifz.total : resPreHifz.totalCount) || 0;
+      const hifzCount = (resHifz.total !== undefined ? resHifz.total : resHifz.totalCount) || 0;
+      const academyCount = (resAcademy.total !== undefined ? resAcademy.total : resAcademy.totalCount) || 0;
+
+      setDivisionStats({
+        preHifzHifz: preHifzCount + hifzCount,
+        academy: academyCount,
+      });
+    } catch (err) {
+      console.warn("Could not fetch division stats fallback:", err);
+    }
+  }, []);
 
   const fetchStudents = useCallback(async () => {
     try {
@@ -59,6 +130,15 @@ function StudentsContent() {
         setStudents(result.data || []);
         setTotalPages(result.totalPages || 1);
         setTotalStudents(result.total !== undefined ? result.total : result.totalCount || 0);
+
+        if (result.stats) {
+          setDivisionStats({
+            preHifzHifz: result.stats.preHifzHifz || 0,
+            academy: result.stats.academy || 0,
+          });
+        } else {
+          fetchDivisionCounts(selectedSession);
+        }
       } else {
         setError(result.message || "শিক্ষার্থীদের তথ্য লোড করা যায়নি।");
       }
@@ -77,7 +157,8 @@ function StudentsContent() {
     selectedAcademyType,
     selectedClass,
     selectedType,
-    selectedFeeCategory
+    selectedFeeCategory,
+    fetchDivisionCounts
   ]);
 
   // ডেটা ফেচ করার ইফেক্ট
@@ -88,21 +169,84 @@ function StudentsContent() {
     return () => clearTimeout(timer);
   }, [fetchStudents]);
 
-  // রোল নম্বর অনুযায়ী ক্রমানুসারে (১, ২, ৩...) গাণিতিক সর্টিং
+  // শ্রেণি ও রোল অনুযায়ী ক্রমানুসারে (Play -> Nursery -> ... -> Hifz) সার্বিক সর্টিং
   const filteredStudents = useMemo(() => {
-    return [...students].sort((a, b) => {
-      const rollDiff = parseRollNumber(a.roll) - parseRollNumber(b.roll);
-      if (rollDiff !== 0) return rollDiff;
-      return String(a.studentId || "").localeCompare(
-        String(b.studentId || ""),
-        undefined,
-        { numeric: true },
-      );
-    });
+    return [...students].sort(compareStudentsByClassAndRoll);
   }, [students]);
 
   const sessionYears = SESSION_YEARS;
   const uniqueFeeCategories = FEE_CATEGORIES;
+
+  // প্রিন্ট হ্যান্ডলিং স্টেটসমূহ
+  const printAreaRef = useRef(null);
+  const [isPrinting, setIsPrinting] = useState(false);
+  const [printStudents, setPrintStudents] = useState([]);
+  const [isPreparingPrint, setIsPreparingPrint] = useState(false);
+
+  const reactToPrintFn = useReactToPrint({
+    contentRef: printAreaRef,
+    documentTitle: `Students-List-${selectedSession !== "all" ? selectedSession : "All"}-${selectedClass !== "all" ? selectedClass : "All"}`,
+    pageStyle: STUDENT_LIST_PAGE_STYLE,
+    onBeforePrint: () => {
+      setIsPrinting(true);
+      return Promise.resolve();
+    },
+    onAfterPrint: () => {
+      setIsPrinting(false);
+      setIsPreparingPrint(false);
+    },
+    onPrintError: () => {
+      setIsPrinting(false);
+      setIsPreparingPrint(false);
+    },
+  });
+
+  const handlePrint = async () => {
+    if (totalStudents === 0 || isPreparingPrint) return;
+
+    try {
+      setIsPreparingPrint(true);
+
+      // ১. যদি বর্তমান লোডকৃত ডাটাতেই ফিল্টার করা সকল শিক্ষার্থী থাকে
+      if (totalStudents <= students.length) {
+        setPrintStudents(filteredStudents);
+        setTimeout(() => {
+          reactToPrintFn();
+        }, 100);
+        return;
+      }
+
+      // ২. পেজিনেশন বাইপাস করে ফিল্টারের সকল শিক্ষার্থী ব্যাকএন্ড থেকে ফেচ করা
+      const params = new URLSearchParams({
+        status: "Approved",
+        activity: "active",
+        page: "1",
+        limit: String(totalStudents || 10000),
+      });
+      if (searchTerm) params.append("search", searchTerm);
+      if (selectedSession !== "all") params.append("sessionYear", selectedSession);
+      if (selectedDivision !== "all") params.append("division", selectedDivision);
+      if (selectedAcademyType !== "all") params.append("academyType", selectedAcademyType);
+      if (selectedClass !== "all") params.append("class", selectedClass);
+      if (selectedType !== "all") params.append("type", selectedType);
+      if (selectedFeeCategory !== "all") params.append("feeCategory", selectedFeeCategory);
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_API}/api/students?${params.toString()}`
+      );
+      const result = await response.json();
+      const allData = result.data || [];
+      const sortedAll = [...allData].sort(compareStudentsByClassAndRoll);
+
+      setPrintStudents(sortedAll);
+      setTimeout(() => {
+        reactToPrintFn();
+      }, 150);
+    } catch (err) {
+      console.error("Error preparing student list for print:", err);
+      setIsPreparingPrint(false);
+    }
+  };
 
   return (
     <div className="p-3 sm:p-5 lg:p-8 bg-slate-50 min-h-screen space-y-5">
@@ -117,8 +261,31 @@ function StudentsContent() {
             মাদ্রাসার সকল শিক্ষার্থীর তথ্য ও ফিল্টারিং ব্যবস্থা
           </p>
         </div>
-        <div>
-          <span className="inline-block px-3 py-1.5 bg-emerald-100 text-[#043e30] font-bold text-xs rounded-xl border border-emerald-200">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={handlePrint}
+            disabled={totalStudents === 0 || loading || isPreparingPrint}
+            title={
+              totalStudents === 0
+                ? "তালিকায় কোনো শিক্ষার্থী নেই"
+                : "বর্তমান ফিল্টারকৃত সকল শিক্ষার্থীর তালিকা প্রিন্ট করুন"
+            }
+            className="px-4 py-2 bg-emerald-800 hover:bg-emerald-950 active:scale-95 text-white font-bold text-xs sm:text-sm rounded-xl border border-emerald-950 flex items-center gap-2 transition-all shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+          >
+            {isPreparingPrint ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin text-emerald-200" />
+                <span>প্রিন্ট প্রস্তুত হচ্ছে...</span>
+              </>
+            ) : (
+              <>
+                <Printer className="w-4 h-4 text-emerald-200" />
+                <span>প্রিন্ট তালিকা</span>
+              </>
+            )}
+          </button>
+          <span className="inline-block px-3 py-2 bg-emerald-100 text-[#043e30] font-bold text-xs rounded-xl border border-emerald-200">
             মোট শিক্ষার্থী: {totalStudents} জন
           </span>
         </div>
@@ -143,7 +310,7 @@ function StudentsContent() {
           <div>
             <p className="text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider">প্রি-হিফজ / হিফজ</p>
             <p className="text-xl sm:text-2xl font-black text-blue-900">
-              {students.filter(s => s.divisionPreHifz?.active || s.divisionHifz?.active).length} জন
+              {divisionStats.preHifzHifz} জন
             </p>
           </div>
         </div>
@@ -155,7 +322,7 @@ function StudentsContent() {
           <div>
             <p className="text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider">একাডেমিক বিভাগ</p>
             <p className="text-xl sm:text-2xl font-black text-purple-900">
-              {students.filter(s => s.divisionAcademy?.active).length} জন
+              {divisionStats.academy} জন
             </p>
           </div>
         </div>
@@ -363,6 +530,33 @@ function StudentsContent() {
 
           </div>
         )}
+      </div>
+
+      {/* অফস্ক্রিন প্রিন্ট এলিমেন্ট (react-to-print এর জন্য প্রস্তুত) */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          left: "-9999px",
+          top: "-9999px",
+          width: "210mm",
+          overflow: "hidden",
+        }}
+      >
+        <StudentListPrintView
+          ref={printAreaRef}
+          students={printStudents.length > 0 ? printStudents : filteredStudents}
+          activeFilters={{
+            searchTerm,
+            selectedSession,
+            selectedDivision,
+            selectedAcademyType,
+            selectedClass,
+            selectedType,
+            selectedFeeCategory,
+          }}
+          totalCount={totalStudents}
+        />
       </div>
     </div>
   );

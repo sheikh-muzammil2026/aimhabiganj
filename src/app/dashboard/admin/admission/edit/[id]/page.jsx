@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import StudentAdmissionEditor from "@/components/admission/StudentAdmissionEditor";
+import StudentAdmissionEditor from "@/components/shared/admission/StudentAdmissionEditor";
 
 export default function EditAdmissionPage() {
   const params = useParams();

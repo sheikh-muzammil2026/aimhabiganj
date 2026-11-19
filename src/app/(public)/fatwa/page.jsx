@@ -2,10 +2,10 @@
 "use client";
 
 import React, { useState } from "react";
-import FatwaSearchBar from "@/components/fatwa/FatwaSearchBar";
-import FatwaSourcesBadge from "@/components/fatwa/FatwaSourcesBadge";
-import FatwaDisclaimer from "@/components/fatwa/FatwaDisclaimer";
-import FatwaAnswerCard from "@/components/fatwa/FatwaAnswerCard";
+import FatwaSearchBar from "@/components/public/fatwa/FatwaSearchBar";
+import FatwaSourcesBadge from "@/components/public/fatwa/FatwaSourcesBadge";
+import FatwaDisclaimer from "@/components/public/fatwa/FatwaDisclaimer";
+import FatwaAnswerCard from "@/components/public/fatwa/FatwaAnswerCard";
 import { BookOpen, Sparkles, HelpCircle } from "lucide-react";
 
 export default function FatwaPage() {
@@ -32,7 +32,7 @@ export default function FatwaPage() {
       if (!res.ok || !json.success) {
         setError(
           json.error ||
-            "ফতোয়া অনুসন্ধানে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
+          "ফতোয়া অনুসন্ধানে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
         );
       } else {
         setData(json.data);

@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import Link from "next/link";
-import AdmissionFormCover from "@/components/admission/AdmissionFormCover";
-import AdmissionFormPage1 from "@/components/admission/AdmissionFormPage1";
-import AdmissionFormPage2 from "@/components/admission/AdmissionFormPage2";
-import AdmissionFormPage3 from "@/components/admission/AdmissionFormPage3";
-import OfficeUseSection from "@/components/admission/OfficeUseSection";
+import { useReactToPrint } from "react-to-print";
+import AdmissionFormCover from "@/components/shared/admission/AdmissionFormCover";
+import AdmissionFormPage1 from "@/components/shared/admission/AdmissionFormPage1";
+import AdmissionFormPage2 from "@/components/shared/admission/AdmissionFormPage2";
+import AdmissionFormPage3 from "@/components/shared/admission/AdmissionFormPage3";
+import OfficeUseSection from "@/components/shared/admission/OfficeUseSection";
 
 const normalizeClassName = (clsName) => {
   if (!clsName) return "";
@@ -341,6 +342,33 @@ export default function StudentAdmissionEditor({
     }
   };
 
+  const formPrintRef = useRef(null);
+
+  const reactToPrintFn = useReactToPrint({
+    contentRef: formPrintRef,
+    documentTitle: `Admission-Form-${formData?.studentNameBangla || formData?.studentId || "Student"}`,
+    pageStyle: `
+      @media print {
+        @page {
+          size: A4 portrait;
+          margin: 0 !important;
+        }
+        html, body {
+          background: #ffffff !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          font-family: 'Bornomala', 'Ubuntu Sans', sans-serif !important;
+        }
+        .page-break-after {
+          page-break-after: always !important;
+          break-after: page !important;
+        }
+      }
+    `,
+  });
+
   if (isLoading) {
     return (
       <div className="text-center p-12 text-sm font-bold text-emerald-900">
@@ -360,14 +388,15 @@ export default function StudentAdmissionEditor({
         </Link>
         <button
           type="button"
-          onClick={() => window.print()}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-lg shadow-sm transition-all"
+          onClick={() => reactToPrintFn()}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-lg shadow-sm transition-all cursor-pointer"
         >
           🖨️ প্রিন্ট / PDF সেভ করুন
         </button>
       </div>
 
       <form
+        ref={formPrintRef}
         onSubmit={handleFormSubmit}
         className="w-full md:w-[8.27in] max-w-full bg-white shadow-2xl rounded-sm print:shadow-none print:rounded-none flex flex-col gap-12 print:gap-0"
       >

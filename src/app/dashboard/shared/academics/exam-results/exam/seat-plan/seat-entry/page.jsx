@@ -180,7 +180,15 @@ export default function AllStudentsPage() {
                 </div>
 
                 {/* মোড সুইচিং এবং প্রিন্ট বাটন */}
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                    <Link
+                        href="/dashboard/shared/academics/exam-results/exam/seat-plan/seat-stickers"
+                        className="px-3.5 py-2 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs sm:text-sm font-bold rounded-xl shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+                    >
+                        <span>🏷️</span>
+                        <span>আসন স্টিকার</span>
+                    </Link>
+
                     <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
                         <button
                             onClick={() => setViewMode("seatPlan")}
