@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState } from "react";
+import siteConfig from "@/config/siteConfig";
 import {
   BookOpen,
   ExternalLink,
@@ -70,14 +71,14 @@ export default function FatwaAnswerCard({ data, isLoading, error }) {
 
             <div className="pt-4 border-t border-amber-200/80 dark:border-amber-900/60 flex flex-wrap gap-3">
               <a
-                href="tel:+8801748868161"
+                href={`tel:${siteConfig.contacts.primaryPhone}`}
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-semibold shadow-sm transition-all"
               >
                 <PhoneCall className="w-4 h-4" />
-                <span>মাদরাসার ফতোয়া বিভাগে কল করুন (+৮৮০ ১৭৪৮-৮৬৮১৬১)</span>
+                <span>মাদরাসার ফতোয়া বিভাগে কল করুন ({siteConfig.contacts.primaryPhone})</span>
               </a>
               <a
-                href="https://wa.me/8801748868161"
+                href={siteConfig.socials.whatsapp}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700 text-gray-800 dark:text-gray-100 border border-gray-300 dark:border-zinc-700 text-xs sm:text-sm font-medium transition-all"

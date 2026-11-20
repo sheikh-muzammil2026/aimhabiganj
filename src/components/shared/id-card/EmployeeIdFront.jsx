@@ -2,6 +2,7 @@
 
 import React from "react";
 import BarcodeSVG from "react-barcode";
+import siteConfig from "@/config/siteConfig";
 
 /**
  * EmployeeIdFront
@@ -74,8 +75,8 @@ export default function EmployeeIdFront({
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/aimlogo1.png"
-                alt="AIM Logo"
+                src={siteConfig.assets.logo}
+                alt={`${siteConfig.name.short} Logo`}
                 className="w-full h-full object-contain"
               />
             </div>

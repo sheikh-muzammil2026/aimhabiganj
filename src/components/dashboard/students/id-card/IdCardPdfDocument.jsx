@@ -1,4 +1,5 @@
 import React from "react";
+import siteConfig from "@/config/siteConfig";
 import {
   Document,
   Page,
@@ -107,7 +108,7 @@ export const IdCardPdfDocument = ({ students, getStudentClassDetails }) => {
               <View style={styles.cardInner}>
                 {/* হেডার ও লোগো */}
                 <View style={styles.headerContainer}>
-                  <Image src="/aimlogo1.png" style={styles.logo} />
+                  <Image src={siteConfig.assets.logo} style={styles.logo} />
                 </View>
 
                 {/* স্টুডেন্ট ছবি */}

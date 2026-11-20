@@ -4,7 +4,7 @@ import ResultSheetGenerator from "@/components/public/academics/IndividualResult
 
 export default function ResultsPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 py-16 flex items-center justify-center">
+    <div className="page-wrapper flex items-center justify-center">
       <div className="w-full">
         <ResultSheetGenerator />
       </div>

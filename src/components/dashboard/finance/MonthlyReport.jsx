@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Printer, Calendar, RefreshCw, Loader2 } from "lucide-react";
 import { MdEmail, MdInstallMobile } from "react-icons/md";
 import Image from "next/image";
+import siteConfig from "@/config/siteConfig";
 import PrintInstitutionalHeader from "@/components/shared/print/PrintInstitutionalHeader";
 import PrintSocialFooter from "@/components/shared/print/PrintSocialFooter";
 
@@ -339,12 +340,11 @@ export default function MonthlyReport({
           </p>
           <div className="flex items-center justify-center gap-2 mt-1 text-[8.5px] text-emerald-800 font-medium">
             <span className="flex items-center gap-0.5">
-              <MdInstallMobile className="text-[10px] shrink-0" /> +880 1748
-              868161
+              <MdInstallMobile className="text-[10px] shrink-0" /> {siteConfig.contacts.phone}
             </span>
             <span className="text-slate-300">|</span>
             <span className="flex items-center gap-0.5">
-              <MdEmail className="text-[10px] shrink-0" /> aimhabiganj@gmail.com
+              <MdEmail className="text-[10px] shrink-0" /> {siteConfig.contacts.email}
             </span>
           </div>
           <h3 className="text-[9px] sm:text-base font-black bg-slate-100 border border-slate-200 inline-block px-4 sm:px-6 py-1.5 rounded-full text-slate-700 mt-3 sm:mt-4 tracking-wide">

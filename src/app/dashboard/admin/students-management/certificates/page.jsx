@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react";
 import Image from "next/image";
+import siteConfig from "@/config/siteConfig";
 import { useReactToPrint } from "react-to-print";
 import { QRCodeSVG } from "qrcode.react";
 import Pagination from "@/components/dashboard/Pagination";
@@ -772,8 +773,8 @@ function CertificatesContent() {
                         <div className="w-16 h-16 sm:w-20 sm:h-20 relative shrink-0">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
-                            src="/aimlogo1.png"
-                            alt="AIM Madrasah"
+                            src={siteConfig.assets.logo}
+                            alt={`${siteConfig.name.short} Logo`}
                             className="w-full h-full object-contain"
                           />
                         </div>
@@ -781,7 +782,7 @@ function CertificatesContent() {
                         {/* Center: Madrasa Name & Titles */}
                         <div className="space-y-0.5 flex-1">
                           <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-emerald-950 tracking-tight font-serif">
-                            আস-সালাম আইডিয়াল মাদরাসা
+                            {siteConfig.name.bn}
                           </h2>
                           <h3 className="text-xs sm:text-sm font-bold text-emerald-900 tracking-wider font-sans uppercase">
                             AS-SALAM IDEAL MADRASAH (AIM)

@@ -2,6 +2,7 @@
 "use client";
 
 import React from "react";
+import siteConfig from "@/config/siteConfig";
 
 export default function AdmissionFormCover({ formData, handleChange }) {
   return (
@@ -104,18 +105,18 @@ export default function AdmissionFormCover({ formData, handleChange }) {
         {/* ফুটার সেকশন */}
         <div className="w-full text-center mt-4 px-4 pb-2 relative z-10 print:mt-2">
           <h4 className="text-xs sm:text-base font-extrabold text-[#cc1e29] tracking-wide mb-0.5 px-2">
-            এইম ক্যাম্পাস, দক্ষিণ শ্যামলী আ/এ, হবিগঞ্জ-৩৩০০
+            {siteConfig.address.bn}
           </h4>
           <p className="text-[10px] sm:text-[14px] font-black text-[#1b2d56] font-mono mb-3 tracking-wide print:mb-2">
-            মোবাইল (অফিস): ০১৩১৬ ২০১ ২০১, ০১৭৪৮ ৮৬৮ ১৬১
+            মোবাইল (অফিস): {siteConfig.contacts.phone}
           </p>
 
           {/* সোশ্যাল বার */}
           <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-1 text-[8px] sm:text-[11px] text-gray-600 font-bold pt-1.5 border-t border-gray-300/70 w-full max-w-lg mx-auto print:pt-1">
-            <span className="flex items-center gap-1 whitespace-nowrap">🌐 www.aimhabiganj.com</span>
-            <span className="flex items-center gap-1 whitespace-nowrap">✉️ aimhabiganj@gmail.com</span>
-            <span className="flex items-center gap-1 whitespace-nowrap">🔷 aim habiganj</span>
-            <span className="flex items-center gap-1 whitespace-nowrap">🔺 aimhabiganj</span>
+            <span className="flex items-center gap-1 whitespace-nowrap">🌐 {siteConfig.contacts.domain}</span>
+            <span className="flex items-center gap-1 whitespace-nowrap">✉️ {siteConfig.contacts.email}</span>
+            <span className="flex items-center gap-1 whitespace-nowrap">🔷 {siteConfig.socials.facebook}</span>
+            <span className="flex items-center gap-1 whitespace-nowrap">🔺 {siteConfig.socials.youtube}</span>
           </div>
         </div>
 

@@ -2,13 +2,14 @@
 "use client";
 
 import React from 'react';
+import siteConfig from '@/config/siteConfig';
 
 export default function WhatsAppButton() {
 
-  const phoneNumber = "8801748868161";
+  const phoneNumber = siteConfig.contacts.whatsappRaw || "8801748868161";
 
   const message = encodeURIComponent(
-    "আস-সালামু আলাইকুম, আমি আস-সালাম আইডিয়াল মাদরাসা (এইম) এর অনলাইন পোর্টাল থেকে যোগাযোগ করছি। কিছু তথ্য জানতে চাচ্ছিলাম।"
+    `আস-সালামু আলাইকুম, আমি ${siteConfig.name.fullBn} এর অনলাইন পোর্টাল থেকে যোগাযোগ করছি। কিছু তথ্য জানতে চাচ্ছিলাম।`
   );
 
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
@@ -18,8 +19,8 @@ export default function WhatsAppButton() {
       href={whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label="Contact As-Salam Ideal Madrasah  (AIM) on WhatsApp"
-      className="fixed bottom-20 md:bottom-6 right-2 z-50 bg-[#25D366] p-3.5 rounded-full shadow-[0_4px_14px_rgba(37,211,102,0.4)] hover:bg-[#20ba59] hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center group  print:hidden"
+      aria-label={`Contact ${siteConfig.name.fullEn} on WhatsApp`}
+      className="fixed bottom-20 md:bottom-6 right-2 z-50 bg-[#25D366] p-3.5 rounded-full shadow-[0_4px_14px_rgba(37,211,102,0.4)] hover:bg-[#20ba59] hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center group print:hidden"
     >
       {/* অফিসিয়াল হোয়াটসঅ্যাপ SVG আইকন */}
       <svg

@@ -25,12 +25,12 @@ export default function NoticeList({ data }) {
   const filteredList = activeTab === "all" ? currentData.list : currentData.list?.filter(n => n.type === activeTab);
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6">
-      <div className="text-center mb-10">
-        <h2 className="text-3xl font-bold text-emerald-900 dark:text-emerald-400 flex items-center justify-center gap-2">
-          <span className="text-amber-500">❖</span> {currentData.title} <span className="text-amber-500">❖</span>
+    <div className="site-container py-12">
+      <div className="text-center mb-10 space-y-3">
+        <h2 className="heading-primary flex items-center justify-center gap-2">
+          <span className="text-[#2196F3]">❖</span> {currentData.title} <span className="text-[#2196F3]">❖</span>
         </h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">{currentData.subtitle}</p>
+        <p className="text-sm text-[#1E293B] max-w-xl mx-auto leading-relaxed">{currentData.subtitle}</p>
       </div>
 
       {/* ক্যাটাগরি ফিল্টার ট্যাব */}
@@ -39,10 +39,10 @@ export default function NoticeList({ data }) {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`text-xs font-bold px-4 py-2 rounded-full transition-all border ${
+            className={`text-xs font-bold px-4 py-2 rounded-full transition-all border cursor-pointer ${
               activeTab === tab.id
-                ? "bg-emerald-800 text-white border-emerald-800 shadow-sm"
-                : "bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-slate-700 hover:bg-gray-50"
+                ? "bg-[#2196F3] text-white border-[#2196F3] shadow-sm"
+                : "bg-white text-[#1E293B] border-[#90CAF9] hover:bg-[#E3F2FD]"
             }`}
           >
             {tab.label}
@@ -53,17 +53,17 @@ export default function NoticeList({ data }) {
       {/* নোটিশ তালিকা */}
       <div className="space-y-4">
         {filteredList?.map((notice) => (
-          <div key={notice.id} className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700/80 p-5 rounded-2xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-emerald-200 transition-colors">
+          <div key={notice.id} className="bg-white border border-[#90CAF9] p-5 rounded-2xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:shadow-md transition-shadow">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-emerald-50 dark:bg-slate-900 rounded-xl flex flex-col items-center justify-center text-emerald-800 dark:text-emerald-400 flex-shrink-0 border border-emerald-100/50">
+              <div className="w-12 h-12 bg-[#E3F2FD] rounded-xl flex flex-col items-center justify-center text-[#0D47A1] flex-shrink-0 border border-[#90CAF9]/50">
                 <span className="text-xl">📄</span>
               </div>
               <div>
-                <h4 className="text-sm sm:text-base font-bold text-gray-800 dark:text-gray-200 leading-snug">{notice.title}</h4>
+                <h4 className="text-sm sm:text-base font-bold text-[#0D47A1] leading-snug">{notice.title}</h4>
                 {notice.description && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{notice.description}</p>
+                  <p className="text-xs text-[#1E293B] mt-1 line-clamp-2">{notice.description}</p>
                 )}
-                <div className="flex items-center gap-3 mt-1.5 text-[11px] font-medium text-gray-400">
+                <div className="flex items-center gap-3 mt-1.5 text-[11px] font-medium text-slate-500">
                   <span>📅 প্রকাশিত: {notice.date}</span>
                   <span>💾 {notice.size}</span>
                 </div>
@@ -74,12 +74,12 @@ export default function NoticeList({ data }) {
                 href={notice.attachmentUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all flex items-center justify-center gap-1.5 self-end sm:self-center whitespace-nowrap"
+                className="btn-primary text-xs py-2 px-4 self-end sm:self-center whitespace-nowrap"
               >
                 📥 ডাউনলোড / দেখুন
               </a>
             ) : (
-              <span className="text-xs text-gray-400 self-end sm:self-center italic px-3 py-1">
+              <span className="text-xs text-[#0D47A1] self-end sm:self-center font-bold px-3 py-1 bg-[#E3F2FD] border border-[#90CAF9] rounded-full">
                 বিজ্ঞপ্তি
               </span>
             )}

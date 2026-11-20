@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import siteConfig from '@/config/siteConfig';
 
 export default function SeatPlanSummary() {
     const [loading, setLoading] = useState(true);
@@ -220,8 +221,8 @@ export default function SeatPlanSummary() {
                     {/* Logo on Left */}
                     <div className="w-[130px] h-[100px] relative flex-shrink-0">
                         <img
-                            src="/aimlogo1.png"
-                            alt="Logo"
+                            src={siteConfig.assets.logo}
+                            alt={`${siteConfig.name.short} Logo`}
                             className="w-full h-full object-contain"
                         />
                     </div>
@@ -229,8 +230,8 @@ export default function SeatPlanSummary() {
                     {/* Banner / Institution Info on Right */}
                     <div className="flex-grow flex justify-end items-center">
                         <img
-                            src="/banner.png"
-                            alt="Institution Banner"
+                            src={siteConfig.assets.banner}
+                            alt={`${siteConfig.name.short} Banner`}
                             className="max-h-[100px] object-contain"
                         />
                     </div>

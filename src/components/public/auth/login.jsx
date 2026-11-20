@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "react-toastify";
 import { Eye, EyeOff, X } from "lucide-react";
+import siteConfig from "@/config/siteConfig";
 
 export default function LoginPage({ onClose }) {
   const router = useRouter();
@@ -173,8 +174,8 @@ export default function LoginPage({ onClose }) {
           >
             <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-full p-1 bg-white dark:bg-slate-800 shadow-md border-2 border-emerald-700 dark:border-amber-400 flex items-center justify-center transition-transform duration-200 group-hover:scale-105 group-hover:shadow-lg">
               <Image
-                src="/aimlogo1.png"
-                alt="As-Salam Ideal Madrasah (AIM) Logo"
+                src={siteConfig.assets.logo}
+                alt={`${siteConfig.name.short} Logo`}
                 width={72}
                 height={72}
                 className="object-contain rounded-full"
@@ -186,7 +187,7 @@ export default function LoginPage({ onClose }) {
             অ্যাকাউন্টে লগইন করুন
           </h2>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            আস-সালাম আইডিয়াল মাদরাসা (এইম) ম্যানেজমেন্ট সিস্টেম
+            {siteConfig.name.bn} ম্যানেজমেন্ট সিস্টেম
           </p>
         </div>
 

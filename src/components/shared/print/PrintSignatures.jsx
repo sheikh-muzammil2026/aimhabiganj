@@ -1,10 +1,11 @@
 import React from "react";
 import Image from "next/image";
+import siteConfig from "@/config/siteConfig";
 
 export default function PrintSignatures({
   variant = "compact",
-  controllerSignatureSrc = "/anarul.png",
-  principalSignatureSrc = "/principle's_signature.jpg",
+  controllerSignatureSrc = siteConfig.assets.controllerSignature,
+  principalSignatureSrc = siteConfig.assets.principalSignature,
   controllerLabel = "পরীক্ষা নিয়ন্ত্রকের স্বাক্ষর",
   principalLabel = "প্রিন্সিপালের স্বাক্ষর",
   principalTopClass = "-top-1",

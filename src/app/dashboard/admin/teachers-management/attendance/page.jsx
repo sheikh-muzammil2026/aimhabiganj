@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import siteConfig from "@/config/siteConfig";
 import {
   UserCheck,
   Clock,
@@ -1523,7 +1524,7 @@ export default function AdminTeachersAttendancePage() {
                   <div className="flex items-center justify-center gap-0 mb-2 border-b-4 border-double border-gray-800 pb-1 pl-2">
                     <div className="w-20 h-20 md:w-28 md:h-28 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-3">
                       <Image
-                        src="/aimlogo1.png"
+                        src={siteConfig.assets.logo}
                         alt="Institution Logo"
                         width={200}
                         height={200}
@@ -1535,7 +1536,7 @@ export default function AdminTeachersAttendancePage() {
                     </div>
                     <div className="flex-grow text-center">
                       <Image
-                        src="/banner_routine.png"
+                        src={siteConfig.assets.bannerRoutine || siteConfig.assets.banner}
                         alt="Institution Banner"
                         width={2000}
                         height={400}

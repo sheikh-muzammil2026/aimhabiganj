@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import siteConfig from '@/config/siteConfig';
 
 export default function ExamAttendanceSheet() {
     // নির্বাচন করার জন্য স্টেটসমূহ
@@ -274,7 +275,7 @@ export default function ExamAttendanceSheet() {
                             <div className="flex justify-between items-center border-b-2 border-black pb-2 mb-3">
                                 <div className="w-[130px] h-[100px] relative flex-shrink-0">
                                     <img
-                                        src="/aimlogo1.png"
+                                        src={siteConfig.assets.logo}
                                         alt="Logo"
                                         className="w-full h-full object-contain"
                                     />
@@ -282,7 +283,7 @@ export default function ExamAttendanceSheet() {
 
                                 <div className="flex-grow flex justify-end items-center">
                                     <img
-                                        src="/banner.png"
+                                        src={siteConfig.assets.banner}
                                         alt="Institution Banner"
                                         className="max-h-[100px] object-contain"
                                     />

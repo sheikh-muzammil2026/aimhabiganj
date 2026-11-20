@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import siteConfig from "@/config/siteConfig";
 import {
   Document,
   Page,
@@ -385,8 +386,8 @@ function VoucherHalf({ tx, copyType, baseUrl = "" }) {
     subInfo = "দাতা / অনুদানকারী";
   }
 
-  const logoUrl = baseUrl ? `${baseUrl}/aimlogo1.png` : "/aimlogo1.png";
-  const bannerUrl = baseUrl ? `${baseUrl}/banner.png` : "/banner.png";
+  const logoUrl = baseUrl ? `${baseUrl}${siteConfig.assets.logo}` : siteConfig.assets.logo;
+  const bannerUrl = baseUrl ? `${baseUrl}${siteConfig.assets.banner}` : siteConfig.assets.banner;
 
   const copyLabel =
     copyType === "office"
@@ -575,8 +576,7 @@ function VoucherHalf({ tx, copyType, baseUrl = "" }) {
         {/* সোশ্যাল ও কন্টাক্ট ইনফো */}
         <View style={styles.socialFooter}>
           <Text style={styles.socialFooterText}>
-            ০১৩১৬-২০৯২০১ | WhatsApp: ০১৭৪৮-৮৮৬১৬১ | www.aimhabiganj.com |
-            aimhabiganj@gmail.com | FB/YT: aimhabiganj
+            {siteConfig.contacts.phone} | WhatsApp: {siteConfig.contacts.whatsapp} | {siteConfig.contacts.domain} | {siteConfig.contacts.email} | FB/YT: {siteConfig.socials.facebook}
           </Text>
         </View>
       </View>

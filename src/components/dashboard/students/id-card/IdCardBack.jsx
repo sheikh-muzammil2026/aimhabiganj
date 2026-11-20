@@ -1,5 +1,6 @@
 "use client";
 import React from 'react';
+import siteConfig from '@/config/siteConfig';
 
 export const IdCardBack = () => {
     return (
@@ -65,14 +66,9 @@ export const IdCardBack = () => {
 
                     {/* ঠিকানা ও যোগাযোগ */}
                     <div className="text-[7.5px] font-serif leading-snug text-black mt-0.5 space-y-1">
-                        <p className="font-normal text-gray-900">Holding No: 4577-03</p>
-                        <p className="font-normal text-gray-900">South Shaymoli R/A</p>
-                        <p className="font-normal text-gray-900">Habiganj-3300</p>
+                        <p className="font-normal text-gray-900">{siteConfig.address.en}</p>
                         <p className="font-bold tracking-wider font-mono text-[8px] mt-0.5 text-black">
-                            01316-209-201
-                        </p>
-                        <p className="font-bold tracking-wider font-mono text-[8px] text-black">
-                            01748-868-161
+                            {siteConfig.contacts.phone}
                         </p>
                     </div>
 
@@ -80,19 +76,19 @@ export const IdCardBack = () => {
                     <div className="pt-2 border-t border-gray-300 grid grid-cols-2 gap-x-1 gap-y-0.5 font-sans w-full px-0.6">
                         <div className="flex items-center justify-center gap-0.5 text-[6.5px]">
                             <span className="text-blue-600 font-bold">f</span>
-                            <span className="truncate font-medium">aimhabiganj</span>
+                            <span className="truncate font-medium">{siteConfig.socials.facebook}</span>
                         </div>
                         <div className="flex items-center justify-center gap-0.5 text-[6.5px]">
                             <span className="text-red-600 font-bold">▶</span>
-                            <span className="truncate font-medium">aimhabiganj</span>
+                            <span className="truncate font-medium">{siteConfig.socials.youtube}</span>
                         </div>
                         <div className="flex items-center justify-center gap-0.5 text-[6.5px]">
                             <span className="text-emerald-600 font-bold">🌐</span>
-                            <span className="truncate font-medium">www.aimhabiganj.com</span>
+                            <span className="truncate font-medium">{siteConfig.contacts.domain}</span>
                         </div>
                         <div className="flex items-center justify-center gap-0.5 text-[5.5px] leading-tight">
                             <span className="text-red-500 font-bold text-[6.5px]">✉</span>
-                            <span className="break-all font-medium">aimhabiganj@gmail.com</span>
+                            <span className="break-all font-medium">{siteConfig.contacts.email}</span>
                         </div>
                     </div>
                 </div>

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import siteConfig from "@/config/siteConfig";
 import {
   LayoutDashboard,
   GraduationCap,
@@ -821,17 +822,17 @@ export default function Sidebar() {
             <div className="w-10 h-10 rounded-full border border-blue-900 p-0.5 flex-shrink-0 flex items-center justify-center bg-white">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/aimlogo1.png"
-                alt="AIM Logo"
+                src={siteConfig.assets.logo}
+                alt={`${siteConfig.name.short} Logo`}
                 className="w-full h-full object-contain rounded-full"
               />
             </div>
             <div>
               <h2 className="font-black text-sm text-amber-400 tracking-wide">
-                আস-সালাম আইডিয়াল মাদরাসা
+                {siteConfig.name.bn}
               </h2>
               <p className="text-[10px] text-emerald-300/80 font-medium tracking-wider">
-                হবিগঞ্জ, বাংলাদেশ
+                {siteConfig.address.district}, {siteConfig.address.country}
               </p>
             </div>
           </Link>

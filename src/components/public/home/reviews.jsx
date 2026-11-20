@@ -121,46 +121,37 @@ export default function ReviewsTestimonial() {
   return (
     <section
       id="testimonials"
-      className="relative py-20 md:py-28 bg-gradient-to-b from-[#f6faf8] via-white to-[#f2f8f5] dark:from-[#010a06] dark:via-[#02150e] dark:to-[#010a06] overflow-hidden transition-colors duration-300"
+      className="relative py-20 md:py-28 bg-[#E3F2FD] overflow-hidden transition-colors duration-300"
     >
-      {/* ডার্ক মোড গোল্ডেন ডট প্যাটার্ন ও অ্যাম্বিয়েন্ট লাইট গ্লো */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-0 dark:opacity-[0.04] transition-opacity duration-300"
-        style={{
-          backgroundImage: `radial-gradient(circle at 2px 2px, rgba(251, 191, 36, 0.9) 1px, transparent 0)`,
-          backgroundSize: "32px 32px",
-        }}
-      />
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute top-12 left-1/3 w-96 h-96 bg-emerald-500/8 dark:bg-emerald-500/15 rounded-full blur-[120px]" />
-        <div className="absolute bottom-12 right-1/3 w-96 h-96 bg-amber-500/8 dark:bg-amber-500/15 rounded-full blur-[120px]" />
+        <div className="absolute top-12 left-1/3 w-96 h-96 bg-[#90CAF9]/25 rounded-full blur-[100px]" />
+        <div className="absolute bottom-12 right-1/3 w-96 h-96 bg-[#2196F3]/15 rounded-full blur-[100px]" />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-14 md:mb-16">
+      <div className="relative z-10 site-container mb-14 md:mb-16">
         {/* সেকশন হেডার */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 bg-emerald-950/5 dark:bg-gradient-to-r dark:from-amber-500/15 dark:to-emerald-500/10 border border-emerald-800/15 dark:border-amber-400/35 px-4 py-1.5 rounded-full shadow-xs dark:shadow-[0_0_20px_rgba(245,158,11,0.12)]">
-
-            <span className="text-emerald-900 dark:text-amber-300 font-bold text-xs uppercase tracking-widest">
+          <div className="inline-flex items-center gap-2 bg-white border border-[#90CAF9] px-4 py-1.5 rounded-full shadow-xs">
+            <span className="text-[#0D47A1] font-bold text-xs uppercase tracking-widest">
               {active.badge}
             </span>
           </div>
 
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[42px] font-black text-slate-900 dark:text-white leading-tight tracking-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[42px] font-black text-[#0D47A1] leading-tight tracking-tight">
             {active.titlePrefix}{" "}
-            <span className="bg-gradient-to-r from-emerald-800 via-emerald-600 to-amber-600 dark:from-amber-200 dark:via-amber-400 dark:to-emerald-300 bg-clip-text text-transparent">
+            <span className="text-[#2196F3]">
               {active.titleHighlight}
             </span>
           </h2>
 
-          <p className="text-sm sm:text-base text-slate-600 dark:text-emerald-100/75 leading-relaxed max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base text-[#1E293B] leading-relaxed max-w-2xl mx-auto">
             {active.subtitle}
           </p>
 
           <div className="flex items-center justify-center gap-2 pt-2">
-            <div className="h-[1px] w-14 bg-gradient-to-r from-transparent to-amber-500" />
-            <div className="h-2 w-2 rotate-45 bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
-            <div className="h-[1px] w-14 bg-gradient-to-l from-transparent to-amber-500" />
+            <div className="h-[1px] w-14 bg-gradient-to-r from-transparent to-[#90CAF9]" />
+            <div className="h-2 w-2 rotate-45 bg-[#2196F3] shadow-[0_0_8px_rgba(33,150,243,0.5)]" />
+            <div className="h-[1px] w-14 bg-gradient-to-l from-transparent to-[#90CAF9]" />
           </div>
         </div>
       </div>
@@ -168,8 +159,8 @@ export default function ReviewsTestimonial() {
       {/* অ্যানিমেশন কন্টেইনার জোন - ইনফিনিট মার্কি */}
       <div className="relative w-full flex overflow-x-hidden pt-2 pb-8 group">
         {/* দুই পাশের সফট ফেইড মাস্ক */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-12 sm:w-28 bg-gradient-to-r from-[#f6faf8] dark:from-[#010a06] to-transparent z-20" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-12 sm:w-28 bg-gradient-to-l from-[#f6faf8] dark:from-[#010a06] to-transparent z-20" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-12 sm:w-28 bg-gradient-to-r from-[#E3F2FD] to-transparent z-20" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-12 sm:w-28 bg-gradient-to-l from-[#E3F2FD] to-transparent z-20" />
 
         <style
           dangerouslySetInnerHTML={{
@@ -194,14 +185,14 @@ export default function ReviewsTestimonial() {
           {duplicatedReviews.map((review, index) => (
             <div
               key={index}
-              className="group/card w-[320px] sm:w-[420px] rounded-3xl p-[1.5px] bg-gradient-to-b from-amber-400/45 via-emerald-600/20 to-slate-200 dark:from-amber-400/55 dark:via-emerald-500/25 dark:to-amber-500/30 shadow-[0_15px_40px_-15px_rgba(2,32,20,0.08)] hover:shadow-[0_25px_55px_-12px_rgba(2,32,20,0.16)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.85),0_0_30px_rgba(16,185,129,0.08)] transition-all duration-300 hover:-translate-y-1.5 flex-shrink-0 whitespace-normal"
+              className="group/card w-[320px] sm:w-[420px] rounded-xl p-[1px] bg-[#90CAF9] hover:bg-[#2196F3] shadow-sm hover:shadow-lg hover:shadow-[#0D47A1]/10 transition-all duration-300 hover:-translate-y-1.5 flex-shrink-0 whitespace-normal"
             >
-              <div className="relative h-full bg-white dark:bg-gradient-to-br dark:from-[#041e14] dark:via-[#02130c] dark:to-[#010906] p-7 sm:p-8 rounded-[22.5px] flex flex-col justify-between overflow-hidden dark:shadow-[inset_0_1px_1px_rgba(251,191,36,0.15)]">
-                {/* টপ গোল্ডেন অ্যাকসেন্ট লাইন */}
-                <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent opacity-80" />
+              <div className="relative h-full bg-white p-7 sm:p-8 rounded-[11px] flex flex-col justify-between overflow-hidden border border-[#90CAF9]">
+                {/* টপ অ্যাকসেন্ট লাইন */}
+                <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#2196F3] to-transparent opacity-80" />
 
                 {/* ব্যাকগ্রাউন্ড উদ্ধৃতি চিহ্ন */}
-                <Quote className="pointer-events-none absolute right-6 top-6 w-12 h-12 text-emerald-900/[0.06] dark:text-amber-400/[0.08] rotate-180" />
+                <Quote className="pointer-events-none absolute right-6 top-6 w-12 h-12 text-[#0D47A1]/[0.05] rotate-180" />
 
                 <div className="relative z-10">
                   {/* ৫ স্টার রেটিং ও ভেরিফাইড ব্যাজ */}
@@ -210,32 +201,32 @@ export default function ReviewsTestimonial() {
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
-                          className="w-4 h-4 fill-amber-400 text-amber-400 drop-shadow-[0_0_6px_rgba(245,158,11,0.45)]"
+                          className="w-4 h-4 fill-[#2196F3] text-[#2196F3]"
                         />
                       ))}
                     </div>
-                    <span className="inline-flex items-center gap-1 text-[10.5px] font-bold text-emerald-800 dark:text-amber-300 bg-emerald-50 dark:bg-amber-400/10 border border-emerald-200/70 dark:border-amber-400/30 px-2.5 py-0.5 rounded-full">
-                      <BadgeCheck className="w-3 h-3 text-amber-500 dark:text-amber-400" />
+                    <span className="inline-flex items-center gap-1 text-[10.5px] font-bold text-[#0D47A1] bg-[#E3F2FD] border border-[#90CAF9] px-2.5 py-0.5 rounded-full">
+                      <BadgeCheck className="w-3 h-3 text-[#2196F3]" />
                       <span>{active.verifiedLabel}</span>
                     </span>
                   </div>
 
                   {/* মন্তব্য */}
-                  <p className="text-xs sm:text-sm text-slate-700 dark:text-emerald-50/90 leading-relaxed mb-7 font-normal">
+                  <p className="text-xs sm:text-sm text-[#1E293B] leading-relaxed mb-7 font-normal">
                     &ldquo;{review.comment}&rdquo;
                   </p>
                 </div>
 
                 {/* প্রোফাইল প্যানেল */}
-                <div className="relative z-10 flex items-center gap-3.5 pt-4 border-t border-slate-100 dark:border-emerald-800/45">
-                  <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#022014] via-emerald-900 to-emerald-800 dark:from-[#062d1e] dark:to-[#02120b] text-amber-300 font-extrabold flex items-center justify-center text-sm ring-1 ring-amber-400/45 shadow-[0_0_15px_rgba(245,158,11,0.2)] flex-shrink-0">
+                <div className="relative z-10 flex items-center gap-3.5 pt-4 border-t border-[#90CAF9]/40">
+                  <div className="w-11 h-11 rounded-xl bg-[#0D47A1] text-white font-extrabold flex items-center justify-center text-sm shadow-sm flex-shrink-0">
                     {review.name[0]}
                   </div>
                   <div className="min-w-0">
-                    <h4 className="text-sm font-extrabold text-slate-900 dark:text-white truncate group-hover/card:text-emerald-800 dark:group-hover/card:text-amber-200 transition-colors">
+                    <h4 className="text-sm font-extrabold text-[#0D47A1] truncate group-hover/card:text-[#2196F3] transition-colors">
                       {review.name}
                     </h4>
-                    <p className="text-xs font-medium text-emerald-700 dark:text-amber-300/90 truncate mt-0.5">
+                    <p className="text-xs font-semibold text-[#2196F3] truncate mt-0.5">
                       {review.role}
                     </p>
                   </div>
@@ -247,12 +238,12 @@ export default function ReviewsTestimonial() {
       </div>
 
       {/* অভিভাবক মতামত বাটন */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 text-center">
+      <div className="relative z-10 site-container pt-6 text-center">
         <Link
           href="/parent-feedback"
-          className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-full bg-[#00733a] hover:bg-emerald-800 text-white font-bold text-sm sm:text-base shadow-[0_10px_25px_-5px_rgba(0,115,58,0.4)] hover:shadow-[0_15px_30px_-5px_rgba(0,115,58,0.55)] ring-1 ring-amber-400/50 transition-all duration-300 hover:-translate-y-0.5 active:scale-95"
+          className="btn-primary"
         >
-          <MessageSquarePlus className="w-4 h-4 text-amber-300" />
+          <MessageSquarePlus className="w-4 h-4 text-white" />
           <span>{active.feedbackBtnText}</span>
         </Link>
       </div>

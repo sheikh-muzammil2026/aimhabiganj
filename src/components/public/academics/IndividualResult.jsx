@@ -18,6 +18,7 @@ import { toBengaliDigits, toEnglishDigits } from "@/lib/studentUtils";
 import PrintInstitutionalHeader from "@/components/shared/print/PrintInstitutionalHeader";
 import PrintSignatures from "@/components/shared/print/PrintSignatures";
 import PrintSocialFooter from "@/components/shared/print/PrintSocialFooter";
+import siteConfig from "@/config/siteConfig";
 
 /**
  * Grade to remark conversion utility based on institutional academic standards.
@@ -1639,7 +1640,7 @@ function ResultSheetGeneratorContent() {
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0 opacity-[0.05]">
                           <div className="w-[420px] h-[420px] rounded-full overflow-hidden flex items-center justify-center">
                             <Image
-                              src="/aimlogo1.png"
+                              src={siteConfig.assets.logo}
                               alt="Watermark Logo"
                               width={420}
                               height={420}
@@ -2048,7 +2049,7 @@ function ResultSheetGeneratorContent() {
                       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0 opacity-[0.05]">
                         <div className="w-[420px] h-[420px] rounded-full overflow-hidden flex items-center justify-center">
                           <Image
-                            src="/aimlogo1.png"
+                            src={siteConfig.assets.logo}
                             alt="Watermark Logo"
                             width={420}
                             height={420}

@@ -57,7 +57,7 @@ export default function NoticesPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 py-16">
+    <div className="page-wrapper">
       {loading ? (
         <div className="text-center py-20 text-slate-500">
           <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />

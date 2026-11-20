@@ -2,6 +2,7 @@
 "use client";
 
 import React, { forwardRef } from "react";
+import siteConfig from "@/config/siteConfig";
 import { getStudentClassDetails, toBengaliDigits } from "@/lib/studentUtils";
 
 export const FALLBACK_AVATAR_DATA_URI =
@@ -127,7 +128,7 @@ const SeatStickersPrintView = forwardRef(function SeatStickersPrintView(
                   <div className="flex items-center gap-1.5 min-w-0">
                     <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0 relative flex items-center justify-center bg-white border border-emerald-900/20">
                       <img
-                        src="/aimlogo1.png"
+                        src={siteConfig.assets.logo}
                         alt="Logo"
                         width={24}
                         height={24}
@@ -142,7 +143,7 @@ const SeatStickersPrintView = forwardRef(function SeatStickersPrintView(
                     </div>
                     <div className="min-w-0">
                       <h4 className="text-[10px] font-black text-[#043e30] leading-tight truncate">
-                        আস-সালাম আইডিয়াল মাদরাসা
+                        {siteConfig.name.bn}
                       </h4>
                       <p className="text-[7.5px] font-semibold text-slate-500 leading-none">
                         পরীক্ষা আসন স্টিকার

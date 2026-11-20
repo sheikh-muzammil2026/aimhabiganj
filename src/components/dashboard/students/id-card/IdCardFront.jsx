@@ -4,6 +4,7 @@ import React from "react";
 import BarcodeSVG from "react-barcode";
 import AutoScaledText from "@/components/shared/AutoScaledText";
 import { getStudentClassDetails } from "@/lib/studentUtils";
+import siteConfig from "@/config/siteConfig";
 
 export function IdCardFront({ student }) {
   if (!student) return null;
@@ -35,8 +36,8 @@ export function IdCardFront({ student }) {
           <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 bg-white">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/aimlogo1.png"
-              alt="AIM Logo"
+              src={siteConfig.assets.logo}
+              alt={`${siteConfig.name.short} Logo`}
               className="w-full h-full object-cover scale-[1.06] rounded-full"
             />
           </div>

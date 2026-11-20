@@ -1,4 +1,5 @@
 import Image from "next/image";
+import siteConfig from "@/config/siteConfig";
 
 export default function CalendarPage() {
     const monthsData = [
@@ -67,8 +68,8 @@ export default function CalendarPage() {
                 {/* Left Logo */}
                 <div className="md:col-span-2 flex justify-center">
                     <Image
-                        src="/aimlogo1.png"
-                        alt="AIM Logo"
+                        src={siteConfig.assets.logo}
+                        alt={`${siteConfig.name.short} Logo`}
                         width={120}
                         height={120}
                         priority
@@ -269,13 +270,13 @@ export default function CalendarPage() {
             <footer className="mt-4 bg-emerald-900 text-white p-4 rounded-lg flex flex-col md:flex-row justify-between items-center text-xs space-y-2 md:space-y-0">
                 <div>
                     <p className="font-bold text-emerald-200">
-                        এইম ক্যাম্পাস, দক্ষিণ শ্যামলী আ/এ, হবিগঞ্জ-৩৩০০
+                        {siteConfig.address.bn}
                     </p>
-                    <p>মোবাইল (অফিস): 01316 209 201, 01748 868 161</p>
+                    <p>মোবাইল (অফিস): {siteConfig.contacts.phone}</p>
                 </div>
                 <div className="text-right">
-                    <p>www.aimhabiganj.com</p>
-                    <p>aimhabiganj@gmail.com</p>
+                    <p>{siteConfig.contacts.domain}</p>
+                    <p>{siteConfig.contacts.email}</p>
                 </div>
             </footer>
         </div>

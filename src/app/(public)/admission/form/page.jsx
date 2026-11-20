@@ -3,9 +3,9 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { toast } from "react-toastify";
-import AdmissionFormPage1 from "@/components/admission/AdmissionFormPage1";
-import AdmissionFormPage2 from "@/components/admission/AdmissionFormPage2";
-import AdmissionFormPage3 from "@/components/admission/AdmissionFormPage3";
+import AdmissionFormPage1 from "@/components/shared/admission/AdmissionFormPage1";
+import AdmissionFormPage2 from "@/components/shared/admission/AdmissionFormPage2";
+import AdmissionFormPage3 from "@/components/shared/admission/AdmissionFormPage3";
 
 export default function AdmissionFormPage() {
   const [formData, setFormData] = useState({
@@ -111,7 +111,7 @@ export default function AdmissionFormPage() {
       markOthers: "",
       totalMarks: 0,
       recommendedClass: "",
-       rollNumber: "",
+      rollNumber: "",
       monthlyFee: "",
       feeCategory: "",
       examinerId1: "",

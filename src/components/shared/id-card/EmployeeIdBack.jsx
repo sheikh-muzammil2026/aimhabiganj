@@ -4,6 +4,7 @@ import React from "react";
 import { Globe, Mail } from "lucide-react";
 import { BsYoutube } from "react-icons/bs";
 import { FaFacebook } from "react-icons/fa";
+import siteConfig from "@/config/siteConfig";
 
 /**
  * EmployeeIdBack
@@ -146,18 +147,18 @@ export default function EmployeeIdBack({
 
             <div className="flex items-center gap-0.5">
               <BsYoutube className="w-2.5 h-2.5 text-[#DC2626] shrink-0" />
-              <span className="font-semibold">aimhabiganj</span>
+              <span className="font-semibold">{siteConfig.socials.youtube}</span>
             </div>
 
             <div className="flex items-center gap-0.5">
               <FaFacebook className="w-2.5 h-2.5 text-[#2563EB] shrink-0" />
-              <span className="font-semibold">aimhabiganj</span>
+              <span className="font-semibold">{siteConfig.socials.facebook}</span>
             </div>
 
             <div className="flex items-center gap-0.5">
               <Mail className="w-2.5 h-2.5 text-[#0D7E75] shrink-0" />
               <span className="font-semibold truncate">
-                aimhabiganj@gmail.com
+                {siteConfig.contacts.email}
               </span>
             </div>
           </div>

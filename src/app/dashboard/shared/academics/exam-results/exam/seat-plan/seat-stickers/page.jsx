@@ -18,6 +18,7 @@ import {
   SESSION_YEARS,
   toBengaliDigits,
 } from "@/lib/studentUtils";
+import siteConfig from "@/config/siteConfig";
 
 const API_BASE_URL = (
   process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000"
@@ -470,7 +471,7 @@ export default function SeatStickersGeneratorPage() {
                     <div className="flex items-center gap-1.5 min-w-0">
                       <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0 relative flex items-center justify-center bg-white border border-emerald-900/20">
                         <img
-                          src="/aimlogo1.png"
+                          src={siteConfig.assets.logo}
                           alt="Logo"
                           width={20}
                           height={20}

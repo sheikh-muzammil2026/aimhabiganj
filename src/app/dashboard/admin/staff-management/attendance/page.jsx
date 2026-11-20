@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import siteConfig from "@/config/siteConfig";
 import {
   Users,
   UserCheck,
@@ -1007,7 +1008,7 @@ export default function StaffAttendancePage() {
                     <div className="w-20 h-20 md:w-28 md:h-28 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-3">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src="/aimlogo1.png"
+                        src={siteConfig.assets.logo}
                         alt="Institution Logo"
                         className="w-full h-full object-cover scale-[1.05]"
                       />
@@ -1015,7 +1016,7 @@ export default function StaffAttendancePage() {
                     <div className="flex-grow text-center">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src="/banner_routine.png"
+                        src={siteConfig.assets.bannerRoutine || siteConfig.assets.banner}
                         alt="Institution Banner"
                         className="w-full h-auto max-h-45 object-fill mx-auto print:max-h-45"
                       />

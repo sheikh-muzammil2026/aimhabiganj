@@ -2,6 +2,7 @@
 
 import React, { forwardRef } from "react";
 import Image from "next/image";
+import siteConfig from "@/config/siteConfig";
 import { formatSubjectName } from "@/lib/subjectFormatter";
 import { toBengaliDigits } from "@/lib/studentUtils";
 import PrintSignatures from "@/components/shared/print/PrintSignatures";
@@ -168,7 +169,7 @@ const CTResultPrintView = forwardRef(function CTResultPrintView(
       <div className="ct-watermark-wrapper absolute inset-0 m-auto flex items-center justify-center pointer-events-none z-0 opacity-[0.05] overflow-hidden">
         <div className="w-[420px] h-[420px] rounded-full overflow-hidden flex items-center justify-center">
           <Image
-            src="/aimlogo1.png"
+            src={siteConfig.assets.logo}
             alt="Watermark Logo"
             width={420}
             height={420}
@@ -184,7 +185,7 @@ const CTResultPrintView = forwardRef(function CTResultPrintView(
             {/* বামে মাদ্রাসার লোগো */}
             <div className="w-24 h-24 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-2">
               <Image
-                src="/aimlogo1.png"
+                src={siteConfig.assets.logo}
                 alt="Institution Logo"
                 width={96}
                 height={96}

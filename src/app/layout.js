@@ -1,14 +1,19 @@
 import "./globals.css";
 import Providers from "@/components/Providers/providers";
 import AIChatbot from "@/components/shared/AIChatbot";
+import CursorTrail from "@/components/shared/CursorTrail";
 import WhatsAppButton from "@/components/shared/WhatsAppButton";
+import siteConfig from "@/config/siteConfig";
 
 export const metadata = {
-  title: "As-Salam Ideal Madrasah  (AIM)",
-  description: "Welcome to our website",
+  title: {
+    default: siteConfig.name.fullEn,
+    template: `%s | ${siteConfig.name.short}`,
+  },
+  description: siteConfig.description.en,
   icons: {
     icon: [
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: siteConfig.assets.favicon || "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
     ],
     apple: [
@@ -48,8 +53,9 @@ export default function RootLayout({ children }) {
           crossOrigin="anonymous"
         />
       </head>
-      <body className="min-h-full flex flex-col bg-[#01160e] dark:bg-[#010604]">
+      <body className="min-h-full flex flex-col bg-slate-50 dark:bg-[#06152B]">
         <Providers>
+          <CursorTrail />
           <main>{children}</main>
           <AIChatbot />
           <WhatsAppButton />

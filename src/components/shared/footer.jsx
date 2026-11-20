@@ -6,13 +6,14 @@ import { BsYoutube } from "react-icons/bs";
 import { RiFacebookCircleFill, RiGlobalFill } from "react-icons/ri";
 import { MapPin, Phone, Mail, ChevronRight, Sparkles } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import siteConfig from "@/config/siteConfig";
 
 export default function Footer() {
   const { language } = useLanguage();
 
   const content = {
     bn: {
-      desc: "দ্বীনি ও আধুনিক শিক্ষার এক অপূর্ব সমন্বয়। অভিজ্ঞ উলামায়ে কেরাম ও দক্ষ শিক্ষকমণ্ডলী দ্বারা পরিচালিত হবিগঞ্জের একটি নির্ভরযোগ্য ও যুগোপযোগী দ্বীনি শিক্ষা প্রতিষ্ঠান।",
+      desc: siteConfig.description.bn,
       colLinks: "গুরুত্বপূর্ণ লিংক",
       links: [
         { name: "আমাদের সম্পর্কে", href: "/about" },
@@ -30,12 +31,11 @@ export default function Footer() {
         { name: "আবাসিক কার্যসূচি", href: "/hostel#routine" },
       ],
       colContact: "যোগাযোগ করুন",
-      address: "দক্ষিণ শ্যামলী, হবিগঞ্জ সদর, হবিগঞ্জ, সিলেট, বাংলাদেশ।",
-      copyright:
-        "© ২০২৬ আস-সালাম আইডিয়াল মাদরাসা (এইম), হবিগঞ্জ। সর্বস্বত্ব সংরক্ষিত।",
+      address: siteConfig.address.bn,
+      copyright: `© ${siteConfig.academicSession.currentBn} ${siteConfig.name.fullBn}। সর্বস্বত্ব সংরক্ষিত।`,
     },
     en: {
-      desc: "A distinguished blend of authentic Islamic scholarship and modern education. Managed by experienced Ulama and dedicated faculty in Habiganj.",
+      desc: siteConfig.description.en,
       colLinks: "Quick Links",
       links: [
         { name: "About Us", href: "/about" },
@@ -57,13 +57,11 @@ export default function Footer() {
         { name: "Residential Hostel Routine", href: "/hostel#routine" },
       ],
       colContact: "Contact Info",
-      address:
-        "Dakshin Shyamoli, Habiganj Sadar, Habiganj, Sylhet, Bangladesh.",
-      copyright:
-        "© 2026 As-Salam Ideal Madrasah (AIM), Habiganj. All rights reserved.",
+      address: siteConfig.address.en,
+      copyright: `© ${siteConfig.academicSession.currentEn} ${siteConfig.name.fullEn}. All rights reserved.`,
     },
     ar: {
-      desc: "منظومة تعليمية رائدة تجمع بين الأصالة الشرعية والتميز الأكاديمي الحديث تحت إشراف نخبة من العلماء والأساتذة المتخصصين في حبيغنج.",
+      desc: siteConfig.description.ar,
       colLinks: "روابط هامة",
       links: [
         { name: "من نحن", href: "/about" },
@@ -85,32 +83,31 @@ export default function Footer() {
         { name: "برنامج السكن الداخلي", href: "/hostel#routine" },
       ],
       colContact: "تواصل معنا",
-      address: "داكشين شامولي، حبيغنج صدر، حبيغنج، سيلهت، بنغلاديش.",
-      copyright:
-        "© ٢٠٢٦ مدرسة السلام النموذجية (AIM)، حبيغنج. جميع الحقوق محفوظة.",
+      address: siteConfig.address.ar,
+      copyright: `© ٢٠٢٦ ${siteConfig.name.fullAr}. جميع الحقوق محفوظة.`,
     },
   };
 
   const active = content[language] || content.bn;
 
   return (
-    <footer className="relative bg-gradient-to-b from-[#021d12] via-[#01160e] to-[#010e09] dark:from-[#02140d] dark:via-[#010b07] dark:to-[#000503] print:hidden text-slate-300 transition-colors pb-20 md:pb-0 duration-300 overflow-hidden">
-      {/* টপ গোল্ডেন অ্যাকসেন্ট বর্ডার ও অ্যাম্বিয়েন্ট লাইট */}
-      <div className="h-[2px] w-full bg-gradient-to-r from-emerald-800 via-amber-400 to-emerald-800" />
-      <div className="pointer-events-none absolute -top-24 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-[130px]" />
-      <div className="pointer-events-none absolute -bottom-24 right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-[130px]" />
+    <footer className="relative bg-[#0D47A1] print:hidden text-[#E3F2FD] transition-colors pb-20 md:pb-0 duration-300 overflow-hidden">
+      {/* টপ স্কাই ব্লু অ্যাকসেন্ট বর্ডার */}
+      <div className="h-[2px] w-full bg-[#90CAF9]" />
+      <div className="pointer-events-none absolute -top-24 left-1/4 w-96 h-96 bg-[#2196F3]/15 rounded-full blur-[130px]" />
+      <div className="pointer-events-none absolute -bottom-24 right-1/4 w-96 h-96 bg-[#90CAF9]/15 rounded-full blur-[130px]" />
 
       {/* প্রধান ফুটার কন্টেইনার */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+      <div className="relative z-10 site-container py-16 md:py-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8">
-          {/* ১. মাদরাসা পরিচিতি ও লোগো সেকশন (৪ কলাম) */}
+          {/* ১. প্রতিষ্ঠান পরিচিতি ও লোগো সেকশন (৪ কলাম) */}
           <div className="lg:col-span-4 space-y-5">
             <Link href="/" className="inline-flex items-center gap-3.5 group">
-              <div className="relative w-12 h-12 rounded-full p-[2px] bg-gradient-to-tr from-amber-500 via-amber-200 to-emerald-400 shadow-[0_0_20px_rgba(245,158,11,0.25)] flex-shrink-0">
-                <div className="relative w-full h-full rounded-full overflow-hidden bg-[#021d12]">
+              <div className="relative w-12 h-12 rounded-full p-[2px] ring-2 ring-[#90CAF9]/80 shadow-md flex-shrink-0 bg-white">
+                <div className="relative w-full h-full rounded-full overflow-hidden">
                   <Image
-                    src="/aimlogo1.png"
-                    alt="As-Salam Ideal Madrasah (AIM) Logo"
+                    src={siteConfig.assets.logo}
+                    alt={`${siteConfig.name.short} Logo`}
                     fill
                     sizes="48px"
                     className="object-cover scale-[1.10] rounded-full"
@@ -118,56 +115,54 @@ export default function Footer() {
                 </div>
               </div>
               <div className="flex flex-col">
-                <span className="font-black text-[15px] text-amber-300 tracking-wide leading-tight font-britanic">
-                  As-Salam Ideal Madrasah (AIM)
+                <span className="font-black text-[15px] text-white tracking-wide leading-tight font-britanic">
+                  {siteConfig.name.fullEn}
                 </span>
                 {language === "ar" ? (
                   <h2
-                    className="text-sm font-bold text-white mt-0.5 kufi-custom"
+                    className="text-sm font-bold text-[#E3F2FD] mt-0.5 kufi-custom"
                     dir="rtl"
                     lang="ar"
                   >
-                    مدرس<span className="font-sans">ة</span> الس
-                    <span className="font-sans">لا</span>م النموذجي
-                    <span className="font-sans">ة</span>
+                    {siteConfig.name.fullAr}
                   </h2>
                 ) : (
-                  <span className="text-sm font-bold text-white mt-0.5 font-shalda">
-                    আস-সালাম আইডিয়াল মাদরাসা (এইম)
+                  <span className="text-sm font-bold text-[#E3F2FD] mt-0.5 font-shalda">
+                    {siteConfig.name.fullBn}
                   </span>
                 )}
               </div>
             </Link>
 
-            <p className="text-xs sm:text-sm text-slate-300/80 leading-relaxed font-normal max-w-sm">
+            <p className="text-xs sm:text-sm text-[#E3F2FD]/80 leading-relaxed font-normal max-w-sm">
               {active.desc}
             </p>
 
             {/* সোশ্যাল মিডিয়া ও ওয়েবসাইট আইকন লিংক */}
             <div className="flex items-center gap-3 pt-1">
               <a
-                href="https://www.facebook.com/p/AIM-Habiganj-100062973924471/"
+                href={siteConfig.socials.facebook}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/10 text-amber-300 hover:bg-gradient-to-r hover:from-amber-400 hover:to-amber-500 hover:text-slate-950 hover:border-amber-400 flex items-center justify-center transition-all duration-300 hover:-translate-y-0.5 shadow-sm text-lg"
+                className="w-10 h-10 rounded-lg bg-white/10 border border-[#90CAF9]/40 text-[#90CAF9] hover:bg-[#2196F3] hover:text-white hover:border-[#2196F3] flex items-center justify-center transition-all duration-300 hover:-translate-y-0.5 shadow-sm text-lg cursor-pointer"
                 title="Facebook"
               >
                 <RiFacebookCircleFill />
               </a>
               <a
-                href="http://www.youtube.com/@aimhabiganj"
+                href={siteConfig.socials.youtube}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/10 text-amber-300 hover:bg-gradient-to-r hover:from-amber-400 hover:to-amber-500 hover:text-slate-950 hover:border-amber-400 flex items-center justify-center transition-all duration-300 hover:-translate-y-0.5 shadow-sm text-base"
+                className="w-10 h-10 rounded-lg bg-white/10 border border-[#90CAF9]/40 text-[#90CAF9] hover:bg-[#2196F3] hover:text-white hover:border-[#2196F3] flex items-center justify-center transition-all duration-300 hover:-translate-y-0.5 shadow-sm text-base cursor-pointer"
                 title="YouTube"
               >
                 <BsYoutube />
               </a>
               <a
-                href="https://aimhabiganj.com"
+                href={siteConfig.contacts.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/10 text-amber-300 hover:bg-gradient-to-r hover:from-amber-400 hover:to-amber-500 hover:text-slate-950 hover:border-amber-400 flex items-center justify-center transition-all duration-300 hover:-translate-y-0.5 shadow-sm text-lg"
+                className="w-10 h-10 rounded-lg bg-white/10 border border-[#90CAF9]/40 text-[#90CAF9] hover:bg-[#2196F3] hover:text-white hover:border-[#2196F3] flex items-center justify-center transition-all duration-300 hover:-translate-y-0.5 shadow-sm text-lg cursor-pointer"
                 title="Website"
               >
                 <RiGlobalFill />
@@ -175,9 +170,9 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* ২. গুরুত্বপূর্ণ লিংকসমূহ (২.৫ কলাম -> ৩ কলাম) */}
+          {/* ২. গুরুত্বপূর্ণ লিংকসমূহ (২ কলাম) */}
           <div className="lg:col-span-2">
-            <h3 className="text-sm font-extrabold text-amber-300 uppercase tracking-wider border-b border-white/10 pb-3 mb-5">
+            <h3 className="text-sm font-extrabold text-white uppercase tracking-wider border-b border-[#90CAF9]/30 pb-3 mb-5">
               {active.colLinks}
             </h3>
             <ul className="space-y-3 text-xs sm:text-sm">
@@ -185,9 +180,9 @@ export default function Footer() {
                 <li key={idx}>
                   <Link
                     href={item.href}
-                    className="group inline-flex items-center gap-1.5 text-slate-300/85 hover:text-amber-300 transition-colors duration-200"
+                    className="group inline-flex items-center gap-1.5 text-[#E3F2FD]/85 hover:text-[#90CAF9] transition-colors duration-200"
                   >
-                    <ChevronRight className="w-3.5 h-3.5 text-amber-400/60 group-hover:translate-x-0.5 transition-transform rtl:rotate-180" />
+                    <ChevronRight className="w-3.5 h-3.5 text-[#90CAF9] group-hover:translate-x-0.5 transition-transform rtl:rotate-180" />
                     <span>{item.name}</span>
                   </Link>
                 </li>
@@ -197,7 +192,7 @@ export default function Footer() {
 
           {/* ৩. শিক্ষা ও ভর্তি কার্যক্রম (৩ কলাম) */}
           <div className="lg:col-span-3">
-            <h3 className="text-sm font-extrabold text-amber-300 uppercase tracking-wider border-b border-white/10 pb-3 mb-5">
+            <h3 className="text-sm font-extrabold text-white uppercase tracking-wider border-b border-[#90CAF9]/30 pb-3 mb-5">
               {active.colAcademic}
             </h3>
             <ul className="space-y-3 text-xs sm:text-sm">
@@ -207,14 +202,14 @@ export default function Footer() {
                     href={item.href}
                     className={`group inline-flex items-center gap-1.5 transition-colors duration-200 ${
                       item.highlight
-                        ? "text-amber-300 font-bold hover:text-amber-200"
-                        : "text-slate-300/85 hover:text-amber-300"
+                        ? "text-white font-bold hover:text-[#90CAF9]"
+                        : "text-[#E3F2FD]/85 hover:text-[#90CAF9]"
                     }`}
                   >
                     {item.highlight ? (
-                      <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                      <Sparkles className="w-3.5 h-3.5 text-[#2196F3] animate-pulse" />
                     ) : (
-                      <ChevronRight className="w-3.5 h-3.5 text-amber-400/60 group-hover:translate-x-0.5 transition-transform rtl:rotate-180" />
+                      <ChevronRight className="w-3.5 h-3.5 text-[#90CAF9] group-hover:translate-x-0.5 transition-transform rtl:rotate-180" />
                     )}
                     <span>{item.name}</span>
                   </Link>
@@ -225,36 +220,36 @@ export default function Footer() {
 
           {/* ৪. যোগাযোগ ও ঠিকানা (৩ কলাম) */}
           <div className="lg:col-span-3">
-            <h3 className="text-sm font-extrabold text-amber-300 uppercase tracking-wider border-b border-white/10 pb-3 mb-5">
+            <h3 className="text-sm font-extrabold text-white uppercase tracking-wider border-b border-[#90CAF9]/30 pb-3 mb-5">
               {active.colContact}
             </h3>
-            <ul className="space-y-3.5 text-xs sm:text-sm text-slate-300/85">
+            <ul className="space-y-3.5 text-xs sm:text-sm text-[#E3F2FD]/85">
               <li className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-white/[0.06] border border-amber-400/25 flex items-center justify-center text-amber-300 flex-shrink-0 mt-0.5">
+                <div className="w-8 h-8 rounded-lg bg-white/10 border border-[#90CAF9]/30 flex items-center justify-center text-[#90CAF9] flex-shrink-0 mt-0.5">
                   <MapPin className="w-4 h-4" />
                 </div>
                 <span className="leading-relaxed">{active.address}</span>
               </li>
               <li className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-white/[0.06] border border-amber-400/25 flex items-center justify-center text-amber-300 flex-shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-white/10 border border-[#90CAF9]/30 flex items-center justify-center text-[#90CAF9] flex-shrink-0">
                   <Phone className="w-4 h-4" />
                 </div>
                 <a
-                  href="tel:+8801748868161"
-                  className="hover:text-amber-300 transition-colors font-mono"
+                  href={`tel:${siteConfig.contacts.phone[0]}`}
+                  className="hover:text-[#90CAF9] transition-colors font-mono"
                 >
-                  +8801748-868161
+                  {siteConfig.contacts.phone[0]}
                 </a>
               </li>
               <li className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-white/[0.06] border border-amber-400/25 flex items-center justify-center text-amber-300 flex-shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-white/10 border border-[#90CAF9]/30 flex items-center justify-center text-[#90CAF9] flex-shrink-0">
                   <Mail className="w-4 h-4" />
                 </div>
                 <a
-                  href="mailto:aimhabiganj@gmail.com"
-                  className="break-all hover:text-amber-300 transition-colors"
+                  href={`mailto:${siteConfig.contacts.email}`}
+                  className="break-all hover:text-[#90CAF9] transition-colors"
                 >
-                  aimhabiganj@gmail.com
+                  {siteConfig.contacts.email}
                 </a>
               </li>
             </ul>
@@ -262,18 +257,30 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* কপিরাইট ও আরবি নাম অংশ */}
-      <div className="relative z-10 bg-black/30 border-t border-white/10 text-xs py-5 px-4">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3 text-center sm:text-left">
-          <p className="text-slate-400 font-medium">{active.copyright}</p>
+      {/* কপিরাইট, ডেভেলপার ক্রেডিট ও আরবি নাম অংশ */}
+      <div className="relative z-10 bg-[#082c66] border-t border-[#90CAF9]/20 text-xs py-5 px-4">
+        <div className="site-container flex flex-col sm:flex-row justify-between items-center gap-3 text-center sm:text-left">
+          <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-[#E3F2FD]/75 font-medium">
+            <span>{active.copyright}</span>
+            <span className="hidden sm:inline text-[#90CAF9]/60">•</span>
+            <span>
+              {siteConfig.developer.creditText[language] || siteConfig.developer.creditText.bn}{" "}
+              <a
+                href={siteConfig.developer.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#90CAF9] hover:underline font-bold"
+              >
+                {siteConfig.developer.name}
+              </a>
+            </span>
+          </div>
           <p
-            className="text-amber-300/85 kufi-custom tracking-wide text-sm sm:text-base"
+            className="text-[#90CAF9] kufi-custom tracking-wide text-sm sm:text-base"
             dir="rtl"
             lang="ar"
           >
-            مدرس<span className="font-sans">ة</span> الس
-            <span className="font-sans">لا</span>م النموذجي
-            <span className="font-sans">ة</span>، حبيغنج
+            {siteConfig.name.fullAr}
           </p>
         </div>
       </div>

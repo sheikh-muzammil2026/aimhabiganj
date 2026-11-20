@@ -26,6 +26,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { toBengaliDigits } from "@/lib/studentUtils";
+import siteConfig from "@/config/siteConfig";
 
 export const FALLBACK_AVATAR_DATA_URI =
   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%2394a3b8'><circle cx='50' cy='36' r='20'/><path d='M20 86c0-16.5 13.5-30 30-30s30 13.5 30 30z'/></svg>";
@@ -801,8 +802,8 @@ function ExecutivePrintSummarySheet({ data, formattedDateBn }) {
           <div className="flex items-center justify-between gap-3">
             <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-white border border-emerald-900/30">
               <img
-                src="/aimlogo1.png"
-                alt="Logo"
+                src={siteConfig.assets.logo}
+                alt={`${siteConfig.name.short} Logo`}
                 width={56}
                 height={56}
                 loading="eager"
@@ -817,10 +818,10 @@ function ExecutivePrintSummarySheet({ data, formattedDateBn }) {
 
             <div className="flex-1 text-center min-w-0">
               <h2 className="text-xl font-black text-[#043e30] leading-tight">
-                আস-সালাম আইডিয়াল মাদরাসা
+                {siteConfig.name.bn}
               </h2>
               <p className="text-[10px] text-slate-600 font-bold">
-                কাজী নজরুল ইসলাম সড়ক, হাসপাতাল রোড, হবিগঞ্জ সদর
+                {siteConfig.address.bn}
               </p>
               <div className="inline-block bg-[#00733a] text-amber-300 font-black text-xs px-3 py-0.5 rounded-full mt-1 font-ubuntu shadow-2xs">
                 দৈনিক প্রশাসনিক ও আর্থিক সারসংক্ষেপ (Executive Summary)

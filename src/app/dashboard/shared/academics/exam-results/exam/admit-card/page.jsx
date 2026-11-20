@@ -11,6 +11,7 @@ import {
   RECENT_SESSION_YEARS,
 } from "@/lib/studentUtils";
 import Image from "next/image";
+import siteConfig from "@/config/siteConfig";
 import { QRCodeSVG } from "qrcode.react";
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useReactToPrint } from "react-to-print";
@@ -539,7 +540,7 @@ export default function AdmitCardGenerator() {
                   {/* ওয়াটারমার্ক (Watermark) */}
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 opacity-[0.08]">
                     <Image
-                      src="/aimlogo1.png"
+                      src={siteConfig.assets.logo}
                       alt="Watermark Logo"
                       width={260}
                       height={260}

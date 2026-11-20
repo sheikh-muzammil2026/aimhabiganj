@@ -12,6 +12,7 @@ import useUrlPagination from "@/hooks/useUrlPagination";
 import { toBengaliDigits } from "@/lib/studentUtils";
 import { useReactToPrint } from "react-to-print";
 import { Printer, Loader2 } from "lucide-react";
+import siteConfig from "@/config/siteConfig";
 import CTResultPrintView, {
   CT_PAGE_STYLE,
 } from "@/components/dashboard/academics/CTResultPrintView";
@@ -1588,7 +1589,7 @@ function ClassWiseResultContent() {
               <div className="watermark-wrapper absolute inset-0 m-auto flex items-center justify-center pointer-events-none z-0 opacity-[0.06] overflow-hidden">
                 <div className="w-[480px] h-[480px] rounded-full overflow-hidden flex items-center justify-center">
                   <Image
-                    src="/aimlogo1.png"
+                    src={siteConfig.assets.logo}
                     alt="Watermark Logo"
                     width={480}
                     height={480}
@@ -1604,7 +1605,7 @@ function ClassWiseResultContent() {
                     <div className="flex items-center justify-between gap-2">
                       <div className="header-logo-container w-30 h-30 print:w-30 print:h-30 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-3">
                         <Image
-                          src={"/aimlogo1.png"}
+                          src={siteConfig.assets.logo}
                           alt="Institution Logo"
                           width={120}
                           height={120}
@@ -1615,7 +1616,7 @@ function ClassWiseResultContent() {
                       </div>
                       <div className="flex-1 text-center px-1">
                         <Image
-                          src={"/banner_routine.png"}
+                          src={siteConfig.assets.bannerRoutine || siteConfig.assets.banner}
                           alt="Institution Banner"
                           width={2000}
                           height={400}

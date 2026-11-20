@@ -1,9 +1,10 @@
 import React from "react";
 import Image from "next/image";
+import siteConfig from "@/config/siteConfig";
 
 export default function PrintInstitutionalHeader({
-  logoSrc = "/aimlogo1.png",
-  bannerSrc = "/banner.png",
+  logoSrc = siteConfig.assets.logo,
+  bannerSrc = siteConfig.assets.banner,
   logoWrapperClassName = "w-22 h-22 rounded-full overflow-hidden flex-shrink-0 relative flex items-center justify-center",
   logoWidth = 120,
   logoHeight = 120,

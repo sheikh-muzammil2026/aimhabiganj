@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import siteConfig from "@/config/siteConfig";
 import {
   Document,
   Page,
@@ -289,20 +290,20 @@ export default function TeacherMonthlyAttendancePdfDocument({
   selectedMonth = "",
   origin = "",
 }) {
-  const logoUrl = origin ? `${origin}/aimlogo1.png` : "/aimlogo1.png";
+  const logoUrl = origin ? `${origin}${siteConfig.assets.logo}` : siteConfig.assets.logo;
   const bannerUrl = origin
-    ? `${origin}/banner_routine.png`
-    : "/banner_routine.png";
+    ? `${origin}${siteConfig.assets.bannerRoutine || siteConfig.assets.banner}`
+    : siteConfig.assets.bannerRoutine || siteConfig.assets.banner;
   const signatureUrl = origin
-    ? `${origin}/principle's_signature.jpg`
-    : "/principle's_signature.jpg";
+    ? `${origin}${siteConfig.assets.principalSignature}`
+    : siteConfig.assets.principalSignature;
 
   const teachersSummary = monthlyData?.teachersSummary || [];
 
   return (
     <Document
       title={`Teachers-Monthly-Attendance-${selectedMonth || "Report"}`}
-      author="As-Salam Ideal Madrasah"
+      author={siteConfig.name.bn}
       subject="Monthly Teacher Attendance Report"
     >
       <Page size="A4" orientation="landscape" style={styles.page}>

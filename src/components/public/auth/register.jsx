@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { X } from "lucide-react";
+import siteConfig from "@/config/siteConfig";
 
 export default function RegisterPage({ onClose }) {
   const router = useRouter();
@@ -95,8 +96,8 @@ export default function RegisterPage({ onClose }) {
           >
             <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-full p-1 bg-white dark:bg-slate-800 shadow-md border-2 border-emerald-700 dark:border-amber-400 flex items-center justify-center transition-transform duration-200 group-hover:scale-105 group-hover:shadow-lg">
               <Image
-                src="/aimlogo1.png"
-                alt="As-Salam Ideal Madrasah (AIM) Logo"
+                src={siteConfig.assets.logo}
+                alt={`${siteConfig.name.short} Logo`}
                 width={72}
                 height={72}
                 className="object-contain rounded-full"
@@ -108,7 +109,7 @@ export default function RegisterPage({ onClose }) {
             নতুন অ্যাকাউন্ট তৈরি করুন
           </h2>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            আস-সালাম আইডিয়াল মাদরাসা (এইম) এর ডিজিটাল পোর্টালে যুক্ত হোন
+            {siteConfig.name.bn} এর ডিজিটাল পোর্টালে যুক্ত হোন
           </p>
         </div>
 

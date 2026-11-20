@@ -1,4 +1,5 @@
 import React from "react";
+import siteConfig from "@/config/siteConfig";
 import {
   Document,
   Page,
@@ -396,10 +397,10 @@ export const PdfTeacherFront = ({ teacher = {}, origin = "" }) => {
   const mobile = teacher?.phone || teacher?.mobile || "—";
   const bloodGroup = teacher?.bloodGroup || teacher?.blood || "—";
   const idNo = teacher?.teacherId || teacher?.idNo || "—";
-  const logoUrl = origin ? `${origin}/aimlogo1.png` : "/aimlogo1.png";
+  const logoUrl = origin ? `${origin}${siteConfig.assets.logo}` : siteConfig.assets.logo;
   const sigUrl = origin
-    ? `${origin}/principle's_signature.jpg`
-    : "/principle's_signature.jpg";
+    ? `${origin}${siteConfig.assets.principalSignature}`
+    : siteConfig.assets.principalSignature;
   const photoUrl =
     teacher?.profileImage ||
     teacher?.image ||
@@ -543,10 +544,10 @@ export const PdfTeacherBack = () => {
 
         {/* Footer */}
         <View style={styles.backFooter}>
-          <Text style={styles.backFooterItem}>web: aimhabiganj.com</Text>
-          <Text style={styles.backFooterItem}>YT: aimhabiganj</Text>
-          <Text style={styles.backFooterItem}>FB: aimhabiganj</Text>
-          <Text style={styles.backFooterItem}>aimhabiganj@gmail.com</Text>
+          <Text style={styles.backFooterItem}>web: {siteConfig.contacts.domain}</Text>
+          <Text style={styles.backFooterItem}>YT: {siteConfig.socials.youtube}</Text>
+          <Text style={styles.backFooterItem}>FB: {siteConfig.socials.facebook}</Text>
+          <Text style={styles.backFooterItem}>{siteConfig.contacts.email}</Text>
         </View>
       </View>
     </View>
