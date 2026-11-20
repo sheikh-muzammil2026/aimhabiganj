@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { Phone, Mail, Clock, Send, MapPin, FaFacebookF, FaYoutube } from "lucide-react";
+import { Phone, Mail, Clock, Send, MapPin } from "lucide-react";
 import siteConfig from "@/config/siteConfig";
 
 export default function ContactComponent() {
@@ -82,7 +82,7 @@ export default function ContactComponent() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 bg-white/10 hover:bg-[#2196F3] text-white px-3.5 py-2 rounded-lg border border-[#90CAF9]/40 transition-all cursor-pointer"
               >
-                <FaFacebookF className="w-4 h-4" />
+                {/* <FaFacebookF className="w-4 h-4" /> */}
                 <span>Facebook</span>
               </a>
               <a
@@ -91,7 +91,7 @@ export default function ContactComponent() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 bg-white/10 hover:bg-[#2196F3] text-white px-3.5 py-2 rounded-lg border border-[#90CAF9]/40 transition-all cursor-pointer"
               >
-                <FaYoutube className="w-4 h-4" />
+                {/* <FaYoutube className="w-4 h-4" /> */}
                 <span>YouTube</span>
               </a>
             </div>
