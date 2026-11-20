@@ -14,6 +14,7 @@ import {
   Menu,
   X,
   User,
+  LogIn,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { useLanguage } from "@/context/LanguageContext";
@@ -28,26 +29,23 @@ const FIRST_SECTION_HASHES = new Set([
   "hifz",
 ]);
 
-const LANGUAGES = [
-  { code: "bn", name: "বাংলা", short: "বাং" },
-  { code: "en", name: "English", short: "EN" },
-  { code: "ar", name: "العربية", short: "عربي" },
-];
-
 export default function Navbar() {
-  const { language, setLanguage, t } = useLanguage();
+  const { language, t } = useLanguage();
   const pathname = usePathname();
   const router = useRouter();
   const headerRef = useRef(null);
 
   const [darkMode, setDarkMode] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [mobileOpenGroup, setMobileOpenGroup] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const { data: session } = authClient.useSession();
   const isLoggedIn = !!session?.user;
   const userRole = session?.user?.role;
+  const isArabic = language === "ar";
+  const isHomePage = pathname === "/";
 
   useEffect(() => {
     const isDark =
@@ -68,7 +66,7 @@ export default function Navbar() {
       if (!ticking) {
         window.requestAnimationFrame(() => {
           const y = window.scrollY;
-          setIsScrolled((prev) => (prev ? y > 10 : y > 35));
+          setIsScrolled((prev) => (prev ? y > 12 : y > 36));
           ticking = false;
         });
         ticking = true;
@@ -83,6 +81,7 @@ export default function Navbar() {
     const timer = setTimeout(() => {
       setActiveDropdown(null);
       setIsMobileMenuOpen(false);
+      setMobileOpenGroup(null);
     }, 0);
     return () => clearTimeout(timer);
   }, [pathname]);
@@ -155,7 +154,7 @@ export default function Navbar() {
 
     const header =
       typeof document !== "undefined" ? document.querySelector("header") : null;
-    const headerHeight = header ? header.offsetHeight : 70;
+    const headerHeight = header ? header.offsetHeight : 76;
     const elementTop = element.getBoundingClientRect().top + window.scrollY;
 
     const targetY = Math.max(0, elementTop - headerHeight - 16);
@@ -285,10 +284,29 @@ export default function Navbar() {
     return false;
   };
 
+  // Adaptive surface styling: dark-emerald glass over Hero at top, crisp elevated bar when scrolled
+  const useHeroGlass = isHomePage && !isScrolled;
+
   const renderNavItems = () =>
     menuItems.map((item) => {
       const active = isMenuActive(item);
       const isOpen = activeDropdown === item.id;
+
+      const linkColorClass = useHeroGlass
+        ? active
+          ? "text-amber-300 border-amber-400 font-semibold"
+          : "text-slate-100 hover:text-emerald-300 border-transparent font-medium"
+        : active
+          ? "text-[#00733a] dark:text-emerald-400 border-[#00733a] dark:border-emerald-400 font-semibold"
+          : "text-slate-700 dark:text-slate-200 hover:text-[#00733a] dark:hover:text-emerald-300 border-transparent font-medium";
+
+      const chevronColorClass = useHeroGlass
+        ? isOpen
+          ? "rotate-180 text-amber-300"
+          : "text-slate-300 group-hover:text-emerald-300 group-hover:rotate-180"
+        : isOpen
+          ? "rotate-180 text-[#00733a] dark:text-emerald-400"
+          : "text-slate-500 dark:text-slate-400 group-hover:text-[#00733a] dark:group-hover:text-emerald-300 group-hover:rotate-180";
 
       return (
         <div
@@ -299,14 +317,11 @@ export default function Navbar() {
         >
           {item.dropdown ? (
             <>
-              <div className="flex items-center gap-0.5 select-none py-1">
+              <div className="flex items-center gap-1 select-none py-1">
                 <Link
                   href={item.href}
                   onClick={(e) => handleSubmenuClick(e, item.href)}
-                  className={`text-[15px]  xl:text-[14px] transition-colors cursor-pointer pb-0.5 border-b-2 whitespace-nowrap ${active
-                    ? "text-[#008744] border-[#008744] font-semibold"
-                    : "text-slate-700 hover:text-[#008744] border-transparent font-medium"
-                    }`}
+                  className={`text-[14px] xl:text-[15px] transition-colors cursor-pointer pb-1 border-b-2 whitespace-nowrap ${linkColorClass}`}
                 >
                   {item.name}
                 </Link>
@@ -317,34 +332,31 @@ export default function Navbar() {
                     e.stopPropagation();
                     setActiveDropdown(isOpen ? null : item.id);
                   }}
-                  className="p-0.5 text-slate-500 hover:text-[#008744] focus:outline-none cursor-pointer transition-transform duration-200"
+                  className="p-0.5 focus:outline-none cursor-pointer"
                 >
                   <ChevronDown
-                    className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen
-                      ? "rotate-180 text-[#008744]"
-                      : "group-hover:rotate-180"
-                      }`}
+                    className={`w-3.5 h-3.5 transition-transform duration-200 ${chevronColorClass}`}
                   />
                 </button>
               </div>
 
               {/* Glass Dropdown Popover */}
               <div
-                className={`absolute ltr:left-0 rtl:right-0 top-full pt-2 w-56 z-[90] transition-all duration-200 ${isOpen
+                className={`absolute ltr:left-0 rtl:right-0 top-full pt-2.5 w-60 z-[90] transition-all duration-200 ${isOpen
                   ? "opacity-100 visible translate-y-0 pointer-events-auto"
                   : "opacity-0 invisible translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:pointer-events-auto"
                   }`}
               >
-                <div className="bg-white text-slate-800 rounded-lg shadow-xl border border-gray-100 p-1.5 space-y-0.5">
+                <div className="bg-white/95 dark:bg-[#071f14]/95 backdrop-blur-xl text-slate-800 dark:text-slate-100 rounded-xl shadow-2xl border border-emerald-900/10 dark:border-emerald-400/20 p-1.5 space-y-0.5">
                   {item.dropdown.map((sub, i) => (
                     <Link
                       key={i}
                       href={sub.href}
                       onClick={(e) => handleSubmenuClick(e, sub.href)}
-                      className="flex items-center justify-between px-3 py-2 rounded-md text-xs font-medium text-slate-700 hover:bg-[#e6f4ea] hover:text-[#008744] transition-colors"
+                      className="group/sub flex items-center justify-between px-3 py-2 rounded-lg text-[13px] font-medium text-slate-700 dark:text-slate-200 hover:bg-[#00733a]/10 dark:hover:bg-[#00733a]/35 hover:text-[#00733a] dark:hover:text-emerald-300 transition-colors"
                     >
                       <span>{sub.name}</span>
-                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#008744] transition-colors" />
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 group-hover/sub:text-[#00733a] dark:group-hover/sub:text-amber-300 rtl:rotate-180 transition-colors" />
                     </Link>
                   ))}
                 </div>
@@ -354,10 +366,7 @@ export default function Navbar() {
             <Link
               href={item.href}
               onClick={(e) => handleSubmenuClick(e, item.href)}
-              className={`text-[13px] xl:text-[14px] transition-colors block pb-0.5 border-b-2 whitespace-nowrap py-1 ${active
-                ? "text-[#008744] border-[#008744] font-bold"
-                : "text-slate-700 hover:text-[#008744] border-transparent font-medium"
-                }`}
+              className={`text-[14px] xl:text-[15px] transition-colors block pb-1 border-b-2 whitespace-nowrap py-1 ${linkColorClass}`}
             >
               {item.name}
             </Link>
@@ -370,44 +379,46 @@ export default function Navbar() {
     <>
       <header
         ref={headerRef}
-        className="absolute md:sticky top-2 sm:top-3 z-50 w-full px-2 sm:px-4 lg:px-6 print:hidden transition-all duration-300"
+        dir={isArabic ? "rtl" : "ltr"}
+        className="sticky top-2.5 sm:top-3.5 z-50 w-full font-bornomala print:hidden transition-all duration-300"
       >
-        {/* Floating rounded container centered horizontally with pure white background */}
-        <div
-          className={`mx-auto bg-white rounded-xl shadow-md border border-gray-100/90 px-3 sm:px-5 py-2.5 md:py-4 transition-all duration-300 ${isScrolled ? "shadow-lg bg-white/95 backdrop-blur-md" : ""
-            }`}
-        >
-          <div className="max-w-[1380] flex items-center justify-between gap-3 lg:gap-4 xl:gap-6">
-            {/* 1. Left Section: Logo & Branding */}
-            <div className="flex-shrink-0">
+        {/* Width-Synchronized Container matching HeroSection's max-w-[1380px] */}
+        <div className="max-w-[1380px] mx-auto px-5 sm:px-8 lg:px-10">
+          <div
+            className={`rounded-2xl px-4 sm:px-6 py-2.5 sm:py-3 transition-all duration-300 border backdrop-blur-xl ${useHeroGlass
+              ? "bg-[#061f14]/75 border-emerald-400/20 shadow-xl shadow-black/25"
+              : "bg-white/95 dark:bg-[#061f14]/95 border-slate-200/80 dark:border-emerald-400/20 shadow-lg shadow-slate-900/10"
+              }`}
+          >
+            <div className="flex items-center justify-between gap-3 lg:gap-5">
+              {/* 1. Left Section: Institutional Emblem & Compact Title */}
               <Link
                 href="/"
                 onClick={(e) => handleSubmenuClick(e, "/")}
-                className="flex items-center gap-2.5 flex-shrink-0 group cursor-pointer"
+                className="flex items-center gap-3 flex-shrink-0 group cursor-pointer"
               >
-                <div className="relative w-10 h-10 sm:w-10 sm:h-10 rounded-full overflow-hidden flex-shrink-0 border border-emerald-100 shadow-xs">
+                <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-emerald-400/40 bg-white shadow-sm transition-transform duration-200 group-hover:scale-105">
                   <Image
                     src="/aimlogo1.png"
                     alt="AIM Logo"
                     fill
-                    sizes="40px"
+                    sizes="44px"
                     className="object-cover"
                     priority
                   />
                 </div>
+
               </Link>
-            </div>
 
-            {/* 2. Center: Desktop Menu Items with Forest Green Active Underline */}
-            <nav
-              aria-label="Main Navigation"
-              className="hidden lg:flex items-center justify-center gap-4 xl:gap-6 flex-1 px-2"
-            >
-              {renderNavItems()}
-            </nav>
+              {/* 2. Center: Desktop Navigation Links */}
+              <nav
+                aria-label="Main Navigation"
+                className="hidden lg:flex items-center justify-center gap-5 xl:gap-7 flex-1 px-2"
+              >
+                {renderNavItems()}
+              </nav>
 
-            {/* 3. Right Actions */}
-            <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
+              {/* 3. Right Actions: Language, Theme, Account & Mobile Menu Trigger */}
               <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
                 <LanguageSwitcher />
 
@@ -417,65 +428,204 @@ export default function Navbar() {
                   onClick={toggleDarkMode}
                   title={darkMode ? "Light Mode" : "Dark Mode"}
                   aria-label="Toggle Dark Mode"
-                  className="p-1.5 sm:p-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-600 hover:text-[#008744] hover:bg-[#e6f4ea] transition-colors cursor-pointer shadow-xs"
+                  className={`p-2 rounded-xl border transition-all cursor-pointer ${useHeroGlass
+                    ? "border-white/15 bg-white/[0.07] text-slate-200 hover:bg-white/[0.15] hover:text-amber-300"
+                    : "border-slate-200 dark:border-white/15 bg-slate-50 dark:bg-white/[0.07] text-slate-600 dark:text-slate-200 hover:text-[#00733a] hover:bg-[#00733a]/10"
+                    }`}
                 >
                   {darkMode ? (
-                    <Sun className="w-4 h-4 text-amber-500" />
+                    <Sun className="w-4 h-4 text-amber-400" />
                   ) : (
-                    <Moon className="w-4 h-4 text-slate-600" />
+                    <Moon className="w-4 h-4" />
+                  )}
+                </button>
+
+                {/* Desktop Auth Action */}
+                <div className="hidden md:flex items-center">
+                  {isLoggedIn ? (
+                    <div className="relative group/user">
+                      <Link
+                        href={getDashboardPath()}
+                        title={t("menu.dashboard")}
+                        className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[#00733a] hover:bg-[#008c47] text-white border border-emerald-400/30 text-xs sm:text-sm font-semibold shadow-sm transition-all cursor-pointer"
+                      >
+                        <User className="w-4 h-4 text-amber-300" />
+                        <span className="hidden xl:inline">
+                          {t("menu.dashboard")}
+                        </span>
+                      </Link>
+
+                      <div className="absolute ltr:right-0 rtl:left-0 top-full pt-2 hidden group-hover/user:block z-50">
+                        <div className="bg-white/95 dark:bg-[#071f14]/95 backdrop-blur-xl rounded-xl shadow-2xl border border-slate-200/80 dark:border-emerald-400/20 p-1.5 w-40 text-xs overflow-hidden">
+                          <Link
+                            href={getDashboardPath()}
+                            className="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-[#00733a]/10 dark:hover:bg-[#00733a]/35 hover:text-[#00733a] dark:hover:text-emerald-300 font-medium transition-colors"
+                          >
+                            <LayoutDashboard className="w-3.5 h-3.5" />
+                            <span>{t("menu.dashboard")}</span>
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={handleLogout}
+                            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 font-medium text-left transition-colors cursor-pointer"
+                          >
+                            <LogOut className="w-3.5 h-3.5" />
+                            <span>{t("menu.logout")}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <Link
+                      href="/login"
+                      title={t("menu.login")}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs sm:text-sm shadow-sm transition-all cursor-pointer"
+                    >
+                      <LogIn className="w-4 h-4" />
+                      <span className="hidden xl:inline">{t("menu.login")}</span>
+                    </Link>
+                  )}
+                </div>
+
+                {/* Mobile Hamburger Button */}
+                <button
+                  type="button"
+                  onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+                  aria-label="Toggle Menu"
+                  className={`lg:hidden p-2 rounded-xl border transition-colors cursor-pointer ${useHeroGlass
+                    ? "border-white/15 bg-white/[0.07] text-white hover:bg-white/[0.15]"
+                    : "border-slate-200 dark:border-white/15 bg-slate-50 dark:bg-white/[0.07] text-slate-700 dark:text-white"
+                    }`}
+                >
+                  {isMobileMenuOpen ? (
+                    <X className="w-5 h-5" />
+                  ) : (
+                    <Menu className="w-5 h-5" />
                   )}
                 </button>
               </div>
-
-              <div className="hidden md:flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
-                {/* Auth actions: */}
-                {isLoggedIn ? (
-                  <div className=" relative group/user">
-                    <Link
-                      href={getDashboardPath()}
-                      title={t("menu.dashboard")}
-                      className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[#fef3c7] hover:bg-[#fde68a] border border-[#fde047] text-[#92400e] transition-colors cursor-pointer shadow-xs"
-                    >
-                      <User className="w-4 h-4" />
-                    </Link>
-
-                    <div className="absolute right-0 top-full pt-1.5 hidden group-hover/user:block z-50">
-                      <div className="bg-white rounded-lg shadow-xl border border-gray-100 py-1.5 w-36 text-xs overflow-hidden">
-                        <Link
-                          href={getDashboardPath()}
-                          className="flex items-center gap-2 px-3 py-2 text-slate-700 hover:bg-[#e6f4ea] hover:text-[#008744] transition-colors"
-                        >
-                          <LayoutDashboard className="w-3.5 h-3.5" />
-                          <span>{t("menu.dashboard")}</span>
-                        </Link>
-                        <button
-                          type="button"
-                          onClick={handleLogout}
-                          className="w-full flex items-center gap-2 px-3 py-2 text-rose-600 hover:bg-rose-50 text-left transition-colors cursor-pointer"
-                        >
-                          <LogOut className="w-3.5 h-3.5" />
-                          <span>{t("menu.logout")}</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <Link
-                    href="/login"
-                    title={t("menu.login")}
-                    className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[#fef3c7] hover:bg-[#fde68a] border border-[#fde047] text-[#92400e] transition-colors cursor-pointer shadow-xs"
-                  >
-                    <User className="w-4 h-4" />
-                  </Link>
-                )}
-              </div>
             </div>
+
+            {/* Mobile Drawer Menu */}
+            {isMobileMenuOpen && (
+              <div className="lg:hidden mt-3 pt-3 border-t border-slate-200/70 dark:border-emerald-400/15 space-y-1.5 max-h-[75vh] overflow-y-auto">
+                {menuItems.map((item) => {
+                  const active = isMenuActive(item);
+                  const expanded = mobileOpenGroup === item.id;
+
+                  return (
+                    <div
+                      key={item.id}
+                      className="rounded-xl overflow-hidden"
+                    >
+                      {item.dropdown ? (
+                        <>
+                          <div className="flex items-center justify-between">
+                            <Link
+                              href={item.href}
+                              onClick={(e) => handleSubmenuClick(e, item.href)}
+                              className={`flex-1 px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors ${active
+                                ? "text-amber-400"
+                                : useHeroGlass
+                                  ? "text-white hover:text-emerald-300"
+                                  : "text-slate-800 dark:text-white hover:text-[#00733a]"
+                                }`}
+                            >
+                              {item.name}
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setMobileOpenGroup(expanded ? null : item.id)
+                              }
+                              aria-label={`Expand ${item.name}`}
+                              className={`p-2 rounded-lg ${useHeroGlass
+                                ? "text-slate-300 hover:bg-white/10"
+                                : "text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10"
+                                }`}
+                            >
+                              <ChevronDown
+                                className={`w-4 h-4 transition-transform duration-200 ${expanded ? "rotate-180" : ""
+                                  }`}
+                              />
+                            </button>
+                          </div>
+
+                          {expanded && (
+                            <div className="ltr:pl-4 rtl:pr-4 pb-2 space-y-1">
+                              {item.dropdown.map((sub, i) => (
+                                <Link
+                                  key={i}
+                                  href={sub.href}
+                                  onClick={(e) =>
+                                    handleSubmenuClick(e, sub.href)
+                                  }
+                                  className={`block px-3 py-2 rounded-lg text-xs font-medium transition-colors ${useHeroGlass
+                                    ? "text-slate-300 hover:bg-white/10 hover:text-amber-300"
+                                    : "text-slate-600 dark:text-slate-300 hover:bg-[#00733a]/10 hover:text-[#00733a]"
+                                    }`}
+                                >
+                                  {sub.name}
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <Link
+                          href={item.href}
+                          onClick={(e) => handleSubmenuClick(e, item.href)}
+                          className={`block px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors ${active
+                            ? "text-amber-400"
+                            : useHeroGlass
+                              ? "text-white hover:text-emerald-300"
+                              : "text-slate-800 dark:text-white hover:text-[#00733a]"
+                            }`}
+                        >
+                          {item.name}
+                        </Link>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* Mobile Auth Footer */}
+                <div className="pt-2 border-t border-slate-200/70 dark:border-emerald-400/15 flex items-center gap-2">
+                  {isLoggedIn ? (
+                    <>
+                      <Link
+                        href={getDashboardPath()}
+                        className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#00733a] text-white text-sm font-semibold"
+                      >
+                        <LayoutDashboard className="w-4 h-4 text-amber-300" />
+                        <span>{t("menu.dashboard")}</span>
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="inline-flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl bg-rose-500/15 text-rose-400 text-sm font-semibold"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span>{t("menu.logout")}</span>
+                      </button>
+                    </>
+                  ) : (
+                    <Link
+                      href="/login"
+                      className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-amber-400 text-slate-950 text-sm font-bold"
+                    >
+                      <LogIn className="w-4 h-4" />
+                      <span>{t("menu.login")}</span>
+                    </Link>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </header>
 
-      {/* Notice Ticker */}
-      <NavbarTicker />
+
     </>
   );
 }

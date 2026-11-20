@@ -68,13 +68,13 @@ export default function NavbarTicker() {
     tickerNotices.length > 0
       ? tickerNotices
       : [
-          {
-            _id: "default-1",
-            title: "ভর্তি সংক্রান্ত জরুরি বিজ্ঞপ্তি",
-            description:
-              "আস-সালাম আইডিয়াল মাদরাসায় নতুন শিক্ষাবর্ষে নূরানী, নাজেরা ও হিফজ বিভাগে ভর্তি কার্যক্রম চলমান। আসন সংখ্যা সীমিত, বিস্তারিত জানতে যোগাযোগ করুন।",
-          },
-        ];
+        {
+          _id: "default-1",
+          title: "ভর্তি সংক্রান্ত জরুরি বিজ্ঞপ্তি",
+          description:
+            "আস-সালাম আইডিয়াল মাদরাসায় নতুন শিক্ষাবর্ষে নূরানী, নাজেরা ও হিফজ বিভাগে ভর্তি কার্যক্রম চলমান। আসন সংখ্যা সীমিত, বিস্তারিত জানতে যোগাযোগ করুন।",
+        },
+      ];
 
   const totalTextLength = items.reduce(
     (acc, n) => acc + (n.description || n.title || "").length,
@@ -88,7 +88,7 @@ export default function NavbarTicker() {
   return (
     <>
       <div className="w-full  text-emerald-50 font-medium py-1.5 px-3 sm:px-5 lg:px-6 flex items-center overflow-hidden  transition-colors duration-300 relative z-20 print:hidden">
-        <div className="max-w-[1140px] mx-auto w-full flex items-center gap-2.5">
+        <div className="mx-auto w-full flex items-center gap-2.5">
           {/* Ticker Label Badge */}
           <div className="flex-shrink-0 flex items-center gap-1.5 bg-gradient-to-r from-amber-500/20 to-amber-400/10 border border-amber-400/35 text-amber-300 px-2.5 py-0.5 md:py-1 rounded-lg text-[11px] md:text-xs font-bold uppercase tracking-wider select-none z-10 shadow-[0_0_12px_rgba(245,158,11,0.12)]">
             <span className="relative flex h-2 w-2">

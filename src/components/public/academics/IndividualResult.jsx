@@ -46,6 +46,580 @@ export const getGradeRemark = (grade, fallback = "") => {
   }
 };
 
+// বিষয়ভিত্তিক গ্রেড এবং গ্রেড পয়েন্ট নির্ধারণ
+export const calculateSubjectGrade = (mark) => {
+  if (
+    mark === "ABS" ||
+    mark === "A" ||
+    mark === "Abs" ||
+    mark === "অনুঃ" ||
+    mark === "a"
+  ) {
+    return { grade: "অনুঃ", gpa: "০.০০", point: 0.0 };
+  }
+  const num = typeof mark === "number" ? mark : parseFloat(mark);
+  if (isNaN(num)) return { grade: "-", gpa: "০.০০", point: 0.0 };
+  if (num >= 80) return { grade: "A+", gpa: "৫.০০", point: 5.0 };
+  if (num >= 70) return { grade: "A", gpa: "৪.০০", point: 4.0 };
+  if (num >= 60) return { grade: "A-", gpa: "৩.০০", point: 3.0 };
+  if (num >= 50) return { grade: "B", gpa: "২.০০", point: 2.0 };
+  if (num >= 40) return { grade: "C", gpa: "১.০০", point: 1.0 };
+  return { grade: "F", gpa: "০.০০", point: 0.0 };
+};
+
+// GPA পয়েন্ট অনুযায়ী লেটার গ্রেড বের করার নিয়ম
+export const getGradeFromPoint = (point) => {
+  const num = parseFloat(point) || 0;
+  if (num >= 5.0) return "A+";
+  if (num >= 4.0) return "A";
+  if (num >= 3.0) return "A-";
+  if (num >= 2.0) return "B";
+  if (num >= 1.0) return "C";
+  return "F";
+};
+
+// সামগ্রিক জিপিএ থেকে আন্তর্জাতিক গ্রেড বাউন্ডারি নির্ধারণ
+export const getOverallGradeFromGPA = (gpaVal) => {
+  return getGradeFromPoint(gpaVal);
+};
+
+// অবজেক্টের CT ও Exam যোগ করে মোট নম্বর বের করার হেলপার
+export const parseExamData = (examObj) => {
+  if (!examObj || Object.keys(examObj).length === 0) return "-";
+
+  const { ct, exam, isAbsent } = examObj;
+
+  const ctStr = String(ct || "")
+    .trim()
+    .toUpperCase();
+  const examStr = String(exam || "")
+    .trim()
+    .toUpperCase();
+
+  if (
+    isAbsent ||
+    ctStr === "A" ||
+    examStr === "A" ||
+    ctStr === "ABS" ||
+    examStr === "ABS" ||
+    ctStr === "ABSENT" ||
+    examStr === "ABSENT" ||
+    ct === "অনুঃ" ||
+    exam === "অনুঃ"
+  ) {
+    return "অনুঃ";
+  }
+
+  const hasCt = ct !== undefined && ct !== null && String(ct).trim() !== "";
+  const hasExam =
+    exam !== undefined && exam !== null && String(exam).trim() !== "";
+
+  if (!hasCt && !hasExam) return "-";
+
+  const ctNum = typeof ct === "number" ? ct : parseFloat(ct) || 0;
+  const examNum = typeof exam === "number" ? exam : parseFloat(exam) || 0;
+
+  return ctNum + examNum;
+};
+
+// সাবজেক্ট অনুসারে নির্দিষ্ট পরীক্ষার জন্য মার্কস বের করার হেলপার
+export const getMarkForExamType = (item, currentExamType) => {
+  const term1Data = item.term1 || item["১ম সাময়িক পরীক্ষা"] || {};
+  const term2Data = item.term2 || item["২য় সাময়িক পরীক্ষা"] || {};
+  const annualData = item.annual || item["বার্ষিক পরীক্ষা"] || {};
+
+  const t1 = parseExamData(term1Data);
+  const t2 = parseExamData(term2Data);
+  const ann = parseExamData(annualData);
+
+  if (currentExamType === "১ম সাময়িক পরীক্ষা") {
+    return t1;
+  } else if (currentExamType === "২য় সাময়িক পরীক্ষা") {
+    return t2;
+  } else if (currentExamType === "বার্ষিক পরীক্ষা") {
+    if (ann === "অনুঃ" || t1 === "অনুঃ" || t2 === "অনুঃ") return "অনুঃ";
+
+    const num1 = typeof t1 === "number" ? t1 : 0;
+    const num2 = typeof t2 === "number" ? t2 : 0;
+    const numAnn = typeof ann === "number" ? ann : 0;
+
+    if (t1 === "-" && t2 === "-" && ann === "-") return "-";
+    return num1 + num2 + numAnn;
+  }
+  return "-";
+};
+
+// বার্ষিক পরীক্ষায় প্রতিটি বিষয়ের ৩টি টার্মের গ্রেড পয়েন্টের গড় হিসাব করে ফাইনাল গ্রেড ও জিপি বের করা
+export const getFinalSubjectGradeForAnnual = (item) => {
+  const term1Data = item.term1 || item["১ম সাময়িক পরীক্ষা"] || {};
+  const term2Data = item.term2 || item["২য় সাময়িক পরীক্ষা"] || {};
+  const annualData = item.annual || item["বার্ষিক পরীক্ষা"] || {};
+
+  const t1 = parseExamData(term1Data);
+  const t2 = parseExamData(term2Data);
+  const ann = parseExamData(annualData);
+
+  if (t1 === "অনুঃ" || t2 === "অনুঃ" || ann === "অনুঃ") {
+    return { grade: "অনুঃ", gpa: "০.০০", point: 0.0 };
+  }
+  if (t1 === "-" && t2 === "-" && ann === "-") {
+    return { grade: "-", gpa: "০.০০", point: 0.0 };
+  }
+
+  const g1 = calculateSubjectGrade(t1);
+  const g2 = calculateSubjectGrade(t2);
+  const gAnn = calculateSubjectGrade(ann);
+
+  if (g1.point === 0 || g2.point === 0 || gAnn.point === 0) {
+    return { grade: "F", gpa: "০.০০", point: 0.0 };
+  }
+
+  const avgPoint = (g1.point + g2.point + gAnn.point) / 3;
+  const finalGrade = getGradeFromPoint(avgPoint);
+
+  return {
+    grade: finalGrade,
+    gpa: toBengaliDigits(avgPoint.toFixed(2)),
+    point: avgPoint,
+  };
+};
+
+// বার্ষিক পরীক্ষায় শতকরা বা ১০০-এর স্কেলে মার্ক নরমালাইজেশন
+export const getNormalizedMarkForGrade = (item, currentExamType) => {
+  const mark = getMarkForExamType(item, currentExamType);
+  if (mark === "অনুঃ" || mark === "-") return mark;
+  if (currentExamType === "বার্ষিক পরীক্ষা") {
+    const term1Data = item.term1 || item["১ম সাময়িক পরীক্ষা"] || {};
+    const term2Data = item.term2 || item["২য় সাময়িক পরীক্ষা"] || {};
+    const annualData = item.annual || item["বার্ষিক পরীক্ষা"] || {};
+    const t1 = parseExamData(term1Data);
+    const t2 = parseExamData(term2Data);
+    const ann = parseExamData(annualData);
+    let count = 0;
+    if (typeof t1 === "number") count++;
+    if (typeof t2 === "number") count++;
+    if (typeof ann === "number") count++;
+    count = count || 1;
+    return mark / count;
+  }
+  return mark;
+};
+
+// নির্দিষ্ট বিষয়ে শিক্ষার্থী অনুপস্থিত কি না যাচাই
+export const isSubjectAbsent = (item, currentExamType) => {
+  let termData = {};
+  if (currentExamType === "১ম সাময়িক পরীক্ষা") {
+    termData = item.term1 || item["১ম সাময়িক পরীক্ষা"] || {};
+  } else if (currentExamType === "২য় সাময়িক পরীক্ষা") {
+    termData = item.term2 || item["২য় সাময়িক পরীক্ষা"] || {};
+  } else if (currentExamType === "বার্ষিক পরীক্ষা") {
+    termData = item.annual || item["বার্ষিক পরীক্ষা"] || {};
+  }
+
+  if (!termData || Object.keys(termData).length === 0) return true;
+  if (termData.isAbsent) return true;
+
+  const ctStr = String(termData.ct || "")
+    .trim()
+    .toUpperCase();
+  const examStr = String(termData.exam || "")
+    .trim()
+    .toUpperCase();
+
+  if (
+    ctStr === "A" ||
+    ctStr === "ABS" ||
+    ctStr === "ABSENT" ||
+    examStr === "A" ||
+    examStr === "ABS" ||
+    examStr === "ABSENT" ||
+    termData.ct === "অনুঃ" ||
+    termData.exam === "অনুঃ"
+  ) {
+    return true;
+  }
+
+  const hasCt =
+    termData.ct !== undefined &&
+    termData.ct !== null &&
+    String(termData.ct).trim() !== "";
+  const hasExam =
+    termData.exam !== undefined &&
+    termData.exam !== null &&
+    String(termData.exam).trim() !== "";
+  if (!hasCt && !hasExam) return true;
+
+  return false;
+};
+
+// ডুপ্লিকেট সাবজেক্ট এন্ট্রি রিমুভ করার হেল্পার
+export const deduplicateSubjects = (resultsList = []) => {
+  if (!Array.isArray(resultsList) || resultsList.length === 0) return [];
+  return Array.from(
+    new Map(
+      resultsList.map((item, idx) => [
+        String(
+          item?.subjectCode ||
+            item?.subjectId ||
+            item?.subjectName ||
+            formatSubjectName(item?.subject) ||
+            item?.subject ||
+            `subject-${idx}`,
+        ).trim(),
+        item,
+      ]),
+    ).values(),
+  );
+};
+
+// আন্তর্জাতিক গ্রেডিং সিস্টেম ও উপস্থিতি ভিত্তিক সামারি ক্যালকুলেশন
+export const calculateSummary = (resultsList = [], currentExamType) => {
+  const uniqueResults = deduplicateSubjects(resultsList);
+  if (!uniqueResults || uniqueResults.length === 0) {
+    return {
+      totalObtained: "০",
+      average: "০.০০",
+      grade: "-",
+      gpa: "০.০০",
+      status: "অনুপস্থিত",
+      remark: "",
+    };
+  }
+
+  const totalSubjects = uniqueResults.length;
+  let absentCount = 0;
+  let totalObtained = 0;
+  let validCount = 0;
+  let hasFailedCompulsory = false;
+  let totalGradePoints = 0;
+  let totalNormalizedMarks = 0;
+
+  uniqueResults.forEach((item) => {
+    const isAbsent = isSubjectAbsent(item, currentExamType);
+    if (isAbsent) {
+      absentCount++;
+    } else {
+      const mark = getMarkForExamType(item, currentExamType);
+      if (typeof mark === "number") {
+        totalObtained += mark;
+        validCount++;
+      }
+
+      let subGrade;
+      if (currentExamType === "বার্ষিক পরীক্ষা") {
+        subGrade = getFinalSubjectGradeForAnnual(item);
+        const normMark = getNormalizedMarkForGrade(item, currentExamType);
+        if (typeof normMark === "number") {
+          totalNormalizedMarks += normMark;
+        }
+      } else {
+        const normalizedMark = getNormalizedMarkForGrade(
+          item,
+          currentExamType,
+        );
+        subGrade = calculateSubjectGrade(normalizedMark);
+      }
+
+      if (subGrade.grade === "F" || subGrade.point === 0) {
+        hasFailedCompulsory = true;
+      }
+      totalGradePoints += subGrade.point;
+    }
+  });
+
+  if (absentCount === totalSubjects) {
+    return {
+      totalObtained: "অনুঃ",
+      average: "-",
+      grade: "অনুঃ",
+      gpa: "০.০০",
+      status: "অনুপস্থিত",
+      remark: "",
+    };
+  }
+
+  if (absentCount > 0) {
+    return {
+      totalObtained: toBengaliDigits(totalObtained),
+      average:
+        validCount > 0
+          ? toBengaliDigits(
+              (
+                (currentExamType === "বার্ষিক পরীক্ষা"
+                  ? totalNormalizedMarks
+                  : totalObtained) / validCount
+              ).toFixed(2),
+            )
+          : "০.০০",
+      grade: "অসম্পূর্ণ",
+      gpa: "০.০০",
+      status: "অসম্পূর্ণ",
+      remark: "",
+    };
+  }
+
+  const avgMarks =
+    validCount > 0
+      ? (
+          (currentExamType === "বার্ষিক পরীক্ষা"
+            ? totalNormalizedMarks
+            : totalObtained) / validCount
+        ).toFixed(2)
+      : "0.00";
+
+  if (hasFailedCompulsory) {
+    return {
+      totalObtained: toBengaliDigits(totalObtained),
+      average: toBengaliDigits(avgMarks),
+      grade: "F",
+      gpa: "০.০০",
+      status: "অকৃতকার্য",
+      remark: getGradeRemark("F"),
+    };
+  }
+
+  const rawGPA = Math.min(5.0, totalGradePoints / totalSubjects);
+  const calculatedGPA = rawGPA.toFixed(2);
+  const overallGrade = getOverallGradeFromGPA(rawGPA);
+
+  return {
+    totalObtained: toBengaliDigits(totalObtained),
+    average: toBengaliDigits(avgMarks),
+    grade: overallGrade,
+    gpa: toBengaliDigits(calculatedGPA),
+    status: "উত্তীর্ণ",
+    remark: getGradeRemark(overallGrade),
+  };
+};
+
+// --- ক্লাস টেস্ট (সিটি / CT) মার্কস বিশ্লেষণ হেলপার ---
+export const getCTSubjectData = (item, currentExamType) => {
+  let termData = {};
+  if (
+    currentExamType === "১ম সাময়িক পরীক্ষা" ||
+    currentExamType === "term1"
+  ) {
+    termData = item.term1 || item["১ম সাময়িক পরীক্ষা"] || {};
+  } else if (
+    currentExamType === "২য় সাময়িক পরীক্ষা" ||
+    currentExamType === "term2"
+  ) {
+    termData = item.term2 || item["২য় সাময়িক পরীক্ষা"] || {};
+  } else if (
+    currentExamType === "বার্ষিক পরীক্ষা" ||
+    currentExamType === "annual"
+  ) {
+    termData = item.annual || item["বার্ষিক পরীক্ষা"] || {};
+  } else {
+    termData = item[currentExamType] || item.term1 || {};
+  }
+
+  const ctVal = termData.ct;
+  const isAbsent =
+    Boolean(termData.isAbsent) ||
+    ctVal === "A" ||
+    ctVal === "a" ||
+    ctVal === "ABS" ||
+    ctVal === "Abs" ||
+    ctVal === "ABSENT" ||
+    ctVal === "absent" ||
+    ctVal === "অনুঃ" ||
+    termData.exam === "A" ||
+    termData.exam === "ABS" ||
+    termData.exam === "অনুঃ";
+
+  const fullMark =
+    typeof item.ctFullMark === "number" && item.ctFullMark > 0
+      ? item.ctFullMark
+      : 20;
+
+  if (isAbsent) {
+    return {
+      obtained: "অনুঃ",
+      numericMark: 0,
+      fullMark,
+      isAbsent: true,
+      grade: "অনুঃ",
+      remark: "অনুপস্থিত",
+      hasMark: true,
+    };
+  }
+
+  if (
+    ctVal === undefined ||
+    ctVal === null ||
+    String(ctVal).trim() === "" ||
+    ctVal === "-"
+  ) {
+    return {
+      obtained: "-",
+      numericMark: 0,
+      fullMark,
+      isAbsent: false,
+      grade: "-",
+      remark: "-",
+      hasMark: false,
+    };
+  }
+
+  const num = typeof ctVal === "number" ? ctVal : parseFloat(ctVal);
+  if (isNaN(num)) {
+    return {
+      obtained: "-",
+      numericMark: 0,
+      fullMark,
+      isAbsent: false,
+      grade: "-",
+      remark: "-",
+      hasMark: false,
+    };
+  }
+
+  const ratio = fullMark > 0 ? num / fullMark : 0;
+  let grade = "C";
+  let remark = "উত্তীর্ণ (C)";
+
+  if (ratio >= 0.8) {
+    grade = "A+";
+    remark = "মুমতাজ (A+)";
+  } else if (ratio >= 0.7) {
+    grade = "A";
+    remark = "জায়্যিদ জিদ্দান (A)";
+  } else if (ratio >= 0.6) {
+    grade = "A-";
+    remark = "জায়্যিদ (A-)";
+  } else if (ratio >= 0.5) {
+    grade = "B";
+    remark = "মাকবুল (B)";
+  } else if (ratio >= 0.4) {
+    grade = "C";
+    remark = "উত্তীর্ণ (C)";
+  } else {
+    grade = "F";
+    remark = "রাসেব (F)";
+  }
+
+  return {
+    obtained: num,
+    numericMark: num,
+    fullMark,
+    isAbsent: false,
+    grade,
+    remark,
+    hasMark: true,
+  };
+};
+
+// ক্লাস টেস্ট (সিটি / CT) সামারি পরিসংখ্যান
+export const calculateCTSummary = (resultsList = [], currentExamType) => {
+  const uniqueResults = deduplicateSubjects(resultsList);
+  if (!uniqueResults || uniqueResults.length === 0) {
+    return {
+      totalFullMarks: "০",
+      totalObtained: "০",
+      percentage: "০.০০%",
+      average: "০.০০",
+      grade: "-",
+      status: "অনুপস্থিত",
+      remark: "-",
+      isAbsentAll: true,
+      numericTotalObtained: 0,
+    };
+  }
+
+  const totalSubs = uniqueResults.length;
+  let absentCount = 0;
+  let totalObtained = 0;
+  let totalFull = 0;
+  let validCount = 0;
+  let hasFailed = false;
+
+  uniqueResults.forEach((item) => {
+    const ctData = getCTSubjectData(item, currentExamType);
+    totalFull += ctData.fullMark;
+
+    if (ctData.isAbsent) {
+      absentCount++;
+      hasFailed = true;
+    } else if (ctData.hasMark) {
+      totalObtained += ctData.numericMark;
+      validCount++;
+      if (ctData.grade === "F") {
+        hasFailed = true;
+      }
+    }
+  });
+
+  const isAbsentAll = absentCount === totalSubs;
+  const isPartialAbsent = absentCount > 0 && absentCount < totalSubs;
+
+  if (isAbsentAll) {
+    return {
+      totalFullMarks: toBengaliDigits(totalFull),
+      totalObtained: "অনুঃ",
+      percentage: "০.০০%",
+      average: "-",
+      grade: "অনুঃ",
+      status: "অনুপস্থিত",
+      remark: "অনুপস্থিত",
+      isAbsentAll: true,
+      numericTotalObtained: 0,
+    };
+  }
+
+  const avgMarks =
+    validCount > 0 ? (totalObtained / validCount).toFixed(2) : "0.00";
+  const pct =
+    totalFull > 0 ? ((totalObtained / totalFull) * 100).toFixed(2) : "0.00";
+
+  let status = "উত্তীর্ণ";
+  let grade = "C";
+  let remark = "উত্তীর্ণ";
+
+  const overallRatio = totalFull > 0 ? totalObtained / totalFull : 0;
+  if (overallRatio >= 0.8) {
+    grade = "A+";
+    remark = "মুমতাজ (উৎকৃষ্ট)";
+  } else if (overallRatio >= 0.7) {
+    grade = "A";
+    remark = "জায়্যিদ জিদ্দান (খুব ভালো)";
+  } else if (overallRatio >= 0.6) {
+    grade = "A-";
+    remark = "জায়্যিদ (ভালো)";
+  } else if (overallRatio >= 0.5) {
+    grade = "B";
+    remark = "মাকবুল (সন্তোষজনক)";
+  } else if (overallRatio >= 0.4) {
+    grade = "C";
+    remark = "উত্তীর্ণ (চলতি মান)";
+  } else {
+    grade = "F";
+    remark = "রাসেব (অনুত্তীর্ণ)";
+  }
+
+  if (isPartialAbsent) {
+    status = "অসম্পূর্ণ";
+    remark = "অসম্পূর্ণ";
+    grade = "অসম্পূর্ণ";
+  } else if (hasFailed) {
+    status = "অকৃতকার্য";
+    grade = "F";
+    remark = "রাসেব (অনুত্তীর্ণ)";
+  }
+
+  return {
+    totalFullMarks: toBengaliDigits(totalFull),
+    totalObtained: toBengaliDigits(totalObtained),
+    percentage: toBengaliDigits(pct) + "%",
+    average: toBengaliDigits(avgMarks),
+    grade,
+    status,
+    remark,
+    isAbsentAll: false,
+    numericTotalObtained: totalObtained,
+  };
+};
+
 function ResultSheetGeneratorContent() {
   const router = useRouter();
   const pathname = usePathname();
@@ -73,6 +647,11 @@ function ResultSheetGeneratorContent() {
   const [selectedClass, setSelectedClass] = useState("all");
   const [targetYear, setTargetYear] = useState("২০২৬");
   const [examType, setExamType] = useState("২য় সাময়িক পরীক্ষা");
+  const [resultMode, setResultMode] = useState(() => {
+    const initialType =
+      searchParams.get("type") || searchParams.get("mode") || "";
+    return initialType.toLowerCase() === "ct" ? "ct" : "term";
+  });
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -80,6 +659,11 @@ function ResultSheetGeneratorContent() {
   const [activeExamType, setActiveExamType] = useState("২য় সাময়িক পরীক্ষা");
   const [activeYear, setActiveYear] = useState("২০২৬");
   const [activeClass, setActiveClass] = useState("all");
+  const [activeResultMode, setActiveResultMode] = useState(() => {
+    const initialType =
+      searchParams.get("type") || searchParams.get("mode") || "";
+    return initialType.toLowerCase() === "ct" ? "ct" : "term";
+  });
   const [copiedLink, setCopiedLink] = useState(false);
 
   // ডুপ্লিকেট রিকোয়েস্ট ও Strict Mode ডাবল-ইনভোকেশন রোধ করার রেফারেন্স
@@ -124,6 +708,7 @@ function ResultSheetGeneratorContent() {
       cls = "all",
       yr = "২০২৬",
       exam = "২য় সাময়িক পরীক্ষা",
+      mode = "term",
       syncUrl = true,
     }) => {
       const trimmedTerm = (term || "").trim();
@@ -317,6 +902,7 @@ function ResultSheetGeneratorContent() {
         setActiveExamType(exam);
         setActiveYear(yr);
         setActiveClass(cls || "all");
+        setActiveResultMode(mode);
         setResultSheets(uniqueFinalResults);
 
         if (uniqueFinalResults.length === 0) {
@@ -336,8 +922,8 @@ function ResultSheetGeneratorContent() {
             trimmedTerm ||
             String(
               uniqueFinalResults[0]?.studentId ||
-                uniqueFinalResults[0]?.student?.studentId ||
-                "",
+              uniqueFinalResults[0]?.student?.studentId ||
+              "",
             ).trim();
 
           if (resolvedRoll) {
@@ -358,6 +944,13 @@ function ResultSheetGeneratorContent() {
 
           if (exam) {
             nextParams.set("exam", exam);
+          }
+
+          if (mode === "ct") {
+            nextParams.set("type", "ct");
+          } else {
+            nextParams.delete("type");
+            nextParams.delete("mode");
           }
 
           const nextQueryStr = nextParams.toString();
@@ -403,6 +996,11 @@ function ResultSheetGeneratorContent() {
       searchParams.get("examType") ||
       ""
     ).trim();
+    const urlType = (
+      searchParams.get("type") ||
+      searchParams.get("mode") ||
+      ""
+    ).trim().toLowerCase();
 
     if (!urlRoll && (!urlClass || urlClass === "all")) {
       return;
@@ -411,7 +1009,8 @@ function ResultSheetGeneratorContent() {
     const effectiveYear = urlYear || "২০২৬";
     const effectiveExam = urlExam || "২য় সাময়িক পরীক্ষা";
     const effectiveClass = urlClass || "all";
-    const queryKey = `${toEnglishDigits(urlRoll)}|${effectiveYear}|${effectiveExam}|${effectiveClass}`;
+    const effectiveMode = urlType === "ct" ? "ct" : "term";
+    const queryKey = `${toEnglishDigits(urlRoll)}|${effectiveYear}|${effectiveExam}|${effectiveClass}|${effectiveMode}`;
 
     if (lastExecutedQueryRef.current === queryKey) {
       return;
@@ -423,12 +1022,15 @@ function ResultSheetGeneratorContent() {
     setTargetYear(effectiveYear);
     setExamType(effectiveExam);
     setSelectedClass(effectiveClass);
+    setResultMode(effectiveMode);
+    setActiveResultMode(effectiveMode);
 
     executeSearch({
       term: urlRoll,
       cls: effectiveClass,
       yr: effectiveYear,
       exam: effectiveExam,
+      mode: effectiveMode,
       syncUrl: true,
     });
   }, [searchParams, executeSearch]);
@@ -447,20 +1049,41 @@ function ResultSheetGeneratorContent() {
       return;
     }
 
-    const queryKey = `${toEnglishDigits(trimmed)}|${targetYear}|${examType}|${selectedClass}`;
+    const queryKey = `${toEnglishDigits(trimmed)}|${targetYear}|${examType}|${selectedClass}|${resultMode}`;
     lastExecutedQueryRef.current = queryKey;
 
     setError(null);
     setResultsError(null);
     setSearchTerm(trimmed);
+    setActiveResultMode(resultMode);
 
     executeSearch({
       term: trimmed,
       cls: selectedClass,
       yr: targetYear,
       exam: examType,
+      mode: resultMode,
       syncUrl: true,
     });
+  };
+
+  // টার্ম ও সিটি ফলাফলের মাঝে তাৎক্ষণিক মোড পরিবর্তন (পেজ রিলোড বা রি-ফেচ ছাড়াই)
+  const handleSwitchMode = (newMode) => {
+    setResultMode(newMode);
+    setActiveResultMode(newMode);
+    if (typeof window !== "undefined") {
+      const nextParams = new URLSearchParams(searchParams.toString());
+      if (newMode === "ct") {
+        nextParams.set("type", "ct");
+      } else {
+        nextParams.delete("type");
+        nextParams.delete("mode");
+      }
+      const nextQueryStr = nextParams.toString();
+      router.replace(`${pathname}${nextQueryStr ? `?${nextQueryStr}` : ""}`, {
+        scroll: false,
+      });
+    }
   };
 
   // শেয়ারেবল ফলাফল লিংক তৈরি ও ক্লিপবোর্ডে কপি করা
@@ -471,10 +1094,10 @@ function ResultSheetGeneratorContent() {
       const primarySheet = resultSheets[0];
       const displayedId = String(
         searchTerm ||
-          primarySheet?.studentId ||
-          primarySheet?.student?.studentId ||
-          searchInput.trim() ||
-          "",
+        primarySheet?.studentId ||
+        primarySheet?.student?.studentId ||
+        searchInput.trim() ||
+        "",
       ).trim();
 
       if (displayedId) {
@@ -488,6 +1111,9 @@ function ResultSheetGeneratorContent() {
       }
       if (activeExamType) {
         shareParams.set("exam", activeExamType);
+      }
+      if (activeResultMode === "ct") {
+        shareParams.set("type", "ct");
       }
 
       const qs = shareParams.toString();
@@ -515,358 +1141,6 @@ function ResultSheetGeneratorContent() {
       console.error("Failed to copy result link:", err);
       toast.error("লিংক কপি করা সম্ভব হয়নি।");
     }
-  };
-
-  // বিষয়ভিত্তিক গ্রেড এবং গ্রেড পয়েন্ট নির্ধারণ
-  const calculateSubjectGrade = (mark) => {
-    if (
-      mark === "ABS" ||
-      mark === "A" ||
-      mark === "Abs" ||
-      mark === "অনুঃ" ||
-      mark === "a"
-    ) {
-      return { grade: "অনুঃ", gpa: "০.০০", point: 0.0 };
-    }
-    const num = typeof mark === "number" ? mark : parseFloat(mark);
-    if (isNaN(num)) return { grade: "-", gpa: "০.০০", point: 0.0 };
-    if (num >= 80) return { grade: "A+", gpa: "৫.০০", point: 5.0 };
-    if (num >= 70) return { grade: "A", gpa: "৪.০০", point: 4.0 };
-    if (num >= 60) return { grade: "A-", gpa: "৩.০০", point: 3.0 };
-    if (num >= 50) return { grade: "B", gpa: "২.০০", point: 2.0 };
-    if (num >= 40) return { grade: "C", gpa: "১.০০", point: 1.0 };
-    return { grade: "F", gpa: "০.০০", point: 0.0 };
-  };
-
-  // GPA পয়েন্ট অনুযায়ী লেটার গ্রেড বের করার নিয়ম
-  const getGradeFromPoint = (point) => {
-    const num = parseFloat(point) || 0;
-    if (num >= 5.0) return "A+";
-    if (num >= 4.0) return "A";
-    if (num >= 3.0) return "A-";
-    if (num >= 2.0) return "B";
-    if (num >= 1.0) return "C";
-    return "F";
-  };
-
-  // সামগ্রিক জিপিএ থেকে আন্তর্জাতিক গ্রেড বাউন্ডারি নির্ধারণ
-  const getOverallGradeFromGPA = (gpaVal) => {
-    return getGradeFromPoint(gpaVal);
-  };
-
-  // অবজেক্টের CT ও Exam যোগ করে মোট নম্বর বের করার হেলপার
-  const parseExamData = (examObj) => {
-    if (!examObj || Object.keys(examObj).length === 0) return "-";
-
-    const { ct, exam, isAbsent } = examObj;
-
-    const ctStr = String(ct || "")
-      .trim()
-      .toUpperCase();
-    const examStr = String(exam || "")
-      .trim()
-      .toUpperCase();
-
-    if (
-      isAbsent ||
-      ctStr === "A" ||
-      examStr === "A" ||
-      ctStr === "ABS" ||
-      examStr === "ABS" ||
-      ctStr === "ABSENT" ||
-      examStr === "ABSENT" ||
-      ct === "অনুঃ" ||
-      exam === "অনুঃ"
-    ) {
-      return "অনুঃ";
-    }
-
-    const hasCt = ct !== undefined && ct !== null && String(ct).trim() !== "";
-    const hasExam =
-      exam !== undefined && exam !== null && String(exam).trim() !== "";
-
-    if (!hasCt && !hasExam) return "-";
-
-    const ctNum = typeof ct === "number" ? ct : parseFloat(ct) || 0;
-    const examNum = typeof exam === "number" ? exam : parseFloat(exam) || 0;
-
-    return ctNum + examNum;
-  };
-
-  // সাবজেক্ট অনুসারে নির্দিষ্ট পরীক্ষার জন্য মার্কস বের করার হেলপার
-  const getMarkForExamType = (item, currentExamType) => {
-    const term1Data = item.term1 || item["১ম সাময়িক পরীক্ষা"] || {};
-    const term2Data = item.term2 || item["২য় সাময়িক পরীক্ষা"] || {};
-    const annualData = item.annual || item["বার্ষিক পরীক্ষা"] || {};
-
-    const t1 = parseExamData(term1Data);
-    const t2 = parseExamData(term2Data);
-    const ann = parseExamData(annualData);
-
-    if (currentExamType === "১ম সাময়িক পরীক্ষা") {
-      return t1;
-    } else if (currentExamType === "২য় সাময়িক পরীক্ষা") {
-      return t2;
-    } else if (currentExamType === "বার্ষিক পরীক্ষা") {
-      if (ann === "অনুঃ" || t1 === "অনুঃ" || t2 === "অনুঃ") return "অনুঃ";
-
-      const num1 = typeof t1 === "number" ? t1 : 0;
-      const num2 = typeof t2 === "number" ? t2 : 0;
-      const numAnn = typeof ann === "number" ? ann : 0;
-
-      if (t1 === "-" && t2 === "-" && ann === "-") return "-";
-      return num1 + num2 + numAnn;
-    }
-    return "-";
-  };
-
-  // বার্ষিক পরীক্ষায় প্রতিটি বিষয়ের ৩টি টার্মের গ্রেড পয়েন্টের গড় হিসাব করে ফাইনাল গ্রেড ও জিপি বের করা
-  const getFinalSubjectGradeForAnnual = (item) => {
-    const term1Data = item.term1 || item["১ম সাময়িক পরীক্ষা"] || {};
-    const term2Data = item.term2 || item["২য় সাময়িক পরীক্ষা"] || {};
-    const annualData = item.annual || item["বার্ষিক পরীক্ষা"] || {};
-
-    const t1 = parseExamData(term1Data);
-    const t2 = parseExamData(term2Data);
-    const ann = parseExamData(annualData);
-
-    if (t1 === "অনুঃ" || t2 === "অনুঃ" || ann === "অনুঃ") {
-      return { grade: "অনুঃ", gpa: "০.০০", point: 0.0 };
-    }
-    if (t1 === "-" && t2 === "-" && ann === "-") {
-      return { grade: "-", gpa: "০.০০", point: 0.0 };
-    }
-
-    const g1 = calculateSubjectGrade(t1);
-    const g2 = calculateSubjectGrade(t2);
-    const gAnn = calculateSubjectGrade(ann);
-
-    // কোনো একটি টার্মে F থাকলে বা পয়েন্ট ০ হলে বিষয়ে ফেল (< 40)
-    if (g1.point === 0 || g2.point === 0 || gAnn.point === 0) {
-      return { grade: "F", gpa: "০.০০", point: 0.0 };
-    }
-
-    // ৩টি টার্মের গ্রেড পয়েন্টের গড়
-    const avgPoint = (g1.point + g2.point + gAnn.point) / 3;
-    const finalGrade = getGradeFromPoint(avgPoint);
-
-    return {
-      grade: finalGrade,
-      gpa: toBengaliDigits(avgPoint.toFixed(2)),
-      point: avgPoint,
-    };
-  };
-
-  // বার্ষিক পরীক্ষায় শতকরা বা ১০০-এর স্কেলে মার্ক নরমালাইজেশন
-  const getNormalizedMarkForGrade = (item, currentExamType) => {
-    const mark = getMarkForExamType(item, currentExamType);
-    if (mark === "অনুঃ" || mark === "-") return mark;
-    if (currentExamType === "বার্ষিক পরীক্ষা") {
-      const term1Data = item.term1 || item["১ম সাময়িক পরীক্ষা"] || {};
-      const term2Data = item.term2 || item["২য় সাময়িক পরীক্ষা"] || {};
-      const annualData = item.annual || item["বার্ষিক পরীক্ষা"] || {};
-      const t1 = parseExamData(term1Data);
-      const t2 = parseExamData(term2Data);
-      const ann = parseExamData(annualData);
-      let count = 0;
-      if (typeof t1 === "number") count++;
-      if (typeof t2 === "number") count++;
-      if (typeof ann === "number") count++;
-      count = count || 1;
-      return mark / count;
-    }
-    return mark;
-  };
-
-  // নির্দিষ্ট বিষয়ে শিক্ষার্থী অনুপস্থিত কি না যাচাই
-  const isSubjectAbsent = (item, currentExamType) => {
-    let termData = {};
-    if (currentExamType === "১ম সাময়িক পরীক্ষা") {
-      termData = item.term1 || item["১ম সাময়িক পরীক্ষা"] || {};
-    } else if (currentExamType === "২য় সাময়িক পরীক্ষা") {
-      termData = item.term2 || item["২য় সাময়িক পরীক্ষা"] || {};
-    } else if (currentExamType === "বার্ষিক পরীক্ষা") {
-      termData = item.annual || item["বার্ষিক পরীক্ষা"] || {};
-    }
-
-    if (!termData || Object.keys(termData).length === 0) return true;
-    if (termData.isAbsent) return true;
-
-    const ctStr = String(termData.ct || "")
-      .trim()
-      .toUpperCase();
-    const examStr = String(termData.exam || "")
-      .trim()
-      .toUpperCase();
-    if (
-      ctStr === "A" ||
-      ctStr === "ABS" ||
-      ctStr === "ABSENT" ||
-      examStr === "A" ||
-      examStr === "ABS" ||
-      examStr === "ABSENT" ||
-      termData.ct === "অনুঃ" ||
-      termData.exam === "অনুঃ"
-    ) {
-      return true;
-    }
-
-    const hasCt =
-      termData.ct !== undefined &&
-      termData.ct !== null &&
-      String(termData.ct).trim() !== "";
-    const hasExam =
-      termData.exam !== undefined &&
-      termData.exam !== null &&
-      String(termData.exam).trim() !== "";
-    if (!hasCt && !hasExam) return true;
-
-    return false;
-  };
-
-  // ডুপ্লিকেট সাবজেক্ট এন্ট্রি রিমুভ করার হেল্পার (যাতে টেবিল রেন্ডারিং ও জিপিএ/টোটাল ক্যালকুলেশন ডাবল না হয়)
-  const deduplicateSubjects = (resultsList = []) => {
-    if (!Array.isArray(resultsList) || resultsList.length === 0) return [];
-    return Array.from(
-      new Map(
-        resultsList.map((item, idx) => [
-          String(
-            item?.subjectCode ||
-              item?.subjectId ||
-              item?.subjectName ||
-              formatSubjectName(item?.subject) ||
-              item?.subject ||
-              `subject-${idx}`,
-          ).trim(),
-          item,
-        ]),
-      ).values(),
-    );
-  };
-
-  // আন্তর্জাতিক গ্রেডিং সিস্টেম ও উপস্থিতি ভিত্তিক সামারি ক্যালকুলেশন
-  const calculateSummary = (resultsList = [], currentExamType) => {
-    const uniqueResults = deduplicateSubjects(resultsList);
-    if (!uniqueResults || uniqueResults.length === 0) {
-      return {
-        totalObtained: "০",
-        average: "০.০০",
-        grade: "-",
-        gpa: "০.০০",
-        status: "অনুপস্থিত",
-        remark: "",
-      };
-    }
-
-    const totalSubjects = uniqueResults.length;
-    let absentCount = 0;
-    let totalObtained = 0;
-    let validCount = 0;
-    let hasFailedCompulsory = false;
-    let totalGradePoints = 0;
-    let totalNormalizedMarks = 0;
-
-    uniqueResults.forEach((item) => {
-      const isAbsent = isSubjectAbsent(item, currentExamType);
-      if (isAbsent) {
-        absentCount++;
-      } else {
-        const mark = getMarkForExamType(item, currentExamType);
-        if (typeof mark === "number") {
-          totalObtained += mark;
-          validCount++;
-        }
-
-        let subGrade;
-        if (currentExamType === "বার্ষিক পরীক্ষা") {
-          subGrade = getFinalSubjectGradeForAnnual(item);
-          const normMark = getNormalizedMarkForGrade(item, currentExamType);
-          if (typeof normMark === "number") {
-            totalNormalizedMarks += normMark;
-          }
-        } else {
-          const normalizedMark = getNormalizedMarkForGrade(
-            item,
-            currentExamType,
-          );
-          subGrade = calculateSubjectGrade(normalizedMark);
-        }
-
-        if (subGrade.grade === "F" || subGrade.point === 0) {
-          hasFailedCompulsory = true;
-        }
-        totalGradePoints += subGrade.point;
-      }
-    });
-
-    // ১. সকল বিষয়ে অনুপস্থিত থাকলে -> Status = "অনুপস্থিত"
-    if (absentCount === totalSubjects) {
-      return {
-        totalObtained: "অনুঃ",
-        average: "-",
-        grade: "অনুঃ",
-        gpa: "০.০০",
-        status: "অনুপস্থিত",
-        remark: "",
-      };
-    }
-
-    // ২. কিছু বিষয়ে অনুপস্থিত থাকলে (সবগুলোতে নয়) -> Status = "অসম্পূর্ণ"
-    if (absentCount > 0) {
-      return {
-        totalObtained: toBengaliDigits(totalObtained),
-        average:
-          validCount > 0
-            ? toBengaliDigits(
-                (
-                  (currentExamType === "বার্ষিক পরীক্ষা"
-                    ? totalNormalizedMarks
-                    : totalObtained) / validCount
-                ).toFixed(2),
-              )
-            : "০.০০",
-        grade: "অসম্পূর্ণ",
-        gpa: "০.০০",
-        status: "অসম্পূর্ণ",
-        remark: "",
-      };
-    }
-
-    // ৩. সকল বিষয়ে উপস্থিত থাকলে -> গ্রেড ও জিপিএ সাধারণ নিয়মে হিসাব করা হবে
-    const avgMarks =
-      validCount > 0
-        ? (
-            (currentExamType === "বার্ষিক পরীক্ষা"
-              ? totalNormalizedMarks
-              : totalObtained) / validCount
-          ).toFixed(2)
-        : "0.00";
-
-    // কোনো বিষয়ে ফেল থাকলে (< 40) সামগ্রিক গ্রেড বাধ্যতামূলকভাবে 'F' এবং জিপিএ ০.০০
-    if (hasFailedCompulsory) {
-      return {
-        totalObtained: toBengaliDigits(totalObtained),
-        average: toBengaliDigits(avgMarks),
-        grade: "F",
-        gpa: "০.০০",
-        status: "অকৃতকার্য",
-        remark: getGradeRemark("F"),
-      };
-    }
-
-    // সকল বিষয়ে পাস করলে জিপিএ ও গ্রেড নির্ধারণ
-    const rawGPA = Math.min(5.0, totalGradePoints / totalSubjects);
-    const calculatedGPA = rawGPA.toFixed(2);
-    const overallGrade = getOverallGradeFromGPA(rawGPA);
-
-    return {
-      totalObtained: toBengaliDigits(totalObtained),
-      average: toBengaliDigits(avgMarks),
-      grade: overallGrade,
-      gpa: toBengaliDigits(calculatedGPA),
-      status: "উত্তীর্ণ",
-      remark: getGradeRemark(overallGrade),
-    };
   };
 
   // একাধিক শিক্ষার্থীর রেজাল্ট একসাথে লোড হলে মোট নম্বরের (Total Marks) ভিত্তিতে মেধাস্থান হিসাব
@@ -934,6 +1208,59 @@ function ResultSheetGeneratorContent() {
     return map;
   }, [resultSheets, activeExamType]);
 
+  // ক্লাস টেস্ট (সিটি / CT) একাধিক শিক্ষার্থী থাকলে মেধাস্থান হিসাব
+  const clientCTMeritMap = useMemo(() => {
+    const map = new Map();
+    if (!resultSheets || resultSheets.length === 0) return map;
+
+    const passed = [];
+    resultSheets.forEach((sheet) => {
+      const resultsList = deduplicateSubjects(sheet.results || []);
+      const summary = calculateCTSummary(resultsList, activeExamType);
+      const isPassed =
+        summary.status === "উত্তীর্ণ" &&
+        summary.grade !== "F" &&
+        summary.grade !== "অনুঃ" &&
+        summary.grade !== "অসম্পূর্ণ";
+
+      const sid = String(sheet.studentId || sheet.student?.studentId || "");
+      const rollNum =
+        parseInt(
+          sheet.student?.roll || sheet.student?.officeUse?.rollNumber,
+          10,
+        ) || 999999;
+
+      if (isPassed && sid) {
+        passed.push({
+          studentId: sid,
+          totalMarks: summary.numericTotalObtained || 0,
+          roll: rollNum,
+        });
+      }
+    });
+
+    passed.sort((a, b) => {
+      const markDiff = b.totalMarks - a.totalMarks;
+      if (markDiff !== 0) return markDiff;
+      return a.roll - b.roll;
+    });
+
+    passed.forEach((st, idx) => {
+      if (idx > 0) {
+        const prev = passed[idx - 1];
+        if (st.totalMarks === prev.totalMarks) {
+          map.set(st.studentId, map.get(prev.studentId));
+        } else {
+          map.set(st.studentId, idx + 1);
+        }
+      } else {
+        map.set(st.studentId, 1);
+      }
+    });
+
+    return map;
+  }, [resultSheets, activeExamType]);
+
   const handlePrint = () => {
     window.print();
   };
@@ -958,49 +1285,6 @@ function ResultSheetGeneratorContent() {
               </h1>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3 shrink-0">
-              {/* লিংক কপি / শেয়ার বাটন */}
-              <button
-                type="button"
-                onClick={handleCopyShareLink}
-                disabled={selectedIds.length === 0 || resultSheets.length === 0}
-                aria-label="Copy shareable result link"
-                className={`px-5 py-3 rounded-2xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shrink-0 ${
-                  selectedIds.length === 0 || resultSheets.length === 0
-                    ? "bg-emerald-950/80 text-emerald-700 border border-emerald-900/60 cursor-not-allowed"
-                    : copiedLink
-                      ? "bg-emerald-600 text-white border border-emerald-400/50 shadow-emerald-500/20 cursor-pointer"
-                      : "bg-[#083c2e] hover:bg-emerald-800/80 text-amber-300 border border-amber-500/40 shadow-emerald-950/40 active:scale-95 cursor-pointer"
-                }`}
-              >
-                {copiedLink ? (
-                  <>
-                    <Check className="w-4 h-4 stroke-[2.5]" />
-                    <span>Copied! (কপি হয়েছে)</span>
-                  </>
-                ) : (
-                  <>
-                    <Share2 className="w-4 h-4 stroke-[2.2]" />
-                    <span>লিংক কপি করুন</span>
-                  </>
-                )}
-              </button>
-
-              {/* প্রিন্ট বাটন (রয়্যাল গোল্ডেন স্টাইল) */}
-              <button
-                type="button"
-                onClick={handlePrint}
-                disabled={selectedIds.length === 0 || resultSheets.length === 0}
-                className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2.5 shadow-lg shrink-0 ${
-                  selectedIds.length === 0 || resultSheets.length === 0
-                    ? "bg-emerald-950/80 text-emerald-700 border border-emerald-900/60 cursor-not-allowed"
-                    : "bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-emerald-950 shadow-amber-500/20 active:scale-95 cursor-pointer font-black"
-                }`}
-              >
-                <span className="text-lg">🖨️</span>
-                <span>রেজাল্ট শিট প্রিন্ট করুন</span>
-              </button>
-            </div>
           </div>
 
           {/* এরর নোটিফিকেশন */}
@@ -1012,6 +1296,45 @@ function ResultSheetGeneratorContent() {
               <span>{error}</span>
             </div>
           )}
+
+          {/* রেজাল্ট টাইপ নির্বাচক (টার্ম পরীক্ষা বনাম ক্লাস টেস্ট CT) */}
+          <div className="mb-6 pb-5 border-b border-emerald-800/50">
+            <label className="block text-[11px] font-extrabold text-amber-300 uppercase tracking-wider mb-2">
+              ১. ফলাফলের ধরন নির্বাচন করুন (Select Result Type)
+            </label>
+            <div className="inline-flex p-1.5 bg-[#031d16] rounded-2xl border border-emerald-700/60 gap-1.5 shadow-inner flex-wrap">
+              <button
+                type="button"
+                onClick={() => {
+                  setResultMode("term");
+                  setActiveResultMode("term");
+                }}
+                className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all duration-200 flex items-center gap-2 cursor-pointer ${
+                  resultMode === "term"
+                    ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-950/60 border border-emerald-400/50"
+                    : "text-emerald-300 hover:text-white hover:bg-emerald-800/40"
+                }`}
+              >
+                <span>📑</span>
+                <span>সাময়িক পরীক্ষা (Term Exam)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setResultMode("ct");
+                  setActiveResultMode("ct");
+                }}
+                className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all duration-200 flex items-center gap-2 cursor-pointer ${
+                  resultMode === "ct"
+                    ? "bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-emerald-950 shadow-lg shadow-amber-950/60 border border-amber-300"
+                    : "text-emerald-300 hover:text-white hover:bg-emerald-800/40"
+                }`}
+              >
+                <span>📝</span>
+                <span>ক্লাস টেস্ট (CT Result)</span>
+              </button>
+            </div>
+          </div>
 
           {/* ২. ফিল্টার ও সার্চ সিস্টেম */}
           <form onSubmit={handleSearch} className="space-y-6">
@@ -1084,18 +1407,19 @@ function ResultSheetGeneratorContent() {
                   </option>
                 </select>
               </div>
+              {/* ৫. খুঁজুন বাটন (ইসলামিক ডিপ গ্রিন ও গোল্ডেন হোভার) */}
+              <div className="flex justify-end pt-2">
+                <button
+                  type="submit"
+                  className="w-full sm:w-auto bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold px-8 py-3.5 rounded-2xl text-sm transition-all duration-200 flex items-center justify-center gap-2.5 shadow-lg shadow-emerald-900/50 border border-emerald-400/30 active:scale-95 cursor-pointer"
+                >
+                  <Search className="w-4 h-4 stroke-[2.5]" />
+                  <span>খুঁজুন</span>
+                </button>
+              </div>
             </div>
 
-            {/* ৫. খুঁজুন বাটন (ইসলামিক ডিপ গ্রিন ও গোল্ডেন হোভার) */}
-            <div className="flex justify-end pt-2">
-              <button
-                type="submit"
-                className="w-full sm:w-auto bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold px-8 py-3.5 rounded-2xl text-sm transition-all duration-200 flex items-center justify-center gap-2.5 shadow-lg shadow-emerald-900/50 border border-emerald-400/30 active:scale-95 cursor-pointer"
-              >
-                <Search className="w-4 h-4 stroke-[2.5]" />
-                <span>খুঁজুন</span>
-              </button>
-            </div>
+
           </form>
         </div>
       </div>
@@ -1167,9 +1491,32 @@ function ResultSheetGeneratorContent() {
         <>
           {/* প্রদর্শিত ফলাফল শিটের উপরে শেয়ার / লিংক কপি ও প্রিন্ট অ্যাকশন বার */}
           <div className="print:hidden w-full max-w-[210mm] mx-auto mb-3 flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-[#063226] via-[#04241b] to-[#021812] px-4 py-3 rounded-2xl border border-emerald-600/30 shadow-lg text-emerald-50">
-            <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-emerald-100">
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-              <span>ফলাফল শিট প্রস্তুত — সরাসরি শেয়ার বা প্রিন্ট করুন</span>
+            {/* শিট মোড টগল (টার্ম বনাম সিটি) */}
+            <div className="inline-flex p-1 bg-[#031d16] rounded-xl border border-emerald-700/60 gap-1">
+              <button
+                type="button"
+                onClick={() => handleSwitchMode("term")}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+                  activeResultMode === "term"
+                    ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow border border-emerald-400/50"
+                    : "text-emerald-300 hover:text-white hover:bg-emerald-800/40"
+                }`}
+              >
+                <span>📑</span>
+                <span>টার্ম শিট</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSwitchMode("ct")}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+                  activeResultMode === "ct"
+                    ? "bg-gradient-to-r from-amber-400 to-amber-500 text-emerald-950 font-extrabold shadow border border-amber-300"
+                    : "text-emerald-300 hover:text-white hover:bg-emerald-800/40"
+                }`}
+              >
+                <span>📝</span>
+                <span>সিটি (CT) শিট</span>
+              </button>
             </div>
 
             <div className="flex items-center gap-2.5">
@@ -1177,11 +1524,10 @@ function ResultSheetGeneratorContent() {
                 type="button"
                 onClick={handleCopyShareLink}
                 aria-label="Copy shareable result link"
-                className={`px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 flex items-center gap-2 border cursor-pointer ${
-                  copiedLink
-                    ? "bg-emerald-600 text-white border-emerald-400/60 shadow-md shadow-emerald-900/40"
-                    : "bg-[#083c2e] hover:bg-emerald-800/80 text-amber-300 border-amber-400/40 active:scale-95"
-                }`}
+                className={`px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 flex items-center gap-2 border cursor-pointer ${copiedLink
+                  ? "bg-emerald-600 text-white border-emerald-400/60 shadow-md shadow-emerald-900/40"
+                  : "bg-[#083c2e] hover:bg-emerald-800/80 text-amber-300 border-amber-400/40 active:scale-95"
+                  }`}
               >
                 {copiedLink ? (
                   <>
@@ -1249,8 +1595,8 @@ function ResultSheetGeneratorContent() {
                 student.roll && student.roll !== "N/A"
                   ? student.roll
                   : student.officeUse?.rollNumber ||
-                    resData.student?.roll ||
-                    "প্রযোজ্য নয়";
+                  resData.student?.roll ||
+                  "প্রযোজ্য নয়";
 
               const studentFatherName =
                 student.fatherNameBangla ||
@@ -1275,6 +1621,415 @@ function ResultSheetGeneratorContent() {
                 null;
 
               const results = deduplicateSubjects(resData.results || []);
+
+              if (activeResultMode === "ct") {
+                const ctSummary = calculateCTSummary(results, activeExamType);
+                const ctStudentMerit =
+                  clientCTMeritMap.get(String(currentStudentId)) || "-";
+
+                return (
+                  <div
+                    key={`ct-${student.studentId || currentStudentId || index}`}
+                    className="page-break relative bg-white box-border flex flex-col justify-between text-black w-full max-w-[210mm] min-h-[297mm] shadow-xl rounded-sm my-4 font-bornomala"
+                  >
+                    {/* কার্ডের গোল্ডেন ট্রিপল আউটার বর্ডার */}
+                    <div className="w-full h-full border-[3px] border-[#C5A059] p-1 box-border relative">
+                      <div className="w-full h-full border border-[#C5A059] p-2 flex flex-col justify-between box-border relative">
+                        {/* ব্যাকগ্রাউন্ড ওয়াটারমার্ক */}
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0 opacity-[0.05]">
+                          <div className="w-[420px] h-[420px] rounded-full overflow-hidden flex items-center justify-center">
+                            <Image
+                              src="/aimlogo1.png"
+                              alt="Watermark Logo"
+                              width={420}
+                              height={420}
+                              priority
+                              className="w-full h-full object-cover scale-[1.05] transform-gpu"
+                            />
+                          </div>
+                        </div>
+
+                        {/* মূল কন্টেন্ট */}
+                        <div className="relative z-10 flex-1 flex flex-col justify-between">
+                          <div className="flex-1 flex flex-col">
+                            {/* হেডার: লোগো ও মাদরাসার নাম */}
+                            <div>
+                              <PrintInstitutionalHeader
+                                bannerSrc="/banner_routine.png"
+                                logoWrapperClassName="w-20 h-20 md:w-45 md:h-45 print:!w-36 print:!h-36 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-3"
+                                logoWidth={200}
+                                logoHeight={200}
+                                logoClassName="w-full h-full object-cover scale-[1.08] transform-gpu"
+                                bannerWidth={1000}
+                                bannerHeight={400}
+                                bannerClassName="w-full h-auto max-h-45 object-fill mx-auto print:max-h-45"
+                              />
+
+                              {/* ডাবল গোল্ডেন লাইন সেপারেটর */}
+                              <div className="border-t-2 border-b border-[#C5A059] my-2 py-0.5"></div>
+
+                              {/* রেজাল্ট ব্যাজ ও হেডলাইন */}
+                              <div className="flex justify-between items-center my-2 px-1">
+                                {/* বাম পাশে শিক্ষার্থীর ছবি */}
+                                <div className="w-16 h-18 border-2 border-gray-300 rounded-lg flex items-center justify-center bg-gray-50 overflow-hidden text-[9px] text-gray-400 font-bold shadow-xs">
+                                  {studentPhoto ? (
+                                    <Image
+                                      src={studentPhoto}
+                                      alt="Student"
+                                      width={56}
+                                      height={64}
+                                      priority
+                                      unoptimized
+                                      className="object-cover w-full h-full"
+                                    />
+                                  ) : (
+                                    "ছবি নেই"
+                                  )}
+                                </div>
+
+                                {/* মাঝখানে ক্যাপসুল টাইটেল */}
+                                <div className="text-center">
+                                  <div className="bg-[#043e30] text-amber-300 px-5 py-1 rounded-full inline-block font-bold text-xs tracking-wide shadow-sm">
+                                    ক্লাস টেস্ট (CT) ফলাফল বিবরণী
+                                  </div>
+                                  <p className="text-[11px] font-bold text-gray-800 mt-1">
+                                    {activeExamType} -{" "}
+                                    {toBengaliDigits(
+                                      (resData.year || "")
+                                        .split(/[-–/]/)[0]
+                                        .trim(),
+                                    )}
+                                  </p>
+                                  <p className="text-[11px] font-bold text-gray-800">
+                                    শ্রেণি: {studentClass}
+                                  </p>
+                                </div>
+
+                                {/* ডান পাশে সিটি গ্রেডিং স্কেল বিবরণী */}
+                                <div className="flex justify-end">
+                                  <table className="border-collapse border border-slate-600 text-[6.5px] sm:text-[7px] leading-tight text-center bg-white shadow-xs">
+                                    <thead>
+                                      <tr className="bg-[#043e30] text-amber-300 font-bold">
+                                        <th className="border border-slate-500 px-1 py-0.5 whitespace-nowrap">
+                                          নম্বর (২০)
+                                        </th>
+                                        <th className="border border-slate-500 px-0.5 py-0.5 whitespace-nowrap">
+                                          গ্রেড
+                                        </th>
+                                        <th className="border border-slate-500 px-1 py-0.5 whitespace-nowrap">
+                                          মান
+                                        </th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <tr>
+                                        <td className="border border-slate-400 px-1 py-0">
+                                          ১৬-২০ (৮০-১০০%)
+                                        </td>
+                                        <td className="border border-slate-400 px-0.5 py-0 font-bold">
+                                          A+
+                                        </td>
+                                        <td className="border border-slate-400 px-1 py-0">
+                                          মুমতাজ
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td className="border border-slate-400 px-1 py-0">
+                                          ১৪-১৫.৯ (৭০-৭৯%)
+                                        </td>
+                                        <td className="border border-slate-400 px-0.5 py-0 font-bold">
+                                          A
+                                        </td>
+                                        <td className="border border-slate-400 px-1 py-0">
+                                          জায়্যিদ জিদ্দান
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td className="border border-slate-400 px-1 py-0">
+                                          ১২-১৩.৯ (৬০-৬৯%)
+                                        </td>
+                                        <td className="border border-slate-400 px-0.5 py-0 font-bold">
+                                          A-
+                                        </td>
+                                        <td className="border border-slate-400 px-1 py-0">
+                                          জায়্যিদ
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td className="border border-slate-400 px-1 py-0">
+                                          ১০-১১.৯ (৫০-৫৯%)
+                                        </td>
+                                        <td className="border border-slate-400 px-0.5 py-0 font-bold">
+                                          B
+                                        </td>
+                                        <td className="border border-slate-400 px-1 py-0">
+                                          মাকবুল
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td className="border border-slate-400 px-1 py-0">
+                                          ৮-৯.৯ (৪০-৪৯%)
+                                        </td>
+                                        <td className="border border-slate-400 px-0.5 py-0 font-bold">
+                                          C
+                                        </td>
+                                        <td className="border border-slate-400 px-1 py-0">
+                                          উত্তীর্ণ
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td className="border border-slate-400 px-1 py-0">
+                                          ০-৭.৯ (&lt;৪০%)
+                                        </td>
+                                        <td className="border border-slate-400 px-0.5 py-0 font-bold text-red-600">
+                                          F
+                                        </td>
+                                        <td className="border border-slate-400 px-1 py-0 text-red-600">
+                                          রাসেব
+                                        </td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+
+                              {/* পরীক্ষার্থীর ডট ডট তথ্যাবলী */}
+                              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] my-3 px-1">
+                                <div className="flex items-end">
+                                  <span className="font-bold w-20 shrink-0">
+                                    পরীক্ষার্থীর নাম:
+                                  </span>
+                                  <span className="font-bold border-b border-dashed border-gray-400 flex-1 truncate">
+                                    {studentName}
+                                  </span>
+                                </div>
+                                <div className="flex items-end">
+                                  <span className="font-bold w-16 shrink-0">
+                                    আইডি:
+                                  </span>
+                                  <span className="font-bold border-b border-dashed border-gray-400 flex-1">
+                                    {toBengaliDigits(student.studentId)}
+                                  </span>
+                                </div>
+                                <div className="flex items-end">
+                                  <span className="font-bold w-20 shrink-0">
+                                    পিতার নাম:
+                                  </span>
+                                  <span className="border-b border-dashed border-gray-400 flex-1 truncate">
+                                    {studentFatherName}
+                                  </span>
+                                </div>
+                                <div className="flex items-end">
+                                  <span className="font-bold w-16 shrink-0">
+                                    রোল নং:
+                                  </span>
+                                  <span className="border-b border-dashed border-gray-400 flex-1">
+                                    {studentRoll !== "প্রযোজ্য নয়"
+                                      ? toBengaliDigits(studentRoll)
+                                      : "প্রযোজ্য নয়"}
+                                  </span>
+                                </div>
+                                <div className="flex items-end">
+                                  <span className="font-bold w-20 shrink-0">
+                                    উপজেলা:
+                                  </span>
+                                  <span className="border-b border-dashed border-gray-400 flex-1">
+                                    {studentThana}
+                                  </span>
+                                </div>
+                                <div className="flex items-end">
+                                  <span className="font-bold w-16 shrink-0">
+                                    জেলা:
+                                  </span>
+                                  <span className="border-b border-dashed border-gray-400 flex-1">
+                                    {studentDistrict}
+                                  </span>
+                                </div>
+                                <div className="flex items-end">
+                                  <span className="font-bold w-20 shrink-0">
+                                    শ্রেণি:
+                                  </span>
+                                  <span className="border-b border-dashed border-gray-400 flex-1 truncate">
+                                    {studentClass}
+                                  </span>
+                                </div>
+                                <div className="flex items-end">
+                                  <span className="font-bold w-16 shrink-0">
+                                    সিটি মেধাস্থান:
+                                  </span>
+                                  <span className="border-b border-dashed border-gray-400 flex-1 font-bold text-[#043e30]">
+                                    {ctStudentMerit && ctStudentMerit !== "-"
+                                      ? toBengaliDigits(ctStudentMerit)
+                                      : "-"}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* টেবিল হেডার টাইটেল */}
+                              <div className="text-center font-bold text-xs my-1 text-gray-800">
+                                ক্লাস টেস্ট (CT) নম্বর বিবরণী
+                              </div>
+                            </div>
+
+                            {/* সিটি নম্বর টেবিল */}
+                            <div className="my-1 flex-shrink-0">
+                              <table className="w-full border-collapse border border-[#C5A059] text-center text-xs">
+                                <thead>
+                                  <tr className="bg-[#fcf8ed] font-bold text-gray-800 text-xs">
+                                    <th className="border border-[#C5A059] p-1.5 w-12">
+                                      ক্রমিক
+                                    </th>
+                                    <th className="border border-[#C5A059] p-1.5 text-left px-3">
+                                      বিষয়
+                                    </th>
+                                    <th className="border border-[#C5A059] p-1.5 w-24">
+                                      সিটি পূর্ণমান
+                                    </th>
+                                    <th className="border border-[#C5A059] p-1.5 w-28 font-bold">
+                                      প্রাপ্ত নম্বর
+                                    </th>
+                                    <th className="border border-[#C5A059] p-1.5 w-32">
+                                      গ্রেড / মন্তব্য
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {results.length === 0 ? (
+                                    <tr>
+                                      <td
+                                        colSpan={5}
+                                        className="p-3 text-center border border-[#C5A059]"
+                                      >
+                                        কোনো সিটি নম্বর পাওয়া যায়নি
+                                      </td>
+                                    </tr>
+                                  ) : (
+                                    results.map((item, idx) => {
+                                      const ctData = getCTSubjectData(
+                                        item,
+                                        activeExamType,
+                                      );
+                                      return (
+                                        <tr
+                                          key={String(
+                                            item.subjectCode ||
+                                              item.subjectId ||
+                                              item.subjectName ||
+                                              formatSubjectName(item.subject) ||
+                                              item.subject ||
+                                              idx,
+                                          ).trim()}
+                                          className="border-b border-[#C5A059]"
+                                        >
+                                          <td className="border border-[#C5A059] p-1.5">
+                                            {toBengaliDigits(idx + 1)}
+                                          </td>
+                                          <td className="border border-[#C5A059] p-1.5 text-left px-3 font-semibold">
+                                            {formatSubjectName(item.subject)}
+                                          </td>
+                                          <td className="border border-[#C5A059] p-1.5">
+                                            {toBengaliDigits(ctData.fullMark)}
+                                          </td>
+                                          <td className="border border-[#C5A059] p-1.5 font-bold">
+                                            {ctData.isAbsent ? (
+                                              <span className="text-red-600 font-bold">
+                                                অনুঃ
+                                              </span>
+                                            ) : typeof ctData.obtained ===
+                                              "number" ? (
+                                              toBengaliDigits(ctData.obtained)
+                                            ) : (
+                                              ctData.obtained
+                                            )}
+                                          </td>
+                                          <td
+                                            className={`border border-[#C5A059] p-1.5 font-bold ${
+                                              ctData.grade === "F" ||
+                                              ctData.isAbsent
+                                                ? "text-red-600"
+                                                : "text-[#043e30]"
+                                            }`}
+                                          >
+                                            {ctData.remark}
+                                          </td>
+                                        </tr>
+                                      );
+                                    })
+                                  )}
+                                </tbody>
+                              </table>
+                            </div>
+
+                            {/* সিটি সামারি সেকশন */}
+                            <div className="mt-1 border border-[#C5A059] bg-[#fcf8ed] p-2 rounded-sm flex-shrink-0">
+                              <div className="grid grid-cols-6 gap-2 text-center text-xs font-bold text-gray-800">
+                                <div>
+                                  <span className="block text-[10px] text-gray-600 font-normal">
+                                    মোট পূর্ণমান
+                                  </span>
+                                  {ctSummary.totalFullMarks}
+                                </div>
+                                <div>
+                                  <span className="block text-[10px] text-gray-600 font-normal">
+                                    মোট প্রাপ্ত নম্বর
+                                  </span>
+                                  {ctSummary.totalObtained}
+                                </div>
+                                <div>
+                                  <span className="block text-[10px] text-gray-600 font-normal">
+                                    শতকরা হার
+                                  </span>
+                                  {ctSummary.percentage}
+                                </div>
+                                <div>
+                                  <span className="block text-[10px] text-gray-600 font-normal">
+                                    গড় নম্বর
+                                  </span>
+                                  {ctSummary.average}
+                                </div>
+                                <div className="bg-[#043e30]/10 rounded-sm py-0.5 border border-[#043e30]/20">
+                                  <span className="block text-[10px] text-[#043e30] font-bold">
+                                    সিটি মেধাস্থান
+                                  </span>
+                                  <span className="text-[#043e30] font-black">
+                                    {ctStudentMerit && ctStudentMerit !== "-"
+                                      ? toBengaliDigits(ctStudentMerit)
+                                      : "-"}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="block text-[10px] text-gray-600 font-normal">
+                                    মন্তব্য
+                                  </span>
+                                  <span
+                                    className={`whitespace-nowrap ${
+                                      ctSummary.grade === "F" ||
+                                      ctSummary.grade === "অনুঃ"
+                                        ? "text-red-600"
+                                        : "text-[#043e30]"
+                                    }`}
+                                  >
+                                    {ctSummary.remark ||
+                                      ctSummary.status ||
+                                      "-"}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* ফুটার লেআউট (স্বাক্ষর এরিয়া এবং সোশ্যাল ও কন্টাক্ট ইনফো) */}
+                          <div className="mt-auto flex-shrink-0 pt-2 relative z-10">
+                            <PrintSignatures principalTopClass="-top-2" />
+                            <PrintSocialFooter />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
               const summary = calculateSummary(results, activeExamType);
               const studentMerit =
                 resData.meritPosition && resData.meritPosition !== "-"
@@ -1640,11 +2395,11 @@ function ResultSheetGeneratorContent() {
                                       <tr
                                         key={String(
                                           item.subjectCode ||
-                                            item.subjectId ||
-                                            item.subjectName ||
-                                            formatSubjectName(item.subject) ||
-                                            item.subject ||
-                                            idx,
+                                          item.subjectId ||
+                                          item.subjectName ||
+                                          formatSubjectName(item.subject) ||
+                                          item.subject ||
+                                          idx,
                                         ).trim()}
                                         className="border-b border-[#C5A059]"
                                       >
@@ -1654,29 +2409,28 @@ function ResultSheetGeneratorContent() {
 
                                         {activeExamType ===
                                           "বার্ষিক পরীক্ষা" && (
-                                          <>
-                                            <td className="border border-[#C5A059] p-1.5">
-                                              {formatVal(t1)}
-                                            </td>
-                                            <td className="border border-[#C5A059] p-1.5">
-                                              {formatVal(t2)}
-                                            </td>
-                                            <td className="border border-[#C5A059] p-1.5">
-                                              {formatVal(ann)}
-                                            </td>
-                                          </>
-                                        )}
+                                            <>
+                                              <td className="border border-[#C5A059] p-1.5">
+                                                {formatVal(t1)}
+                                              </td>
+                                              <td className="border border-[#C5A059] p-1.5">
+                                                {formatVal(t2)}
+                                              </td>
+                                              <td className="border border-[#C5A059] p-1.5">
+                                                {formatVal(ann)}
+                                              </td>
+                                            </>
+                                          )}
 
                                         <td className="border border-[#C5A059] p-1.5 font-bold">
                                           {formatVal(finalMark)}
                                         </td>
                                         <td
-                                          className={`border border-[#C5A059] p-1.5 font-bold ${
-                                            gradeInfo.grade === "F" ||
+                                          className={`border border-[#C5A059] p-1.5 font-bold ${gradeInfo.grade === "F" ||
                                             gradeInfo.grade === "অনুঃ"
-                                              ? "text-red-600"
-                                              : ""
-                                          }`}
+                                            ? "text-red-600"
+                                            : ""
+                                            }`}
                                         >
                                           {gradeInfo.grade}
                                         </td>
