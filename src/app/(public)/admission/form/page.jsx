@@ -196,17 +196,17 @@ export default function AdmissionFormPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 py-4 sm:py-10 px-2 sm:px-4 flex flex-col items-center justify-center font-sans antialiased print:bg-white print:py-0 print:px-0">
+    <div className="min-h-screen bg-[#E3F2FD] py-6 sm:py-10 px-2 sm:px-4 flex flex-col items-center justify-center font-sans antialiased print:bg-white print:py-0 print:px-0">
 
       {/* অ্যাকশন ও ব্যাক বাটন এরিয়া */}
       <div className="w-full max-w-[8.27in] flex justify-between items-center mb-4 print:hidden px-2">
-        <Link href="/admission" className="text-xs sm:text-sm font-bold text-emerald-800 hover:underline flex items-center gap-1">
+        <Link href="/admission" className="text-xs sm:text-sm font-bold text-[#0D47A1] hover:text-[#2196F3] hover:underline flex items-center gap-1">
           ⬅ নির্দেশিকাতে ফিরে যান
         </Link>
         <button
           type="button"
           onClick={() => window.print()}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-lg shadow-sm transition-all"
+          className="bg-[#0D47A1] hover:bg-[#0A3880] text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-lg shadow-sm transition-all cursor-pointer"
         >
           🖨️ প্রিন্ট / PDF সেভ করুন
         </button>
@@ -214,7 +214,7 @@ export default function AdmissionFormPage() {
 
       <form
         onSubmit={handleSubmit}
-        className="w-full md:w-[8.27in] max-w-full bg-white shadow-2xl rounded-sm print:shadow-none print:rounded-none flex flex-col gap-12 print:gap-0"
+        className="w-full md:w-[8.27in] max-w-full bg-white shadow-2xl rounded-sm print:shadow-none print:rounded-none flex flex-col gap-12 print:gap-0 border border-[#90CAF9]/40"
       >
 
 
@@ -240,11 +240,11 @@ export default function AdmissionFormPage() {
 
 
         {/* সাবমিট বাটন */}
-        <div className="p-4 sm:p-8 bg-gray-50 border-t border-gray-200 text-right print:hidden rounded-b-sm w-full">
+        <div className="p-4 sm:p-8 bg-[#E3F2FD]/50 border-t border-[#90CAF9] text-right print:hidden rounded-b-sm w-full">
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base sm:text-lg px-8 sm:px-10 py-3 sm:py-3.5 rounded-lg shadow-md transition-all duration-150 active:scale-95 w-full sm:w-auto ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`btn-primary text-base sm:text-lg px-8 sm:px-10 py-3 sm:py-3.5 rounded-lg shadow-md transition-all duration-150 active:scale-95 w-full sm:w-auto cursor-pointer ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             {isSubmitting ? "সংরক্ষণ হচ্ছে, অপেক্ষা করুন..." : "ভর্তি ফরমটি ডাটাবেজে সংরক্ষণ করুন"}
           </button>

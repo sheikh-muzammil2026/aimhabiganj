@@ -43,30 +43,30 @@ export default function HostelPage() {
   }, []);
 
   return (
-    <div className="scroll-smooth min-h-screen bg-gray-50 dark:bg-slate-900">
+    <div className="page-wrapper scroll-smooth">
       
       {/* ১. ছাত্রাবাস পরিচিতি সেকশন */}
-      <section id="about" className="py-16 scroll-mt-24 border-b border-gray-100 dark:border-slate-800/60">
+      <section id="about" className="py-12 sm:py-16 scroll-mt-24 border-b border-[#90CAF9]/40 bg-white">
         <HostelAbout data={hostelData?.about} />
       </section>
 
       {/* ২. আবাসিক হলের পরিচালকবৃন্দ সেকশন (অল্টারনেট ব্যাকগ্রাউন্ড) */}
-      <section id="directors" className="py-16 scroll-mt-24 border-b border-gray-100 dark:border-slate-800/60 bg-emerald-50/10 dark:bg-slate-900/40">
+      <section id="directors" className="py-12 sm:py-16 scroll-mt-24 border-b border-[#90CAF9]/40 bg-[#E3F2FD]/50">
         <HostelDirectors data={hostelData?.directors} />
       </section>
 
       {/* ৩. আবাসন প্রাপ্তির নিয়মাবলী সেকশন */}
-      <section id="rules" className="py-16 scroll-mt-24 border-b border-gray-100 dark:border-slate-800/60">
+      <section id="rules" className="py-12 sm:py-16 scroll-mt-24 border-b border-[#90CAF9]/40 bg-white">
         <HostelRules data={hostelData?.rules} />
       </section>
 
       {/* ৪. আবাসন চার্ট সেকশন (অল্টারনেট ব্যাকগ্রাউন্ড) */}
-      <section id="chart" className="py-16 scroll-mt-24 border-b border-gray-100 dark:border-slate-800/60 bg-emerald-50/10 dark:bg-slate-900/40">
+      <section id="chart" className="py-12 sm:py-16 scroll-mt-24 border-b border-[#90CAF9]/40 bg-[#E3F2FD]/50">
         <HostelChart data={hostelData?.chart} />
       </section>
 
       {/* ৫. দৈনিক আবাসিক কার্যসূচি সেকশন */}
-      <section id="routine" className="py-16">
+      <section id="routine" className="py-12 sm:py-16 bg-white">
         <HostelRoutine data={hostelData?.routine} />
       </section>
 

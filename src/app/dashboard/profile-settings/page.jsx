@@ -293,7 +293,7 @@ export default function ProfileSettingsPage() {
   if (isPending) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
+        <Loader2 className="w-8 h-8 text-[#2196F3] animate-spin" />
         <span className="ml-3 text-sm font-semibold text-slate-600 dark:text-slate-400">
           প্রোফাইল তথ্য লোড হচ্ছে...
         </span>
@@ -302,25 +302,25 @@ export default function ProfileSettingsPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 pb-12">
+    <div className="dashboard-container space-y-8 pb-12 font-bornomala selection:bg-[#0D47A1] selection:text-white">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#043e30] via-emerald-800 to-teal-800 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
-        <div className="absolute right-0 top-0 translate-x-8 -translate-y-8 w-64 h-64 bg-emerald-600/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="bg-[#0D47A1] rounded-2xl p-6 sm:p-8 text-white shadow-md border border-[#90CAF9]/40 relative overflow-hidden">
+        <div className="absolute right-0 top-0 translate-x-8 -translate-y-8 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 text-xs font-semibold backdrop-blur-xs">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E3F2FD]/20 text-[#90CAF9] text-xs font-semibold backdrop-blur-xs">
               <Sparkles className="w-3.5 h-3.5" />
               <span>নিরাপত্তা ও সেটিংস</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
               প্রোফাইল সেটিংস
             </h1>
-            <p className="text-emerald-100/90 text-xs sm:text-sm">
+            <p className="text-[#90CAF9] text-xs sm:text-sm">
               আপনার ব্যক্তিগত তথ্য, ছবি এবং নিরাপত্তা সেটিংস পরিচালনা করুন
             </p>
           </div>
           <div className="flex items-center gap-2 self-start sm:self-auto bg-white/10 backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/10 text-xs">
-            <ShieldCheck className="w-4 h-4 text-amber-400" />
+            <ShieldCheck className="w-4 h-4 text-[#90CAF9]" />
             <span className="font-semibold capitalize">
               রোল: {user?.role || "ব্যবহারকারী"}
             </span>
@@ -331,9 +331,9 @@ export default function ProfileSettingsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: Avatar Card & Basic Info */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-emerald-900/10 dark:border-emerald-950/40 shadow-xs text-center">
+          <div className="bg-white rounded-2xl p-6 border border-[#90CAF9]/40 shadow-xs text-center">
             <div className="relative inline-block mx-auto mb-4">
-              <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full ring-4 ring-emerald-500/20 dark:ring-emerald-400/20 overflow-hidden bg-emerald-50 dark:bg-slate-800 flex items-center justify-center">
+              <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full ring-4 ring-[#90CAF9]/40 overflow-hidden bg-[#E3F2FD] flex items-center justify-center">
                 {image ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
@@ -342,12 +342,12 @@ export default function ProfileSettingsPage() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <User className="w-16 h-16 text-emerald-700 dark:text-emerald-400" />
+                  <User className="w-16 h-16 text-[#0D47A1]" />
                 )}
               </div>
               <label
                 htmlFor="avatar-upload"
-                className="absolute bottom-1 right-1 p-2.5 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white shadow-lg cursor-pointer transition-all transform hover:scale-105"
+                className="absolute bottom-1 right-1 p-2.5 rounded-full bg-[#2196F3] hover:bg-[#1976D2] text-white shadow-lg cursor-pointer transition-all transform hover:scale-105"
                 title="ছবি পরিবর্তন করুন"
               >
                 {uploadingImage ? (
@@ -366,17 +366,17 @@ export default function ProfileSettingsPage() {
               />
             </div>
 
-            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+            <h2 className="text-lg font-bold text-slate-800">
               {name || "নাম প্রদান করুন"}
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-500 mt-0.5">
               {user?.email}
             </p>
-            <div className="inline-block mt-3 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">
+            <div className="inline-block mt-3 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#E3F2FD] text-[#0D47A1] border border-[#90CAF9] uppercase tracking-wider">
               {user?.role || "User"}
             </div>
 
-            <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-4">
+            <p className="text-[11px] text-slate-400 mt-4">
               সর্বোচ্চ ৩MB পর্যন্ত ছবি অনুমোদিত।
             </p>
           </div>
@@ -385,10 +385,10 @@ export default function ProfileSettingsPage() {
         {/* Right Column: Edit Forms */}
         <div className="lg:col-span-2 space-y-8">
           {/* 1. Name and Avatar Form */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-emerald-900/10 dark:border-emerald-950/40 shadow-xs">
-            <div className="flex items-center gap-2.5 pb-4 border-b border-slate-100 dark:border-slate-800">
-              <User className="w-5 h-5 text-emerald-700 dark:text-emerald-400" />
-              <h2 className="text-base font-bold text-slate-800 dark:text-slate-100">
+          <div className="bg-white rounded-2xl p-6 border border-[#90CAF9]/40 shadow-xs">
+            <div className="flex items-center gap-2.5 pb-4 border-b border-slate-100">
+              <User className="w-5 h-5 text-[#2196F3]" />
+              <h2 className="text-base font-bold text-slate-800">
                 সাধারণ তথ্য
               </h2>
             </div>
@@ -397,8 +397,8 @@ export default function ProfileSettingsPage() {
               <div
                 className={`mt-4 p-3 rounded-xl flex items-center gap-2 text-xs font-semibold ${
                   profileMsg.type === "success"
-                    ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200"
-                    : "bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300 border border-rose-200"
+                    ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                    : "bg-rose-50 text-rose-800 border border-rose-200"
                 }`}
               >
                 {profileMsg.type === "success" ? (
@@ -412,7 +412,7 @@ export default function ProfileSettingsPage() {
 
             <form onSubmit={handleSaveProfile} className="mt-5 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
                   পূর্ণ নাম <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -421,12 +421,12 @@ export default function ProfileSettingsPage() {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="আপনার পূর্ণ নাম লিখুন"
                   required
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-emerald-600 transition-all"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#90CAF9]/60 bg-white text-sm text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-[#2196F3] focus:border-[#2196F3] transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
                   প্রোফাইল ছবির লিংক (URL - ঐচ্ছিক)
                 </label>
                 <input
@@ -434,7 +434,7 @@ export default function ProfileSettingsPage() {
                   value={image}
                   onChange={(e) => setImage(e.target.value)}
                   placeholder="https://example.com/photo.jpg"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-emerald-600 transition-all"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#90CAF9]/60 bg-white text-sm text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-[#2196F3] focus:border-[#2196F3] transition-all"
                 />
               </div>
 
@@ -442,7 +442,7 @@ export default function ProfileSettingsPage() {
                 <button
                   type="submit"
                   disabled={savingProfile || uploadingImage}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-md hover:shadow-lg disabled:opacity-50 transition-all"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0D47A1] hover:bg-[#0A3880] text-white text-xs font-bold shadow-sm disabled:opacity-50 transition-all cursor-pointer"
                 >
                   {savingProfile ? (
                     <>
@@ -458,25 +458,25 @@ export default function ProfileSettingsPage() {
           </div>
 
           {/* 2. Email Address & Verification */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-emerald-900/10 dark:border-emerald-950/40 shadow-xs">
-            <div className="flex items-center gap-2.5 pb-4 border-b border-slate-100 dark:border-slate-800">
-              <Mail className="w-5 h-5 text-emerald-700 dark:text-emerald-400" />
-              <h2 className="text-base font-bold text-slate-800 dark:text-slate-100">
+          <div className="bg-white rounded-2xl p-6 border border-[#90CAF9]/40 shadow-xs">
+            <div className="flex items-center gap-2.5 pb-4 border-b border-slate-100">
+              <Mail className="w-5 h-5 text-[#2196F3]" />
+              <h2 className="text-base font-bold text-slate-800">
                 ইমেইল ঠিকানা পরিবর্তন
               </h2>
             </div>
 
-            <div className="mt-4 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 flex items-center justify-between">
+            <div className="mt-4 p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
               <div>
-                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block">
+                <span className="text-[11px] font-semibold text-slate-500 block">
                   বর্তমান ইমেইল
                 </span>
-                <span className="text-sm font-bold text-slate-800 dark:text-slate-100">
+                <span className="text-sm font-bold text-slate-800">
                   {user?.email}
                 </span>
               </div>
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
-                <CheckCircle className="w-3.5 h-3.5" />
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#E3F2FD] text-[#0D47A1] border border-[#90CAF9]">
+                <CheckCircle className="w-3.5 h-3.5 text-[#2196F3]" />
                 <span>ভেরিফাইড</span>
               </span>
             </div>
@@ -485,8 +485,8 @@ export default function ProfileSettingsPage() {
               <div
                 className={`mt-4 p-3 rounded-xl flex items-center gap-2 text-xs font-semibold ${
                   emailMsg.type === "success"
-                    ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200"
-                    : "bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300 border border-rose-200"
+                    ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                    : "bg-rose-50 text-rose-800 border border-rose-200"
                 }`}
               >
                 {emailMsg.type === "success" ? (
@@ -503,7 +503,7 @@ export default function ProfileSettingsPage() {
               className="mt-5 space-y-4"
             >
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
                   নতুন ইমেইল ঠিকানা <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -512,9 +512,9 @@ export default function ProfileSettingsPage() {
                   onChange={(e) => setNewEmail(e.target.value)}
                   placeholder="newemail@example.com"
                   required
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-emerald-600 transition-all"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#90CAF9]/60 bg-white text-sm text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-[#2196F3] focus:border-[#2196F3] transition-all"
                 />
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5">
+                <p className="text-[11px] text-slate-500 mt-1.5">
                   নিরাপত্তার স্বার্থে নতুন ইমেইলে একটি নিশ্চিতকরণ লিংক পাঠানো
                   হবে। লিংকটিতে ক্লিক করলেই কেবল নতুন ইমেইল কার্যকর হবে।
                 </p>
@@ -524,7 +524,7 @@ export default function ProfileSettingsPage() {
                 <button
                   type="submit"
                   disabled={sendingEmailOtp}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-md hover:shadow-lg disabled:opacity-50 transition-all"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#2196F3] hover:bg-[#1976D2] text-white text-xs font-bold shadow-sm disabled:opacity-50 transition-all cursor-pointer"
                 >
                   {sendingEmailOtp ? (
                     <>
@@ -540,10 +540,10 @@ export default function ProfileSettingsPage() {
           </div>
 
           {/* 3. Password Change Form */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-emerald-900/10 dark:border-emerald-950/40 shadow-xs">
-            <div className="flex items-center gap-2.5 pb-4 border-b border-slate-100 dark:border-slate-800">
-              <Lock className="w-5 h-5 text-emerald-700 dark:text-emerald-400" />
-              <h2 className="text-base font-bold text-slate-800 dark:text-slate-100">
+          <div className="bg-white rounded-2xl p-6 border border-[#90CAF9]/40 shadow-xs">
+            <div className="flex items-center gap-2.5 pb-4 border-b border-slate-100">
+              <Lock className="w-5 h-5 text-[#2196F3]" />
+              <h2 className="text-base font-bold text-slate-800">
                 পাসওয়ার্ড পরিবর্তন
               </h2>
             </div>
@@ -552,8 +552,8 @@ export default function ProfileSettingsPage() {
               <div
                 className={`mt-4 p-3 rounded-xl flex items-center gap-2 text-xs font-semibold ${
                   passwordMsg.type === "success"
-                    ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200"
-                    : "bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300 border border-rose-200"
+                    ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                    : "bg-rose-50 text-rose-800 border border-rose-200"
                 }`}
               >
                 {passwordMsg.type === "success" ? (
@@ -567,7 +567,7 @@ export default function ProfileSettingsPage() {
 
             <form onSubmit={handleChangePassword} className="mt-5 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
                   বর্তমান পাসওয়ার্ড <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
@@ -577,12 +577,12 @@ export default function ProfileSettingsPage() {
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     placeholder="বর্তমান পাসওয়ার্ড দিন"
                     required
-                    className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-emerald-600 transition-all"
+                    className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-[#90CAF9]/60 bg-white text-sm text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-[#2196F3] focus:border-[#2196F3] transition-all"
                   />
                   <button
                     type="button"
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                   >
                     {showCurrentPassword ? (
                       <EyeOff className="w-4 h-4" />
@@ -595,7 +595,7 @@ export default function ProfileSettingsPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
                     নতুন পাসওয়ার্ড <span className="text-rose-500">*</span>
                   </label>
                   <div className="relative">
@@ -606,12 +606,12 @@ export default function ProfileSettingsPage() {
                       placeholder="কমপক্ষে ৬ অক্ষর"
                       required
                       minLength={6}
-                      className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-emerald-600 transition-all"
+                      className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-[#90CAF9]/60 bg-white text-sm text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-[#2196F3] focus:border-[#2196F3] transition-all"
                     />
                     <button
                       type="button"
                       onClick={() => setShowNewPassword(!showNewPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                     >
                       {showNewPassword ? (
                         <EyeOff className="w-4 h-4" />
@@ -623,7 +623,7 @@ export default function ProfileSettingsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
                     নতুন পাসওয়ার্ড নিশ্চিত করুন{" "}
                     <span className="text-rose-500">*</span>
                   </label>
@@ -635,14 +635,14 @@ export default function ProfileSettingsPage() {
                       placeholder="পুনরায় টাইপ করুন"
                       required
                       minLength={6}
-                      className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-emerald-600 transition-all"
+                      className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-[#90CAF9]/60 bg-white text-sm text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-[#2196F3] focus:border-[#2196F3] transition-all"
                     />
                     <button
                       type="button"
                       onClick={() =>
                         setShowConfirmPassword(!showConfirmPassword)
                       }
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                     >
                       {showConfirmPassword ? (
                         <EyeOff className="w-4 h-4" />
@@ -658,7 +658,7 @@ export default function ProfileSettingsPage() {
                 <button
                   type="submit"
                   disabled={changingPassword}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-md hover:shadow-lg disabled:opacity-50 transition-all"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0D47A1] hover:bg-[#0A3880] text-white text-xs font-bold shadow-sm disabled:opacity-50 transition-all cursor-pointer"
                 >
                   {changingPassword ? (
                     <>

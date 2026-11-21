@@ -144,151 +144,150 @@ export default function LoginPage({ onClose }) {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center md:bg-cover lg:bg-[length:100%_100%] bg-no-repeat bg-center transition-colors duration-200 px-4 py-12 sm:px-6 lg:px-8"
-      style={{ backgroundImage: `url('/loginBackground.png')` }}
-    >
-      <div className="relative max-w-md w-full space-y-8 bg-white dark:bg-slate-900 p-8 rounded-xl shadow-xl border border-gray-100 dark:border-slate-800">
-        {/* হোম / ক্লোজ বাটন */}
-        <Link
-          href="/"
-          onClick={() => {
-            if (typeof onClose === "function") onClose();
-          }}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 cursor-pointer"
-          title="হোম পেজে ফিরে যান"
-          aria-label="হোম পেজে ফিরে যান"
-        >
-          <X className="w-5 h-5" />
-        </Link>
-
-        {/* হেডার ও লোগো */}
-        <div className="text-center">
+    <div className="min-h-[820px] bg-[#E3F2FD] flex items-center justify-center py-12 sm:py-16">
+      <div className="site-container flex items-center justify-center w-full">
+        <div className="relative max-w-md w-full space-y-7 bg-white p-6 sm:p-8 rounded-2xl shadow-xl border border-[#90CAF9] text-[#1E293B]">
+          {/* হোম / ক্লোজ বাটন */}
           <Link
             href="/"
             onClick={() => {
               if (typeof onClose === "function") onClose();
             }}
-            className="inline-block group focus:outline-none"
+            className="absolute top-4 right-4 text-slate-400 hover:text-[#0D47A1] transition-colors p-1.5 rounded-full hover:bg-[#E3F2FD] cursor-pointer"
             title="হোম পেজে ফিরে যান"
+            aria-label="হোম পেজে ফিরে যান"
           >
-            <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-full p-1 bg-white dark:bg-slate-800 shadow-md border-2 border-emerald-700 dark:border-amber-400 flex items-center justify-center transition-transform duration-200 group-hover:scale-105 group-hover:shadow-lg">
-              <Image
-                src={siteConfig.assets.logo}
-                alt={`${siteConfig.name.short} Logo`}
-                width={72}
-                height={72}
-                className="object-contain rounded-full"
-                priority
-              />
-            </div>
+            <X className="w-5 h-5" />
           </Link>
-          <h2 className="mt-4 text-2xl font-extrabold text-gray-900 dark:text-amber-400">
-            অ্যাকাউন্টে লগইন করুন
-          </h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            {siteConfig.name.bn} ম্যানেজমেন্ট সিস্টেম
-          </p>
-        </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md space-y-4">
-            {/* ইমেইল ইনপুট */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                ইমেইল ঠিকানা
-              </label>
-              <input
-                name="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="example@domain.com"
-                className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm"
-              />
-            </div>
-
-            {/* পাসওয়ার্ড ইনপুট */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                পাসওয়ার্ড
-              </label>
-              <div className="relative">
-                <input
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="••••••••"
-                  className="w-full pl-3 pr-10 py-2.5 border border-gray-300 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm font-mono"
+          {/* হেডার ও লোগো */}
+          <div className="text-center">
+            <Link
+              href="/"
+              onClick={() => {
+                if (typeof onClose === "function") onClose();
+              }}
+              className="inline-block group focus:outline-none"
+              title="হোম পেজে ফিরে যান"
+            >
+              <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-full p-1 bg-white shadow-md border-2 border-[#0D47A1] flex items-center justify-center transition-transform duration-200 group-hover:scale-105 group-hover:shadow-lg">
+                <Image
+                  src={siteConfig.assets.logo}
+                  alt={`${siteConfig.name.short} Logo`}
+                  width={72}
+                  height={72}
+                  className="object-contain rounded-full"
+                  priority
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer"
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4.5 w-4.5" />
-                  ) : (
-                    <Eye className="h-4.5 w-4.5" />
-                  )}
-                </button>
+              </div>
+            </Link>
+            <h2 className="mt-4 text-2xl font-black text-[#0D47A1]">
+              অ্যাকাউন্টে লগইন করুন
+            </h2>
+            <p className="mt-1 text-xs sm:text-sm text-slate-600 font-medium">
+              {siteConfig.name.bn} ম্যানেজমেন্ট সিস্টেম
+            </p>
+          </div>
+
+          <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              {/* ইমেইল ইনপুট */}
+              <div>
+                <label className="block text-xs font-bold text-[#0D47A1] mb-1.5">
+                  ইমেইল ঠিকানা
+                </label>
+                <input
+                  name="email"
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="example@domain.com"
+                  className="w-full px-3.5 py-2.5 border border-[#90CAF9] rounded-xl bg-white text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#2196F3] focus:border-[#2196F3] text-sm transition-all"
+                />
+              </div>
+
+              {/* পাসওয়ার্ড ইনপুট */}
+              <div>
+                <label className="block text-xs font-bold text-[#0D47A1] mb-1.5">
+                  পাসওয়ার্ড
+                </label>
+                <div className="relative">
+                  <input
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="••••••••"
+                    className="w-full pl-3.5 pr-10 py-2.5 border border-[#90CAF9] rounded-xl bg-white text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#2196F3] focus:border-[#2196F3] text-sm font-mono transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-[#0D47A1] cursor-pointer"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4.5 w-4.5" />
+                    ) : (
+                      <Eye className="h-4.5 w-4.5" />
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* রিমেম্বার মি ও পাসওয়ার্ড রিসেট */}
-          <div className="flex items-center justify-between text-xs sm:text-sm">
-            <div className="flex items-center">
-              <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
-              />
-              <label
-                htmlFor="remember-me"
-                className="ml-2 block text-gray-900 dark:text-gray-300"
-              >
-                মনে রাখুন
-              </label>
+            {/* রিমেম্বার মি ও পাসওয়ার্ড রিসেট */}
+            <div className="flex items-center justify-between text-xs">
+              <div className="flex items-center">
+                <input
+                  id="remember-me"
+                  name="remember-me"
+                  type="checkbox"
+                  className="h-4 w-4 text-[#2196F3] focus:ring-[#2196F3] border-[#90CAF9] rounded cursor-pointer"
+                />
+                <label
+                  htmlFor="remember-me"
+                  className="ml-2 block text-slate-700 font-medium cursor-pointer"
+                >
+                  মনে রাখুন
+                </label>
+              </div>
+
+              <div>
+                <Link
+                  href="/forgot-password"
+                  className="font-bold text-[#2196F3] hover:text-[#0D47A1] hover:underline"
+                >
+                  পাসওয়ার্ড ভুলে গেছেন?
+                </Link>
+              </div>
             </div>
 
-            <div className="text-sm">
+            {/* সাবমিট বাটন */}
+            <div>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full py-2.5 px-4 bg-[#2196F3] hover:bg-[#1976D2] text-white text-sm font-bold rounded-xl shadow-md transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50"
+              >
+                {isSubmitting ? "প্রবেশ করা হচ্ছে..." : "প্রবেশ করুন (Login)"}
+              </button>
+            </div>
+          </form>
+
+          {/* রেজিস্টার লিংক */}
+          <div className="text-center pt-2 border-t border-[#90CAF9]/40">
+            <p className="text-xs sm:text-sm text-slate-600">
+              নতুন অ্যাকাউন্ট তৈরি করতে চান?{" "}
               <Link
-                href="/forgot-password"
-                className="font-medium text-emerald-700 dark:text-emerald-400 hover:underline"
+                href="/register"
+                className="font-bold text-[#2196F3] hover:text-[#0D47A1] hover:underline ml-1"
               >
-                পাসওয়ার্ড ভুলে গেছেন?
+                এখানে রেজিস্ট্রেশন করুন
               </Link>
-            </div>
+            </p>
           </div>
-
-          {/* সাবমিট বাটন */}
-          <div>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-bold rounded-md text-slate-950 bg-amber-500 hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 shadow-md transition duration-150 disabled:opacity-50"
-            >
-              {isSubmitting ? "প্রবেশ করা হচ্ছে..." : "প্রবেশ করুন (Login)"}
-            </button>
-          </div>
-        </form>
-
-        {/* রেজিস্টার লিংক */}
-        <div className="text-center mt-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            নতুন অ্যাকাউন্ট তৈরি করতে চান?{" "}
-            <Link
-              href="/register"
-              className="font-bold text-emerald-700 dark:text-emerald-400 hover:underline"
-            >
-              এখানে রেজিস্ট্রেশন করুন
-            </Link>
-          </p>
         </div>
       </div>
     </div>

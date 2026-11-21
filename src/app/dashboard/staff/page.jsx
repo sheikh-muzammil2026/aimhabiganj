@@ -356,16 +356,16 @@ export default function StaffDashboard() {
   };
 
   return (
-    <div className="space-y-6 sm:space-y-8 animate-fade-in font-sans pb-16">
+    <div className="dashboard-container space-y-6 sm:space-y-8 animate-fade-in font-bornomala pb-16 selection:bg-[#0D47A1] selection:text-white">
       {/* ================= 1. HERO BANNER ================= */}
-      <div className="bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-emerald-800/40 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
-        <div className="absolute bottom-0 left-0 w-60 h-60 bg-amber-500/10 rounded-full blur-2xl pointer-events-none -ml-16 -mb-16" />
+      <div className="bg-[#0D47A1] text-white rounded-3xl p-6 sm:p-8 shadow-md border border-[#90CAF9]/40 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+        <div className="absolute bottom-0 left-0 w-60 h-60 bg-[#2196F3]/10 rounded-full blur-2xl pointer-events-none -ml-16 -mb-16" />
 
         <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20 text-xs font-semibold text-emerald-200">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20 text-xs font-semibold text-[#90CAF9]">
+              <Sparkles className="w-3.5 h-3.5 text-[#90CAF9]" />
               <span>আস-সালাম আইডিয়াল মাদরাসা • স্টাফ পোর্টাল</span>
             </div>
 
@@ -373,12 +373,12 @@ export default function StaffDashboard() {
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white flex items-center gap-2">
                 আসসালামু আলাইকুম, {profile.fullName}!
               </h1>
-              <p className="text-emerald-200/90 text-sm sm:text-base mt-1 flex flex-wrap items-center gap-x-4 gap-y-1">
-                <span className="font-semibold text-amber-300">
+              <p className="text-[#90CAF9] text-sm sm:text-base mt-1 flex flex-wrap items-center gap-x-4 gap-y-1">
+                <span className="font-semibold text-white">
                   {profile.designation}
                 </span>
                 <span>•</span>
-                <span className="font-mono bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-700/50 text-xs">
+                <span className="font-mono bg-white/10 px-2 py-0.5 rounded-md border border-white/20 text-xs">
                   {profile.staffId || "আইডি লোড হচ্ছে"}
                 </span>
                 <span>•</span>
@@ -390,10 +390,10 @@ export default function StaffDashboard() {
           {/* Right Clock & Quick Actions */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
             <div className="bg-black/30 backdrop-blur-md rounded-2xl p-4 border border-white/10 text-center sm:text-right">
-              <span className="text-[11px] uppercase tracking-wider text-emerald-300 font-bold block">
+              <span className="text-[11px] uppercase tracking-wider text-[#90CAF9] font-bold block">
                 রিয়েল-টাইম সময় (ঢাকা)
               </span>
-              <span className="font-mono text-2xl sm:text-3xl font-black text-amber-400 tracking-wide">
+              <span className="font-mono text-2xl sm:text-3xl font-black text-white tracking-wide">
                 {currentTimeStr || "--:--:--"}
               </span>
             </div>
@@ -401,7 +401,7 @@ export default function StaffDashboard() {
             <div className="flex sm:flex-col gap-2">
               <Link
                 href="/dashboard/staff/attendance"
-                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black rounded-xl text-xs sm:text-sm shadow-lg hover:shadow-xl transition-all"
+                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#2196F3] hover:bg-[#1976D2] text-white font-black rounded-xl text-xs sm:text-sm shadow-md transition-all"
               >
                 <Clock className="w-4 h-4" />
                 <span>হাজিরা দিন</span>
@@ -409,7 +409,7 @@ export default function StaffDashboard() {
               <button
                 onClick={fetchData}
                 disabled={loading}
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold border border-white/10 transition-colors"
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold border border-white/10 transition-colors cursor-pointer"
                 title="রিফ্রেশ করুন"
               >
                 <RefreshCw
@@ -423,13 +423,13 @@ export default function StaffDashboard() {
       </div>
 
       {/* ================= 2. TAB NAVIGATION SWITCHER ================= */}
-      <div className="flex items-center gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-2xl w-fit border border-slate-200/80 dark:border-slate-700/60 shadow-xs">
+      <div className="flex items-center gap-2 p-1.5 bg-slate-100 rounded-2xl w-fit border border-[#90CAF9]/40 shadow-xs">
         <button
           onClick={() => setActiveTab("overview")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
             activeTab === "overview"
-              ? "bg-white dark:bg-slate-700 text-teal-800 dark:text-teal-300 shadow-xs border border-slate-200/60 dark:border-slate-600"
-              : "text-slate-600 dark:text-slate-400 hover:text-teal-700"
+              ? "bg-white text-[#0D47A1] shadow-xs border border-[#90CAF9]/60"
+              : "text-slate-600 hover:text-[#2196F3]"
           }`}
         >
           <CreditCard className="w-4 h-4" />
@@ -437,10 +437,10 @@ export default function StaffDashboard() {
         </button>
         <button
           onClick={() => setActiveTab("profile")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
             activeTab === "profile"
-              ? "bg-white dark:bg-slate-700 text-teal-800 dark:text-teal-300 shadow-xs border border-slate-200/60 dark:border-slate-600"
-              : "text-slate-600 dark:text-slate-400 hover:text-teal-700"
+              ? "bg-white text-[#0D47A1] shadow-xs border border-[#90CAF9]/60"
+              : "text-slate-600 hover:text-[#2196F3]"
           }`}
         >
           <Edit3 className="w-4 h-4" />
@@ -453,23 +453,23 @@ export default function StaffDashboard() {
         <div className="space-y-6 sm:space-y-8 animate-fade-in">
           {/* Profile Completeness Alert if missing data */}
           {(!profileData || !profileData.phone || !profileData.staffId) && (
-            <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/60 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+            <div className="bg-amber-50 border border-amber-300 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-amber-500/20 text-amber-700 dark:text-amber-400 rounded-xl text-xl">
+                <div className="p-2 bg-amber-500/20 text-amber-700 rounded-xl text-xl">
                   ⚠️
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-amber-900 dark:text-amber-300">
+                  <h4 className="text-sm font-bold text-amber-900">
                     আপনার স্টাফ প্রোফাইল তথ্য এখনো অসম্পূর্ণ!
                   </h4>
-                  <p className="text-xs text-amber-800/80 dark:text-amber-300/80 mt-0.5">
+                  <p className="text-xs text-amber-800/80 mt-0.5">
                     আইডি কার্ড এবং প্রাতিষ্ঠানিক রেকর্ডের জন্য অনুগ্রহ করে আপনার ব্যক্তিগত, পেশাগত ও ব্যাংক হিসাব তথ্য আপডেট করুন।
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setActiveTab("profile")}
-                className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5"
+                className="px-4 py-2 bg-[#2196F3] hover:bg-[#1976D2] text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <Edit3 className="w-3.5 h-3.5" />
                 <span>প্রোফাইল পূরণ করুন</span>
@@ -478,26 +478,26 @@ export default function StaffDashboard() {
           )}
 
           {/* TWO-TERM ATTENDANCE ALERT / SCHEDULE STRIP */}
-          <div className="bg-gradient-to-r from-amber-500/10 via-emerald-500/10 to-teal-500/10 dark:from-amber-950/30 dark:via-emerald-950/30 dark:to-teal-950/30 border border-emerald-600/30 rounded-2xl p-4 sm:p-5">
+          <div className="bg-[#E3F2FD]/50 border border-[#90CAF9]/50 rounded-2xl p-4 sm:p-5">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-md">
-                  <Clock className="w-5 h-5" />
+                <div className="w-10 h-10 rounded-xl bg-[#0D47A1] text-white flex items-center justify-center shrink-0 shadow-md">
+                  <Clock className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-sm sm:text-base font-black text-emerald-950 dark:text-emerald-300">
+                  <h3 className="text-sm sm:text-base font-black text-[#0D47A1]">
                     দৈনিক ২ টার্ম হাজিরা নিয়মাবলী
                   </h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
-                    <span className="font-bold text-emerald-800 dark:text-emerald-400">
+                  <p className="text-xs text-slate-600 mt-0.5">
+                    <span className="font-bold text-[#0D47A1]">
                       ১ম টার্ম (সকালের চেক-ইন):
                     </span>{" "}
-                    সর্বশেষ সময় <strong className="text-amber-700 dark:text-amber-400">ভোর ৫:৩০ টা</strong>{" "}
+                    সর্বশেষ সময় <strong className="text-amber-700">ভোর ৫:৩০ টা</strong>{" "}
                     (এরপর লেট) •{" "}
-                    <span className="font-bold text-teal-800 dark:text-teal-400">
+                    <span className="font-bold text-[#0D47A1]">
                       ২য় টার্ম (রাতের চেক-আউট):
                     </span>{" "}
-                    নির্ধারিত সময় <strong className="text-amber-700 dark:text-amber-400">রাত ১০:০০ টা থেকে ১০:১০ টা</strong>।
+                    নির্ধারিত সময় <strong className="text-amber-700">রাত ১০:০০ টা থেকে ১০:১০ টা</strong>।
                   </p>
                 </div>
               </div>
@@ -505,7 +505,7 @@ export default function StaffDashboard() {
               <div className="flex items-center gap-2 self-end md:self-center">
                 <Link
                   href="/dashboard/staff/attendance"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-800 hover:bg-emerald-900 text-white rounded-lg text-xs font-bold shadow-xs transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#2196F3] hover:bg-[#1976D2] text-white rounded-xl text-xs font-bold shadow-xs transition-colors"
                 >
                   <span>হাজিরা পেজ</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -662,7 +662,7 @@ export default function StaffDashboard() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
                 <div>
                   <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
-                    <CreditCard className="w-5 h-5 text-teal-600" />
+                    <CreditCard className="w-5 h-5 text-[#2196F3]" />
                     <span>আমার অফিসিয়াল স্টাফ আইডি কার্ড</span>
                   </h2>
                   <p className="text-xs text-slate-500 mt-0.5">
@@ -671,23 +671,23 @@ export default function StaffDashboard() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <div className="inline-flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs font-bold">
+                  <div className="inline-flex p-1 bg-slate-100 rounded-xl text-xs font-bold border border-[#90CAF9]/40">
                     <button
                       onClick={() => setIdCardSide("front")}
-                      className={`px-3 py-1 rounded-lg transition-all ${
+                      className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
                         idCardSide === "front"
-                          ? "bg-white dark:bg-slate-700 text-teal-700 dark:text-teal-300 shadow-xs"
-                          : "text-slate-600 dark:text-slate-400"
+                          ? "bg-white text-[#0D47A1] shadow-xs"
+                          : "text-slate-600 hover:text-[#2196F3]"
                       }`}
                     >
                       সামনের দিক
                     </button>
                     <button
                       onClick={() => setIdCardSide("back")}
-                      className={`px-3 py-1 rounded-lg transition-all ${
+                      className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
                         idCardSide === "back"
-                          ? "bg-white dark:bg-slate-700 text-teal-700 dark:text-teal-300 shadow-xs"
-                          : "text-slate-600 dark:text-slate-400"
+                          ? "bg-white text-[#0D47A1] shadow-xs"
+                          : "text-slate-600 hover:text-[#2196F3]"
                       }`}
                     >
                       পেছনের দিক
@@ -696,10 +696,10 @@ export default function StaffDashboard() {
 
                   <Link
                     href="/dashboard/staff/id-card"
-                    className="p-2 bg-teal-50 dark:bg-teal-950/40 hover:bg-teal-100 text-teal-700 dark:text-teal-300 rounded-xl transition-colors"
+                    className="p-2 bg-[#E3F2FD] hover:bg-[#E3F2FD]/80 text-[#0D47A1] rounded-xl transition-colors border border-[#90CAF9]/50"
                     title="পূর্ণাঙ্গ ভিউ ও প্রিন্ট"
                   >
-                    <Printer className="w-4 h-4" />
+                    <Printer className="w-4 h-4 text-[#2196F3]" />
                   </Link>
                 </div>
               </div>
@@ -754,14 +754,14 @@ export default function StaffDashboard() {
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
                 <button
                   onClick={() => setActiveTab("profile")}
-                  className="text-xs font-bold text-teal-700 dark:text-teal-400 hover:underline flex items-center gap-1"
+                  className="text-xs font-bold text-[#2196F3] hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <Edit3 className="w-3.5 h-3.5" />
                   <span>কার্ডের তথ্য পরিবর্তন করতে প্রোফাইল এডিট করুন</span>
                 </button>
                 <Link
                   href="/dashboard/staff/id-card"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-800 hover:bg-emerald-900 text-white rounded-xl text-xs font-bold transition-all shadow-xs"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#2196F3] hover:bg-[#1976D2] text-white rounded-xl text-xs font-bold transition-all shadow-xs"
                 >
                   <span>আইডি কার্ড ডাউনলোড ও প্রিন্ট</span>
                   <ExternalLink className="w-3.5 h-3.5" />
@@ -772,23 +772,23 @@ export default function StaffDashboard() {
             {/* Right Column (5 cols): Quick Services & Daily Duty Status */}
             <div className="lg:col-span-5 space-y-6">
               {/* Quick Actions Panel */}
-              <div className="bg-white dark:bg-[#0f172a] rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
-                <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-emerald-600" />
+              <div className="bg-white rounded-3xl p-6 border border-[#90CAF9]/40 shadow-xs space-y-4">
+                <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-[#2196F3]" />
                   <span>প্রয়োজনীয় সার্ভিস ও পেজসমূহ</span>
                 </h3>
 
                 <div className="space-y-2.5">
                   <Link
                     href="/dashboard/staff/attendance"
-                    className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-850 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 border border-slate-200/70 dark:border-slate-800 group transition-all"
+                    className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 hover:bg-[#E3F2FD]/50 border border-slate-200/70 hover:border-[#90CAF9] group transition-all"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-400 flex items-center justify-center font-bold">
+                      <div className="w-10 h-10 rounded-xl bg-[#E3F2FD] text-[#0D47A1] border border-[#90CAF9]/40 flex items-center justify-center font-bold">
                         📅
                       </div>
                       <div>
-                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white group-hover:text-emerald-700 transition-colors">
+                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-[#0D47A1] transition-colors">
                           ডিজিটাল হাজিরা (২ টার্ম)
                         </h4>
                         <p className="text-[11px] text-slate-500">
@@ -796,19 +796,19 @@ export default function StaffDashboard() {
                         </p>
                       </div>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-700 transition-all group-hover:translate-x-0.5" />
+                    <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#2196F3] transition-all group-hover:translate-x-0.5" />
                   </Link>
 
                   <Link
                     href="/dashboard/staff/id-card"
-                    className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-850 hover:bg-teal-50 dark:hover:bg-teal-950/30 border border-slate-200/70 dark:border-slate-800 group transition-all"
+                    className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 hover:bg-[#E3F2FD]/50 border border-slate-200/70 hover:border-[#90CAF9] group transition-all"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-400 flex items-center justify-center font-bold">
+                      <div className="w-10 h-10 rounded-xl bg-[#E3F2FD] text-[#0D47A1] border border-[#90CAF9]/40 flex items-center justify-center font-bold">
                         🪪
                       </div>
                       <div>
-                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white group-hover:text-teal-700 transition-colors">
+                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-[#0D47A1] transition-colors">
                           স্টাফ আইডি কার্ড জেনারেটর
                         </h4>
                         <p className="text-[11px] text-slate-500">
@@ -816,19 +816,19 @@ export default function StaffDashboard() {
                         </p>
                       </div>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-teal-700 transition-all group-hover:translate-x-0.5" />
+                    <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#2196F3] transition-all group-hover:translate-x-0.5" />
                   </Link>
 
                   <button
                     onClick={() => setActiveTab("profile")}
-                    className="w-full text-left flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-850 hover:bg-teal-50 dark:hover:bg-teal-950/30 border border-slate-200/70 dark:border-slate-800 group transition-all"
+                    className="w-full text-left flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 hover:bg-[#E3F2FD]/50 border border-slate-200/70 hover:border-[#90CAF9] group transition-all cursor-pointer"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-400 flex items-center justify-center font-bold">
+                      <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
                         📝
                       </div>
                       <div>
-                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white group-hover:text-amber-700 transition-colors">
+                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-amber-700 transition-colors">
                           আমার প্রোফাইল তথ্য ফরম
                         </h4>
                         <p className="text-[11px] text-slate-500">
@@ -841,14 +841,14 @@ export default function StaffDashboard() {
 
                   <Link
                     href="/dashboard/profile-settings"
-                    className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/70 dark:border-slate-800 group transition-all"
+                    className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200/70 group transition-all"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 flex items-center justify-center font-bold">
+                      <div className="w-10 h-10 rounded-xl bg-slate-200 text-slate-700 flex items-center justify-center font-bold">
                         ⚙️
                       </div>
                       <div>
-                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white group-hover:text-slate-950 transition-colors">
+                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-slate-950 transition-colors">
                           নিরাপত্তা সেটিংস
                         </h4>
                         <p className="text-[11px] text-slate-500">
@@ -862,19 +862,19 @@ export default function StaffDashboard() {
               </div>
 
               {/* Daily Campus Duty Card */}
-              <div className="bg-gradient-to-br from-slate-900 to-emerald-950 text-white rounded-3xl p-6 shadow-md border border-emerald-900/40 space-y-4">
+              <div className="bg-[#0D47A1] text-white rounded-3xl p-6 shadow-md border border-[#90CAF9]/40 space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">
+                  <span className="text-xs font-bold text-white uppercase tracking-wider">
                     ক্যাম্পাস ডিউটি গাইডলাইন
                   </span>
-                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-800/80 font-bold border border-emerald-700">
+                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-white/10 font-bold border border-white/20">
                     সক্রিয় শিফট
                   </span>
                 </div>
 
-                <div className="space-y-3 text-xs text-slate-300">
+                <div className="space-y-3 text-xs text-[#E3F2FD]">
                   <div className="flex items-start gap-2.5">
-                    <span className="w-5 h-5 rounded-full bg-emerald-800 flex items-center justify-center text-[10px] font-bold shrink-0 text-white mt-0.5">
+                    <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold shrink-0 text-white mt-0.5">
                       ১
                     </span>
                     <p>
@@ -883,7 +883,7 @@ export default function StaffDashboard() {
                   </div>
 
                   <div className="flex items-start gap-2.5">
-                    <span className="w-5 h-5 rounded-full bg-teal-800 flex items-center justify-center text-[10px] font-bold shrink-0 text-white mt-0.5">
+                    <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold shrink-0 text-white mt-0.5">
                       ২
                     </span>
                     <p>
@@ -892,7 +892,7 @@ export default function StaffDashboard() {
                   </div>
 
                   <div className="flex items-start gap-2.5">
-                    <span className="w-5 h-5 rounded-full bg-amber-800 flex items-center justify-center text-[10px] font-bold shrink-0 text-white mt-0.5">
+                    <span className="w-5 h-5 rounded-full bg-amber-500/30 flex items-center justify-center text-[10px] font-bold shrink-0 text-white mt-0.5">
                       ৩
                     </span>
                     <p>
@@ -902,8 +902,8 @@ export default function StaffDashboard() {
                 </div>
 
                 <div className="pt-2 border-t border-white/10 flex items-center justify-between text-xs">
-                  <span className="text-slate-400">জরুরি অফিস হেল্পলাইন:</span>
-                  <span className="font-mono font-bold text-amber-400">
+                  <span className="text-[#90CAF9]">জরুরি অফিস হেল্পলাইন:</span>
+                  <span className="font-mono font-bold text-white">
                     ০১৮০৪৯০৯৫০০
                   </span>
                 </div>
@@ -915,20 +915,20 @@ export default function StaffDashboard() {
 
       {/* ================= 4. TAB 2: FULL STAFF PROFILE FORM ================= */}
       {activeTab === "profile" && (
-        <form onSubmit={handleSaveProfile} className="space-y-6 sm:space-y-8 animate-fade-in max-w-5xl">
+        <form onSubmit={handleSaveProfile} className="space-y-6 sm:space-y-8 animate-fade-in w-full">
           {/* Section 1: Header & Identity */}
-          <div className="bg-white dark:bg-[#0f172a] rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xs space-y-6">
-            <div className="border-b border-slate-100 dark:border-slate-800 pb-4 flex items-center justify-between">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#90CAF9]/40 shadow-xs space-y-6">
+            <div className="border-b border-slate-100 pb-4 flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
-                  <User className="w-5 h-5 text-teal-600" />
+                <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                  <User className="w-5 h-5 text-[#2196F3]" />
                   <span>১. ব্যক্তিগত ও পরিচিতি তথ্য (Personal & Identity Details)</span>
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
                   নাম, পদবি, স্টাফ আইডি, যোগাযোগ এবং পরিচয় সংক্রান্ত তথ্য
                 </p>
               </div>
-              <span className="text-xs bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 font-bold px-3 py-1 rounded-full border border-teal-200 dark:border-teal-800">
+              <span className="text-xs bg-[#E3F2FD] text-[#0D47A1] font-bold px-3 py-1 rounded-full border border-[#90CAF9]">
                 ধাপ ১ / ৪
               </span>
             </div>
@@ -944,7 +944,7 @@ export default function StaffDashboard() {
                   placeholder="যেমন: মুহাম্মদ রফিকুল ইসলাম"
                   value={formData.fullName}
                   onChange={(e) => handleInputChange("fullName", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-medium"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-medium"
                 />
               </div>
 
@@ -957,7 +957,7 @@ export default function StaffDashboard() {
                   placeholder="e.g. Md. Rafiqul Islam"
                   value={formData.nameEnglish}
                   onChange={(e) => handleInputChange("nameEnglish", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-medium"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-medium"
                 />
               </div>
 
@@ -970,7 +970,7 @@ export default function StaffDashboard() {
                   placeholder="ID NO-AIM ST-001"
                   value={formData.staffId}
                   onChange={(e) => handleInputChange("staffId", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-mono font-bold"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-mono font-bold"
                 />
               </div>
 
@@ -981,7 +981,7 @@ export default function StaffDashboard() {
                 <select
                   value={formData.designation}
                   onChange={(e) => handleInputChange("designation", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-medium"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-medium"
                 >
                   {DESIGNATIONS.map((d) => (
                     <option key={d} value={d}>
@@ -998,7 +998,7 @@ export default function StaffDashboard() {
                 <select
                   value={formData.department}
                   onChange={(e) => handleInputChange("department", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-medium"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-medium"
                 >
                   {DEPARTMENTS.map((dept) => (
                     <option key={dept} value={dept}>
@@ -1017,7 +1017,7 @@ export default function StaffDashboard() {
                   placeholder="০১৭১২-৩৪৫৬৭৮"
                   value={formData.phone}
                   onChange={(e) => handleInputChange("phone", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-medium"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-medium"
                 />
               </div>
 
@@ -1044,7 +1044,7 @@ export default function StaffDashboard() {
                   placeholder="দিন/মাস/বছর (যেমন: 15/05/1990)"
                   value={formData.dateOfBirth}
                   onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-medium"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-medium"
                 />
               </div>
 
@@ -1055,7 +1055,7 @@ export default function StaffDashboard() {
                 <select
                   value={formData.bloodGroup}
                   onChange={(e) => handleInputChange("bloodGroup", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-bold"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-bold"
                 >
                   <option value="">নির্বাচন করুন</option>
                   {BLOOD_GROUPS.map((b) => (
@@ -1075,7 +1075,7 @@ export default function StaffDashboard() {
                   placeholder="১০ বা ১৭ ডিজিটের NID নম্বর"
                   value={formData.nid}
                   onChange={(e) => handleInputChange("nid", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-mono"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-mono"
                 />
               </div>
 
@@ -1088,7 +1088,7 @@ export default function StaffDashboard() {
                   placeholder="যেমন: পিতা / ভাই - ০১৭১১..."
                   value={formData.emergencyContact}
                   onChange={(e) => handleInputChange("emergencyContact", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-medium"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-medium"
                 />
               </div>
 
@@ -1101,7 +1101,7 @@ export default function StaffDashboard() {
                   placeholder="https://i.ibb.co/..."
                   value={formData.profileImage}
                   onChange={(e) => handleInputChange("profileImage", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-medium"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-medium"
                 />
               </div>
             </div>
@@ -1112,14 +1112,14 @@ export default function StaffDashboard() {
             <div className="border-b border-slate-100 dark:border-slate-800 pb-4 flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
-                  <Briefcase className="w-5 h-5 text-teal-600" />
+                  <Briefcase className="w-5 h-5 text-[#2196F3]" />
                   <span>২. চাকরি, শিফট ও বেতন কাঠামো (Employment & Salary Info)</span>
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
                   যোগদানের তারিখ, নিয়োগের ধরন, শিফট এবং প্রাতিষ্ঠানিক বেতন বিবরণী
                 </p>
               </div>
-              <span className="text-xs bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 font-bold px-3 py-1 rounded-full border border-teal-200 dark:border-teal-800">
+              <span className="text-xs bg-[#E3F2FD] text-[#0D47A1] font-bold px-3 py-1 rounded-full border border-[#90CAF9]">
                 ধাপ ২ / ৪
               </span>
             </div>
@@ -1134,7 +1134,7 @@ export default function StaffDashboard() {
                   placeholder="যেমন: 01/01/2023"
                   value={formData.joiningDate}
                   onChange={(e) => handleInputChange("joiningDate", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-medium"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-medium"
                 />
               </div>
 
@@ -1145,7 +1145,7 @@ export default function StaffDashboard() {
                 <select
                   value={formData.employmentType}
                   onChange={(e) => handleInputChange("employmentType", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-medium"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-medium"
                 >
                   <option value="ফুল-টাইম (Full-time)">ফুল-টাইম (Full-time)</option>
                   <option value="পার্ট-টাইম (Part-time)">পার্ট-টাইম (Part-time)</option>
@@ -1161,7 +1161,7 @@ export default function StaffDashboard() {
                 <select
                   value={formData.workShift}
                   onChange={(e) => handleInputChange("workShift", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-medium"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-medium"
                 >
                   <option value="২ টার্ম (সকাল-রাত)">২ টার্ম (ভোর ৫:৩০ ও রাত ১০:০০)</option>
                   <option value="দিন শিফট (সকাল ৮টা - বিকাল ৪টা)">দিন শিফট (সকাল ৮টা - বিকাল ৪টা)</option>
@@ -1179,7 +1179,7 @@ export default function StaffDashboard() {
                   placeholder="৳ যেমন: ১২০০০"
                   value={formData.salaryDetails.basicSalary}
                   onChange={(e) => handleNestedChange("salaryDetails", "basicSalary", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-mono"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-mono"
                 />
               </div>
 
@@ -1192,7 +1192,7 @@ export default function StaffDashboard() {
                   placeholder="৳ যেমন: ৩০০০"
                   value={formData.salaryDetails.houseRent}
                   onChange={(e) => handleNestedChange("salaryDetails", "houseRent", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-mono"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-mono"
                 />
               </div>
 
@@ -1205,7 +1205,7 @@ export default function StaffDashboard() {
                   placeholder="৳ মোট বেতন"
                   value={formData.salaryDetails.totalSalary}
                   onChange={(e) => handleNestedChange("salaryDetails", "totalSalary", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-mono font-bold text-teal-700 dark:text-teal-300"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-mono font-bold text-[#0D47A1]"
                 />
               </div>
             </div>
@@ -1216,14 +1216,14 @@ export default function StaffDashboard() {
             <div className="border-b border-slate-100 dark:border-slate-800 pb-4 flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
-                  <MapPin className="w-5 h-5 text-teal-600" />
+                  <MapPin className="w-5 h-5 text-[#2196F3]" />
                   <span>৩. স্থায়ী ও বর্তমান ঠিকানা (Address Details)</span>
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
                   গ্রাম, ডাকঘর, থানা এবং জেলা সংক্রান্ত বিবরণ
                 </p>
               </div>
-              <span className="text-xs bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 font-bold px-3 py-1 rounded-full border border-teal-200 dark:border-teal-800">
+              <span className="text-xs bg-[#E3F2FD] text-[#0D47A1] font-bold px-3 py-1 rounded-full border border-[#90CAF9]">
                 ধাপ ৩ / ৪
               </span>
             </div>
@@ -1238,7 +1238,7 @@ export default function StaffDashboard() {
                   placeholder="যেমন: দক্ষিণ শ্যামলী"
                   value={formData.addressDetails.village}
                   onChange={(e) => handleNestedChange("addressDetails", "village", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-medium"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-medium"
                 />
               </div>
 
@@ -1251,7 +1251,7 @@ export default function StaffDashboard() {
                   placeholder="যেমন: হবিগঞ্জ সদর - ৩৩০০"
                   value={formData.addressDetails.postOffice}
                   onChange={(e) => handleNestedChange("addressDetails", "postOffice", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-medium"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-medium"
                 />
               </div>
 
@@ -1264,7 +1264,7 @@ export default function StaffDashboard() {
                   placeholder="যেমন: হবিগঞ্জ সদর"
                   value={formData.addressDetails.thana}
                   onChange={(e) => handleNestedChange("addressDetails", "thana", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-medium"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-medium"
                 />
               </div>
 
@@ -1277,7 +1277,7 @@ export default function StaffDashboard() {
                   placeholder="যেমন: হবিগঞ্জ"
                   value={formData.addressDetails.district}
                   onChange={(e) => handleNestedChange("addressDetails", "district", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-medium"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-medium"
                 />
               </div>
             </div>
@@ -1291,7 +1291,7 @@ export default function StaffDashboard() {
                 placeholder="হবিগঞ্জ সদর, হবিগঞ্জ"
                 value={formData.address}
                 onChange={(e) => handleInputChange("address", e.target.value)}
-                className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-medium"
+                className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-medium"
               />
             </div>
           </div>
@@ -1301,14 +1301,14 @@ export default function StaffDashboard() {
             <div className="border-b border-slate-100 dark:border-slate-800 pb-4 flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
-                  <DollarSign className="w-5 h-5 text-teal-600" />
+                  <DollarSign className="w-5 h-5 text-[#2196F3]" />
                   <span>৪. ব্যাংক ও মোবাইল ব্যাংকিং হিসাব (Payment & Banking Info)</span>
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
                   মাসিক বেতন ও ভাতা প্রাপ্তির জন্য নির্ধারিত ব্যাংক বা মোবাইল অ্যাকাউন্ট
                 </p>
               </div>
-              <span className="text-xs bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 font-bold px-3 py-1 rounded-full border border-teal-200 dark:border-teal-800">
+              <span className="text-xs bg-[#E3F2FD] text-[#0D47A1] font-bold px-3 py-1 rounded-full border border-[#90CAF9]">
                 ধাপ ৪ / ৪
               </span>
             </div>
@@ -1323,7 +1323,7 @@ export default function StaffDashboard() {
                   placeholder="যেমন: ইসলামী ব্যাংক বাংলাদেশ লি."
                   value={formData.bankAccount.bankName}
                   onChange={(e) => handleNestedChange("bankAccount", "bankName", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-medium"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-medium"
                 />
               </div>
 
@@ -1336,7 +1336,7 @@ export default function StaffDashboard() {
                   placeholder="২০৫০xxxxxxxxxxxxx"
                   value={formData.bankAccount.accountNumber}
                   onChange={(e) => handleNestedChange("bankAccount", "accountNumber", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-mono font-bold"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-mono font-bold"
                 />
               </div>
 
@@ -1349,7 +1349,7 @@ export default function StaffDashboard() {
                   placeholder="হবিগঞ্জ শাখা (রাউটিং: ১২৫...)"
                   value={formData.bankAccount.branchName}
                   onChange={(e) => handleNestedChange("bankAccount", "branchName", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-medium"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-medium"
                 />
               </div>
 
@@ -1360,7 +1360,7 @@ export default function StaffDashboard() {
                 <select
                   value={formData.bankAccount.mobileBanking}
                   onChange={(e) => handleNestedChange("bankAccount", "mobileBanking", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-medium"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-medium"
                 >
                   <option value="">প্রযোজ্য নয়</option>
                   <option value="বিকাশ (bKash)">বিকাশ (bKash)</option>
@@ -1379,7 +1379,7 @@ export default function StaffDashboard() {
                   placeholder="০১৭১২-৩৪৫৬৭৮"
                   value={formData.bankAccount.mobileBankingNumber}
                   onChange={(e) => handleNestedChange("bankAccount", "mobileBankingNumber", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-mono"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-mono"
                 />
               </div>
 
@@ -1390,7 +1390,7 @@ export default function StaffDashboard() {
                 <select
                   value={formData.bankAccount.accountType}
                   onChange={(e) => handleNestedChange("bankAccount", "accountType", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-medium"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-medium"
                 >
                   <option value="সঞ্চয়ী (Savings)">সঞ্চয়ী (Savings)</option>
                   <option value="চলতি (Current)">চলতি (Current)</option>
@@ -1408,7 +1408,7 @@ export default function StaffDashboard() {
                 placeholder="প্রয়োজনীয় কোনো বিশেষ দক্ষতা, শারীরিক সুস্থতা বা প্রশাসনিক মন্তব্য..."
                 value={formData.bio}
                 onChange={(e) => handleInputChange("bio", e.target.value)}
-                className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 font-medium"
+                className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-medium"
               />
             </div>
           </div>
@@ -1426,7 +1426,7 @@ export default function StaffDashboard() {
             <button
               type="submit"
               disabled={isSaving}
-              className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-emerald-700 to-teal-800 hover:from-emerald-800 hover:to-teal-900 text-white font-black text-sm rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full sm:w-auto px-8 py-3 bg-[#0D47A1] hover:bg-[#0A3880] text-white font-black text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
             >
               {isSaving ? (
                 <>

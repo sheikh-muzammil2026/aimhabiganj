@@ -37,6 +37,27 @@ export const isValidImageUrl = (url) => {
   return /^(https?:\/\/|\/|data:image\/)/i.test(trimmed);
 };
 
+// Bengali to English digit mapping and digit extractor helpers
+export const bnToEnDigits = (str) => {
+  if (!str && str !== 0) return "";
+  const bnDigits = { "০": "0", "১": "1", "২": "2", "৩": "3", "৪": "4", "৫": "5", "৬": "6", "৭": "7", "৮": "8", "৯": "9" };
+  return String(str).replace(/[০-৯]/g, (d) => bnDigits[d] || d);
+};
+
+export const parseSeatNumber = (seat) => {
+  if (!seat && seat !== 0) return 0;
+  const enStr = bnToEnDigits(seat);
+  const match = enStr.match(/\d+/);
+  return match ? parseInt(match[0], 10) : 0;
+};
+
+export const parseHallNumber = (hall) => {
+  if (!hall && hall !== 0) return 0;
+  const enStr = bnToEnDigits(hall);
+  const match = enStr.match(/\d+/);
+  return match ? parseInt(match[0], 10) : 0;
+};
+
 // হলের কনফিগারেশন এবং অবস্থান
 export const HALL_CONFIGS = {
   1: {
@@ -95,7 +116,14 @@ export default function ExamHallMapPage() {
   // স্টেটসমূহ
   const [selectedHall, setSelectedHall] = useState(1);
   const [selectedSemester, setSelectedSemester] = useState("২য় সাময়িক পরীক্ষা");
-  const [examYear, setExamYear] = useState("২০২৬");
+  const [examList, setExamList] = useState([
+    "১ম সাময়িক পরীক্ষা",
+    "২য় সাময়িক পরীক্ষা",
+    "বার্ষিক পরীক্ষা",
+  ]);
+  const [examYear, setExamYear] = useState(
+    siteConfig.academicSession || "২০২৬"
+  );
   const [showPhotos, setShowPhotos] = useState(true);
 
   const [students, setStudents] = useState([]);
@@ -105,56 +133,130 @@ export default function ExamHallMapPage() {
 
   const activeHallConfig = HALL_CONFIGS[selectedHall] || HALL_CONFIGS[1];
 
+  // পরীক্ষার তালিকা লাইভ লোড
+  useEffect(() => {
+    let isMounted = true;
+    const fetchExams = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/admit-cards/exams`, {
+          cache: "no-store",
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (
+          isMounted &&
+          data?.success &&
+          Array.isArray(data.data) &&
+          data.data.length > 0
+        ) {
+          setExamList(data.data);
+          setSelectedSemester((prev) => (data.data.includes(prev) ? prev : data.data[0]));
+        }
+      } catch (err) {
+        console.warn("Could not fetch exam list, using defaults:", err);
+      }
+    };
+    fetchExams();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   // ব্যাকএন্ড থেকে শিক্ষার্থীদের ডাটা ফেচ করা (শুধুমাত্র Approved ও Active)
   const fetchHallData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
+      let studentList = [];
+
       // ১. নির্দিষ্ট হলের সিট প্ল্যান ডাটা লোড
       const hallUrl = `${API_BASE_URL}/api/seat-plan?hallNo=${selectedHall}&semester=${encodeURIComponent(
         selectedSemester,
       )}`;
 
-      const res = await fetch(hallUrl);
-      const data = await res.json();
+      let data = null;
+      try {
+        const res = await fetch(hallUrl, {
+          cache: "no-store",
+          headers: { "Cache-Control": "no-cache" },
+        });
+        if (res.ok) {
+          data = await res.json();
+        }
+      } catch (e) {
+        console.warn("External API fetch failed, trying Next.js internal API:", e);
+      }
 
-      let studentList = [];
+      // যদি এক্সটার্নাল সার্ভার না পাওয়া যায় বা এরর দেয়, ইন্টারনাল Next.js API-তে ফলব্যাক
+      if (!data || !data.success) {
+        try {
+          const localRes = await fetch(
+            `/api/seat-plan?hallNo=${selectedHall}&semester=${encodeURIComponent(
+              selectedSemester,
+            )}`,
+            { cache: "no-store" }
+          );
+          if (localRes.ok) {
+            data = await localRes.json();
+          }
+        } catch (localErr) {
+          console.warn("Next.js internal API fallback error:", localErr);
+        }
+      }
 
       if (data?.success && Array.isArray(data.data) && data.data.length > 0) {
-        studentList = data.data;
+        studentList = data.data.map((s) => ({
+          ...s,
+          seatNo: parseSeatNumber(s.seatNo),
+          hallNo: parseHallNumber(s.hallNo) || selectedHall,
+        }));
       } else {
-        // ফলব্যাক: যদি /api/seat-plan খালি থাকে, তাহলে মূল /api/students থেকে ওই হলের একটিভ শিক্ষার্থীদের ফিল্টার
-        const fallbackRes = await fetch(
-          `${API_BASE_URL}/api/students?status=Approved&activity=active&limit=1000`,
-        );
-        const fallbackData = await fallbackRes.json();
+        // ফলব্যাক ২: যদি /api/seat-plan খালি থাকে, তাহলে মূল /api/students থেকে ওই হলের একটিভ শিক্ষার্থীদের ফিল্টার
+        let fallbackData = null;
+        try {
+          const fallbackRes = await fetch(
+            `${API_BASE_URL}/api/students?status=Approved&activity=active&limit=1000`,
+            { cache: "no-store" }
+          );
+          if (fallbackRes.ok) {
+            fallbackData = await fallbackRes.json();
+          }
+        } catch (e) {
+          console.warn("External students fallback failed:", e);
+        }
 
         if (fallbackData?.success && Array.isArray(fallbackData.data)) {
           studentList = fallbackData.data
             .filter((s) => {
               const h = s.seatPlan?.hallNo || s.hallNo;
-              return (
-                h &&
-                (Number(h) === Number(selectedHall) ||
-                  String(h) === String(selectedHall) ||
-                  toBengaliDigits(h) === toBengaliDigits(selectedHall))
-              );
+              const studentHallNo = parseHallNumber(h);
+              return studentHallNo === Number(selectedHall);
             })
             .map((s) => {
               const details = getStudentClassDetails(s);
+              const seatNum = parseSeatNumber(s.seatPlan?.seatNo || s.seatNo);
               return {
                 _id: s._id?.$oid || s._id || s.studentId,
-                hallNo: Number(s.seatPlan?.hallNo || s.hallNo || selectedHall),
-                seatNo: Number(s.seatPlan?.seatNo || s.seatNo || 0),
+                hallNo: Number(selectedHall),
+                seatNo: seatNum,
+                benchNo: s.seatPlan?.benchNo || s.benchNo || (seatNum > 0 ? Math.ceil(seatNum / 2) : ""),
                 class: details.className || "N/A",
                 divisionName: details.divisionName,
-                name: s.studentNameBangla || s.studentNameEnglish || "নাম নেই",
-                studentId: s.studentId,
+                name: s.studentNameBangla || s.studentNameEnglish || s.name || "নাম নেই",
+                studentId: s.studentId || "",
                 roll: s.roll || s.officeUse?.rollNumber || "",
-                studentImage: s.studentImage || s.profilePhoto || "",
+                studentImage:
+                  s.studentImage ||
+                  s.profilePhoto ||
+                  s.photoUrl ||
+                  s.profileImage ||
+                  s.image ||
+                  s.avatar ||
+                  "",
               };
-            });
+            })
+            .filter((s) => s.seatNo > 0);
         }
       }
 
@@ -179,7 +281,7 @@ export default function ExamHallMapPage() {
   const studentMapBySeatNo = useMemo(() => {
     const map = {};
     students.forEach((s) => {
-      const seat = Number(s.seatNo);
+      const seat = parseSeatNumber(s.seatNo);
       if (seat && !isNaN(seat) && seat > 0) {
         map[seat] = s;
       }
@@ -411,9 +513,11 @@ export default function ExamHallMapPage() {
                 onChange={(e) => setSelectedSemester(e.target.value)}
                 className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1 font-bold text-slate-800 focus:outline-emerald-600"
               >
-                <option value="১ম সাময়িক পরীক্ষা">১ম সাময়িক পরীক্ষা</option>
-                <option value="২য় সাময়িক পরীক্ষা">২য় সাময়িক পরীক্ষা</option>
-                <option value="বার্ষিক পরীক্ষা">বার্ষিক পরীক্ষা</option>
+                {examList.map((exam) => (
+                  <option key={exam} value={exam}>
+                    {exam}
+                  </option>
+                ))}
               </select>
             </div>
 

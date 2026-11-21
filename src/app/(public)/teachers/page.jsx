@@ -87,53 +87,51 @@ export default function TeachersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50 dark:bg-slate-900 pb-16">
+    <div className="page-wrapper pb-16">
       {/* ব্যানার ও ব্রেডক্রাম্ব */}
-      <div className="bg-gradient-to-b from-emerald-900 via-emerald-800 to-teal-900 text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(#f59e0b_1px,transparent_1px)] [background-size:20px_20px] opacity-10 pointer-events-none" />
-
-        <div className="max-w-7xl mx-auto relative z-10">
-          <nav className="flex items-center gap-2 text-xs text-emerald-200/90 mb-4">
-            <Link href="/" className="hover:text-amber-300 flex items-center gap-1">
+      <div className="bg-gradient-to-b from-[#0D47A1] via-[#0A3880] to-[#0D47A1] text-white py-12 relative overflow-hidden border-b border-[#90CAF9]/40">
+        <div className="site-container relative z-10">
+          <nav className="flex items-center gap-2 text-xs text-[#90CAF9] mb-4">
+            <Link href="/" className="hover:text-white flex items-center gap-1">
               <Home className="w-3.5 h-3.5" />
               <span>হোম</span>
             </Link>
-            <ChevronRight className="w-3.5 h-3.5 text-emerald-400/60" />
-            <Link href="/about" className="hover:text-amber-300">
+            <ChevronRight className="w-3.5 h-3.5 text-[#90CAF9]/60" />
+            <Link href="/about" className="hover:text-white">
               আমাদের সম্পর্কে
             </Link>
-            <ChevronRight className="w-3.5 h-3.5 text-emerald-400/60" />
-            <span className="text-amber-300 font-semibold">শিক্ষকমণ্ডলী</span>
+            <ChevronRight className="w-3.5 h-3.5 text-[#90CAF9]/60" />
+            <span className="text-white font-semibold">শিক্ষকমণ্ডলী</span>
           </nav>
 
           <div className="text-center sm:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-700/60 border border-emerald-500/40 text-amber-300 text-xs font-semibold mb-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#2196F3]/30 border border-[#90CAF9]/40 text-[#E3F2FD] text-xs font-semibold mb-3">
               <Users className="w-3.5 h-3.5" />
               <span>AIM Faculty Directory</span>
             </div>
-            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
+            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white">
               আমাদের সম্মানিত শিক্ষকমণ্ডলী
             </h1>
-            <p className="mt-2 text-sm sm:text-base text-emerald-100/90 max-w-2xl">
+            <p className="mt-2 text-sm sm:text-base text-[#E3F2FD]/90 max-w-2xl">
               দ্বীন ও আধুনিক শিক্ষার সমন্বয়ে আদর্শ জাতি গঠনে নিবেদিতপ্রাণ ও অভিজ্ঞ শিক্ষকবৃন্দ
             </p>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-20">
+      <div className="site-container -mt-6 relative z-20">
         {/* সার্চ ও ফিল্টার বার */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-gray-100 dark:border-slate-700 p-4 sm:p-5 mb-8">
+        <div className="bg-white rounded-2xl shadow-lg border border-[#90CAF9] p-4 sm:p-5 mb-8">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             {/* সার্চ ইনপুট */}
             <div className="relative w-full md:w-96">
-              <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="শিক্ষকের নাম, বিষয় বা পদবী খুঁজুন..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-gray-100 text-sm focus:outline-hidden focus:ring-2 focus:ring-emerald-500 transition-all"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#90CAF9] bg-white text-[#1E293B] text-sm focus:outline-hidden focus:ring-2 focus:ring-[#2196F3] transition-all"
               />
             </div>
 
@@ -142,9 +140,9 @@ export default function TeachersPage() {
               <button
                 type="button"
                 onClick={() => setSelectedDept("all")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${selectedDept === "all"
-                  ? "bg-emerald-800 text-white"
-                  : "bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200"
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer border ${selectedDept === "all"
+                  ? "bg-[#2196F3] text-white border-[#2196F3]"
+                  : "bg-[#E3F2FD] text-[#0D47A1] border-[#90CAF9]/40 hover:bg-[#90CAF9]/20"
                   }`}
               >
                 সকল ({teachers.length})
@@ -154,9 +152,9 @@ export default function TeachersPage() {
                   key={dept}
                   type="button"
                   onClick={() => setSelectedDept(dept)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${selectedDept === dept
-                    ? "bg-emerald-800 text-white"
-                    : "bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200"
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer border ${selectedDept === dept
+                    ? "bg-[#2196F3] text-white border-[#2196F3]"
+                    : "bg-[#E3F2FD] text-[#0D47A1] border-[#90CAF9]/40 hover:bg-[#90CAF9]/20"
                     }`}
                 >
                   {dept}
@@ -172,23 +170,23 @@ export default function TeachersPage() {
             {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
               <div
                 key={`skel-t-${n}`}
-                className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-gray-100 dark:border-slate-700 animate-pulse text-center space-y-3"
+                className="bg-white rounded-2xl p-6 border border-[#90CAF9] animate-pulse text-center space-y-3"
               >
-                <div className="w-24 h-24 rounded-full bg-gray-200 dark:bg-slate-700 mx-auto" />
-                <div className="h-5 bg-gray-200 dark:bg-slate-700 rounded w-3/4 mx-auto" />
-                <div className="h-4 bg-amber-100 dark:bg-amber-950/40 rounded-full w-1/2 mx-auto" />
-                <div className="h-3 bg-gray-200 dark:bg-slate-700 rounded w-5/6 mx-auto" />
-                <div className="h-9 bg-gray-200 dark:bg-slate-700 rounded-xl w-full pt-2" />
+                <div className="w-24 h-24 rounded-full bg-slate-200 mx-auto" />
+                <div className="h-5 bg-slate-200 rounded w-3/4 mx-auto" />
+                <div className="h-4 bg-[#E3F2FD] rounded-full w-1/2 mx-auto" />
+                <div className="h-3 bg-slate-200 rounded w-5/6 mx-auto" />
+                <div className="h-9 bg-slate-200 rounded-xl w-full pt-2" />
               </div>
             ))}
           </div>
         ) : filteredTeachers.length === 0 ? (
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-gray-200 dark:border-slate-700 p-12 text-center">
-            <Users className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-gray-800 dark:text-gray-200">
+          <div className="bg-white rounded-2xl border border-dashed border-[#90CAF9] p-12 text-center">
+            <Users className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+            <h3 className="text-base font-bold text-[#0D47A1]">
               কোনো শিক্ষক খুঁজে পাওয়া যায়নি
             </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-sm text-[#1E293B] mt-1">
               অনুগ্রহ করে অন্য কি-ওয়ার্ড বা ফিল্টার দিয়ে পুনরায় চেষ্টা করুন।
             </p>
             <button
@@ -197,7 +195,7 @@ export default function TeachersPage() {
                 setSearch("");
                 setSelectedDept("all");
               }}
-              className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-800 text-white hover:bg-emerald-700 transition-colors"
+              className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-[#0D47A1] text-white hover:bg-[#0A3880] transition-colors cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>ফিল্টার রিসেট করুন</span>

@@ -525,13 +525,13 @@ export default function ParentFeedbackPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#f4f9f6] via-white to-[#eef7f2] dark:from-[#010a06] dark:via-[#02150e] dark:to-[#010a06] py-8 sm:py-12 px-4 sm:px-6 lg:px-8 font-bornomala">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="page-wrapper font-bornomala">
+      <div className="site-container space-y-6">
         {/* Top Utility Bar: Back to Home & Shareable Copy Link Button */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-[#00733a] dark:text-emerald-300 hover:underline"
+            className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-[#0D47A1] hover:text-[#2196F3] hover:underline"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>হোমপেজে ফিরে যান</span>
@@ -540,16 +540,16 @@ export default function ParentFeedbackPage() {
           <button
             type="button"
             onClick={handleCopyShareLink}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-emerald-950/80 border border-emerald-700/25 dark:border-amber-400/35 text-xs sm:text-sm font-bold text-[#00733a] dark:text-amber-300 shadow-xs hover:bg-emerald-50 dark:hover:bg-emerald-900/60 transition-all"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-[#90CAF9] text-xs sm:text-sm font-bold text-[#0D47A1] shadow-xs hover:bg-[#E3F2FD] transition-all cursor-pointer"
           >
             {copiedLink ? (
               <>
-                <Check className="w-4 h-4 text-emerald-600 dark:text-amber-400" />
+                <Check className="w-4 h-4 text-[#2196F3]" />
                 <span>লিংক কপি হয়েছে!</span>
               </>
             ) : (
               <>
-                <Copy className="w-4 h-4 text-[#00733a] dark:text-amber-300" />
+                <Copy className="w-4 h-4 text-[#0D47A1]" />
                 <span>লিংক কপি করুন</span>
               </>
             )}
@@ -557,21 +557,21 @@ export default function ParentFeedbackPage() {
         </div>
 
         {/* Official Institutional Header Card */}
-        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#022c1b] via-[#00733a] to-[#034429] text-white p-6 sm:p-10 shadow-xl border border-amber-400/30">
-          <div className="pointer-events-none absolute -top-20 -right-20 w-64 h-64 bg-amber-400/15 rounded-full blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-20 -left-20 w-64 h-64 bg-emerald-400/15 rounded-full blur-3xl" />
+        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#0D47A1] via-[#0A3880] to-[#0D47A1] text-white p-6 sm:p-10 shadow-xl border border-[#90CAF9]/40">
+          <div className="pointer-events-none absolute -top-20 -right-20 w-64 h-64 bg-[#2196F3]/20 rounded-full blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 -left-20 w-64 h-64 bg-[#90CAF9]/20 rounded-full blur-3xl" />
 
           <div className="relative z-10 text-center space-y-3">
-            <p className="text-lg sm:text-2xl font-bold text-amber-300 tracking-wide">
+            <p className="text-lg sm:text-2xl font-bold text-[#90CAF9] tracking-wide">
               بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
             </p>
 
-            <h2 className="text-sm sm:text-base md:text-lg font-extrabold tracking-widest uppercase text-emerald-100 font-ubuntu">
+            <h2 className="text-sm sm:text-base md:text-lg font-extrabold tracking-widest uppercase text-white font-ubuntu">
               AS-SALAM IDEAL MADRASAH — AIM HABIGANJ
             </h2>
 
-            <div className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-amber-400/20 border border-amber-300/40 text-amber-200 text-xs sm:text-sm font-bold">
-              <Sparkles className="w-4 h-4 text-amber-300" />
+            <div className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-[#2196F3]/30 border border-[#90CAF9]/40 text-white text-xs sm:text-sm font-bold">
+              <Sparkles className="w-4 h-4 text-[#90CAF9]" />
               <span>Parents Feedback</span>
             </div>
 
@@ -579,8 +579,8 @@ export default function ParentFeedbackPage() {
               অভিভাবক মতামত
             </h1>
 
-            <div className="max-w-3xl mx-auto mt-4 pt-4 border-t border-white/15 text-xs sm:text-sm md:text-base text-emerald-50/95 leading-relaxed text-left bg-black/15 rounded-2xl p-4 sm:p-5">
-              <p className="font-bold text-amber-300 mb-1.5">ভূমিকা:</p>
+            <div className="max-w-3xl mx-auto mt-4 pt-4 border-t border-white/20 text-xs sm:text-sm md:text-base text-[#E3F2FD] leading-relaxed text-left bg-black/15 rounded-2xl p-4 sm:p-5 border border-[#90CAF9]/20">
+              <p className="font-bold text-[#90CAF9] mb-1.5">ভূমিকা:</p>
               <p>সম্মানিত অভিভাবক, আসসালামু আলাইকুম।</p>
               <p className="mt-1">
                 ২০২৬ শিক্ষাবর্ষে আপনার সন্তানের শিক্ষা, নৈতিক ও চারিত্রিক উন্নয়ন এবং
@@ -588,7 +588,7 @@ export default function ParentFeedbackPage() {
                 আগ্রহী। আপনার মতামত আগামী শিক্ষাবর্ষে প্রতিষ্ঠানের শিক্ষার মানোন্নয়নে
                 গুরুত্বপূর্ণ ভূমিকা রাখবে।
               </p>
-              <p className="mt-1 font-semibold text-amber-200">
+              <p className="mt-1 font-semibold text-white">
                 আপনার মূল্যবান সময় ও সহযোগিতার জন্য আন্তরিক ধন্যবাদ।
               </p>
             </div>
@@ -597,16 +597,16 @@ export default function ParentFeedbackPage() {
 
         {/* Post-Submission Thank You Screen */}
         {isSubmitted ? (
-          <div className="bg-white dark:bg-[#041e14] rounded-3xl p-8 sm:p-12 border border-emerald-600/25 dark:border-amber-400/30 shadow-lg text-center space-y-5">
-            <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-[#00733a] dark:text-amber-300 flex items-center justify-center mx-auto shadow-md">
-              <CheckCircle2 className="w-9 h-9" />
+          <div className="bg-white rounded-3xl p-8 sm:p-12 border border-[#90CAF9] shadow-lg text-center space-y-5">
+            <div className="w-16 h-16 rounded-full bg-[#E3F2FD] text-[#0D47A1] border border-[#90CAF9] flex items-center justify-center mx-auto shadow-md">
+              <CheckCircle2 className="w-9 h-9 text-[#2196F3]" />
             </div>
 
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+            <h2 className="text-2xl sm:text-3xl font-black text-[#0D47A1]">
               আপনাকে আন্তরিক ধন্যবাদ।
             </h2>
 
-            <p className="text-sm sm:text-base text-slate-600 dark:text-emerald-100/85 max-w-xl mx-auto leading-relaxed">
+            <p className="text-sm sm:text-base text-[#1E293B] max-w-xl mx-auto leading-relaxed">
               আপনার মূল্যবান মতামত আমাদের আগামী দিনের পথচলাকে আরও সুন্দর, সমৃদ্ধ ও
               কার্যকর করতে সহায়তা করবে।
             </p>
@@ -615,13 +615,13 @@ export default function ParentFeedbackPage() {
               <button
                 type="button"
                 onClick={handleResetForm}
-                className="px-6 py-2.5 rounded-xl bg-[#00733a] hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm shadow-md transition-all"
+                className="btn-primary px-6 py-2.5 text-xs sm:text-sm shadow-md"
               >
                 অন্য সন্তানের জন্য মতামত দিন
               </button>
               <Link
                 href="/"
-                className="px-6 py-2.5 rounded-xl border border-slate-200 dark:border-emerald-800 text-slate-700 dark:text-emerald-200 font-bold text-xs sm:text-sm hover:bg-slate-50 dark:hover:bg-emerald-950/60 transition-all"
+                className="px-6 py-2.5 rounded-xl border border-[#90CAF9] text-[#0D47A1] font-bold text-xs sm:text-sm hover:bg-[#E3F2FD] transition-all"
               >
                 হোমপেজে ফিরে যান
               </Link>
@@ -630,17 +630,17 @@ export default function ParentFeedbackPage() {
         ) : (
           <>
             {/* Controlled Student Lookup Card (Auto-fills Name, Class & Class Subjects from DB) */}
-            <div className="bg-white dark:bg-[#041e14] rounded-3xl p-5 sm:p-7 border border-emerald-800/15 dark:border-emerald-800/40 shadow-sm space-y-4">
+            <div className="bg-white rounded-3xl p-5 sm:p-7 border border-[#90CAF9] shadow-sm space-y-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#00733a] dark:text-amber-300 bg-emerald-50 dark:bg-emerald-950/70 px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800">
-                    <UserCheck className="w-3.5 h-3.5" />
+                  <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0D47A1] bg-[#E3F2FD] px-3 py-1 rounded-full border border-[#90CAF9]">
+                    <UserCheck className="w-3.5 h-3.5 text-[#2196F3]" />
                     দ্রুত তথ্য পূরণ (ঐচ্ছিক)
                   </span>
-                  <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white mt-2">
+                  <h3 className="text-base sm:text-lg font-extrabold text-[#0D47A1] mt-2">
                     শিক্ষার্থীর আইডি / রোল অথবা নাম দিয়ে খুঁজুন
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-emerald-200/70 mt-0.5">
+                  <p className="text-xs text-slate-500 mt-0.5">
                     আইডি বা নাম দিয়ে খুঁজলে শিক্ষার্থীর নাম, শ্রেণি এবং ওই শ্রেণির
                     বিষয়সমূহ স্বয়ংক্রিয়ভাবে পূরণ হয়ে যাবে।
                   </p>
@@ -661,14 +661,14 @@ export default function ParentFeedbackPage() {
                       }
                     }}
                     placeholder="শিক্ষার্থীর আইডি (যেমন: 04189), রোল অথবা নাম লিখুন..."
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-emerald-800/60 bg-slate-50 dark:bg-[#02130c] text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00733a]"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#90CAF9] bg-white text-xs sm:text-sm text-[#1E293B] focus:outline-hidden focus:ring-2 focus:ring-[#2196F3]"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={handleStudentLookup}
                   disabled={searchingStudent}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-[#00733a] hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm shadow-sm transition-all disabled:opacity-60 shrink-0"
+                  className="btn-primary inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-xs sm:text-sm shadow-sm disabled:opacity-60 shrink-0"
                 >
                   {searchingStudent ? (
                     <>
@@ -687,7 +687,7 @@ export default function ParentFeedbackPage() {
               {/* Multiple Matched Students Selector */}
               {matchedStudents.length > 1 && (
                 <div className="pt-2 space-y-2">
-                  <p className="text-xs font-bold text-emerald-800 dark:text-amber-300">
+                  <p className="text-xs font-bold text-[#0D47A1]">
                     নিচের তালিকা থেকে আপনার সন্তানকে নির্বাচন করুন:
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-60 overflow-y-auto pr-1">
@@ -696,18 +696,18 @@ export default function ParentFeedbackPage() {
                         key={st._id}
                         type="button"
                         onClick={() => applyStudentSelection(st)}
-                        className="text-left p-3 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/40 hover:bg-emerald-100/70 dark:hover:bg-emerald-900/50 transition-all flex items-center justify-between gap-2"
+                        className="text-left p-3 rounded-xl border border-[#90CAF9] bg-[#E3F2FD]/40 hover:bg-[#E3F2FD] transition-all flex items-center justify-between gap-2"
                       >
                         <div>
-                          <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                          <p className="text-xs sm:text-sm font-bold text-[#0D47A1]">
                             {st.studentName}
                           </p>
-                          <p className="text-[11px] text-slate-500 dark:text-emerald-200/70">
+                          <p className="text-[11px] text-slate-500">
                             শ্রেণি: <strong>{st.className || "—"}</strong> • আইডি:{" "}
                             {st.studentId || "—"} • রোল: {st.roll || "—"}
                           </p>
                         </div>
-                        <span className="text-[11px] font-bold text-[#00733a] dark:text-amber-300 px-2.5 py-1 rounded-lg bg-white dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-700 shrink-0">
+                        <span className="text-[11px] font-bold text-[#0D47A1] px-2.5 py-1 rounded-lg bg-white border border-[#90CAF9] shrink-0">
                           নির্বাচন করুন
                         </span>
                       </button>
@@ -718,9 +718,9 @@ export default function ParentFeedbackPage() {
 
               {/* Selected Student Confirmation Banner */}
               {selectedStudentRecord && (
-                <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/70 flex flex-wrap items-center justify-between gap-2 text-xs">
-                  <div className="flex items-center gap-2 text-emerald-900 dark:text-emerald-200">
-                    <CheckCircle2 className="w-4 h-4 text-[#00733a] dark:text-amber-400 shrink-0" />
+                <div className="p-3 rounded-xl bg-[#E3F2FD] border border-[#90CAF9] flex flex-wrap items-center justify-between gap-2 text-xs">
+                  <div className="flex items-center gap-2 text-[#0D47A1]">
+                    <CheckCircle2 className="w-4 h-4 text-[#2196F3] shrink-0" />
                     <span>
                       নির্বাচিত শিক্ষার্থী:{" "}
                       <strong>{selectedStudentRecord.studentName}</strong> (আইডি:{" "}
@@ -731,7 +731,7 @@ export default function ParentFeedbackPage() {
                   <button
                     type="button"
                     onClick={() => setSelectedStudentRecord(null)}
-                    className="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline"
+                    className="text-[11px] font-bold text-rose-600 hover:underline cursor-pointer"
                   >
                     পরিবর্তন করুন
                   </button>
@@ -742,11 +742,11 @@ export default function ParentFeedbackPage() {
             {/* Main 11-Question Feedback Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Questions 1 & 2: Student Name & Student Class */}
-              <div className="bg-white dark:bg-[#041e14] rounded-3xl p-6 sm:p-8 border border-emerald-800/15 dark:border-emerald-800/40 shadow-sm space-y-5">
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#90CAF9] shadow-sm space-y-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   {/* Question 1 */}
                   <div>
-                    <label className="block text-sm sm:text-base font-extrabold text-slate-900 dark:text-white mb-2">
+                    <label className="block text-sm sm:text-base font-extrabold text-[#0D47A1] mb-2">
                       ১. শিক্ষার্থীর নাম <span className="text-rose-500">*</span>
                     </label>
                     <input
@@ -757,13 +757,13 @@ export default function ParentFeedbackPage() {
                         setFormData({ ...formData, studentName: e.target.value })
                       }
                       placeholder="শিক্ষার্থীর পূর্ণ নাম লিখুন..."
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-emerald-800/60 bg-slate-50 dark:bg-[#02130c] text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00733a]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-[#90CAF9] bg-white text-xs sm:text-sm text-[#1E293B] focus:outline-hidden focus:ring-2 focus:ring-[#2196F3]"
                     />
                   </div>
 
                   {/* Question 2 */}
                   <div>
-                    <label className="block text-sm sm:text-base font-extrabold text-slate-900 dark:text-white mb-2">
+                    <label className="block text-sm sm:text-base font-extrabold text-[#0D47A1] mb-2">
                       ২. শিক্ষার্থীর শ্রেণি <span className="text-rose-500">*</span>
                     </label>
                     <select
@@ -771,7 +771,7 @@ export default function ParentFeedbackPage() {
                       value={formData.className}
                       onChange={(e) => handleClassChange(e.target.value)}
                       disabled={loadingMeta}
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-emerald-800/60 bg-slate-50 dark:bg-[#02130c] text-xs sm:text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00733a]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-[#90CAF9] bg-white text-xs sm:text-sm font-semibold text-[#1E293B] focus:outline-hidden focus:ring-2 focus:ring-[#2196F3]"
                     >
                       <option value="">
                         {loadingMeta
@@ -792,9 +792,9 @@ export default function ParentFeedbackPage() {
               {MCQ_QUESTIONS.map((q) => (
                 <div
                   key={q.id}
-                  className="bg-white dark:bg-[#041e14] rounded-3xl p-6 sm:p-7 border border-emerald-800/15 dark:border-emerald-800/40 shadow-sm space-y-4"
+                  className="bg-white rounded-3xl p-6 sm:p-7 border border-[#90CAF9] shadow-sm space-y-4"
                 >
-                  <label className="block text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">
+                  <label className="block text-sm sm:text-base font-extrabold text-[#0D47A1]">
                     {q.number}. {q.label} <span className="text-rose-500">*</span>
                   </label>
 
@@ -810,18 +810,18 @@ export default function ParentFeedbackPage() {
                           }
                           aria-pressed={isSelected}
                           className={`cursor-pointer w-full text-left flex items-center gap-3 p-3.5 rounded-2xl border text-xs sm:text-sm font-bold transition-all select-none ${isSelected
-                              ? "bg-[#00733a] text-white border-[#00733a] shadow-md"
-                              : "bg-slate-50 dark:bg-[#02130c] text-slate-700 dark:text-emerald-100 border-slate-200 dark:border-emerald-800/50 hover:border-emerald-500/60"
+                              ? "bg-[#2196F3] text-white border-[#2196F3] shadow-md"
+                              : "bg-white text-[#1E293B] border-[#90CAF9] hover:bg-[#E3F2FD]"
                             }`}
                         >
                           <span
                             className={`w-4 h-4 rounded-full flex items-center justify-center border shrink-0 ${isSelected
-                                ? "border-white bg-white text-[#00733a]"
-                                : "border-slate-400 dark:border-emerald-600"
+                                ? "border-white bg-white text-[#2196F3]"
+                                : "border-slate-400"
                               }`}
                           >
                             {isSelected && (
-                              <span className="w-2 h-2 rounded-full bg-[#00733a]" />
+                              <span className="w-2 h-2 rounded-full bg-[#2196F3]" />
                             )}
                           </span>
                           <span>{opt}</span>
@@ -833,21 +833,21 @@ export default function ParentFeedbackPage() {
               ))}
 
               {/* Question 9: Checkboxes (Multiple Selection) */}
-              <div className="bg-white dark:bg-[#041e14] rounded-3xl p-6 sm:p-7 border border-emerald-800/15 dark:border-emerald-800/40 shadow-sm space-y-4">
+              <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#90CAF9] shadow-sm space-y-4">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div>
-                    <label className="block text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">
+                    <label className="block text-sm sm:text-base font-extrabold text-[#0D47A1]">
                       ৯. আগামী শিক্ষাবর্ষে প্রতিষ্ঠানের কোন বিষয়গুলোর উন্নয়ন বেশি
                       প্রয়োজন বলে মনে করেন?
                     </label>
-                    <p className="text-xs text-emerald-700 dark:text-amber-300/90 font-semibold mt-1">
+                    <p className="text-xs text-[#2196F3] font-semibold mt-1">
                       (একাধিক নির্বাচন করা যাবে)
                     </p>
                   </div>
 
                   {formData.q9_improvementAreas.length > 0 && (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-[#00733a] dark:text-amber-300 text-xs font-extrabold border border-emerald-200 dark:border-emerald-800">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E3F2FD] text-[#0D47A1] text-xs font-extrabold border border-[#90CAF9]">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#2196F3]" />
                       <span>
                         {formData.q9_improvementAreas.length} টি নির্বাচিত
                       </span>
@@ -866,14 +866,14 @@ export default function ParentFeedbackPage() {
                         onClick={() => handleCheckboxToggle(option)}
                         aria-pressed={isChecked}
                         className={`cursor-pointer w-full text-left flex items-center gap-3 p-3.5 rounded-2xl border text-xs sm:text-sm font-bold transition-all select-none ${isChecked
-                            ? "bg-emerald-50 dark:bg-emerald-900/60 text-[#00733a] dark:text-amber-300 border-[#00733a] dark:border-amber-400/80 ring-2 ring-[#00733a]/15 dark:ring-amber-400/20 shadow-xs"
-                            : "bg-slate-50 dark:bg-[#02130c] text-slate-700 dark:text-emerald-100 border-slate-200 dark:border-emerald-800/50 hover:border-emerald-500/50"
+                            ? "bg-[#E3F2FD] text-[#0D47A1] border-[#2196F3] ring-2 ring-[#2196F3]/20 shadow-xs"
+                            : "bg-white text-[#1E293B] border-[#90CAF9] hover:bg-[#E3F2FD]"
                           }`}
                       >
                         <span
                           className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors ${isChecked
-                              ? "bg-[#00733a] dark:bg-amber-400 border-[#00733a] dark:border-amber-400 text-white dark:text-[#022c1b]"
-                              : "border-slate-400 dark:border-emerald-600 bg-white dark:bg-transparent"
+                              ? "bg-[#2196F3] border-[#2196F3] text-white"
+                              : "border-slate-400 bg-white"
                             }`}
                         >
                           {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
@@ -886,16 +886,16 @@ export default function ParentFeedbackPage() {
               </div>
 
               {/* Question 10: Auto-Display Comment Fields for All Class Subjects / Subject Teachers (Optional) */}
-              <div className="bg-white dark:bg-[#041e14] rounded-3xl p-6 sm:p-7 border border-emerald-800/15 dark:border-emerald-800/40 shadow-sm space-y-4">
+              <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#90CAF9] shadow-sm space-y-4">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <BookOpen className="w-5 h-5 text-[#00733a] dark:text-amber-300 shrink-0" />
-                      <label className="block text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">
+                      <BookOpen className="w-5 h-5 text-[#2196F3] shrink-0" />
+                      <label className="block text-sm sm:text-base font-extrabold text-[#0D47A1]">
                         ১০. বিষয়ভিত্তিক শিক্ষক সম্পর্কে আপনার মতামত (ঐচ্ছিক)
                       </label>
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-emerald-200/75 pl-7">
+                    <p className="text-xs text-slate-500 pl-7">
                       আপনার সন্তানের শ্রেণির সকল বিষয়ের তালিকা নিচে দেওয়া হলো। যে সকল
                       বিষয়ের শিক্ষকের ব্যাপারে মতামত দিতে চান, শুধুমাত্র সেই ঘরগুলোতে
                       লিখুন (বাকিগুলো খালি রাখা যাবে)।
@@ -903,7 +903,7 @@ export default function ParentFeedbackPage() {
                   </div>
 
                   {formData.className && (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-200 dark:border-emerald-800 text-xs font-extrabold text-[#00733a] dark:text-amber-300">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E3F2FD] border border-[#90CAF9] text-xs font-extrabold text-[#0D47A1]">
                       শ্রেণি: {formData.className} (
                       {availableSubjectsForClass.length} টি বিষয়)
                     </span>
@@ -911,19 +911,19 @@ export default function ParentFeedbackPage() {
                 </div>
 
                 {!formData.className ? (
-                  <div className="p-5 sm:p-6 rounded-2xl border border-dashed border-emerald-300 dark:border-emerald-800/70 bg-emerald-50/40 dark:bg-[#02130c]/80 text-center space-y-1.5">
-                    <BookOpen className="w-7 h-7 text-[#00733a]/70 dark:text-amber-300/70 mx-auto" />
-                    <p className="text-xs sm:text-sm font-bold text-slate-700 dark:text-emerald-100">
+                  <div className="p-5 sm:p-6 rounded-2xl border border-dashed border-[#90CAF9] bg-[#E3F2FD]/40 text-center space-y-1.5">
+                    <BookOpen className="w-7 h-7 text-[#2196F3] mx-auto" />
+                    <p className="text-xs sm:text-sm font-bold text-[#0D47A1]">
                       বিষয়ভিত্তিক শিক্ষকদের তালিকা দেখতে অনুগ্রহ করে প্রথমে ২ নং প্রশ্নে
                       শিক্ষার্থীর শ্রেণি নির্বাচন করুন।
                     </p>
-                    <p className="text-[11px] text-slate-500 dark:text-emerald-200/60">
+                    <p className="text-[11px] text-slate-500">
                       শ্রেণি নির্বাচন করার সাথে সাথেই উক্ত শ্রেণির সকল বিষয়ের মন্তব্যের
                       ঘর স্বয়ংক্রিয়ভাবে প্রদর্শিত হবে।
                     </p>
                   </div>
                 ) : availableSubjectsForClass.length === 0 ? (
-                  <div className="p-5 rounded-2xl border border-slate-200 dark:border-emerald-800/50 bg-slate-50 dark:bg-[#02130c] text-center text-xs sm:text-sm text-slate-500 dark:text-emerald-200/70">
+                  <div className="p-5 rounded-2xl border border-[#90CAF9] bg-[#E3F2FD]/30 text-center text-xs sm:text-sm text-slate-500">
                     এই শ্রেণির জন্য কোনো বিষয় তালিকা পাওয়া যায়নি।
                   </div>
                 ) : (
@@ -937,27 +937,27 @@ export default function ParentFeedbackPage() {
                           <div
                             key={subject}
                             className={`p-4 rounded-2xl border transition-all space-y-2.5 ${hasText
-                                ? "bg-emerald-50/50 dark:bg-emerald-950/40 border-[#00733a]/60 dark:border-amber-400/50 shadow-xs"
-                                : "bg-slate-50/80 dark:bg-[#02130c] border-slate-200 dark:border-emerald-800/50"
+                                ? "bg-[#E3F2FD]/60 border-[#2196F3] shadow-xs"
+                                : "bg-white border-[#90CAF9]"
                               }`}
                           >
                             <div className="flex items-start justify-between gap-2">
                               <div>
-                                <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white">
-                                  <span className="w-5 h-5 rounded-full bg-[#00733a]/10 dark:bg-emerald-900 text-[#00733a] dark:text-amber-300 text-[11px] flex items-center justify-center shrink-0">
+                                <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-extrabold text-[#0D47A1]">
+                                  <span className="w-5 h-5 rounded-full bg-[#2196F3] text-white text-[11px] flex items-center justify-center shrink-0">
                                     {index + 1}
                                   </span>
                                   <span>{subject}</span>
                                 </span>
                                 {teacherName && (
-                                  <p className="text-[11px] font-semibold text-emerald-700 dark:text-amber-300/90 mt-0.5 pl-6">
+                                  <p className="text-[11px] font-semibold text-[#2196F3] mt-0.5 pl-6">
                                     শিক্ষক: {teacherName}
                                   </p>
                                 )}
                               </div>
 
                               {hasText && (
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#00733a] text-white shrink-0">
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2196F3] text-white shrink-0">
                                   মতামত যুক্ত
                                 </span>
                               )}
@@ -973,7 +973,7 @@ export default function ParentFeedbackPage() {
                                 )
                               }
                               placeholder={`${subject}${teacherName ? ` (${teacherName})` : ""} বিষয়ের শিক্ষক ও পাঠদান সম্পর্কে মতামত লিখুন (ঐচ্ছিক)...`}
-                              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-emerald-800/60 bg-white dark:bg-[#041e14] text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00733a]"
+                              className="w-full px-3.5 py-2.5 rounded-xl border border-[#90CAF9] bg-white text-xs sm:text-sm text-[#1E293B] focus:outline-hidden focus:ring-2 focus:ring-[#2196F3]"
                             />
                           </div>
                         );
@@ -984,10 +984,10 @@ export default function ParentFeedbackPage() {
               </div>
 
               {/* Question 11: Overall Suggestions, Complaints or Expectations */}
-              <div className="bg-white dark:bg-[#041e14] rounded-3xl p-6 sm:p-7 border border-emerald-800/15 dark:border-emerald-800/40 shadow-sm space-y-3">
+              <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#90CAF9] shadow-sm space-y-3">
                 <div className="flex items-center gap-2">
-                  <MessageSquare className="w-5 h-5 text-[#00733a] dark:text-amber-300 shrink-0" />
-                  <label className="block text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">
+                  <MessageSquare className="w-5 h-5 text-[#2196F3] shrink-0" />
+                  <label className="block text-sm sm:text-base font-extrabold text-[#0D47A1]">
                     ১১. প্রতিষ্ঠানের প্রতি আপনার কোনো পরামর্শ, অভিযোগ বা প্রত্যাশা
                     থাকলে লিখুন।
                   </label>
@@ -1003,17 +1003,17 @@ export default function ParentFeedbackPage() {
                     }))
                   }
                   placeholder="আপনার পরামর্শ, অভিযোগ বা প্রত্যাশা বিস্তারিত লিখুন..."
-                  className="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-emerald-800/60 bg-slate-50 dark:bg-[#02130c] text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00733a]"
+                  className="w-full px-4 py-3 rounded-2xl border border-[#90CAF9] bg-white text-xs sm:text-sm text-[#1E293B] focus:outline-hidden focus:ring-2 focus:ring-[#2196F3]"
                 />
               </div>
 
               {/* Footer Message & Submit Button */}
-              <div className="bg-white dark:bg-[#041e14] rounded-3xl p-6 sm:p-8 border border-emerald-800/15 dark:border-emerald-800/40 shadow-sm space-y-5 text-center">
-                <div className="p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/50 border border-emerald-200/70 dark:border-emerald-800/60">
-                  <p className="text-sm sm:text-base font-extrabold text-[#00733a] dark:text-amber-300">
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#90CAF9] shadow-sm space-y-5 text-center">
+                <div className="p-4 rounded-2xl bg-[#E3F2FD] border border-[#90CAF9]">
+                  <p className="text-sm sm:text-base font-extrabold text-[#0D47A1]">
                     আপনাকে আন্তরিক ধন্যবাদ।
                   </p>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-emerald-100/85 mt-1">
+                  <p className="text-xs sm:text-sm text-[#1E293B] mt-1">
                     আপনার মূল্যবান মতামত আমাদের আগামী দিনের পথচলাকে আরও সুন্দর,
                     সমৃদ্ধ ও কার্যকর করতে সহায়তা করবে।
                   </p>
@@ -1022,9 +1022,9 @@ export default function ParentFeedbackPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-10 py-3.5 rounded-2xl bg-[#00733a] hover:bg-emerald-800 text-white font-black text-sm sm:text-base shadow-lg hover:shadow-xl transition-all disabled:opacity-60 active:scale-95"
+                  className="btn-primary w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-10 py-3.5 rounded-2xl text-sm sm:text-base shadow-lg hover:shadow-xl transition-all disabled:opacity-60 active:scale-95 cursor-pointer"
                 >
-                  <Send className="w-4 h-4 text-amber-300" />
+                  <Send className="w-4 h-4 text-white" />
                   <span>
                     {isSubmitting
                       ? "মতামত জমা হচ্ছে, অপেক্ষা করুন..."

@@ -69,53 +69,53 @@ export default function AboutPage() {
   }, []);
 
   return (
-    <div className="scroll-smooth min-h-screen bg-gray-50 dark:bg-slate-900">
+    <div className="page-wrapper scroll-smooth">
       {/* প্রতিটি সেকশনে scroll-mt-24 ক্লাসটি যুক্ত করা হয়েছে */}
       <section
         id="profile"
-        className="py-16 scroll-mt-24 border-b border-gray-100 dark:border-slate-800/60"
+        className="py-12 sm:py-16 scroll-mt-24 border-b border-[#90CAF9]/40 bg-white"
       >
         <Profile data={aboutData?.profile} />
       </section>
 
       <section
         id="founder"
-        className="py-16 scroll-mt-24 border-b border-gray-100 dark:border-slate-800/60 bg-emerald-50/10 dark:bg-slate-900/40"
+        className="py-12 sm:py-16 scroll-mt-24 border-b border-[#90CAF9]/40 bg-[#E3F2FD]/50"
       >
         <Founder data={aboutData?.founder} />
       </section>
 
       <section
         id="vision"
-        className="py-16 scroll-mt-24 border-b border-gray-100 dark:border-slate-800/60"
+        className="py-12 sm:py-16 scroll-mt-24 border-b border-[#90CAF9]/40 bg-white"
       >
         <Vision data={aboutData?.vision} />
       </section>
 
       <section
         id="committee"
-        className="py-16 scroll-mt-24 border-b border-gray-100 dark:border-slate-800/60 bg-emerald-50/10 dark:bg-slate-900/40"
+        className="py-12 sm:py-16 scroll-mt-24 border-b border-[#90CAF9]/40 bg-[#E3F2FD]/50"
       >
         <Committee data={aboutData?.committee} />
       </section>
 
       <section
         id="features"
-        className="py-16 scroll-mt-24 border-b border-gray-100 dark:border-slate-800/60"
+        className="py-12 sm:py-16 scroll-mt-24 border-b border-[#90CAF9]/40 bg-white"
       >
         <Features data={aboutData?.features} />
       </section>
 
       <section
         id="roadmap"
-        className="py-16 scroll-mt-24 border-b border-gray-100 dark:border-slate-800/60 bg-emerald-50/10 dark:bg-slate-900/40"
+        className="py-12 sm:py-16 scroll-mt-24 border-b border-[#90CAF9]/40 bg-[#E3F2FD]/50"
       >
         <Roadmap data={aboutData?.roadmap} />
       </section>
 
       <section
         id="policies"
-        className="py-16 scroll-mt-24 border-b border-gray-100 dark:border-slate-800/60 bg-emerald-50/10 dark:bg-slate-900/40"
+        className="py-12 sm:py-16 scroll-mt-24 border-b border-[#90CAF9]/40 bg-white"
       >
         <Policies data={aboutData?.policies} />
       </section>
@@ -123,19 +123,19 @@ export default function AboutPage() {
       {/* নতুন ৩টি সেকশন যুক্ত করা হলো */}
       <section
         id="faculty"
-        className="py-16 scroll-mt-24 border-b border-gray-100 dark:border-slate-800/60"
+        className="py-12 sm:py-16 scroll-mt-24 border-b border-[#90CAF9]/40 bg-[#E3F2FD]/50"
       >
         <Faculty data={aboutData?.faculty} onLoaded={handleSectionLoaded} />
       </section>
 
       <section
         id="staff"
-        className="py-16 scroll-mt-24 border-b border-gray-100 dark:border-slate-800/60 bg-emerald-50/10 dark:bg-slate-900/40"
+        className="py-12 sm:py-16 scroll-mt-24 border-b border-[#90CAF9]/40 bg-white"
       >
         <Staff data={aboutData?.staff} onLoaded={handleSectionLoaded} />
       </section>
 
-      <section id="roster" className="py-16 scroll-mt-24">
+      <section id="roster" className="py-12 sm:py-16 scroll-mt-24 bg-[#E3F2FD]/50">
         <Roster data={aboutData?.roster} />
       </section>
     </div>

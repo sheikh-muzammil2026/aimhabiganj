@@ -409,7 +409,7 @@ export default function Navbar() {
                 <LanguageSwitcher />
 
                 {/* Theme Toggle Button */}
-                <button
+                {/* <button
                   type="button"
                   onClick={toggleDarkMode}
                   title={darkMode ? "Light Mode" : "Dark Mode"}
@@ -421,7 +421,7 @@ export default function Navbar() {
                   ) : (
                     <Moon className="w-4 h-4 text-[#90CAF9]" />
                   )}
-                </button>
+                </button> */}
 
                 {/* Desktop Auth Action */}
                 <div className="hidden md:flex items-center">
@@ -470,127 +470,12 @@ export default function Navbar() {
                   )}
                 </div>
 
-                {/* Mobile Hamburger Button */}
-                <button
-                  type="button"
-                  onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-                  aria-label="Toggle Menu"
-                  className="lg:hidden p-2 rounded-xl border border-[#90CAF9]/40 bg-white/10 text-white hover:bg-white/20 transition-colors cursor-pointer"
-                >
-                  {isMobileMenuOpen ? (
-                    <X className="w-5 h-5" />
-                  ) : (
-                    <Menu className="w-5 h-5" />
-                  )}
-                </button>
+
+
               </div>
             </div>
 
-            {/* Mobile Drawer Menu */}
-            {isMobileMenuOpen && (
-              <div className="lg:hidden mt-3 pt-3 border-t border-[#90CAF9]/30 space-y-1.5 max-h-[75vh] overflow-y-auto">
-                {menuItems.map((item) => {
-                  const active = isMenuActive(item);
-                  const expanded = mobileOpenGroup === item.id;
 
-                  return (
-                    <div
-                      key={item.id}
-                      className="rounded-xl overflow-hidden"
-                    >
-                      {item.dropdown ? (
-                        <>
-                          <div className="flex items-center justify-between">
-                            <Link
-                              href={item.href}
-                              onClick={(e) => handleSubmenuClick(e, item.href)}
-                              className={`flex-1 px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors ${active
-                                ? "text-white bg-[#2196F3]/30 border-l-2 border-[#2196F3]"
-                                : "text-[#E3F2FD] hover:text-white hover:bg-white/10"
-                                }`}
-                            >
-                              {item.name}
-                            </Link>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setMobileOpenGroup(expanded ? null : item.id)
-                              }
-                              aria-label={`Expand ${item.name}`}
-                              className="p-2 rounded-lg text-[#90CAF9] hover:bg-white/10"
-                            >
-                              <ChevronDown
-                                className={`w-4 h-4 transition-transform duration-200 ${expanded ? "rotate-180" : ""
-                                  }`}
-                              />
-                            </button>
-                          </div>
-
-                          {expanded && (
-                            <div className="ltr:pl-4 rtl:pr-4 pb-2 space-y-1">
-                              {item.dropdown.map((sub, i) => (
-                                <Link
-                                  key={i}
-                                  href={sub.href}
-                                  onClick={(e) =>
-                                    handleSubmenuClick(e, sub.href)
-                                  }
-                                  className="block px-3 py-2 rounded-lg text-xs font-medium text-[#E3F2FD]/80 hover:bg-[#2196F3] hover:text-white transition-colors"
-                                >
-                                  {sub.name}
-                                </Link>
-                              ))}
-                            </div>
-                          )}
-                        </>
-                      ) : (
-                        <Link
-                          href={item.href}
-                          onClick={(e) => handleSubmenuClick(e, item.href)}
-                          className={`block px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors ${active
-                            ? "text-white bg-[#2196F3]/30 border-l-2 border-[#2196F3]"
-                            : "text-[#E3F2FD] hover:text-white hover:bg-white/10"
-                            }`}
-                        >
-                          {item.name}
-                        </Link>
-                      )}
-                    </div>
-                  );
-                })}
-
-                {/* Mobile Auth Footer */}
-                <div className="pt-2 border-t border-[#90CAF9]/30 flex items-center gap-2">
-                  {isLoggedIn ? (
-                    <>
-                      <Link
-                        href={getDashboardPath()}
-                        className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#2196F3] text-white text-sm font-semibold"
-                      >
-                        <LayoutDashboard className="w-4 h-4 text-white" />
-                        <span>{t("menu.dashboard")}</span>
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={handleLogout}
-                        className="inline-flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl bg-rose-500/20 text-rose-300 text-sm font-semibold"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        <span>{t("menu.logout")}</span>
-                      </button>
-                    </>
-                  ) : (
-                    <Link
-                      href="/login"
-                      className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#2196F3] text-white text-sm font-bold shadow-md"
-                    >
-                      <LogIn className="w-4 h-4" />
-                      <span>{t("menu.login")}</span>
-                    </Link>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </header>

@@ -15,22 +15,22 @@ export default function ClassTeachers({ data }) {
   const currentData = data || fallbackData;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6">
-      <div className="text-center mb-12">
-        <h2 className="text-3xl font-bold text-emerald-900 dark:text-emerald-400 flex items-center justify-center gap-2">
-          <span className="text-amber-500">❖</span> {currentData.title} <span className="text-amber-500">❖</span>
+    <div className="site-container">
+      <div className="text-center mb-10 space-y-3">
+        <h2 className="heading-primary flex items-center justify-center gap-2">
+          <span className="text-[#2196F3]">❖</span> {currentData.title} <span className="text-[#2196F3]">❖</span>
         </h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">{currentData.subtitle}</p>
+        <p className="text-sm text-[#1E293B] max-w-xl mx-auto leading-relaxed">{currentData.subtitle}</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {currentData.list?.map((item, index) => (
-          <div key={item.id || index} className="bg-white dark:bg-slate-800 border-l-4 border-emerald-700 p-5 rounded-r-xl shadow-sm">
-            <span className="text-xs font-bold text-amber-600 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded">
+          <div key={item.id || index} className="bg-white border border-[#90CAF9] border-l-4 border-l-[#2196F3] p-5 rounded-2xl shadow-sm">
+            <span className="text-xs font-bold text-[#0D47A1] bg-[#E3F2FD] border border-[#90CAF9] px-2.5 py-1 rounded-md">
               শ্রেণী কক্ষ: {item.room}
             </span>
-            <h4 className="text-base font-bold text-emerald-950 dark:text-emerald-300 mt-2">{item.grade}</h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">👤 {item.teacher}</p>
+            <h4 className="text-base font-bold text-[#0D47A1] mt-3">{item.grade}</h4>
+            <p className="text-sm text-[#1E293B] mt-1">👤 {item.teacher}</p>
           </div>
         ))}
       </div>

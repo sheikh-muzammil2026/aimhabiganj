@@ -623,8 +623,8 @@ export default function Sidebar() {
             type="button"
             onClick={() => toggleNestedSubmenu(node.title, node)}
             className={`w-full flex items-center justify-between py-2 px-3 text-[11px] sm:text-xs rounded-lg transition-all duration-200 font-semibold ${isOpen || isActive
-              ? "text-amber-350 bg-emerald-900/40 text-amber-300"
-              : "text-emerald-200/80 hover:text-white hover:bg-emerald-800/20"
+              ? "text-white bg-[#1976D2]/50 font-bold"
+              : "text-[#90CAF9] hover:text-white hover:bg-[#1976D2]/20"
               }`}
             style={{ paddingLeft: `${12 + level * 8}px` }}
           >
@@ -638,7 +638,7 @@ export default function Sidebar() {
           </button>
 
           {isOpen && (
-            <div className="pl-3 space-y-1 ml-2 overflow-hidden transition-all duration-200 border-l border-emerald-700/50">
+            <div className="pl-3 space-y-1 ml-2 overflow-hidden transition-all duration-200 border-l border-[#90CAF9]/40">
               {node.submenu.map((child, childIdx) =>
                 renderDesktopSubmenu(child, childIdx, level + 1),
               )}
@@ -654,8 +654,8 @@ export default function Sidebar() {
         key={node.href || index}
         href={node.href || "#"}
         className={`block py-1.5 px-3 text-[10px] sm:text-[11px] rounded-md transition-all duration-200 font-medium ${isChildActive
-          ? "text-amber-400 font-bold bg-emerald-900/60 border-l-2 border-amber-400 pl-2"
-          : "text-emerald-300/70 hover:text-white hover:bg-emerald-800/10 hover:pl-4"
+          ? "text-white font-bold bg-[#2196F3]/50 border-l-2 border-white pl-2"
+          : "text-[#90CAF9] hover:text-white hover:bg-[#1976D2]/20 hover:pl-4"
           }`}
         style={{ paddingLeft: `${12 + level * 6}px` }}
       >
@@ -676,13 +676,13 @@ export default function Sidebar() {
             type="button"
             onClick={() => toggleNestedSubmenu(node.title, node)}
             className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs font-bold transition-all ${isOpen || isAnyChildActive
-              ? "bg-emerald-900 text-amber-300 border-amber-400"
-              : "bg-emerald-950/50 text-emerald-100 border-emerald-800/40"
+              ? "bg-[#2196F3] text-white border-white"
+              : "bg-[#0A3880]/50 text-[#E3F2FD] border-[#90CAF9]/30"
               }`}
             style={{ paddingLeft: `${12 + level * 8}px` }}
           >
             <div className="flex items-center gap-3 truncate">
-              <Sparkles className="w-3.5 h-3.5 text-amber-300 flex-shrink-0" />
+              <Sparkles className="w-3.5 h-3.5 text-[#90CAF9] flex-shrink-0" />
               <span className="truncate">📂 {node.title}</span>
             </div>
             <span
@@ -694,7 +694,7 @@ export default function Sidebar() {
           </button>
 
           {isOpen && (
-            <div className="pl-4 space-y-2 py-1 border-l border-emerald-700/40 ml-2">
+            <div className="pl-4 space-y-2 py-1 border-l border-[#90CAF9]/40 ml-2">
               {node.submenu.map((subChild, childIdx) =>
                 renderMobileActiveSubmenu(subChild, childIdx, level + 1),
               )}
@@ -711,8 +711,8 @@ export default function Sidebar() {
         href={node.href || "#"}
         onClick={() => setActiveMobileDrawer(null)}
         className={`flex items-center gap-3 p-2.5 rounded-lg border text-[11px] font-semibold transition-all ${isChildActive
-          ? "bg-amber-400 text-[#043e30] border-amber-400 font-bold"
-          : "bg-emerald-950/30 text-emerald-200 border-emerald-800/30 hover:bg-emerald-900/40"
+          ? "bg-[#2196F3] text-white border-white font-bold"
+          : "bg-[#0A3880]/40 text-[#E3F2FD] border-[#90CAF9]/30 hover:bg-[#1976D2]/30"
           }`}
         style={{ paddingLeft: `${12 + level * 8}px` }}
       >
@@ -730,13 +730,13 @@ export default function Sidebar() {
       return (
         <div
           key={node.title || index}
-          className="space-y-1 pl-4 pr-2 py-1 bg-emerald-950/40"
+          className="space-y-1 pl-4 pr-2 py-1 bg-[#0A3880]/40"
           style={{ paddingLeft: `${16 + level * 8}px` }}
         >
           <button
             type="button"
             onClick={() => toggleNestedSubmenu(node.title, node)}
-            className={`w-full flex items-center justify-between p-2 text-xs font-bold transition-colors ${isOpen || isAnyChildActive ? "text-amber-300" : "text-emerald-200"
+            className={`w-full flex items-center justify-between p-2 text-xs font-bold transition-colors ${isOpen || isAnyChildActive ? "text-white" : "text-[#90CAF9]"
               }`}
           >
             <div className="flex items-center gap-2 truncate">
@@ -751,7 +751,7 @@ export default function Sidebar() {
           </button>
 
           {isOpen && (
-            <div className="pl-4 space-y-1 pb-1 border-l border-emerald-800/40 ml-1">
+            <div className="pl-4 space-y-1 pb-1 border-l border-[#90CAF9]/40 ml-1">
               {node.submenu.map((subChild, childIdx) =>
                 renderMobileFullSubmenu(subChild, childIdx, level + 1),
               )}
@@ -768,12 +768,12 @@ export default function Sidebar() {
         href={node.href || "#"}
         onClick={() => setActiveMobileDrawer(null)}
         className={`flex items-center gap-2 p-2 text-[11px] font-medium transition-colors ${isChildActive
-          ? "text-amber-400 font-bold bg-emerald-900/30"
-          : "text-emerald-300/80 hover:text-white"
+          ? "text-white font-bold bg-[#2196F3]/50"
+          : "text-[#90CAF9] hover:text-white"
           }`}
         style={{ paddingLeft: `${16 + level * 8}px` }}
       >
-        <Sparkles className="w-2.5 h-2.5 text-amber-400 flex-shrink-0" />
+        <Sparkles className="w-2.5 h-2.5 text-[#90CAF9] flex-shrink-0" />
         <span>{node.title}</span>
       </Link>
     );
@@ -812,14 +812,14 @@ export default function Sidebar() {
       {/* ========================================================= */}
       {/* 1. DESKTOP SIDEBAR (বড় স্ক্রিনে দেখাবে: lg:flex)          */}
       {/* ========================================================= */}
-      <aside className="hidden lg:flex sticky top-0 left-0 w-66 bg-[#043e30] text-gray-100 h-screen flex-col border-r border-emerald-800/40 z-50 print:hidden">
+      <aside className="hidden lg:flex sticky top-0 left-0 w-66 bg-[#0D47A1] text-gray-100 h-screen flex-col border-r border-[#90CAF9]/30 z-50 print:hidden">
         {/* ব্র্যান্ড লোগো */}
-        <div className="p-4 border-b border-emerald-800/40 flex items-center justify-between bg-emerald-950/30">
+        <div className="p-4 border-b border-[#90CAF9]/30 flex items-center justify-between bg-[#0A3880]/60">
           <Link
             href="/"
             className="group flex items-center gap-2.5 focus:outline-none"
           >
-            <div className="w-10 h-10 rounded-full border border-blue-900 p-0.5 flex-shrink-0 flex items-center justify-center bg-white">
+            <div className="w-10 h-10 rounded-full border border-[#90CAF9] p-0.5 flex-shrink-0 flex items-center justify-center bg-white shadow-sm">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={siteConfig.assets.logo}
@@ -828,10 +828,10 @@ export default function Sidebar() {
               />
             </div>
             <div>
-              <h2 className="font-black text-sm text-amber-400 tracking-wide">
+              <h2 className="font-black text-sm text-white tracking-wide">
                 {siteConfig.name.bn}
               </h2>
-              <p className="text-[10px] text-emerald-300/80 font-medium tracking-wider">
+              <p className="text-[10px] text-[#90CAF9] font-medium tracking-wider">
                 {siteConfig.address.district}, {siteConfig.address.country}
               </p>
             </div>
@@ -839,13 +839,13 @@ export default function Sidebar() {
         </div>
 
         {/* মেনু আইটেমসমূহ */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-1.5 scrollbar-thin scrollbar-thumb-emerald-900/60 scrollbar-track-transparent">
+        <div className="flex-1 overflow-y-auto p-3 space-y-1.5 scrollbar-thin scrollbar-thumb-[#1976D2]/60 scrollbar-track-transparent">
           {isPending ? (
             <div className="space-y-3 p-2 animate-pulse">
               {[...Array(6)].map((_, i) => (
                 <div
                   key={i}
-                  className="h-9 bg-emerald-900/40 rounded-xl w-full"
+                  className="h-9 bg-[#1976D2]/40 rounded-xl w-full"
                 ></div>
               ))}
             </div>
@@ -863,8 +863,8 @@ export default function Sidebar() {
                         setOpenDropdown(isDropdownOpen ? null : item.id)
                       }
                       className={`w-full flex items-center justify-between px-3 py-2.5 text-xs sm:text-sm rounded-xl transition-all duration-300 group/btn ${isDropdownOpen
-                        ? "bg-emerald-900/80 text-amber-300 shadow-inner border-l-4 border-amber-400 pl-2"
-                        : "text-emerald-100/90 hover:bg-emerald-800/40 hover:text-white hover:translate-x-1"
+                        ? "bg-[#2196F3] text-white shadow-md border-l-4 border-white pl-2"
+                        : "text-[#E3F2FD]/90 hover:bg-[#1976D2]/40 hover:text-white hover:translate-x-1"
                         }`}
                     >
                       <div className="flex items-center gap-3">
@@ -876,7 +876,7 @@ export default function Sidebar() {
                         </span>
                       </div>
                       <span
-                        className={`text-[10px] text-emerald-400 transition-transform duration-300 ${isDropdownOpen ? "rotate-180 text-amber-400" : ""}`}
+                        className={`text-[10px] text-[#90CAF9] transition-transform duration-300 ${isDropdownOpen ? "rotate-180 text-white" : ""}`}
                       >
                         ▼
                       </span>
@@ -885,8 +885,8 @@ export default function Sidebar() {
                     <Link
                       href={item.href || "#"}
                       className={`flex items-center gap-3 px-3 py-2.5 text-xs sm:text-sm rounded-xl transition-all duration-300 group/link ${isActive
-                        ? "bg-amber-400 text-[#043e30] font-black shadow-md border-r-4 border-emerald-900 scale-[1.02]"
-                        : "text-emerald-100/90 hover:bg-emerald-800/40 hover:text-white hover:translate-x-1"
+                        ? "bg-[#2196F3] text-white font-black shadow-md border-r-4 border-white scale-[1.02]"
+                        : "text-[#E3F2FD]/90 hover:bg-[#1976D2]/40 hover:text-white hover:translate-x-1"
                         }`}
                     >
                       <span className="text-base transform group-hover/link:scale-110 transition-transform">
@@ -901,7 +901,7 @@ export default function Sidebar() {
                   {/* ড্রপডাউন মেনু */}
                   {hasDropdown && (
                     <div
-                      className={`pl-4 space-y-1 border-l-2 border-emerald-800/50 ml-5 transition-all duration-300 ${isDropdownOpen
+                      className={`pl-4 space-y-1 border-l-2 border-[#90CAF9]/40 ml-5 transition-all duration-300 ${isDropdownOpen
                         ? "max-h-[2000px] opacity-100 py-1"
                         : "max-h-0 opacity-0 overflow-hidden"
                         }`}
@@ -919,13 +919,13 @@ export default function Sidebar() {
 
         {/* ইউজার প্রোফাইল কার্ড */}
         {!isPending && session && (
-          <div className="p-3 border-t border-emerald-800/40 bg-emerald-950/40">
+          <div className="p-3 border-t border-[#90CAF9]/30 bg-[#0A3880]/60">
             <Link
               href="/dashboard/profile-settings"
-              className="flex items-center gap-3 px-2 py-2 rounded-xl bg-emerald-900/30 border border-emerald-800/30 hover:bg-emerald-900/60 hover:border-amber-400/30 transition-all group"
+              className="flex items-center gap-3 px-2 py-2 rounded-xl bg-[#0D47A1]/80 border border-[#90CAF9]/30 hover:bg-[#1976D2]/50 hover:border-white/40 transition-all group"
               title="প্রোফাইল সেটিংস"
             >
-              <div className="w-8 h-8 rounded-full bg-amber-400 text-[#043e30] flex items-center justify-center font-black text-sm group-hover:scale-105 transition-transform">
+              <div className="w-8 h-8 rounded-full bg-[#2196F3] text-white flex items-center justify-center font-black text-sm group-hover:scale-105 transition-transform shadow-xs">
                 {user?.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -938,14 +938,14 @@ export default function Sidebar() {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="text-xs font-bold text-slate-100 truncate group-hover:text-amber-300 transition-colors">
+                <h4 className="text-xs font-bold text-white truncate group-hover:text-[#90CAF9] transition-colors">
                   {userName}
                 </h4>
-                <span className="inline-block text-[9px] font-extrabold bg-amber-400/10 text-amber-400 px-2 py-0.5 rounded-md uppercase tracking-widest mt-0.5">
+                <span className="inline-block text-[9px] font-extrabold bg-[#2196F3]/25 text-[#90CAF9] border border-[#90CAF9]/30 px-2 py-0.5 rounded-md uppercase tracking-widest mt-0.5">
                   {displayRoleName(userRole)}
                 </span>
               </div>
-              <Settings className="w-3.5 h-3.5 text-emerald-400 opacity-60 group-hover:opacity-100 group-hover:rotate-90 transition-all" />
+              <Settings className="w-3.5 h-3.5 text-[#90CAF9] opacity-75 group-hover:opacity-100 group-hover:rotate-90 transition-all" />
             </Link>
           </div>
         )}
@@ -955,7 +955,7 @@ export default function Sidebar() {
       {/* 2. MOBILE BOTTOM NAVBAR (ছোট স্ক্রিনে দেখাবে: lg:hidden)      */}
       {/* ========================================================= */}
 
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#043e30] border-t-2 border-amber-400/40 shadow-2xl lg:hidden pb-safe print:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0D47A1] border-t-2 border-[#90CAF9]/40 shadow-2xl lg:hidden pb-safe print:hidden">
         <div className="flex justify-around items-center h-16 px-1">
           {/* রোল ভিত্তিক ৪টি স্পেসিফিক ডাইনামিক মেনু */}
           {mobileBottomNavItems.map((item) => {
@@ -980,7 +980,7 @@ export default function Sidebar() {
             const Content = (
               <>
                 {(isDrawerActive || isRouteActive) && (
-                  <span className="absolute top-0 w-8 h-1 bg-amber-400 rounded-full shadow-md" />
+                  <span className="absolute top-0 w-8 h-1 bg-[#2196F3] rounded-full shadow-md" />
                 )}
                 <div
                   className={`transition-transform duration-300 ${isDrawerActive || isRouteActive ? "scale-110" : ""}`}
@@ -999,8 +999,8 @@ export default function Sidebar() {
                   key={item.id}
                   onClick={() => handleBottomNavItemClick(item)}
                   className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative ${isDrawerActive || isRouteActive
-                    ? "text-amber-400 font-bold"
-                    : "text-emerald-200/70 hover:text-white"
+                    ? "text-[#2196F3] font-bold"
+                    : "text-[#90CAF9]/80 hover:text-white"
                     }`}
                 >
                   {Content}
@@ -1014,8 +1014,8 @@ export default function Sidebar() {
                 href={item.href || "#"}
                 onClick={() => setActiveMobileDrawer(null)}
                 className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative ${isRouteActive
-                  ? "text-amber-400 font-bold"
-                  : "text-emerald-200/70 hover:text-white"
+                  ? "text-[#2196F3] font-bold"
+                  : "text-[#90CAF9]/80 hover:text-white"
                   }`}
               >
                 {Content}
@@ -1031,15 +1031,15 @@ export default function Sidebar() {
               )
             }
             className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative ${activeMobileDrawer === "full"
-              ? "text-amber-400 font-bold"
-              : "text-emerald-200/70 hover:text-white"
+              ? "text-[#2196F3] font-bold"
+              : "text-[#90CAF9]/80 hover:text-white"
               }`}
           >
             {activeMobileDrawer === "full" && (
-              <span className="absolute top-0 w-8 h-1 bg-amber-400 rounded-full" />
+              <span className="absolute top-0 w-8 h-1 bg-[#2196F3] rounded-full" />
             )}
             <div
-              className={`p-1 rounded-lg transition-transform duration-300 ${activeMobileDrawer === "full" ? "rotate-90 text-amber-400" : ""}`}
+              className={`p-1 rounded-lg transition-transform duration-300 ${activeMobileDrawer === "full" ? "rotate-90 text-[#2196F3]" : ""}`}
             >
               {activeMobileDrawer === "full" ? (
                 <X className="w-5 h-5" />
@@ -1058,30 +1058,30 @@ export default function Sidebar() {
 
       {activeMobileDrawer && (
         <div
-          className="fixed inset-0 z-40 bg-emerald-950/60 backdrop-blur-xs lg:hidden transition-all duration-300"
+          className="fixed inset-0 z-40 bg-[#0D47A1]/60 backdrop-blur-xs lg:hidden transition-all duration-300"
           onClick={() => setActiveMobileDrawer(null)}
         >
           <div
-            className="fixed bottom-16 left-0 right-0 max-h-[75vh] bg-[#043e30] rounded-t-3xl overflow-y-auto p-4 border-t border-emerald-700/50 text-gray-100 shadow-2xl"
+            className="fixed bottom-16 left-0 right-0 max-h-[75vh] bg-[#0D47A1] rounded-t-3xl overflow-y-auto p-4 border-t border-[#90CAF9]/40 text-gray-100 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* ড্রয়ার গ্রিপ বার */}
-            <div className="w-12 h-1.5 bg-emerald-700/60 rounded-full mx-auto mb-3" />
+            <div className="w-12 h-1.5 bg-[#90CAF9]/50 rounded-full mx-auto mb-3" />
 
             {/* ৩.১ নির্দিষ্ট মেনুর নিজ ড্রয়ার (Item-Specific Drawer) */}
             {typeof activeMobileDrawer === "object" &&
               activeMobileDrawer?.dropdown && (
                 <div>
-                  <div className="flex items-center justify-between border-b border-emerald-800/60 pb-3 mb-3">
+                  <div className="flex items-center justify-between border-b border-[#90CAF9]/30 pb-3 mb-3">
                     <div className="flex items-center gap-2">
                       <span className="text-xl">{activeMobileDrawer.icon}</span>
-                      <h3 className="font-bold text-amber-400 text-base">
+                      <h3 className="font-bold text-white text-base">
                         {activeMobileDrawer.title}
                       </h3>
                     </div>
                     <button
                       onClick={() => setActiveMobileDrawer(null)}
-                      className="text-emerald-300 hover:text-white"
+                      className="text-[#90CAF9] hover:text-white"
                     >
                       <X className="w-5 h-5" />
                     </button>
@@ -1099,16 +1099,16 @@ export default function Sidebar() {
             {activeMobileDrawer === "full" && (
               <div>
                 {!isPending && session && (
-                  <div className="bg-emerald-950/80 border border-emerald-800/60 p-3 rounded-2xl mb-4 flex items-center justify-between shadow-inner">
+                  <div className="bg-[#0A3880]/80 border border-[#90CAF9]/30 p-3 rounded-2xl mb-4 flex items-center justify-between shadow-inner">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-amber-400 text-[#043e30] font-bold flex items-center justify-center text-sm">
+                      <div className="w-9 h-9 rounded-full bg-[#2196F3] text-white font-bold flex items-center justify-center text-sm shadow-xs">
                         {avatarLetter.toUpperCase()}
                       </div>
                       <div>
-                        <p className="text-xs text-amber-300 font-semibold">
+                        <p className="text-xs text-white font-semibold">
                           {userName}
                         </p>
-                        <p className="text-[10px] text-emerald-300 capitalize">
+                        <p className="text-[10px] text-[#90CAF9] capitalize">
                           {displayRoleName(userRole)}
                         </p>
                       </div>
@@ -1116,7 +1116,7 @@ export default function Sidebar() {
                   </div>
                 )}
 
-                <div className="text-center font-bold text-amber-400 text-sm mb-3 pb-2 border-b border-emerald-800/50">
+                <div className="text-center font-bold text-white text-sm mb-3 pb-2 border-b border-[#90CAF9]/30">
                   সকল ড্যাশবোর্ড মেনুসমূহ
                 </div>
 
@@ -1129,7 +1129,7 @@ export default function Sidebar() {
                     return (
                       <div
                         key={item.id}
-                        className="bg-emerald-950/40 rounded-xl border border-emerald-800/30 overflow-hidden"
+                        className="bg-[#0A3880]/40 rounded-xl border border-[#90CAF9]/25 overflow-hidden"
                       >
                         {hasDropdown ? (
                           <div>
@@ -1138,8 +1138,8 @@ export default function Sidebar() {
                                 setOpenDropdown(isDropdownOpen ? null : item.id)
                               }
                               className={`w-full flex justify-between items-center p-3 text-left font-medium transition-colors ${isDropdownOpen
-                                ? "bg-emerald-900/60 text-amber-300"
-                                : "text-emerald-100"
+                                ? "bg-[#2196F3] text-white"
+                                : "text-[#E3F2FD]"
                                 }`}
                             >
                               <div className="flex items-center gap-3">
@@ -1149,12 +1149,12 @@ export default function Sidebar() {
                                 </span>
                               </div>
                               <ChevronDown
-                                className={`w-4 h-4 text-emerald-400 transition-transform duration-300 ${isDropdownOpen ? "rotate-180 text-amber-400" : ""}`}
+                                className={`w-4 h-4 text-[#90CAF9] transition-transform duration-300 ${isDropdownOpen ? "rotate-180 text-white" : ""}`}
                               />
                             </button>
 
                             {isDropdownOpen && (
-                              <div className="bg-emerald-950/90 border-t border-emerald-800/40 divide-y divide-emerald-900/40">
+                              <div className="bg-[#0D47A1]/90 border-t border-[#90CAF9]/30 divide-y divide-[#90CAF9]/20">
                                 {item.dropdown.map((subItem, subIdx) =>
                                   renderMobileFullSubmenu(subItem, subIdx, 0),
                                 )}
@@ -1166,8 +1166,8 @@ export default function Sidebar() {
                             href={item.href || "#"}
                             onClick={() => setActiveMobileDrawer(null)}
                             className={`flex items-center gap-3 p-3 text-xs font-semibold transition-colors ${isActive
-                              ? "text-amber-400 bg-emerald-900/60"
-                              : "text-emerald-100 hover:text-white"
+                              ? "text-white bg-[#2196F3]"
+                              : "text-[#E3F2FD] hover:text-white"
                               }`}
                           >
                             <span className="text-base">{item.icon}</span>

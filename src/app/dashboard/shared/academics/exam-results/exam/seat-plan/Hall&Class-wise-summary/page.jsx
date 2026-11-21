@@ -1,105 +1,147 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import siteConfig from '@/config/siteConfig';
+import { toBengaliDigits } from '@/lib/studentUtils';
+
+// শ্রেণি অনুযায়ী ডাটা তালিকা (প্লে থেকে হিফজ পর্যন্ত নিখুঁত ক্রম)
+const CLASSES_LIST = [
+    'প্লে',
+    'নার্সারি',
+    'প্রথম',
+    'দ্বিতীয়',
+    'তৃতীয়',
+    'চতুর্থ',
+    'পঞ্চম',
+    'ষষ্ঠ',
+    'সপ্তম',
+    'অষ্টম',
+    'নবম',
+    'দশম',
+    'কায়দা/আমপারা',
+    'নাজেরা',
+    'সবক',
+    'হিফজ',
+];
+
+// প্রিন্ট ডেট ফরম্যাট করার হেলপার
+const formatPrintDate = () => {
+    const d = new Date();
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    let hours = d.getHours();
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const seconds = String(d.getSeconds()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'pm' : 'am';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    const strTime = `${hours}:${minutes}:${seconds}${ampm}`;
+    return `${day}-${month}-${year} ${strTime}`;
+};
+
+// হল নাম ফরম্যাট করার হেলপার (১ -> হল নং ১ — নিচ তলার নার্সারির রুম)
+const formatHallName = (name) => {
+    if (!name && name !== 0) return "হল নাম বিহীন";
+    const str = String(name).trim();
+    if (str === '1') return "হল নং ১ — নিচ তলার নার্সারির রুম (Ground Floor, Nursery Room)";
+    if (str === '2') return "হল নং ২ — ২য় তলার থ্রির রুম (2nd Floor, Class Three Room)";
+    if (str === '3') return "হল নং ৩ — ২য় তলার ক্লাস টু এর রুম (2nd Floor, Class Two Room)";
+    if (str === '4') return "হল নং ৪ — ৩য় তলায় হিফজ বিভাগের ক্লাস রুম (3rd Floor, Hifz Room)";
+    if (/^\d+$/.test(str)) {
+        return `হল নং - ${toBengaliDigits(str)}`;
+    }
+    return str;
+};
+
+// ড্রপডাউনের জন্য সংক্ষিপ্ত নাম
+const formatHallOption = (name) => {
+    if (!name && name !== 0) return "হল নাম বিহীন";
+    const str = String(name).trim();
+    if (str === '1') return "হল নং ১ (নিচ তলা - নার্সারি)";
+    if (str === '2') return "হল নং ২ (২য় তলা - ক্লাস থ্রি)";
+    if (str === '3') return "হল নং ৩ (২য় তলা - ক্লাস টু)";
+    if (str === '4') return "হল নং ৪ (৩য় তলা - হিফজ বিভাগ)";
+    return `হল নং ${toBengaliDigits(str)}`;
+};
+
+// বানানের তারতম্য সত্ত্বেও শ্রেণির সংখ্যা ম্যাচ করার হেলপার
+const getCountForClass = (classCounts, className) => {
+    if (!classCounts) return 0;
+    
+    const normalize = (str) => {
+        if (!str) return '';
+        return String(str)
+            .normalize('NFC')
+            .replace(/ী/g, 'ি')
+            .replace(/ূ/g, 'ু')
+            .replace(/তৃ/g, 'তৃ')
+            .replace(/\s+/g, '')
+            .trim();
+    };
+
+    const normalizedName = normalize(className);
+    for (const key of Object.keys(classCounts)) {
+        if (normalize(key) === normalizedName) {
+            return Number(classCounts[key]) || 0;
+        }
+    }
+    return 0;
+};
 
 export default function SeatPlanSummary() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [groupedData, setGroupedData] = useState({});
     const [selectedHall, setSelectedHall] = useState('');
-    const [year, setYear] = useState('২০২৬');
-    const [printDate, setPrintDate] = useState('');
+    const [year] = useState(siteConfig.academicSession || '২০২৬');
+    const [printDate] = useState(formatPrintDate);
 
-    // শ্রেণি অনুযায়ী ডাটা তালিকা
-    const classesList = [
-        'প্রথম',
-        'দ্বিতীয়',
-        'তৃতীয়',
-        'চতুর্থ',
-        'পঞ্চম',
-        'ষষ্ঠ',
-        'সপ্তম',
-        'অষ্টম',
-        'প্লে',
-        'নার্সারি',
-
-    ];
-
-    // প্রিন্ট ডেট ফরম্যাট করার হেলপার
-    const formatPrintDate = () => {
-        const d = new Date();
-        const day = String(d.getDate()).padStart(2, '0');
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const year = d.getFullYear();
-        let hours = d.getHours();
-        const minutes = String(d.getMinutes()).padStart(2, '0');
-        const seconds = String(d.getSeconds()).padStart(2, '0');
-        const ampm = hours >= 12 ? 'pm' : 'am';
-        hours = hours % 12;
-        hours = hours ? hours : 12; // hour '0' matches '12'
-        const strTime = `${hours}:${minutes}:${seconds}${ampm}`;
-        return `${day}-${month}-${year} ${strTime}`;
-    };
-
-    // হল নাম ফরম্যাট করার হেলপার (১ -> হল নং - ১)
-    const formatHallName = (name) => {
-        if (!name) return "হল নাম বিহীন";
-        const bengaliDigits = { '0': '০', '1': '১', '2': '২', '3': '৩', '4': '৪', '5': '৫', '6': '৬', '7': '৭', '8': '৮', '9': '৯' };
-        if (/^\d+$/.test(name)) {
-            const bnNum = name.split('').map(d => bengaliDigits[d] || d).join('');
-            return `হল নং - ${bnNum}`;
-        }
-        return name;
-    };
-
-    // বানানের তারতম্য সত্ত্বেও শ্রেণির সংখ্যা ম্যাচ করার হেলপার
-    const getCountForClass = (classCounts, className) => {
-        if (!classCounts) return 0;
-        
-        // normalizer supporting NFC normal form, and spelling/character fixes
-        const normalize = (str) => {
-            if (!str) return '';
-            return String(str)
-                .normalize('NFC')
-                .replace(/ী/g, 'ি')
-                .replace(/তৃ/g, 'তৃ');
-        };
-
-        const normalizedName = normalize(className);
-        for (const key of Object.keys(classCounts)) {
-            if (normalize(key) === normalizedName) {
-                return classCounts[key];
-            }
-        }
-        return 0;
-    };
-
-    useEffect(() => {
-        setPrintDate(formatPrintDate());
-        fetchSeatPlanSummary();
-    }, []);
-
-    const fetchSeatPlanSummary = async () => {
+    const fetchSeatPlanSummary = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
-            const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/seat-plans/summary`);
-            const result = await response.json();
 
-            if (result.success && result.data) {
+            let result = null;
+            // ১. এক্সটার্নাল API
+            try {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/seat-plans/summary`, {
+                    cache: "no-store",
+                    headers: { "Cache-Control": "no-cache" }
+                });
+                if (response.ok) {
+                    result = await response.json();
+                }
+            } catch (err) {
+                console.warn("External summary fetch failed, trying local fallback:", err);
+            }
+
+            // ২. লোকাল Next.js API ফলব্যাক
+            if (!result || !result.success) {
+                try {
+                    const localRes = await fetch(`/api/seat-plans/summary`, { cache: "no-store" });
+                    if (localRes.ok) {
+                        result = await localRes.json();
+                    }
+                } catch (localErr) {
+                    console.warn("Local summary fetch failed:", localErr);
+                }
+            }
+
+            if (result && result.success && result.data) {
                 setGroupedData(result.data);
-                const halls = Object.keys(result.data).sort((a, b) => {
+                const hallsList = Object.keys(result.data).sort((a, b) => {
                     const numA = parseInt(a, 10);
                     const numB = parseInt(b, 10);
                     if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
                     return a.localeCompare(b);
                 });
-                if (halls.length > 0) {
-                    setSelectedHall(halls[0]);
+                if (hallsList.length > 0) {
+                    setSelectedHall((prev) => prev || hallsList[0]);
                 }
             } else {
-                setError(result.message || 'সিট প্ল্যানের তথ্য পাওয়া যায়নি।');
+                setError(result?.message || 'সিট প্ল্যানের তথ্য পাওয়া যায়নি।');
             }
         } catch (err) {
             console.error('Error fetching seat plan summary:', err);
@@ -107,7 +149,35 @@ export default function SeatPlanSummary() {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchSeatPlanSummary();
+        }, 0);
+        return () => clearTimeout(timer);
+    }, [fetchSeatPlanSummary]);
+
+    const halls = useMemo(() => {
+        return Object.keys(groupedData).sort((a, b) => {
+            const numA = parseInt(a, 10);
+            const numB = parseInt(b, 10);
+            if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+            return a.localeCompare(b);
+        });
+    }, [groupedData]);
+
+    const activeCounts = useMemo(() => groupedData[selectedHall] || {}, [groupedData, selectedHall]);
+    const formattedHallNameStr = formatHallName(selectedHall);
+
+    // সর্বমোট পরীক্ষার্থী হিসাব
+    const grandTotal = useMemo(() => {
+        let sum = 0;
+        CLASSES_LIST.forEach((cls) => {
+            sum += getCountForClass(activeCounts, cls);
+        });
+        return sum;
+    }, [activeCounts]);
 
     // প্রিন্ট ফাংশন
     const handlePrint = () => {
@@ -132,7 +202,7 @@ export default function SeatPlanSummary() {
                     <p className="text-slate-600 mt-1">{error}</p>
                     <button
                         onClick={fetchSeatPlanSummary}
-                        className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
+                        className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer"
                     >
                         আবার চেষ্টা করুন
                     </button>
@@ -140,13 +210,6 @@ export default function SeatPlanSummary() {
             </div>
         );
     }
-
-    const halls = Object.keys(groupedData).sort((a, b) => {
-        const numA = parseInt(a, 10);
-        const numB = parseInt(b, 10);
-        if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
-        return a.localeCompare(b);
-    });
 
     if (halls.length === 0) {
         return (
@@ -159,9 +222,6 @@ export default function SeatPlanSummary() {
             </div>
         );
     }
-
-    const activeCounts = groupedData[selectedHall] || {};
-    const formattedHallNameStr = formatHallName(selectedHall);
 
     return (
         <div className="bg-slate-100 min-h-screen p-2 sm:p-6 flex flex-col items-center">
@@ -194,7 +254,7 @@ export default function SeatPlanSummary() {
                         >
                             {halls.map((hall) => (
                                 <option key={hall} value={hall}>
-                                    {formatHallName(hall)}
+                                    {formatHallOption(hall)}
                                 </option>
                             ))}
                         </select>
@@ -239,7 +299,7 @@ export default function SeatPlanSummary() {
 
                 {/* Title */}
                 <h2 className="text-center font-bold text-xl sm:text-2xl mt-4 mb-2 text-black">
-                    সিট প্ল্যান - {year}
+                    সিট প্ল্যান - {toBengaliDigits(year)}
                 </h2>
 
                 {/* Print Timestamp on Right */}
@@ -265,22 +325,32 @@ export default function SeatPlanSummary() {
                         </thead>
 
                         <tbody>
-                            {classesList.map((cls, idx) => {
+                            {CLASSES_LIST.map((cls, idx) => {
                                 const totalCount = getCountForClass(activeCounts, cls);
                                 return (
-                                    <tr key={idx} className="h-8">
+                                    <tr key={idx} className="h-8 hover:bg-slate-50 transition-colors">
                                         {/* Class Name */}
                                         <td className="border border-black px-2 text-center font-semibold">
                                             {cls}
                                         </td>
 
                                         {/* Total Students */}
-                                        <td className="border border-black px-2 text-center font-medium">
-                                            {totalCount}
+                                        <td className="border border-black px-2 text-center font-bold">
+                                            {toBengaliDigits(totalCount)}
                                         </td>
                                     </tr>
                                 );
                             })}
+
+                            {/* সর্বমোট পরীক্ষার্থী */}
+                            <tr className="bg-gray-200 print:bg-gray-200 h-9 font-black">
+                                <td className="border border-black px-2 text-center text-sm font-black">
+                                    সর্বমোট পরীক্ষার্থী
+                                </td>
+                                <td className="border border-black px-2 text-center text-sm font-black">
+                                    {toBengaliDigits(grandTotal)}
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>

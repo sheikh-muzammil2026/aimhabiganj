@@ -817,9 +817,9 @@ export default function FinanceDashboard() {
         )}
 
         {/* Top Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-emerald-900/10 pb-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#90CAF9]/40 pb-5">
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-emerald-950 flex items-center gap-2 flex-wrap">
+            <h1 className="text-xl sm:text-2xl font-black text-[#0D47A1] flex items-center gap-2 flex-wrap">
               <span>🕌</span> <span>আর্থিক ব্যবস্থাপনা মডিউল</span>
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
@@ -830,16 +830,16 @@ export default function FinanceDashboard() {
 
           {/* Month/Year & Fund Selection for Overview */}
           {activeTab === "overview" && (
-            <div className="flex flex-wrap items-center justify-between sm:justify-start gap-2 bg-white p-2 rounded-xl border border-emerald-900/10 shadow-xs shrink-0 w-full sm:w-auto">
+            <div className="flex flex-wrap items-center justify-between sm:justify-start gap-2 bg-white p-2 rounded-xl border border-[#90CAF9]/50 shadow-xs shrink-0 w-full sm:w-auto">
               <div className="flex flex-wrap items-center gap-2 min-w-0">
-                <Calendar className="w-4 h-4 text-emerald-800 shrink-0" />
+                <Calendar className="w-4 h-4 text-[#2196F3] shrink-0" />
                 <select
                   value={reportAccount}
                   onChange={(e) => {
                     setReportAccount(e.target.value);
                     setTxPage(1);
                   }}
-                  className="text-xs font-bold text-emerald-900 bg-emerald-50/70 px-2 py-1 rounded-lg border border-emerald-200 focus:outline-none cursor-pointer"
+                  className="text-xs font-bold text-[#0D47A1] bg-[#E3F2FD] px-2 py-1 rounded-lg border border-[#90CAF9] focus:outline-none cursor-pointer"
                 >
                   <option value="all">সকল ফান্ড (সমন্বিত)</option>
                   {FUND_ACCOUNTS.map((f) => (
@@ -904,7 +904,7 @@ export default function FinanceDashboard() {
               onClick={() => setActiveTab(tab.id)}
               className={`py-2.5 sm:py-3 px-3 sm:px-5 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-all duration-200 rounded-t-lg shrink-0 ${
                 activeTab === tab.id
-                  ? "border-emerald-750 text-emerald-950 bg-emerald-50/50"
+                  ? "border-[#2196F3] text-[#0D47A1] bg-[#E3F2FD]"
                   : "border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50"
               }`}
             >

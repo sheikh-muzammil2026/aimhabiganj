@@ -117,6 +117,14 @@ const SeatStickersPrintView = forwardRef(function SeatStickersPrintView(
             const hallDisplay = currentSeat.hallNo || student.hallNo || "—";
             const benchDisplay = currentSeat.benchNo || student.benchNo || "";
             const seatDisplay = currentSeat.seatNo || student.seatNo || "—";
+            const studentPhoto =
+              student.studentImage ||
+              student.profilePhoto ||
+              student.photoUrl ||
+              student.profileImage ||
+              student.image ||
+              student.avatar ||
+              "";
 
             return (
               <div
@@ -161,9 +169,9 @@ const SeatStickersPrintView = forwardRef(function SeatStickersPrintView(
                   {/* ছবি ও রোল ফ্রেম */}
                   <div className="flex flex-col items-center flex-shrink-0">
                     <div className="w-[19mm] h-[23mm] rounded-lg border border-slate-300 overflow-hidden relative bg-slate-100 flex items-center justify-center shadow-2xs">
-                      {isValidImageUrl(student.studentImage) ? (
+                      {isValidImageUrl(studentPhoto) ? (
                         <img
-                          src={student.studentImage.trim()}
+                          src={studentPhoto.trim()}
                           alt={
                             student.studentNameBangla ||
                             student.studentNameEnglish ||

@@ -41,7 +41,7 @@ export default function SeatStickersGeneratorPage() {
 
   // ফিল্টারিং স্টেটসমূহ
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedSession, setSelectedSession] = useState("২০২৬");
+  const [selectedSession, setSelectedSession] = useState(siteConfig.academicSession || "২০২৬");
   const [selectedDivision, setSelectedDivision] = useState("all");
   const [selectedAcademyType, setSelectedAcademyType] = useState("all");
   const [selectedClass, setSelectedClass] = useState("all");
@@ -53,7 +53,10 @@ export default function SeatStickersGeneratorPage() {
     let isMounted = true;
     const fetchExams = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/admit-cards/exams`);
+        const res = await fetch(`${API_BASE_URL}/api/admit-cards/exams`, {
+          cache: "no-store",
+          headers: { "Cache-Control": "no-cache" },
+        });
         if (!res.ok) return;
         const data = await res.json();
         if (isMounted && data?.success && Array.isArray(data.data) && data.data.length > 0) {
@@ -75,13 +78,37 @@ export default function SeatStickersGeneratorPage() {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(
-        `${API_BASE_URL}/api/students?status=Approved&activity=active&limit=1000`,
-      );
-      if (!res.ok) {
-        throw new Error(`Failed to fetch students: ${res.status}`);
+      let data = null;
+
+      try {
+        const res = await fetch(
+          `${API_BASE_URL}/api/students?status=Approved&activity=active&limit=1000`,
+          {
+            cache: "no-store",
+            headers: { "Cache-Control": "no-cache" },
+          }
+        );
+        if (res.ok) {
+          data = await res.json();
+        }
+      } catch (err) {
+        console.warn("External students fetch failed, trying local fallback:", err);
       }
-      const data = await res.json();
+
+      if (!data || !data.success) {
+        try {
+          const localRes = await fetch(
+            `/api/students?status=Approved&activity=active&limit=1000`,
+            { cache: "no-store" }
+          );
+          if (localRes.ok) {
+            data = await localRes.json();
+          }
+        } catch (localErr) {
+          console.warn("Local students fetch failed:", localErr);
+        }
+      }
+
       if (data?.success && Array.isArray(data.data)) {
         // রোল এবং ক্লাস অনুযায়ী সর্ট করা
         const sorted = [...data.data].sort(compareStudentsByClassAndRoll);
@@ -460,6 +487,14 @@ export default function SeatStickersGeneratorPage() {
               const benchDisplay = currentSeat.benchNo || student.benchNo || "";
               const seatDisplay = currentSeat.seatNo || student.seatNo || "—";
               const hasSeat = Boolean(currentSeat.seatNo || student.seatNo);
+              const studentPhoto =
+                student.studentImage ||
+                student.profilePhoto ||
+                student.photoUrl ||
+                student.profileImage ||
+                student.image ||
+                student.avatar ||
+                "";
 
               return (
                 <div
@@ -485,7 +520,7 @@ export default function SeatStickersGeneratorPage() {
                         />
                       </div>
                       <span className="text-[10px] font-black text-[#043e30] truncate">
-                        আস-সালাম মাদরাসা
+                        {siteConfig.name.bn}
                       </span>
                     </div>
 
@@ -497,9 +532,9 @@ export default function SeatStickersGeneratorPage() {
                   {/* ছবি ও তথ্যাবলী */}
                   <div className="flex items-center gap-2.5 my-2.5">
                     <div className="w-12 h-14 rounded-lg border border-slate-300 overflow-hidden relative bg-slate-100 flex items-center justify-center shrink-0">
-                      {isValidImageUrl(student.studentImage) ? (
+                      {isValidImageUrl(studentPhoto) ? (
                         <img
-                          src={student.studentImage.trim()}
+                          src={studentPhoto.trim()}
                           alt={student.studentNameBangla || student.studentNameEnglish || "Student"}
                           loading="eager"
                           referrerPolicy="no-referrer"

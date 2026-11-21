@@ -16,36 +16,36 @@ export default function Roster({ data }) {
   const rosterData = data || fallbackData;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="site-container">
       <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-bold text-emerald-900 dark:text-emerald-400 flex items-center justify-center gap-3">
-          <span className="hidden sm:inline text-amber-500">❖</span>
+        <h2 className="heading-primary flex items-center justify-center gap-3">
+          <span className="hidden sm:inline text-[#2196F3]">❖</span>
           {rosterData.title}
-          <span className="hidden sm:inline text-amber-500">❖</span>
+          <span className="hidden sm:inline text-[#2196F3]">❖</span>
         </h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">{rosterData.subtitle}</p>
-        <div className="w-24 h-1 bg-amber-500 mx-auto mt-4 rounded-full relative">
-          <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-emerald-800 rotate-45 border border-amber-400"></div>
+        <p className="text-sm text-[#1E293B] mt-2">{rosterData.subtitle}</p>
+        <div className="w-24 h-1 bg-[#2196F3] mx-auto mt-4 rounded-full relative">
+          <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-[#0D47A1] rotate-45 border border-[#90CAF9]"></div>
         </div>
       </div>
 
       {/* রেসপনসিভ টেবিল কন্টেইনার */}
-      <div className="overflow-x-auto rounded-2xl border border-emerald-100 dark:border-slate-700 shadow-md">
+      <div className="overflow-x-auto rounded-2xl border border-[#90CAF9] shadow-md">
         <table className="w-full text-left border-collapse text-sm">
           <thead>
-            <tr className="bg-emerald-900 text-white dark:bg-slate-800 border-b border-emerald-800 dark:border-slate-700 text-right sm:text-left">
+            <tr className="bg-[#0D47A1] text-white border-b border-[#90CAF9] text-right sm:text-left">
               {rosterData.headers?.map((header, idx) => (
-                <th key={idx} className="p-4 font-bold text-amber-400 tracking-wide text-xs sm:text-sm">{header}</th>
+                <th key={idx} className="p-4 font-bold text-[#90CAF9] tracking-wide text-xs sm:text-sm">{header}</th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-slate-700/60 bg-white dark:bg-slate-900">
+          <tbody className="divide-y divide-[#90CAF9]/30 bg-white">
             {rosterData.rows?.map((row, index) => (
-              <tr key={index} className="hover:bg-emerald-50/30 dark:hover:bg-slate-800/30 transition-colors">
-                <td className="p-4 font-bold text-emerald-950 dark:text-emerald-300">{row.dept}</td>
-                <td className="p-4 font-medium text-gray-700 dark:text-gray-200">{row.head}</td>
-                <td className="p-4 text-gray-600 dark:text-gray-400">{row.assistant}</td>
-                <td className="p-4 text-xs font-semibold text-emerald-800 dark:text-emerald-400 bg-emerald-50/40 dark:bg-slate-800/20">{row.focus}</td>
+              <tr key={index} className="hover:bg-[#E3F2FD]/50 transition-colors">
+                <td className="p-4 font-bold text-[#0D47A1]">{row.dept}</td>
+                <td className="p-4 font-medium text-[#1E293B]">{row.head}</td>
+                <td className="p-4 text-slate-600">{row.assistant}</td>
+                <td className="p-4 text-xs font-semibold text-[#0D47A1] bg-[#E3F2FD]/50">{row.focus}</td>
               </tr>
             ))}
           </tbody>

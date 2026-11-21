@@ -83,17 +83,17 @@ export default function ClassWiseRoutinePage() {
     }) || [];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-8 px-4 sm:px-6 lg:px-8 text-slate-800 dark:text-slate-100">
+    <div className="page-wrapper py-8 px-4 sm:px-6 lg:px-8 text-[#1E293B]">
       {/* ========================================== */}
       {/* স্ক্রিন কন্ট্রোল সেকশন (প্রিন্ট করার সময় দেখা যাবে না) */}
       {/* ========================================== */}
-      <div className="no-print max-w-4xl mx-auto mb-8 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-emerald-950/10 shadow-md">
+      <div className="no-print site-container mb-8 bg-white p-6 rounded-2xl border border-[#90CAF9] shadow-md">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-emerald-900 dark:text-emerald-400">
+            <h1 className="heading-primary">
               শ্রেণি-ভিত্তিক পরীক্ষার রুটিন 🖨️
             </h1>
-            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-xs sm:text-sm text-[#1E293B] mt-1">
               পরীক্ষার নাম ও শ্রেণি অনুযায়ী ফিল্টার করে রুটিন প্রিন্ট বা ডাউনলোড
               করুন
             </p>
@@ -101,14 +101,14 @@ export default function ClassWiseRoutinePage() {
           <div className="flex gap-2">
             <Link
               href="/academics"
-              className="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
+              className="px-4 py-2 border border-[#90CAF9] text-[#0D47A1] rounded-xl text-xs font-bold hover:bg-[#E3F2FD] transition-all"
             >
               ← ব্যাক টু একাডেমি
             </Link>
             <button
               onClick={handlePrint}
               disabled={!routine || filteredRoutineData.length === 0}
-              className="px-5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-primary px-5 py-2 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
             >
               🖨️ রুটিন প্রিন্ট করুন
             </button>
@@ -118,7 +118,7 @@ export default function ClassWiseRoutinePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* পরীক্ষা সিলেকশন ড্রপডাউন */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-gray-600 dark:text-gray-400">
+            <label className="text-xs font-bold text-[#0D47A1]">
               পরীক্ষা নির্বাচন করুন:
             </label>
             <select
@@ -127,7 +127,7 @@ export default function ClassWiseRoutinePage() {
                 setSelectedExam(e.target.value);
                 setSelectedClass("all");
               }}
-              className="p-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-sm bg-slate-50 dark:bg-slate-900 focus:outline-none focus:border-emerald-600 font-bold"
+              className="p-2.5 border border-[#90CAF9] rounded-xl text-sm bg-white focus:outline-hidden focus:ring-2 focus:ring-[#2196F3] font-bold text-[#1E293B]"
             >
               {exams.map((title, idx) => (
                 <option key={idx} value={title}>
@@ -139,14 +139,14 @@ export default function ClassWiseRoutinePage() {
 
           {/* শ্রেণি সিলেকশন ড্রপডাউন */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-gray-600 dark:text-gray-400">
+            <label className="text-xs font-bold text-[#0D47A1]">
               শ্রেণি ফিল্টার করুন:
             </label>
             <select
               value={selectedClass}
               onChange={(e) => setSelectedClass(e.target.value)}
               disabled={!routine}
-              className="p-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-sm bg-slate-50 dark:bg-slate-900 focus:outline-none focus:border-emerald-600 font-bold disabled:opacity-50"
+              className="p-2.5 border border-[#90CAF9] rounded-xl text-sm bg-white focus:outline-hidden focus:ring-2 focus:ring-[#2196F3] font-bold text-[#1E293B] disabled:opacity-50"
             >
               <option value="all">সকল শ্রেণির রুটিন (All Classes)</option>
               {availableClasses.map((cls, idx) => (
@@ -162,7 +162,7 @@ export default function ClassWiseRoutinePage() {
       {/* লোডিং ও এরর হ্যান্ডলিং */}
       {loading && (
         <div className="no-print text-center py-12">
-          <div className="w-10 h-10 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+          <div className="w-10 h-10 border-4 border-[#2196F3] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
           <p className="text-sm font-semibold text-slate-500">
             রুটিন ডাটা লোড হচ্ছে...
           </p>
@@ -170,7 +170,7 @@ export default function ClassWiseRoutinePage() {
       )}
 
       {!loading && error && (
-        <div className="no-print max-w-4xl mx-auto bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-400 p-4 rounded-xl text-sm font-bold text-center">
+        <div className="no-print site-container bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-bold text-center">
           ⚠️ {error}
         </div>
       )}
@@ -183,34 +183,34 @@ export default function ClassWiseRoutinePage() {
           {filteredRoutineData.map((clsData) => (
             <div
               key={clsData.class}
-              className="print-card bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden"
+              className="print-card bg-white p-6 sm:p-8 rounded-2xl border border-[#90CAF9] shadow-sm relative overflow-hidden"
             >
               {/* প্রাতিষ্ঠানিক হেডার */}
-              <div className="text-center pb-4 mb-6 border-b-2 border-slate-800 dark:border-slate-600 space-y-1">
-                <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-amber-400">
+              <div className="text-center pb-4 mb-6 border-b-2 border-[#0D47A1] space-y-1">
+                <h2 className="text-xl sm:text-2xl font-black text-[#0D47A1]">
                   আস-সালাম আইডিয়াল মাদরাসা (এইম) 🕌
                 </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-xs text-slate-500">
                   ইসলামিক শিক্ষা ও সাধারণ শিক্ষার এক অপূর্ব সমন্বয়
                 </p>
-                <h3 className="text-md sm:text-lg font-bold bg-emerald-950/15 dark:bg-emerald-950/45 text-emerald-900 dark:text-emerald-300 py-1.5 px-3 rounded-lg inline-block mt-2">
+                <h3 className="text-md sm:text-lg font-bold bg-[#E3F2FD] text-[#0D47A1] border border-[#90CAF9] py-1.5 px-3 rounded-lg inline-block mt-2">
                   পরীক্ষার সময়সূচী ও রুটিন
                 </h3>
               </div>
 
               {/* রুটিন ইনফো সেকশন */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 text-xs sm:text-sm font-bold text-[#1E293B]">
                 <div className="space-y-1.5">
                   <p>
                     📂{" "}
-                    <span className="font-semibold text-slate-500 dark:text-slate-400">
+                    <span className="font-semibold text-slate-500">
                       পরীক্ষার নাম:
                     </span>{" "}
                     {routine.examTitle}
                   </p>
                   <p>
                     🏫{" "}
-                    <span className="font-semibold text-slate-500 dark:text-slate-400">
+                    <span className="font-semibold text-slate-500">
                       শ্রেণি:
                     </span>{" "}
                     {clsData.class}
@@ -219,7 +219,7 @@ export default function ClassWiseRoutinePage() {
                 <div className="space-y-1.5 sm:text-right">
                   <p>
                     🌙{" "}
-                    <span className="font-semibold text-slate-500 dark:text-slate-400">
+                    <span className="font-semibold text-slate-500">
                       হিজরী বর্ষ:
                     </span>{" "}
                     {routine.hijriYear
@@ -228,7 +228,7 @@ export default function ClassWiseRoutinePage() {
                   </p>
                   <p>
                     📅{" "}
-                    <span className="font-semibold text-slate-500 dark:text-slate-400">
+                    <span className="font-semibold text-slate-500">
                       ঈসায়ী বর্ষ:
                     </span>{" "}
                     {routine.gregorianYear
@@ -237,7 +237,7 @@ export default function ClassWiseRoutinePage() {
                   </p>
                 </div>
                 {routine.note && (
-                  <div className="col-span-1 sm:col-span-2 bg-amber-50 dark:bg-slate-900/60 p-2.5 rounded-lg border border-amber-200/50 dark:border-slate-800 text-[11px] sm:text-xs text-amber-900 dark:text-amber-300 mt-2 font-medium">
+                  <div className="col-span-1 sm:col-span-2 bg-[#E3F2FD]/60 p-2.5 rounded-lg border border-[#90CAF9] text-[11px] sm:text-xs text-[#0D47A1] mt-2 font-medium">
                     📝 <span className="font-bold">বিশেষ নির্দেশিকা:</span>{" "}
                     {routine.note}
                   </div>
@@ -245,20 +245,20 @@ export default function ClassWiseRoutinePage() {
               </div>
 
               {/* রুটিন টেবিল */}
-              <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
+              <div className="overflow-x-auto rounded-xl border border-[#90CAF9]">
                 <table className="w-full border-collapse text-left">
                   <thead>
-                    <tr className="bg-[#043e30] text-emerald-100 text-xs sm:text-sm uppercase tracking-wider font-bold">
-                      <th className="py-3 px-4 border-r border-[#05503e]/40">
+                    <tr className="bg-[#0D47A1] text-white text-xs sm:text-sm uppercase tracking-wider font-bold">
+                      <th className="py-3 px-4 border-r border-[#90CAF9]/40">
                         তারিখ
                       </th>
-                      <th className="py-3 px-4 border-r border-[#05503e]/40">
+                      <th className="py-3 px-4 border-r border-[#90CAF9]/40">
                         দিন
                       </th>
                       <th className="py-3 px-4">বিষয় </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200 dark:divide-slate-700 text-xs sm:text-sm text-slate-800 dark:text-slate-200">
+                  <tbody className="divide-y divide-[#90CAF9]/30 text-xs sm:text-sm text-[#1E293B]">
                     {routine.dates.map((d) => {
                       const subjectName = clsData.subjects?.[d.id];
                       if (!subjectName) return null; // বিষয় না থাকলে সেই তারিখ রুটিনে দেখাব না
@@ -266,15 +266,15 @@ export default function ClassWiseRoutinePage() {
                       return (
                         <tr
                           key={d.id}
-                          className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
+                          className="hover:bg-[#E3F2FD]/50 transition-colors"
                         >
-                          <td className="py-2.5 px-4 font-bold border-r border-slate-200 dark:border-slate-700">
+                          <td className="py-2.5 px-4 font-bold border-r border-[#90CAF9]/30">
                             {d.gregorian}
                           </td>
-                          <td className="py-2.5 px-4 border-r border-slate-200 dark:border-slate-700 font-semibold">
+                          <td className="py-2.5 px-4 border-r border-[#90CAF9]/30 font-semibold">
                             {d.day}
                           </td>
-                          <td className="py-2.5 px-4 font-extrabold text-emerald-800 dark:text-emerald-400">
+                          <td className="py-2.5 px-4 font-extrabold text-[#0D47A1]">
                             {subjectName}
                           </td>
                         </tr>
@@ -285,10 +285,10 @@ export default function ClassWiseRoutinePage() {
               </div>
 
               {/* স্বাক্ষর সেকশন (প্রিন্ট অপ্টিমাইজড) */}
-              <div className="mt-12 flex justify-between text-[11px] sm:text-xs text-slate-700 dark:text-slate-300 pt-8 border-t border-dashed border-slate-200 dark:border-slate-700">
+              <div className="mt-12 flex justify-between text-[11px] sm:text-xs text-[#1E293B] pt-8 border-t border-dashed border-[#90CAF9]">
                 <div className="text-center w-28 sm:w-36 space-y-1">
                   <div className="h-6"></div>
-                  <p className="border-t border-slate-400 dark:border-slate-600 pt-1 font-bold">
+                  <p className="border-t border-slate-400 pt-1 font-bold">
                     অধ্যক্ষ / মোহতামিম
                   </p>
                   <p className="text-[9px] text-slate-400">
@@ -297,7 +297,7 @@ export default function ClassWiseRoutinePage() {
                 </div>
                 <div className="text-center w-28 sm:w-36 space-y-1">
                   <div className="h-6"></div>
-                  <p className="border-t border-slate-400 dark:border-slate-600 pt-1 font-bold">
+                  <p className="border-t border-slate-400 pt-1 font-bold">
                     পরীক্ষা নিয়ন্ত্রক
                   </p>
                   <p className="text-[9px] text-slate-400">

@@ -19,25 +19,25 @@ export default function HostelRoutine({ data }) {
   const currentData = data || fallbackData;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6">
-      <div className="text-center mb-12">
-        <h2 className="text-3xl font-bold text-emerald-900 dark:text-emerald-400 flex items-center justify-center gap-2">
-          <span className="text-amber-500">❖</span> {currentData.title} <span className="text-amber-500">❖</span>
+    <div className="site-container">
+      <div className="text-center mb-10 space-y-3">
+        <h2 className="heading-primary flex items-center justify-center gap-2">
+          <span className="text-[#2196F3]">❖</span> {currentData.title} <span className="text-[#2196F3]">❖</span>
         </h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">{currentData.subtitle}</p>
+        <p className="text-sm text-[#1E293B] max-w-xl mx-auto leading-relaxed">{currentData.subtitle}</p>
       </div>
 
-      <div className="relative border-l border-emerald-200 dark:border-slate-700 pl-6 space-y-6 max-w-2xl mx-auto">
+      <div className="relative border-l border-[#90CAF9] pl-6 space-y-6 max-w-2xl mx-auto">
         {currentData.schedule?.map((item, idx) => (
           <div key={idx} className="relative group">
             {/* টাইমলাইন ডট */}
-            <div className="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-amber-500 border-4 border-white dark:border-slate-900 group-hover:scale-125 transition-transform"></div>
+            <div className="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-[#2196F3] border-4 border-white group-hover:scale-125 transition-transform"></div>
             
-            <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700/60 p-4 rounded-xl shadow-sm">
-              <span className="text-xs font-mono font-bold text-emerald-800 dark:text-amber-400 block mb-1">
+            <div className="bg-white border border-[#90CAF9] p-4 rounded-xl shadow-sm">
+              <span className="text-xs font-mono font-bold text-[#0D47A1] block mb-1">
                 ⏱ {item.time}
               </span>
-              <p className="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200">
+              <p className="text-xs sm:text-sm font-bold text-[#1E293B]">
                 {item.task}
               </p>
             </div>

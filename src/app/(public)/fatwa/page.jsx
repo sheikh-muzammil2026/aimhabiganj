@@ -48,21 +48,21 @@ export default function FatwaPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-emerald-50/40 via-white to-emerald-50/20 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 py-10 sm:py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-5xl mx-auto">
+    <div className="page-wrapper">
+      <div className="site-container py-10 sm:py-14">
         {/* Header / Hero Section */}
         <div className="text-center mb-8 sm:mb-12">
           {/* Bismillah calligraphy styling */}
-          <div className="inline-block mb-3 px-4 py-1.5 rounded-full bg-emerald-100/70 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs sm:text-sm font-semibold kufi-custom">
+          <div className="inline-block mb-3 px-4 py-1.5 rounded-full bg-[#E3F2FD] border border-[#90CAF9] text-[#0D47A1] text-xs sm:text-sm font-semibold kufi-custom">
             بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
           </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-emerald-950 dark:text-emerald-50 tracking-tight font-serif mb-4 flex items-center justify-center gap-3">
-            <BookOpen className="w-8 h-8 sm:w-10 sm:h-10 text-emerald-700 dark:text-emerald-400" />
+          <h1 className="heading-primary mb-4 flex items-center justify-center gap-3">
+            <BookOpen className="w-8 h-8 sm:w-10 sm:h-10 text-[#2196F3]" />
             <span>ফাতওয়া জিজ্ঞাসা</span>
           </h1>
 
-          <p className="max-w-2xl mx-auto text-sm sm:text-base text-gray-600 dark:text-zinc-300 leading-relaxed">
+          <p className="max-w-2xl mx-auto text-sm sm:text-base text-[#1E293B] leading-relaxed">
             অনুমোদিত ও নির্ভরযোগ্য ফতোয়া ওয়েবসাইটসমূহ হতে সরাসরি তথ্য ও সঠিক
             দলীল সমৃদ্ধ ইসলামী প্রশ্নোত্তর অনুসন্ধান
           </p>

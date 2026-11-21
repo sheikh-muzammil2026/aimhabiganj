@@ -86,53 +86,51 @@ export default function StaffsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50 dark:bg-slate-900 pb-16">
+    <div className="page-wrapper pb-16">
       {/* ব্যানার ও ব্রেডক্রাম্ব */}
-      <div className="bg-gradient-to-b from-emerald-900 via-emerald-800 to-teal-900 text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(#f59e0b_1px,transparent_1px)] [background-size:20px_20px] opacity-10 pointer-events-none" />
-
-        <div className="max-w-7xl mx-auto relative z-10">
-          <nav className="flex items-center gap-2 text-xs text-emerald-200/90 mb-4">
-            <Link href="/" className="hover:text-amber-300 flex items-center gap-1">
+      <div className="bg-gradient-to-b from-[#0D47A1] via-[#0A3880] to-[#0D47A1] text-white py-12 relative overflow-hidden border-b border-[#90CAF9]/40">
+        <div className="site-container relative z-10">
+          <nav className="flex items-center gap-2 text-xs text-[#90CAF9] mb-4">
+            <Link href="/" className="hover:text-white flex items-center gap-1">
               <Home className="w-3.5 h-3.5" />
               <span>হোম</span>
             </Link>
-            <ChevronRight className="w-3.5 h-3.5 text-emerald-400/60" />
-            <Link href="/about" className="hover:text-amber-300">
+            <ChevronRight className="w-3.5 h-3.5 text-[#90CAF9]/60" />
+            <Link href="/about" className="hover:text-white">
               আমাদের সম্পর্কে
             </Link>
-            <ChevronRight className="w-3.5 h-3.5 text-emerald-400/60" />
-            <span className="text-amber-300 font-semibold">কর্মকর্তা ও কর্মচারী</span>
+            <ChevronRight className="w-3.5 h-3.5 text-[#90CAF9]/60" />
+            <span className="text-white font-semibold">কর্মকর্তা ও কর্মচারী</span>
           </nav>
 
           <div className="text-center sm:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-semibold mb-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#2196F3]/30 border border-[#90CAF9]/40 text-[#E3F2FD] text-xs font-semibold mb-3">
               <UserCheck className="w-3.5 h-3.5" />
               <span>AIM Staff Directory</span>
             </div>
-            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
+            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white">
               আমাদের কর্মকর্তা ও কর্মচারীবৃন্দ
             </h1>
-            <p className="mt-2 text-sm sm:text-base text-emerald-100/90 max-w-2xl">
+            <p className="mt-2 text-sm sm:text-base text-[#E3F2FD]/90 max-w-2xl">
               মাদরাসার প্রশাসনিক, আর্থিক ও সার্বিক ব্যবস্থাপনায় নিয়োজিত দক্ষ ও দায়িত্বশীল টিম
             </p>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-20">
+      <div className="site-container -mt-6 relative z-20">
         {/* সার্চ ও ফিল্টার বার */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-gray-100 dark:border-slate-700 p-4 sm:p-5 mb-8">
+        <div className="bg-white rounded-2xl shadow-lg border border-[#90CAF9] p-4 sm:p-5 mb-8">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             {/* সার্চ ইনপুট */}
             <div className="relative w-full md:w-96">
-              <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="নাম, পদবী, বা স্টাফ আইডি খুঁজুন..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-gray-100 text-sm focus:outline-hidden focus:ring-2 focus:ring-emerald-500 transition-all"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#90CAF9] bg-white text-[#1E293B] text-sm focus:outline-hidden focus:ring-2 focus:ring-[#2196F3] transition-all"
               />
             </div>
 
@@ -141,9 +139,9 @@ export default function StaffsPage() {
               <button
                 type="button"
                 onClick={() => setSelectedRole("all")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${selectedRole === "all"
-                  ? "bg-amber-600 text-white"
-                  : "bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200"
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer border ${selectedRole === "all"
+                  ? "bg-[#2196F3] text-white border-[#2196F3]"
+                  : "bg-[#E3F2FD] text-[#0D47A1] border-[#90CAF9]/40 hover:bg-[#90CAF9]/20"
                   }`}
               >
                 সকল ({staffList.length})
@@ -153,9 +151,9 @@ export default function StaffsPage() {
                   key={r}
                   type="button"
                   onClick={() => setSelectedRole(r)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${selectedRole === r
-                    ? "bg-amber-600 text-white"
-                    : "bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200"
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer border ${selectedRole === r
+                    ? "bg-[#2196F3] text-white border-[#2196F3]"
+                    : "bg-[#E3F2FD] text-[#0D47A1] border-[#90CAF9]/40 hover:bg-[#90CAF9]/20"
                     }`}
                 >
                   {r}
@@ -171,25 +169,25 @@ export default function StaffsPage() {
             {[1, 2, 3, 4, 5, 6].map((n) => (
               <div
                 key={`skel-s-${n}`}
-                className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-gray-100 dark:border-slate-700 animate-pulse flex items-start gap-4"
+                className="bg-white rounded-2xl p-5 border border-[#90CAF9] animate-pulse flex items-start gap-4"
               >
-                <div className="w-14 h-14 bg-gray-200 dark:bg-slate-700 rounded-full shrink-0" />
+                <div className="w-14 h-14 bg-slate-200 rounded-full shrink-0" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-gray-200 dark:bg-slate-700 rounded w-3/4" />
-                  <div className="h-3 bg-gray-200 dark:bg-slate-700 rounded w-1/2" />
-                  <div className="h-3 bg-gray-200 dark:bg-slate-700 rounded w-2/3" />
-                  <div className="h-8 bg-gray-200 dark:bg-slate-700 rounded-lg w-full mt-2" />
+                  <div className="h-4 bg-slate-200 rounded w-3/4" />
+                  <div className="h-3 bg-slate-200 rounded w-1/2" />
+                  <div className="h-3 bg-slate-200 rounded w-2/3" />
+                  <div className="h-8 bg-slate-200 rounded-lg w-full mt-2" />
                 </div>
               </div>
             ))}
           </div>
         ) : filteredStaff.length === 0 ? (
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-gray-200 dark:border-slate-700 p-12 text-center">
-            <UserCheck className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-gray-800 dark:text-gray-200">
+          <div className="bg-white rounded-2xl border border-dashed border-[#90CAF9] p-12 text-center">
+            <UserCheck className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+            <h3 className="text-base font-bold text-[#0D47A1]">
               কোনো স্টাফ খুঁজে পাওয়া যায়নি
             </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-sm text-[#1E293B] mt-1">
               অনুগ্রহ করে অন্য কি-ওয়ার্ড দিয়ে পুনরায় চেষ্টা করুন।
             </p>
             <button
@@ -198,7 +196,7 @@ export default function StaffsPage() {
                 setSearch("");
                 setSelectedRole("all");
               }}
-              className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-amber-600 text-white hover:bg-amber-700 transition-colors"
+              className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-[#0D47A1] text-white hover:bg-[#0A3880] transition-colors cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>ফিল্টার রিসেট করুন</span>

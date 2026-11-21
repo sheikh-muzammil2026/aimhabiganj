@@ -420,14 +420,14 @@ export default function TeacherProfileDashboard() {
       {/* ======================================================================== */}
       {/* 🟢১. ড্যাশবোর্ড ভিউ (শুধুমাত্র স্ক্রিনে দেখা যাবে - `no-print`) */}
       {/* ======================================================================== */}
-      <div className="no-print p-3 sm:p-6 md:p-8 bg-slate-50 min-h-screen space-y-6 text-slate-800 max-w-6xl mx-auto w-full">
+      <div className="no-print dashboard-container space-y-6 text-slate-800 font-bornomala selection:bg-[#0D47A1] selection:text-white">
         {/* হেডার ও প্রিন্ট বাটন */}
-        <div className="bg-[#043e30] text-white p-4 sm:p-6 rounded-2xl shadow-md flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="bg-[#0D47A1] text-white p-4 sm:p-6 rounded-2xl shadow-md border border-[#90CAF9]/40 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-amber-400">
+            <h1 className="text-xl sm:text-2xl font-bold text-white">
               সিভি ড্যাশবোর্ড 🕌
             </h1>
-            <p className="text-xs sm:text-sm text-emerald-200 mt-1">
+            <p className="text-xs sm:text-sm text-[#90CAF9] mt-1">
               আপনার সমস্ত প্রাতিষ্ঠানিক ও সিভি সংক্রান্ত তথ্য আপডেট করুন
             </p>
           </div>
@@ -435,28 +435,28 @@ export default function TeacherProfileDashboard() {
             {hasFinancePermission && (
               <Link
                 href="/dashboard/accountant/finance"
-                className="w-full sm:w-auto justify-center bg-amber-400 hover:bg-amber-500 text-emerald-950 font-bold px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 text-sm"
+                className="w-full sm:w-auto justify-center bg-[#2196F3] hover:bg-[#1976D2] text-white font-bold px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 text-sm"
               >
                 💰 হিসাব বিভাগ
               </Link>
             )}
             <Link
               href="/dashboard/teacher/teachers-attendance"
-              className="w-full sm:w-auto justify-center bg-emerald-500/30 hover:bg-emerald-500/50 text-emerald-100 font-bold px-4 py-2.5 rounded-xl border border-emerald-400/30 shadow-md transition-all flex items-center gap-2 text-sm"
+              className="w-full sm:w-auto justify-center bg-white/10 hover:bg-white/20 text-white font-bold px-4 py-2.5 rounded-xl border border-white/20 shadow-md transition-all flex items-center gap-2 text-sm"
             >
               📋 Attendance
             </Link>
             <button
               onClick={handlePrint}
               type="button"
-              className="w-full sm:w-auto justify-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 text-sm"
+              className="w-full sm:w-auto justify-center bg-[#2196F3] hover:bg-[#1976D2] text-white font-bold px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 text-sm cursor-pointer"
             >
               🖨️ সিভি প্রিন্ট / ডাউনলোড
             </button>
             <button
               onClick={handleSaveProfile}
               disabled={saving || uploadingImage}
-              className="w-full sm:w-auto justify-center bg-amber-400 hover:bg-amber-500 text-[#043e30] font-bold px-5 py-2.5 rounded-xl shadow-md transition-all disabled:opacity-50 text-sm"
+              className="w-full sm:w-auto justify-center bg-white hover:bg-slate-100 text-[#0D47A1] font-bold px-5 py-2.5 rounded-xl shadow-md transition-all disabled:opacity-50 text-sm cursor-pointer"
             >
               {saving ? "সেভ হচ্ছে..." : "💾 সেভ করুন"}
             </button>
@@ -465,16 +465,16 @@ export default function TeacherProfileDashboard() {
 
         {/* হিসাব ও অর্থ বিভাগ অ্যাক্সেস নোটিফিকেশন ব্যানার */}
         {hasFinancePermission && (
-          <div className="bg-[#032e24] text-white p-4 sm:p-5 rounded-2xl shadow-sm border border-emerald-700/60 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="bg-[#0D47A1]/95 text-white p-4 sm:p-5 rounded-2xl shadow-sm border border-[#90CAF9]/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-3">
-              <span className="text-2xl p-2.5 bg-emerald-800/80 rounded-xl border border-emerald-600/50">
+              <span className="text-2xl p-2.5 bg-white/10 rounded-xl border border-white/20">
                 💰
               </span>
               <div>
-                <h3 className="font-bold text-sm sm:text-base text-amber-300">
+                <h3 className="font-bold text-sm sm:text-base text-white">
                   হিসাব ও অর্থ বিভাগের দায়িত্ব অর্পিত হয়েছে
                 </h3>
-                <p className="text-xs text-emerald-100 mt-0.5">
+                <p className="text-xs text-[#90CAF9] mt-0.5">
                   আপনাকে মাদরাসার হিসাব ও অর্থ (Finance & Accounts) বিভাগ
                   পরিচালনার অনুমতি দেওয়া হয়েছে।
                 </p>
@@ -483,19 +483,19 @@ export default function TeacherProfileDashboard() {
             <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
               <Link
                 href="/dashboard/accountant"
-                className="flex-1 md:flex-none text-center bg-emerald-800 hover:bg-emerald-700 text-emerald-100 font-semibold px-3.5 py-2 rounded-xl text-xs border border-emerald-600/60 shadow-xs transition-all"
+                className="flex-1 md:flex-none text-center bg-white/10 hover:bg-white/20 text-white font-semibold px-3.5 py-2 rounded-xl text-xs border border-white/20 shadow-xs transition-all"
               >
                 হিসাব ওভারভিউ
               </Link>
               <Link
                 href="/dashboard/accountant/finance"
-                className="flex-1 md:flex-none text-center bg-amber-400 hover:bg-amber-500 text-emerald-950 font-bold px-4 py-2 rounded-xl text-xs shadow-xs transition-all"
+                className="flex-1 md:flex-none text-center bg-[#2196F3] hover:bg-[#1976D2] text-white font-bold px-4 py-2 rounded-xl text-xs shadow-xs transition-all"
               >
                 অ্যাকাউন্টিং রিপোর্টস ↗
               </Link>
               <Link
                 href="/dashboard/accountant/finance/category-management"
-                className="flex-1 md:flex-none text-center bg-emerald-800 hover:bg-emerald-700 text-emerald-100 font-semibold px-3.5 py-2 rounded-xl text-xs border border-emerald-600/60 shadow-xs transition-all"
+                className="flex-1 md:flex-none text-center bg-white/10 hover:bg-white/20 text-white font-semibold px-3.5 py-2 rounded-xl text-xs border border-white/20 shadow-xs transition-all"
               >
                 খাত তৈরি ↗
               </Link>
@@ -530,7 +530,7 @@ export default function TeacherProfileDashboard() {
 
             {/* প্রোফাইল ছবি আপলোড */}
             <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
-              <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-4 border-emerald-700 shadow-md bg-slate-200 flex justify-center items-center shrink-0">
+              <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-4 border-[#0D47A1] shadow-md bg-slate-200 flex justify-center items-center shrink-0">
                 {profile.profileImage ? (
                   <img
                     src={profile.profileImage}
@@ -558,7 +558,7 @@ export default function TeacherProfileDashboard() {
 
             {/* ১.১ নাম ও পরিচিতি (Personal Information) */}
             <div className="space-y-3">
-              <div className="flex items-center gap-2 text-xs font-bold text-emerald-800 uppercase tracking-wide bg-emerald-50/70 border border-emerald-200 px-3 py-1.5 rounded-lg w-fit">
+              <div className="flex items-center gap-2 text-xs font-bold text-[#0D47A1] uppercase tracking-wide bg-[#E3F2FD] border border-[#90CAF9] px-3 py-1.5 rounded-lg w-fit">
                 <span>👤</span>
                 <span>নাম ও পদবি সংক্রান্ত তথ্য (Identity)</span>
               </div>
@@ -572,7 +572,7 @@ export default function TeacherProfileDashboard() {
                     placeholder="যেমন: 0235"
                     value={profile.teacherId || ""}
                     onChange={(e) => handleChange("teacherId", e.target.value)}
-                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all font-mono font-bold text-emerald-900"
+                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#2196F3] focus:bg-white transition-all font-mono font-bold text-[#0D47A1]"
                   />
                 </div>
                 <div>
@@ -585,7 +585,7 @@ export default function TeacherProfileDashboard() {
                     placeholder="যেমন: মুহাম্মদ ইউসুফ হাসানী"
                     value={profile.fullName}
                     onChange={(e) => handleChange("fullName", e.target.value)}
-                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all"
+                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#2196F3] focus:bg-white transition-all"
                   />
                 </div>
                 <div>
@@ -599,7 +599,7 @@ export default function TeacherProfileDashboard() {
                     onChange={(e) =>
                       handleChange("nameEnglish", e.target.value)
                     }
-                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all"
+                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#2196F3] focus:bg-white transition-all"
                   />
                 </div>
                 <div>
@@ -612,7 +612,7 @@ export default function TeacherProfileDashboard() {
                     onChange={(e) =>
                       handleChange("designation", e.target.value)
                     }
-                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all font-medium text-slate-800"
+                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#2196F3] focus:bg-white transition-all font-medium text-slate-800"
                   >
                     <option value="">পদবি নির্বাচন করুন</option>
                     <option value="প্রিন্সিপাল">প্রিন্সিপাল</option>
@@ -637,7 +637,7 @@ export default function TeacherProfileDashboard() {
                     placeholder="০১৭১২-৩৪৫৬৭৮"
                     value={profile.phone}
                     onChange={(e) => handleChange("phone", e.target.value)}
-                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all font-mono"
+                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#2196F3] focus:bg-white transition-all font-mono"
                   />
                 </div>
                 <div>
@@ -656,7 +656,7 @@ export default function TeacherProfileDashboard() {
 
             {/* ১.২ বর্তমান ঠিকানা (Address Details) */}
             <div className="space-y-3 pt-3 border-t border-slate-100">
-              <div className="flex items-center gap-2 text-xs font-bold text-emerald-800 uppercase tracking-wide bg-emerald-50/70 border border-emerald-200 px-3 py-1.5 rounded-lg w-fit">
+              <div className="flex items-center gap-2 text-xs font-bold text-[#0D47A1] uppercase tracking-wide bg-[#E3F2FD] border border-[#90CAF9] px-3 py-1.5 rounded-lg w-fit">
                 <span>📍</span>
                 <span>বর্তমান ঠিকানা (Address Details)</span>
               </div>
@@ -672,7 +672,7 @@ export default function TeacherProfileDashboard() {
                     onChange={(e) =>
                       handleAddressDetailChange("district", e.target.value)
                     }
-                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all"
+                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#2196F3] focus:bg-white transition-all"
                   />
                 </div>
                 <div>
@@ -686,7 +686,7 @@ export default function TeacherProfileDashboard() {
                     onChange={(e) =>
                       handleAddressDetailChange("thana", e.target.value)
                     }
-                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all"
+                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#2196F3] focus:bg-white transition-all"
                   />
                 </div>
                 <div>
@@ -700,7 +700,7 @@ export default function TeacherProfileDashboard() {
                     onChange={(e) =>
                       handleAddressDetailChange("postOffice", e.target.value)
                     }
-                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all"
+                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#2196F3] focus:bg-white transition-all"
                   />
                 </div>
                 <div>
@@ -714,7 +714,7 @@ export default function TeacherProfileDashboard() {
                     onChange={(e) =>
                       handleAddressDetailChange("village", e.target.value)
                     }
-                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all"
+                    className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#2196F3] focus:bg-white transition-all"
                   />
                 </div>
               </div>
@@ -728,14 +728,14 @@ export default function TeacherProfileDashboard() {
                   placeholder="যেমন: রাজনগর, ডাকঘর: হবিগঞ্জ, হবিগঞ্জ সদর, হবিগঞ্জ"
                   value={profile.address}
                   onChange={(e) => handleChange("address", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#2196F3] focus:bg-white transition-all"
                 />
               </div>
             </div>
 
             {/* ১.৩ ব্যাংক অ্যাকাউন্ট ও আর্থিক তথ্য (Bank Account Details) */}
             <div className="space-y-3 pt-3 border-t border-slate-100">
-              <div className="flex items-center gap-2 text-xs font-bold text-emerald-800 uppercase tracking-wide bg-emerald-50/70 border border-emerald-200 px-3 py-1.5 rounded-lg w-fit">
+              <div className="flex items-center gap-2 text-xs font-bold text-[#0D47A1] uppercase tracking-wide bg-[#E3F2FD] border border-[#90CAF9] px-3 py-1.5 rounded-lg w-fit">
                 <span>🏦</span>
                 <span>
                   ব্যাংক অ্যাকাউন্ট সংক্রান্ত তথ্য (Bank Account Details)
@@ -758,7 +758,7 @@ export default function TeacherProfileDashboard() {
                         e.target.value,
                       )
                     }
-                    className="w-full p-2.5 border rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                    className="w-full p-2.5 border rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#2196F3] transition-all"
                   />
                 </div>
 
@@ -777,7 +777,7 @@ export default function TeacherProfileDashboard() {
                         e.target.value,
                       )
                     }
-                    className="w-full p-2.5 border rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 font-mono tracking-wider transition-all"
+                    className="w-full p-2.5 border rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-mono tracking-wider transition-all"
                   />
                 </div>
 
@@ -796,7 +796,7 @@ export default function TeacherProfileDashboard() {
                         e.target.value,
                       )
                     }
-                    className="w-full p-2.5 border rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                    className="w-full p-2.5 border rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#2196F3] transition-all"
                   />
                 </div>
 
@@ -815,7 +815,7 @@ export default function TeacherProfileDashboard() {
                         e.target.value,
                       )
                     }
-                    className="w-full p-2.5 border rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 font-mono transition-all"
+                    className="w-full p-2.5 border rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#2196F3] font-mono transition-all"
                   />
                 </div>
 
@@ -834,7 +834,7 @@ export default function TeacherProfileDashboard() {
                         e.target.value,
                       )
                     }
-                    className="w-full p-2.5 border rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all font-medium text-slate-800"
+                    className="w-full p-2.5 border rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#2196F3] transition-all font-medium text-slate-800"
                   >
                     <option value="সঞ্চয়ী (Savings)">
                       সঞ্চয়ী হিসাব (Savings Account)
@@ -862,7 +862,7 @@ export default function TeacherProfileDashboard() {
               value={profile.bio}
               onChange={(e) => handleChange("bio", e.target.value)}
               placeholder="আপনার টিচিং ফিলোসফি ও সংক্ষিপ্ত অভিজ্ঞতা..."
-              className="w-full p-3 border rounded-xl text-sm bg-slate-50 resize-none focus:outline-none focus:ring-2 focus:ring-emerald-600"
+              className="w-full p-3 border rounded-xl text-sm bg-slate-50 resize-none focus:outline-none focus:ring-2 focus:ring-[#2196F3]"
             ></textarea>
           </div>
 
@@ -882,7 +882,7 @@ export default function TeacherProfileDashboard() {
                     result: "",
                   })
                 }
-                className="text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3 py-1.5 rounded-lg transition-all"
+                className="text-xs bg-[#2196F3] hover:bg-[#1976D2] text-white font-bold px-3 py-1.5 rounded-lg transition-all"
               >
                 + নতুন ডিগ্রি যোগ করুন
               </button>
@@ -974,7 +974,7 @@ export default function TeacherProfileDashboard() {
                     responsibilities: "",
                   })
                 }
-                className="text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3 py-1.5 rounded-lg transition-all"
+                className="text-xs bg-[#2196F3] hover:bg-[#1976D2] text-white font-bold px-3 py-1.5 rounded-lg transition-all"
               >
                 + অভিজ্ঞতা যোগ করুন
               </button>
@@ -1072,7 +1072,7 @@ export default function TeacherProfileDashboard() {
                   placeholder="Curriculum Development, Lesson Planning, Tajweed"
                   value={profile.hardSkills}
                   onChange={(e) => handleChange("hardSkills", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#2196F3]"
                 />
               </div>
               <div>
@@ -1084,7 +1084,7 @@ export default function TeacherProfileDashboard() {
                   placeholder="Communication, Leadership, Problem Solving"
                   value={profile.softSkills}
                   onChange={(e) => handleChange("softSkills", e.target.value)}
-                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                  className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#2196F3]"
                 />
               </div>
             </div>
@@ -1104,7 +1104,7 @@ export default function TeacherProfileDashboard() {
                 placeholder="Google Classroom, MS PowerPoint, Zoom, Canva"
                 value={profile.edTechSkills}
                 onChange={(e) => handleChange("edTechSkills", e.target.value)}
-                className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                className="w-full p-2.5 border rounded-xl text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#2196F3]"
               />
             </div>
           </div>
@@ -1124,7 +1124,7 @@ export default function TeacherProfileDashboard() {
                     year: "",
                   })
                 }
-                className="text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3 py-1.5 rounded-lg transition-all"
+                className="text-xs bg-[#2196F3] hover:bg-[#1976D2] text-white font-bold px-3 py-1.5 rounded-lg transition-all"
               >
                 + নতুন যোগ করুন
               </button>
@@ -1207,7 +1207,7 @@ export default function TeacherProfileDashboard() {
                     link: "",
                   })
                 }
-                className="text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3 py-1.5 rounded-lg transition-all"
+                className="text-xs bg-[#2196F3] hover:bg-[#1976D2] text-white font-bold px-3 py-1.5 rounded-lg transition-all"
               >
                 + পাবলিকেশন যোগ করুন
               </button>
@@ -1303,7 +1303,7 @@ export default function TeacherProfileDashboard() {
                     year: "",
                   })
                 }
-                className="text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3 py-1.5 rounded-lg transition-all"
+                className="text-xs bg-[#2196F3] hover:bg-[#1976D2] text-white font-bold px-3 py-1.5 rounded-lg transition-all"
               >
                 + অ্যাওয়ার্ড যোগ করুন
               </button>
@@ -1377,7 +1377,7 @@ export default function TeacherProfileDashboard() {
                     phone: "",
                   })
                 }
-                className="text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3 py-1.5 rounded-lg transition-all"
+                className="text-xs bg-[#2196F3] hover:bg-[#1976D2] text-white font-bold px-3 py-1.5 rounded-lg transition-all"
               >
                 + রেফারেন্স যোগ করুন
               </button>
@@ -1471,14 +1471,14 @@ export default function TeacherProfileDashboard() {
             <button
               onClick={handlePrint}
               type="button"
-              className="w-full sm:w-auto justify-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl shadow-md transition-all text-sm flex items-center gap-2"
+              className="w-full sm:w-auto justify-center bg-[#2196F3] hover:bg-[#1976D2] text-white font-bold px-6 py-3 rounded-xl shadow-md transition-all text-sm flex items-center gap-2 cursor-pointer"
             >
               🖨️ প্রিভিউ ও সিভি প্রিন্ট করুন
             </button>
             <button
               type="submit"
               disabled={saving || uploadingImage}
-              className="w-full sm:w-auto justify-center bg-[#043e30] hover:bg-emerald-950 text-white font-bold px-8 py-3 rounded-xl shadow-md transition-all disabled:opacity-50 text-sm"
+              className="w-full sm:w-auto justify-center bg-[#0D47A1] hover:bg-[#0A3880] text-white font-bold px-8 py-3 rounded-xl shadow-md transition-all disabled:opacity-50 text-sm cursor-pointer"
             >
               {saving ? "তথ্য সেভ হচ্ছে..." : "প্রোফাইল সেভ করুন"}
             </button>
@@ -1636,7 +1636,7 @@ export default function TeacherProfileDashboard() {
                 (pub, i) =>
                   pub.title && (
                     <p key={i}>
-                      • "{pub.title}" - <i>{pub.journal}</i> ({pub.year})
+                      • &ldquo;{pub.title}&rdquo; - <i>{pub.journal}</i> ({pub.year})
                     </p>
                   ),
               )}

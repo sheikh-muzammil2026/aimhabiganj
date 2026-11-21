@@ -1267,21 +1267,21 @@ function ResultSheetGeneratorContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-[#09101d] text-gray-800 dark:text-gray-200 p-3 sm:p-4 md:p-6">
-      <div className="print:hidden max-w-7xl mx-auto mb-8 font-sans">
-        {/* ড্যাশবোর্ড মেইন কার্ড - ইসলামিক ডিপ গ্রিন ও ফাইনাল গোল্ডেন বর্ডার */}
-        <div className="bg-gradient-to-br from-[#063226] via-[#04241b] to-[#021812] rounded-3xl p-6 sm:p-8 border border-emerald-600/30 shadow-2xl shadow-emerald-950/40 text-emerald-50 relative overflow-hidden">
-          {/* ব্যাকগ্রাউন্ড গোল্ডেন ও এমারেল্ড গ্লো */}
-          <div className="absolute -top-24 -right-24 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
+    <div className="w-full text-[#1E293B] p-3 sm:p-4 md:p-6">
+      <div className="print:hidden site-container mb-8 font-sans">
+        {/* ড্যাশবোর্ড মেইন কার্ড - প্রাতিষ্ঠানিক থিম */}
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#90CAF9] shadow-xl text-[#1E293B] relative overflow-hidden">
+          {/* ব্যাকগ্রাউন্ড ব্লু গ্লো */}
+          <div className="absolute -top-24 -right-24 w-80 h-80 bg-[#2196F3]/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-[#0D47A1]/10 rounded-full blur-3xl pointer-events-none" />
 
-          {/* ১. হেডার ও প্রিন্ট / শেয়ার বাটন (গোল্ডেন একসেন্ট সহ) */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 mb-6 border-b border-emerald-800/60">
+          {/* ১. হেডার ও প্রিন্ট / শেয়ার বাটন */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 mb-6 border-b border-[#90CAF9]/40">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-amber-300 bg-amber-950/60 border border-amber-500/30 px-3.5 py-1 rounded-full inline-block mb-2 shadow-inner">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#0D47A1] bg-[#E3F2FD] border border-[#90CAF9] px-3.5 py-1 rounded-full inline-block mb-2 shadow-inner">
                 ✦ রেজাল্ট ম্যানেজমেন্ট প্যানেল ✦
               </span>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-emerald-100 flex items-center gap-2">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0D47A1] flex items-center gap-2">
                 রেজাল্ট শিট জেনারেটর
               </h1>
             </div>
@@ -1290,8 +1290,8 @@ function ResultSheetGeneratorContent() {
 
           {/* এরর নোটিফিকেশন */}
           {error && (
-            <div className="mb-6 p-4 bg-rose-950/50 border border-rose-800/80 text-rose-200 rounded-2xl text-sm font-medium flex items-center gap-3 backdrop-blur-md animate-fade-in">
-              <span className="p-1.5 bg-rose-900/50 rounded-lg text-rose-300 text-base">
+            <div className="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-sm font-medium flex items-center gap-3 backdrop-blur-md animate-fade-in">
+              <span className="p-1.5 bg-rose-100 rounded-lg text-rose-700 text-base">
                 ⚠️
               </span>
               <span>{error}</span>
@@ -1299,11 +1299,11 @@ function ResultSheetGeneratorContent() {
           )}
 
           {/* রেজাল্ট টাইপ নির্বাচক (টার্ম পরীক্ষা বনাম ক্লাস টেস্ট CT) */}
-          <div className="mb-6 pb-5 border-b border-emerald-800/50">
-            <label className="block text-[11px] font-extrabold text-amber-300 uppercase tracking-wider mb-2">
+          <div className="mb-6 pb-5 border-b border-[#90CAF9]/40">
+            <label className="block text-[11px] font-extrabold text-[#0D47A1] uppercase tracking-wider mb-2">
               ১. ফলাফলের ধরন নির্বাচন করুন (Select Result Type)
             </label>
-            <div className="inline-flex p-1.5 bg-[#031d16] rounded-2xl border border-emerald-700/60 gap-1.5 shadow-inner flex-wrap">
+            <div className="inline-flex p-1.5 bg-[#E3F2FD]/60 rounded-2xl border border-[#90CAF9] gap-1.5 shadow-inner flex-wrap">
               <button
                 type="button"
                 onClick={() => {
@@ -1312,8 +1312,8 @@ function ResultSheetGeneratorContent() {
                 }}
                 className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all duration-200 flex items-center gap-2 cursor-pointer ${
                   resultMode === "term"
-                    ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-950/60 border border-emerald-400/50"
-                    : "text-emerald-300 hover:text-white hover:bg-emerald-800/40"
+                    ? "bg-[#2196F3] text-white shadow-md border border-[#2196F3]"
+                    : "text-[#0D47A1] hover:text-[#0D47A1] hover:bg-[#E3F2FD]"
                 }`}
               >
                 <span>📑</span>
@@ -1327,8 +1327,8 @@ function ResultSheetGeneratorContent() {
                 }}
                 className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all duration-200 flex items-center gap-2 cursor-pointer ${
                   resultMode === "ct"
-                    ? "bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-emerald-950 shadow-lg shadow-amber-950/60 border border-amber-300"
-                    : "text-emerald-300 hover:text-white hover:bg-emerald-800/40"
+                    ? "bg-[#2196F3] text-white shadow-md border border-[#2196F3]"
+                    : "text-[#0D47A1] hover:text-[#0D47A1] hover:bg-[#E3F2FD]"
                 }`}
               >
                 <span>📝</span>
@@ -1341,8 +1341,8 @@ function ResultSheetGeneratorContent() {
           <form onSubmit={handleSearch} className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* ২. শিক্ষার্থী আইডি */}
-              <div className="bg-[#083c2e]/60 p-3.5 rounded-2xl border border-emerald-700/40 focus-within:border-amber-400/60 focus-within:ring-1 focus-within:ring-amber-400/50 transition-all">
-                <label className="block text-[11px] font-extrabold text-emerald-300 uppercase tracking-wider mb-1.5">
+              <div className="bg-[#E3F2FD]/30 p-3.5 rounded-2xl border border-[#90CAF9] focus-within:border-[#2196F3] focus-within:ring-1 focus-within:ring-[#2196F3] transition-all">
+                <label className="block text-[11px] font-extrabold text-[#0D47A1] uppercase tracking-wider mb-1.5">
                   ২. শিক্ষার্থীর আইডি
                 </label>
                 <div className="flex items-center gap-2">
@@ -1351,26 +1351,26 @@ function ResultSheetGeneratorContent() {
                     placeholder="শিক্ষার্থীর আইডি (ঐচ্ছিক)..."
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
-                    className="w-full bg-[#031d16] text-emerald-100 placeholder-emerald-600/70 border border-emerald-800/80 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-amber-400 transition-all"
+                    className="w-full bg-white text-[#1E293B] placeholder-slate-400 border border-[#90CAF9] rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#2196F3] transition-all"
                   />
                 </div>
               </div>
 
               {/* ৩. শিক্ষাবর্ষ */}
-              <div className="bg-[#083c2e]/60 p-3.5 rounded-2xl border border-emerald-700/40 focus-within:border-amber-400/60 transition-all">
-                <label className="block text-[11px] font-extrabold text-emerald-300 uppercase tracking-wider mb-1.5">
+              <div className="bg-[#E3F2FD]/30 p-3.5 rounded-2xl border border-[#90CAF9] focus-within:border-[#2196F3] transition-all">
+                <label className="block text-[11px] font-extrabold text-[#0D47A1] uppercase tracking-wider mb-1.5">
                   ৩. শিক্ষাবর্ষ
                 </label>
                 <select
                   value={targetYear}
                   onChange={(e) => setTargetYear(e.target.value)}
-                  className="w-full bg-[#031d16] text-emerald-100 border border-emerald-800/80 rounded-xl py-2 px-3 text-sm font-medium focus:outline-none focus:border-amber-400 cursor-pointer"
+                  className="w-full bg-white text-[#1E293B] border border-[#90CAF9] rounded-xl py-2 px-3 text-sm font-medium focus:outline-none focus:border-[#2196F3] cursor-pointer"
                 >
                   {sessionYears.map((year) => (
                     <option
                       key={year}
                       value={year}
-                      className="bg-[#04241b] text-emerald-100"
+                      className="bg-white text-[#1E293B]"
                     >
                       {year}
                     </option>
@@ -1379,40 +1379,40 @@ function ResultSheetGeneratorContent() {
               </div>
 
               {/* ৪. পরীক্ষার নাম */}
-              <div className="bg-[#083c2e]/60 p-3.5 rounded-2xl border border-emerald-700/40 focus-within:border-amber-400/60 transition-all">
-                <label className="block text-[11px] font-extrabold text-emerald-300 uppercase tracking-wider mb-1.5">
+              <div className="bg-[#E3F2FD]/30 p-3.5 rounded-2xl border border-[#90CAF9] focus-within:border-[#2196F3] transition-all">
+                <label className="block text-[11px] font-extrabold text-[#0D47A1] uppercase tracking-wider mb-1.5">
                   ৪. পরীক্ষার নাম
                 </label>
                 <select
                   value={examType}
                   onChange={(e) => setExamType(e.target.value)}
-                  className="w-full bg-[#031d16] text-emerald-100 border border-emerald-800/80 rounded-xl py-2 px-3 text-sm font-medium focus:outline-none focus:border-amber-400 cursor-pointer"
+                  className="w-full bg-white text-[#1E293B] border border-[#90CAF9] rounded-xl py-2 px-3 text-sm font-medium focus:outline-none focus:border-[#2196F3] cursor-pointer"
                 >
                   <option
                     value="১ম সাময়িক পরীক্ষা"
-                    className="bg-[#04241b] text-emerald-100"
+                    className="bg-white text-[#1E293B]"
                   >
                     ১ম সাময়িক পরীক্ষা
                   </option>
                   <option
                     value="২য় সাময়িক পরীক্ষা"
-                    className="bg-[#04241b] text-emerald-100"
+                    className="bg-white text-[#1E293B]"
                   >
                     ২য় সাময়িক পরীক্ষা
                   </option>
                   <option
                     value="বার্ষিক পরীক্ষা"
-                    className="bg-[#04241b] text-emerald-100"
+                    className="bg-white text-[#1E293B]"
                   >
                     বার্ষিক পরীক্ষা
                   </option>
                 </select>
               </div>
-              {/* ৫. খুঁজুন বাটন (ইসলামিক ডিপ গ্রিন ও গোল্ডেন হোভার) */}
+              {/* ৫. খুঁজুন বাটন */}
               <div className="flex justify-end pt-2">
                 <button
                   type="submit"
-                  className="w-full sm:w-auto bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold px-8 py-3.5 rounded-2xl text-sm transition-all duration-200 flex items-center justify-center gap-2.5 shadow-lg shadow-emerald-900/50 border border-emerald-400/30 active:scale-95 cursor-pointer"
+                  className="btn-primary w-full sm:w-auto px-8 py-3.5 rounded-2xl text-sm flex items-center justify-center gap-2.5 active:scale-95 cursor-pointer"
                 >
                   <Search className="w-4 h-4 stroke-[2.5]" />
                   <span>খুঁজুন</span>
