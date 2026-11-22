@@ -157,9 +157,9 @@ export const siteConfig = {
     shortName: "MTM Tech",
     url: "https://mtmtechbd.com",
     creditText: {
-      bn: "কারিগরি সহযোগিতায় MTM Tech BD",
-      en: "Developed by MTM Tech BD",
-      ar: "تطوير بواسطة MTM Tech BD",
+      bn: "কারিগরি সহযোগিতায়",
+      en: "Developed by",
+      ar: "تطوير بواسطة",
     },
   },
 

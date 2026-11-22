@@ -3,7 +3,7 @@
 export const MADRASA_LOCATION = {
   LATITUDE: parseFloat(process.env.NEXT_PUBLIC_MADRASA_LAT || "24.381197"),
   LONGITUDE: parseFloat(process.env.NEXT_PUBLIC_MADRASA_LNG || "91.416974"),
-  RADIUS_METERS: parseFloat(process.env.NEXT_PUBLIC_MADRASA_RADIUS || "200"),
+  RADIUS_METERS: parseFloat(process.env.NEXT_PUBLIC_MADRASA_RADIUS || "20"),
   MAX_ALLOWED_ACCURACY_METERS: 500,
   ACCURACY_TOLERANCE_METERS: 50,
   NAME: "আস-সালাম আইডিয়াল মাদরাসা (AIM) ক্যাম্পাস",
@@ -14,11 +14,11 @@ export const MADRASA_LOCATION = {
 // Office Hours: Morning 8:00 AM to 1:10 PM (13:10)
 export const ATTENDANCE_RULES = {
   OFFICE_START_HOUR: 8,
-  OFFICE_START_MINUTE: 0,
+  OFFICE_START_MINUTE: 40,
   ON_TIME_CHECKIN_CUTOFF_HOUR: 8,
-  ON_TIME_CHECKIN_CUTOFF_MINUTE: 5, // <= 8:05 AM is 'On Time', > 8:05 AM is 'Late'
-  OFFICE_END_HOUR: 13,
-  OFFICE_END_MINUTE: 10, // >= 1:10 PM is 'On Time' departure, < 1:10 PM is 'Early'
+  ON_TIME_CHECKIN_CUTOFF_MINUTE: 45, // <= 8:05 AM is 'On Time', > 8:05 AM is 'Late'
+  OFFICE_END_HOUR: 12,
+  OFFICE_END_MINUTE: 0, // >= 1:10 PM is 'On Time' departure, < 1:10 PM is 'Early'
 };
 
 // Staff Attendance Schedule & Rules (2 Terms Per Day)
@@ -27,9 +27,9 @@ export const ATTENDANCE_RULES = {
 export const STAFF_ATTENDANCE_RULES = {
   // টার্ম ১: সকালের হাজিরা / চেক-ইন (সর্বশেষ সময় ভোর ৫:৩০)
   TERM_1_TITLE: "১ম টার্ম (সকালের প্রবেশ হাজিরা)",
-  TERM_1_CUTOFF_HOUR: 5,
+  TERM_1_CUTOFF_HOUR: 6,
   TERM_1_CUTOFF_MINUTE: 30, // <= 05:30 AM 'On Time', > 05:30 AM 'Late'
-  TERM_1_CUTOFF_LABEL: "ভোর ০৫:৩০ টা",
+  TERM_1_CUTOFF_LABEL: "ভোর ০৬:৩০ টা",
 
   // টার্ম ২: রাতের হাজিরা / চেক-আউট (রাত ১০:০০ থেকে ১০:১০)
   TERM_2_TITLE: "২য় টার্ম (রাতের প্রস্থান হাজিরা)",
@@ -288,7 +288,7 @@ export function getStaffShiftPhase(date = new Date()) {
     isTerm2Open: minutesSinceMidnight >= t2Start && minutesSinceMidnight <= t2End,
     isTerm2Early: minutesSinceMidnight < t2Start,
     isTerm2Overtime: minutesSinceMidnight > t2End,
-    term1CutoffTime: "05:30 AM",
+    term1CutoffTime: "06:30 AM",
     term2Window: "10:00 PM - 10:10 PM",
   };
 }
@@ -301,7 +301,7 @@ export const RESIDENTIAL_ATTENDANCE_RULES = {
     nameEnglish: "Morning Shift",
     checkInStartHour: 4,
     checkInStartMinute: 0,
-    checkInCutoffHour: 5,
+    checkInCutoffHour: 6,
     checkInCutoffMinute: 30, // Cutoff 5:30 AM (Late after 5:30 AM)
     checkInWindowLabel: "ভোর ০৪:০০ টা – ০৫:৩০ টা",
     checkOutStartHour: 7,
@@ -317,13 +317,13 @@ export const RESIDENTIAL_ATTENDANCE_RULES = {
     checkInStartHour: 7,
     checkInStartMinute: 15,
     checkInCutoffHour: 8,
-    checkInCutoffMinute: 5, // Cutoff 8:05 AM (Late after 8:05 AM)
-    checkInWindowLabel: "সকাল ০৮:০৫ এর পূর্বে",
-    checkOutStartHour: 13,
+    checkInCutoffMinute: 45, // Cutoff 8:05 AM (Late after 8:05 AM)
+    checkInWindowLabel: "সকাল ০৮:৪৫ এর পূর্বে",
+    checkOutStartHour: 12,
     checkOutStartMinute: 10,
-    checkOutEndHour: 13,
+    checkOutEndHour: 12,
     checkOutEndMinute: 30, // Early before 1:10 PM
-    checkOutWindowLabel: "দুপুর ০১:১০ টা",
+    checkOutWindowLabel: "দুপুর ১২:১০ টা",
   },
   shift3: {
     id: "shift3",
@@ -434,7 +434,7 @@ export function evaluateTeacherShiftCheckIn(category, shiftId = "shift1", date =
     const isLate =
       minutesSinceMidnight >
       ATTENDANCE_RULES.ON_TIME_CHECKIN_CUTOFF_HOUR * 60 +
-        ATTENDANCE_RULES.ON_TIME_CHECKIN_CUTOFF_MINUTE;
+      ATTENDANCE_RULES.ON_TIME_CHECKIN_CUTOFF_MINUTE;
     return {
       status: isLate ? "Late" : "On Time",
       isLate,
