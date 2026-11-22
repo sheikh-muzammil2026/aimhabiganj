@@ -1,11 +1,16 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useReactToPrint } from 'react-to-print';
 import siteConfig from '@/config/siteConfig';
+import PrintInstitutionalHeader from '@/components/shared/print/PrintInstitutionalHeader';
 
 export default function ExamAttendanceSheet() {
+    const printAreaRef = useRef(null);
+    const [isPrinting, setIsPrinting] = useState(false);
+
     // নির্বাচন করার জন্য স্টেটসমূহ
-    const [classes, setClasses] = useState([
+    const [classes] = useState([
         'প্লে',
         'নার্সারি',
         'প্রথম',
@@ -102,10 +107,6 @@ export default function ExamAttendanceSheet() {
         }
     }, [selectedExam, selectedClass, fetchAttendanceData]);
 
-    const handlePrint = () => {
-        window.print();
-    };
-
     const getSubjectStyles = (count) => {
         if (count > 10) {
             return {
@@ -145,8 +146,94 @@ export default function ExamAttendanceSheet() {
 
     const { fontSizeClass, subTitleSizeClass, paddingClass } = getSubjectStyles(subjects.length);
 
-    // লজিক: ১৪ বা তার বেশি স্টুডেন্ট থাকলে আলাদা পেজ হবে না, সব ১ পেজে ফিট করবে
+    // লজিক: ৯ বা তার বেশি স্টুডেন্ট থাকলে আলাদা পেজ হবে না, সব ১ পেজে ফিট করবে
     const isSinglePageMode = students.length >= 9;
+
+    const printPageStyle = `
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: ${isSinglePageMode ? '5mm' : '8mm'};
+            }
+            html, body {
+                background: white !important;
+                color: black !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                height: auto !important;
+                overflow: visible !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .print-page {
+                page-break-before: always !important;
+                break-before: page !important;
+                page-break-after: always !important;
+                break-after: page !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                box-sizing: border-box !important;
+                width: 100% !important;
+                max-width: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            .print-page:first-child {
+                page-break-before: auto !important;
+                break-before: auto !important;
+            }
+            .print-page:last-child {
+                page-break-after: auto !important;
+                break-after: auto !important;
+            }
+            table {
+                width: 100% !important;
+                table-layout: fixed !important;
+            }
+            tr {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+        }
+    `;
+
+    const reactToPrintFn = useReactToPrint({
+        contentRef: printAreaRef,
+        documentTitle: `Attendance-Sheet-${metaData.className || selectedClass}-${metaData.examName || selectedExam}`,
+        pageStyle: printPageStyle,
+        onBeforePrint: async () => {
+            setIsPrinting(true);
+            if (printAreaRef.current) {
+                const images = Array.from(printAreaRef.current.querySelectorAll('img'));
+                await Promise.all(
+                    images.map((img) => {
+                        if (img.complete && img.naturalWidth > 0) {
+                            return typeof img.decode === 'function'
+                                ? img.decode().catch(() => {})
+                                : Promise.resolve();
+                        }
+                        return new Promise((resolve) => {
+                            img.addEventListener('load', resolve, { once: true });
+                            img.addEventListener('error', resolve, { once: true });
+                        });
+                    })
+                );
+            }
+        },
+        onAfterPrint: () => {
+            setIsPrinting(false);
+        },
+        onPrintError: () => {
+            setIsPrinting(false);
+        },
+    });
+
+    const handlePrint = () => {
+        if (!printAreaRef.current || students.length === 0) return;
+        reactToPrintFn();
+    };
 
     const chunkArray = (arr, size) => {
         const chunks = [];
@@ -164,41 +251,7 @@ export default function ExamAttendanceSheet() {
 
             {/* A4 Landscape Print Style Injector */}
             <style jsx global>{`
-                @media print {
-                    @page {
-                        size: A4 landscape;
-                        margin: ${isSinglePageMode ? '5mm' : '8mm'};
-                    }
-                    html, body {
-                        background: white !important;
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        height: auto !important;
-                        overflow: visible !important;
-                        -webkit-print-color-adjust: exact !important;
-                        print-color-adjust: exact !important;
-                    }
-                    .print-page {
-                        page-break-before: always !important;
-                        break-before: page !important;
-                        page-break-after: always !important;
-                        break-after: page !important;
-                        page-break-inside: avoid !important;
-                        break-inside: avoid !important;
-                        box-sizing: border-box !important;
-                        width: 100% !important;
-                        margin: 0 !important;
-                        padding: 0 !important;
-                    }
-                    .print-page:first-child {
-                        page-break-before: auto !important;
-                        break-before: auto !important;
-                    }
-                    .print-page:last-child {
-                        page-break-after: auto !important;
-                        break-after: auto !important;
-                    }
-                }
+                ${printPageStyle}
             `}</style>
 
             {/* Action Buttons Bar */}
@@ -238,14 +291,14 @@ export default function ExamAttendanceSheet() {
                 <div>
                     <button
                         onClick={handlePrint}
-                        disabled={students.length === 0}
-                        className={`text-white px-5 py-2 rounded-lg text-sm font-medium transition shadow flex items-center gap-2 cursor-pointer ${students.length === 0 ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+                        disabled={students.length === 0 || isPrinting}
+                        className={`text-white px-5 py-2 rounded-lg text-sm font-medium transition shadow flex items-center gap-2 cursor-pointer ${students.length === 0 || isPrinting ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
                             }`}
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                         </svg>
-                        প্রিন্ট করুন
+                        {isPrinting ? 'প্রিন্ট প্রস্তুত হচ্ছে...' : 'প্রিন্ট করুন'}
                     </button>
                 </div>
             </div>
@@ -264,104 +317,122 @@ export default function ExamAttendanceSheet() {
                     📭 এই শ্রেণিতে কোনো শিক্ষার্থীর তথ্য পাওয়া যায়নি।
                 </div>
             ) : (
-                studentChunks.map((chunk, chunkIdx) => (
-                    <div
-                        key={chunkIdx}
-                        className={`print-page bg-white text-black rounded-sm shadow-xl w-full max-w-[1150px] border border-gray-300 print:shadow-none print:border-none print:p-0 print:m-0 print:w-full mb-6 ${isSinglePageMode ? 'p-2' : 'p-6'
-                            }`}
-                    >
-                        {/* ১৪ বা তার বেশি স্টুডেন্ট থাকলে Header ও Logo সম্পূর্ণ হাইড থাকবে */}
-                        {!isSinglePageMode && (
-                            <div className="flex justify-between items-center border-b-2 border-black pb-2 mb-3">
-                                <div className="w-[130px] h-[100px] relative flex-shrink-0">
-                                    <img
-                                        src={siteConfig.assets.logo}
-                                        alt="Logo"
-                                        className="w-full h-full object-contain"
-                                    />
-                                </div>
+                <div ref={printAreaRef} className="w-full flex flex-col items-center print:block print:w-full">
+                    {studentChunks.map((chunk, chunkIdx) => (
+                        <div
+                            key={chunkIdx}
+                            className={`print-page bg-white text-black rounded-sm shadow-xl w-full max-w-[1150px] border border-gray-300 print:shadow-none print:border-none print:p-0 print:m-0 print:w-full mb-6 ${isSinglePageMode ? 'p-2' : 'p-6'
+                                }`}
+                        >
+                            {/* Institutional Header with Logo (aimlogo1.png) & Routine Banner (banner_routine.png) */}
+                            <PrintInstitutionalHeader
+                                logoSrc={siteConfig.assets.logo || '/aimlogo1.png'}
+                                bannerSrc={siteConfig.assets.bannerRoutine || '/banner_routine.png'}
+                                containerClassName="flex items-center justify-center gap-0 mb-2 border-b-4 border-double border-gray-800 pb-1 pl-2"
+                                logoWrapperClassName="w-20 h-20 md:w-28 md:h-28 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-3"
+                                logoWidth={200}
+                                logoHeight={200}
+                                logoClassName="w-full h-full object-cover scale-[1.05] transform-gpu"
+                                bannerWidth={2000}
+                                bannerHeight={500}
+                                bannerClassName="w-full h-auto max-h-45 object-fill mx-auto print:max-h-25"
+                            />
 
-                                <div className="flex-grow flex justify-end items-center">
-                                    <img
-                                        src={siteConfig.assets.banner}
-                                        alt="Institution Banner"
-                                        className="max-h-[100px] object-contain"
-                                    />
-                                </div>
+                            {/* Sub Header Meta Info */}
+                            <div className={`text-center font-semibold text-gray-900 ${isSinglePageMode ? 'text-xs mb-1' : 'text-[15px] sm:text-[16px] mb-2'
+                                }`}>
+                                শ্রেণি: <span className="font-bold">{metaData.className}</span> - {metaData.examName} {(metaData.englishYear || '').split(/[-–/]/)[0].trim()} ইং / {(metaData.hijriYear || '').split(/[-–/]/)[0].trim()} হি শিক্ষাবর্ষ
                             </div>
-                        )}
 
-                        {/* Sub Header Meta Info */}
-                        <div className={`text-center font-semibold text-gray-900 ${isSinglePageMode ? 'text-xs mb-1' : 'text-[15px] sm:text-[16px] mb-2'
-                            }`}>
-                            শ্রেণি: <span className="font-bold">{metaData.className}</span> - {metaData.examName} {(metaData.englishYear || '').split(/[-–/]/)[0].trim()} ইং / {(metaData.hijriYear || '').split(/[-–/]/)[0].trim()} হি শিক্ষাবর্ষ
-                        </div>
+                            {/* Title */}
+                            <h2 className={`text-center font-bold text-black underline underline-offset-4 decoration-1 ${isSinglePageMode ? 'text-lg mb-2' : 'text-xl sm:text-2xl mb-4'
+                                }`}>
+                                উপস্থিতি স্বাক্ষরপত্র
+                            </h2>
 
-                        {/* Title */}
-                        <h2 className={`text-center font-bold text-black underline underline-offset-4 decoration-1 ${isSinglePageMode ? 'text-lg mb-2' : 'text-xl sm:text-2xl mb-4'
-                            }`}>
-                            উপস্থিতি স্বাক্ষরপত্র
-                        </h2>
-
-                        {/* Attendance Grid Table */}
-                        <div className="overflow-x-auto w-full">
-                            <table className="w-full border-collapse border border-black text-xs text-black table-fixed">
-                                <thead>
-                                    <tr className="bg-gray-200 print:bg-gray-200">
-                                        <th className="border border-black p-1 w-10 text-center font-bold">রোল</th>
-                                        <th className="border border-black p-1 w-12 sm:w-14 text-center font-bold">আইডি</th>
-                                        <th className="border border-black p-1 w-32 sm:w-40 text-center font-bold">পরীক্ষার্থীর নাম</th>
-
-                                        {subjects.length > 0 ? (
-                                            subjects.map((sub) => (
-                                                <th key={sub.id} className={`border border-black ${paddingClass} text-center font-normal break-words`}>
-                                                    <div className={`font-bold ${fontSizeClass}`}>{sub.name}</div>
-                                                    <div className={`${subTitleSizeClass} text-gray-800`}>{sub.date}</div>
-                                                </th>
-                                            ))
-                                        ) : (
-                                            <th className="border border-black p-1 text-center font-bold">
-                                                বিষয় ও তারিখ
-                                            </th>
-                                        )}
-                                    </tr>
-                                </thead>
-
-                                <tbody>
-                                    {chunk.map((student, idx) => (
-                                        <tr key={idx} className={isSinglePageMode ? 'h-6 sm:h-7' : 'h-9'}>
-                                            <td className="border border-black px-1 text-center font-medium">
-                                                {student.roll}
-                                            </td>
-
-                                            <td className="border border-black px-1 text-center font-medium">
-                                                {student.studentId}
-                                            </td>
-
-                                            <td className="border border-black px-1 font-semibold text-left align-middle">
-                                                <div className={`${getStudentNameFontSize(student.studentName, isSinglePageMode)} break-words leading-tight`}>
-                                                    {student.studentName}
-                                                </div>
-                                            </td>
+                            {/* Attendance Grid Table */}
+                            <div className="overflow-x-auto w-full">
+                                <table className="w-full border-collapse border border-black text-xs text-black table-fixed">
+                                    <thead>
+                                        <tr className="bg-gray-200 print:bg-gray-200">
+                                            <th className="border border-black p-1 w-10 text-center font-bold">রোল</th>
+                                            <th className="border border-black p-1 w-12 sm:w-14 text-center font-bold">আইডি</th>
+                                            <th className="border border-black p-1 w-32 sm:w-40 text-center font-bold">পরীক্ষার্থীর নাম</th>
 
                                             {subjects.length > 0 ? (
                                                 subjects.map((sub) => (
-                                                    <td
-                                                        key={sub.id}
-                                                        className="border border-black text-center bg-white"
-                                                    >
-                                                    </td>
+                                                    <th key={sub.id} className={`border border-black ${paddingClass} text-center font-normal break-words`}>
+                                                        <div className={`font-bold ${fontSizeClass}`}>{sub.name}</div>
+                                                        <div className={`${subTitleSizeClass} text-gray-800`}>{sub.date}</div>
+                                                    </th>
                                                 ))
                                             ) : (
-                                                <td className="border border-black text-center bg-white"></td>
+                                                <th className="border border-black p-1 text-center font-bold">
+                                                    বিষয় ও তারিখ
+                                                </th>
                                             )}
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+
+                                    <tbody>
+                                        {chunk.map((student, idx) => (
+                                            <tr key={idx} className={isSinglePageMode ? 'h-6 sm:h-7' : 'h-9'}>
+                                                <td className="border border-black px-1 text-center font-medium">
+                                                    {student.roll}
+                                                </td>
+
+                                                <td className="border border-black px-1 text-center font-medium">
+                                                    {student.studentId}
+                                                </td>
+
+                                                <td className="border border-black px-1 font-semibold text-left align-middle">
+                                                    <div className={`${getStudentNameFontSize(student.studentName, isSinglePageMode)} break-words leading-tight`}>
+                                                        {student.studentName}
+                                                    </div>
+                                                </td>
+
+                                                {subjects.length > 0 ? (
+                                                    subjects.map((sub) => (
+                                                        <td
+                                                            key={sub.id}
+                                                            className="border border-black text-center bg-white"
+                                                        >
+                                                        </td>
+                                                    ))
+                                                ) : (
+                                                    <td className="border border-black text-center bg-white"></td>
+                                                )}
+                                            </tr>
+                                        ))}
+
+                                        {/* Hall Invigilator's Subject-wise Signature Row */}
+                                        {chunkIdx === studentChunks.length - 1 && (
+                                            <tr className={`${isSinglePageMode ? 'h-8 sm:h-9' : 'h-10'} break-inside-avoid`}>
+                                                <td
+                                                    colSpan={3}
+                                                    className="border border-black px-2 text-center font-bold text-xs sm:text-sm bg-gray-100 print:bg-gray-100 align-middle"
+                                                >
+                                                    হল পরিদর্শকের স্বাক্ষর
+                                                </td>
+
+                                                {subjects.length > 0 ? (
+                                                    subjects.map((sub) => (
+                                                        <td
+                                                            key={`invigilator-${sub.id}`}
+                                                            className="border border-black text-center bg-white"
+                                                        ></td>
+                                                    ))
+                                                ) : (
+                                                    <td className="border border-black text-center bg-white"></td>
+                                                )}
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                    </div>
-                ))
+                    ))}
+                </div>
             )}
         </div>
     );
