@@ -96,7 +96,7 @@ const TEACHER_I18N = {
     btnCheckOut: "প্রস্থান (Check Out)",
     singleCheckInTitle: "প্রবেশ হাজিরা (Check-In)",
     singleCheckInSub:
-      'সকাল ৮:০০ থেকে ৮:০৫ এর মধ্যে প্রবেশ করলে "On Time" গণ্য হবে।',
+      'সকাল ৮:৪৫ বা তার পূর্বে প্রবেশ করলে "On Time" গণ্য হবে।',
     badgeOnTime: "সময়মতো (On Time)",
     badgeLate: "দেরিতে (Late)",
     badgeNotSubmitted: "হাজিরা দেওয়া হয়নি",
@@ -110,7 +110,7 @@ const TEACHER_I18N = {
     confirmCheckInBtn: "প্রবেশ হাজিরা নিশ্চিত করুন (Check In)",
     singleCheckOutTitle: "প্রস্থান হাজিরা (Check-Out)",
     singleCheckOutSub:
-      'দুপুর ১:১০ বা তার পরে প্রস্থান করলে "On Time" গণ্য হবে।',
+      'দুপুর ১২:০০ বা তার পরে প্রস্থান করলে "On Time" গণ্য হবে।',
     badgeOnTimeExit: "অন-টাইম প্রস্থান (On Time)",
     badgeEarlyExit: "আর্লি প্রস্থান (Early)",
     badgeNotExited: "প্রস্থান হয়নি",
@@ -127,14 +127,14 @@ const TEACHER_I18N = {
       "হিফজ বিভাগীয় শিক্ষক (৩ শিফট) হাজিরা নির্দেশিকা ও সময়সূচি",
     regularRulesHeader: "মাদরাসা অফিস সময় ও হাজিরা নির্দেশিকা",
     ruleCard1Tag: "অফিস কার্যকাল",
-    ruleCard1Val: "সকাল ৮:০০ - দুপুর ১:১০",
-    ruleCard1Sub: "দৈনিক মোট ৫ ঘণ্টা ১০ মিনিট",
+    ruleCard1Val: "সকাল ৮:৪০ - দুপুর ১২:৩০",
+    ruleCard1Sub: "দৈনিক মোট ৩ ঘণ্টা ২০ মিনিট",
     ruleCard2Tag: "অন-টাইম প্রবেশ (Arrival)",
-    ruleCard2Val: "সকাল ৮:০৫ বা পূর্বে",
-    ruleCard2Sub: "সকাল ৮:০৫ এর পর প্রবেশ করলে Late",
+    ruleCard2Val: "সকাল ৮:৪০ বা পূর্বে",
+    ruleCard2Sub: "সকাল ৮:৪০ এর পর প্রবেশ করলে Late",
     ruleCard3Tag: "অন-টাইম প্রস্থান (Departure)",
-    ruleCard3Val: "দুপুর ১:১০ বা পরে",
-    ruleCard3Sub: "দুপুর ১:১০ এর পূর্বে প্রস্থান Early",
+    ruleCard3Val: "দুপুর ১২:৩০ বা পরে",
+    ruleCard3Sub: "দুপুর ১২:৩০ এর পূর্বে প্রস্থান Early",
     ruleCard4Tag: "লোকেশন বাধ্যবাধকতা",
     ruleCard4ValPrefix: "সর্বোচ্চ",
     ruleCard4Sub: "মাদরাসা প্রাঙ্গণের বাইরে সাবমিট হবে না",
@@ -159,8 +159,8 @@ const TEACHER_I18N = {
     modalShiftLateSubSuffix: ") অতিক্রান্ত হয়েছে",
     modalShiftEarlySubPrefix: "নির্ধারিত সময় (",
     modalShiftEarlySubSuffix: ") এর পূর্বে প্রস্থান করছেন",
-    modalRegLateSub: "নির্ধারিত সময় (সকাল ৮:০৫) এর পরে প্রবেশ করছেন",
-    modalRegEarlySub: "নির্ধারিত সময় (দুপুর ১:১০) এর পূর্বে প্রস্থান করছেন",
+    modalRegLateSub: "নির্ধারিত সময় (সকাল ৮:৪০) এর পরে প্রবেশ করছেন",
+    modalRegEarlySub: "নির্ধারিত সময় (দুপুর ১২:৩০) এর পূর্বে প্রস্থান করছেন",
     modalLateNotice:
       "অনুগ্রহ করে দেরিতে আসার সুনির্দিষ্ট কারণ উল্লেখ করুন। এটি প্রশাসন প্যানেলে সংরক্ষিত হবে।",
     modalEarlyNotice:
@@ -225,7 +225,7 @@ const TEACHER_I18N = {
     btnCheckOut: "Check Out",
     singleCheckInTitle: "Morning Check-In",
     singleCheckInSub:
-      'Checking in between 8:00 AM and 8:05 AM is recorded as "On Time".',
+      'Checking in on or before 8:45 AM is recorded as "On Time".',
     badgeOnTime: "On Time",
     badgeLate: "Late",
     badgeNotSubmitted: "Not Checked In",
@@ -239,7 +239,7 @@ const TEACHER_I18N = {
     confirmCheckInBtn: "Confirm Check-In",
     singleCheckOutTitle: "Afternoon Check-Out",
     singleCheckOutSub:
-      'Checking out at or after 1:10 PM is recorded as "On Time".',
+      'Checking out at or after 12:00 PM is recorded as "On Time".',
     badgeOnTimeExit: "On-Time Exit",
     badgeEarlyExit: "Early Exit",
     badgeNotExited: "Not Checked Out",
@@ -255,14 +255,14 @@ const TEACHER_I18N = {
     hifzRulesHeader: "Hifz Department Teacher (3 Shifts) Attendance Guidelines",
     regularRulesHeader: "Madrasah Office Hours & Attendance Guidelines",
     ruleCard1Tag: "Office Hours",
-    ruleCard1Val: "08:00 AM - 01:10 PM",
-    ruleCard1Sub: "Total 5 hours 10 minutes daily",
+    ruleCard1Val: "08:40 AM - 12:30 PM",
+    ruleCard1Sub: "Total 3 hours 20 minutes daily",
     ruleCard2Tag: "On-Time Arrival",
-    ruleCard2Val: "By 08:05 AM",
-    ruleCard2Sub: "Marked Late after 08:05 AM",
+    ruleCard2Val: "By 08:40 AM",
+    ruleCard2Sub: "Marked Late after 08:40 AM",
     ruleCard3Tag: "On-Time Departure",
-    ruleCard3Val: "01:10 PM or Later",
-    ruleCard3Sub: "Marked Early before 01:10 PM",
+    ruleCard3Val: "12:00 PM or Later",
+    ruleCard3Sub: "Marked Early before 12:30 PM",
     ruleCard4Tag: "Geofence Requirement",
     ruleCard4ValPrefix: "Max",
     ruleCard4Sub: "Cannot submit outside campus premises",
@@ -287,8 +287,8 @@ const TEACHER_I18N = {
     modalShiftLateSubSuffix: ") has passed",
     modalShiftEarlySubPrefix: "Leaving before scheduled window (",
     modalShiftEarlySubSuffix: ")",
-    modalRegLateSub: "Checking in after scheduled time (08:05 AM)",
-    modalRegEarlySub: "Checking out before scheduled time (01:10 PM)",
+    modalRegLateSub: "Checking in after scheduled time (08:40 AM)",
+    modalRegEarlySub: "Checking out before scheduled time (12:30 PM)",
     modalLateNotice:
       "Please specify the exact reason for arriving late. This will be recorded in the admin panel.",
     modalEarlyNotice:
@@ -351,7 +351,7 @@ const TEACHER_I18N = {
     btnCheckOut: "تسجيل انصراف",
     singleCheckInTitle: "تسجيل الحضور (Check-In)",
     singleCheckInSub:
-      'التسجيل بين الساعة ٨:٠٠ و ٨:٠٥ صباحاً يُحتسب "في الوقت المحدد".',
+      'التسجيل في الساعة ٨:٤٥ صباحاً أو قبلها يُحتسب "في الوقت المحدد".',
     badgeOnTime: "في الموعد (On Time)",
     badgeLate: "متأخر (Late)",
     badgeNotSubmitted: "لم يتم التسجيل",
@@ -365,7 +365,7 @@ const TEACHER_I18N = {
     confirmCheckInBtn: "تأكيد تسجيل الحضور (Check In)",
     singleCheckOutTitle: "تسجيل الانصراف (Check-Out)",
     singleCheckOutSub:
-      'الانصراف الساعة ١:١٠ ظهراً أو بعدها يُحتسب "في الوقت المحدد".',
+      'الانصراف الساعة ١٢:٠٠ ظهراً أو بعدها يُحتسب "في الوقت المحدد".',
     badgeOnTimeExit: "انصراف في الموعد",
     badgeEarlyExit: "انصراف مبكر",
     badgeNotExited: "لم يتم الانصراف",
@@ -381,14 +381,14 @@ const TEACHER_I18N = {
     hifzRulesHeader: "إرشادات ومواعيد حضور معلمي التحفيظ (٣ فترات)",
     regularRulesHeader: "أوقات الدوام الرسمي وإرشادات الحضور",
     ruleCard1Tag: "ساعات الدوام",
-    ruleCard1Val: "٠٨:٠٠ ص - ٠١:١٠ م",
-    ruleCard1Sub: "إجمالي ٥ ساعات و ١٠ دقائق يومياً",
+    ruleCard1Val: "٠٨:٤٠ ص - ١٢:٠٠ م",
+    ruleCard1Sub: "إجمالي ٣ ساعات و ٢٠ دقيقة يومياً",
     ruleCard2Tag: "الحضور في الموعد",
-    ruleCard2Val: "حتى ٠٨:٠٥ صباحاً",
-    ruleCard2Sub: "يُحتسب تأخراً بعد ٠٨:٠٥ صباحاً",
+    ruleCard2Val: "حتى ٠٨:٤٥ صباحاً",
+    ruleCard2Sub: "يُحتسب تأخراً بعد ٠٨:٤٥ صباحاً",
     ruleCard3Tag: "الانصراف في الموعد",
-    ruleCard3Val: "٠١:١٠ ظهراً أو بعدها",
-    ruleCard3Sub: "يُحتسب مبكراً قبل ٠١:١٠ ظهراً",
+    ruleCard3Val: "١٢:٠٠ ظهراً أو بعدها",
+    ruleCard3Sub: "يُحتسب مبكراً قبل ١٢:٠٠ ظهراً",
     ruleCard4Tag: "شرط الموقع الجغرافي",
     ruleCard4ValPrefix: "الحد الأقصى",
     ruleCard4Sub: "لا يمكن التسجيل خارج حرم المدرسة",
@@ -413,8 +413,8 @@ const TEACHER_I18N = {
     modalShiftLateSubSuffix: ")",
     modalShiftEarlySubPrefix: "الانصراف قبل الوقت المحدد (",
     modalShiftEarlySubSuffix: ")",
-    modalRegLateSub: "تسجيل الدخول بعد الوقت المحدد (٠٨:٠٥ صباحاً)",
-    modalRegEarlySub: "تسجيل الانصراف قبل الوقت المحدد (٠١:١٠ ظهراً)",
+    modalRegLateSub: "تسجيل الدخول بعد الوقت المحدد (٠٨:٤٥ صباحاً)",
+    modalRegEarlySub: "تسجيل الانصراف قبل الوقت المحدد (١٢:٠٠ ظهراً)",
     modalLateNotice:
       "يرجى ذكر السبب الدقيق للتأخر في الحضور. سيتم حفظ ذلك في لوحة الإدارة.",
     modalEarlyNotice:
@@ -920,7 +920,7 @@ export default function TeacherAttendancePage() {
             <div className="space-y-2.5">
               <div className="flex items-center gap-2">
                 <span className="px-3.5 py-1 text-xs font-bold uppercase tracking-wider bg-white/[0.07] border border-amber-400/35 rounded-full text-amber-300 backdrop-blur-md flex items-center gap-1.5 shadow-[0_0_20px_rgba(245,158,11,0.12)]">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+
                   {text.portalBadge}
                 </span>
                 <span className="text-xs text-amber-200/80 font-semibold">
@@ -985,11 +985,10 @@ export default function TeacherAttendancePage() {
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div className="flex items-start sm:items-center gap-3.5">
               <div
-                className={`p-3.5 rounded-2xl flex-shrink-0 ring-1 ${
-                  isInsideEffective
-                    ? "bg-emerald-100 text-emerald-800 ring-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:ring-emerald-500/40"
-                    : "bg-rose-100 text-rose-800 ring-rose-300 dark:bg-rose-950/60 dark:text-rose-300 dark:ring-rose-500/40"
-                }`}
+                className={`p-3.5 rounded-2xl flex-shrink-0 ring-1 ${isInsideEffective
+                  ? "bg-emerald-100 text-emerald-800 ring-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:ring-emerald-500/40"
+                  : "bg-rose-100 text-rose-800 ring-rose-300 dark:bg-rose-950/60 dark:text-rose-300 dark:ring-rose-500/40"
+                  }`}
               >
                 <MapPin className="w-6 h-6" />
               </div>
@@ -1096,11 +1095,10 @@ export default function TeacherAttendancePage() {
               return (
                 <div
                   key={shiftKey}
-                  className={`relative rounded-3xl p-[1.5px] transition-all duration-300 hover:-translate-y-1 ${
-                    isActive
-                      ? "bg-gradient-to-b from-amber-400 via-emerald-500 to-amber-500 shadow-[0_20px_50px_-15px_rgba(245,158,11,0.25)]"
-                      : "bg-gradient-to-b from-amber-400/40 via-emerald-600/15 to-slate-200 dark:from-amber-400/45 dark:via-emerald-500/20 dark:to-amber-500/25 shadow-[0_12px_35px_-12px_rgba(2,32,20,0.08)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.85)]"
-                  }`}
+                  className={`relative rounded-3xl p-[1.5px] transition-all duration-300 hover:-translate-y-1 ${isActive
+                    ? "bg-gradient-to-b from-amber-400 via-emerald-500 to-amber-500 shadow-[0_20px_50px_-15px_rgba(245,158,11,0.25)]"
+                    : "bg-gradient-to-b from-amber-400/40 via-emerald-600/15 to-slate-200 dark:from-amber-400/45 dark:via-emerald-500/20 dark:to-amber-500/25 shadow-[0_12px_35px_-12px_rgba(2,32,20,0.08)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.85)]"
+                    }`}
                 >
                   <div className="relative h-full bg-white dark:bg-gradient-to-br dark:from-[#041e14] dark:via-[#02120c] dark:to-[#010906] rounded-[22.5px] p-6 flex flex-col justify-between overflow-hidden dark:shadow-[inset_0_1px_1px_rgba(251,191,36,0.15)]">
                     <div className="space-y-4">
@@ -1109,11 +1107,10 @@ export default function TeacherAttendancePage() {
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
                             <span
-                              className={`p-2 rounded-xl text-xs font-bold ${
-                                isActive
-                                  ? "bg-gradient-to-br from-[#022014] to-emerald-800 text-amber-300 ring-1 ring-amber-400/50"
-                                  : "bg-emerald-50 text-emerald-700 dark:bg-white/[0.06] dark:text-amber-300"
-                              }`}
+                              className={`p-2 rounded-xl text-xs font-bold ${isActive
+                                ? "bg-gradient-to-br from-[#022014] to-emerald-800 text-amber-300 ring-1 ring-amber-400/50"
+                                : "bg-emerald-50 text-emerald-700 dark:bg-white/[0.06] dark:text-amber-300"
+                                }`}
                             >
                               <Clock className="w-4 h-4" />
                             </span>
@@ -1189,11 +1186,10 @@ export default function TeacherAttendancePage() {
                               {text.checkInStatusLabel}
                             </span>
                             <span
-                              className={`font-bold ${
-                                shiftLog.checkInStatus === "On Time"
-                                  ? "text-emerald-600 dark:text-emerald-300"
-                                  : "text-rose-600 dark:text-rose-300"
-                              }`}
+                              className={`font-bold ${shiftLog.checkInStatus === "On Time"
+                                ? "text-emerald-600 dark:text-emerald-300"
+                                : "text-rose-600 dark:text-rose-300"
+                                }`}
                             >
                               {shiftLog.checkInStatus === "On Time"
                                 ? text.onTimeText
@@ -1224,11 +1220,10 @@ export default function TeacherAttendancePage() {
                               {text.checkOutStatusLabel}
                             </span>
                             <span
-                              className={`font-bold ${
-                                shiftLog.checkOutStatus === "On Time"
-                                  ? "text-emerald-600 dark:text-emerald-300"
-                                  : "text-amber-600 dark:text-amber-300"
-                              }`}
+                              className={`font-bold ${shiftLog.checkOutStatus === "On Time"
+                                ? "text-emerald-600 dark:text-emerald-300"
+                                : "text-amber-600 dark:text-amber-300"
+                                }`}
                             >
                               {shiftLog.checkOutStatus === "On Time"
                                 ? text.onTimeExitText
@@ -1250,11 +1245,10 @@ export default function TeacherAttendancePage() {
                       <button
                         onClick={() => handleShiftCheckIn(shiftKey)}
                         disabled={hasCheckedIn || isSubmitting}
-                        className={`py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                          hasCheckedIn
-                            ? "bg-slate-100 dark:bg-white/[0.05] text-slate-400 dark:text-slate-500 cursor-not-allowed"
-                            : "bg-gradient-to-r from-[#022014] to-emerald-800 dark:from-amber-400 dark:to-amber-500 text-amber-200 dark:text-slate-950 shadow-xs active:scale-[0.98]"
-                        }`}
+                        className={`py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${hasCheckedIn
+                          ? "bg-slate-100 dark:bg-white/[0.05] text-slate-400 dark:text-slate-500 cursor-not-allowed"
+                          : "bg-gradient-to-r from-[#022014] to-emerald-800 dark:from-amber-400 dark:to-amber-500 text-amber-200 dark:text-slate-950 shadow-xs active:scale-[0.98]"
+                          }`}
                       >
                         {isSubmitting ? (
                           <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -1271,11 +1265,10 @@ export default function TeacherAttendancePage() {
                       <button
                         onClick={() => handleShiftCheckOut(shiftKey)}
                         disabled={!hasCheckedIn || hasCheckedOut || isSubmitting}
-                        className={`py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                          !hasCheckedIn || hasCheckedOut
-                            ? "bg-slate-100 dark:bg-white/[0.05] text-slate-400 dark:text-slate-500 cursor-not-allowed"
-                            : "bg-gradient-to-r from-teal-800 to-emerald-900 dark:from-emerald-600 dark:to-teal-700 text-white shadow-xs active:scale-[0.98]"
-                        }`}
+                        className={`py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${!hasCheckedIn || hasCheckedOut
+                          ? "bg-slate-100 dark:bg-white/[0.05] text-slate-400 dark:text-slate-500 cursor-not-allowed"
+                          : "bg-gradient-to-r from-teal-800 to-emerald-900 dark:from-emerald-600 dark:to-teal-700 text-white shadow-xs active:scale-[0.98]"
+                          }`}
                       >
                         {isSubmitting ? (
                           <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -1320,11 +1313,10 @@ export default function TeacherAttendancePage() {
                 {/* Check-In Status Badge */}
                 {isCheckedIn ? (
                   <span
-                    className={`px-3 py-1 text-xs font-extrabold rounded-full flex items-center gap-1.5 shadow-xs ${
-                      todayData?.checkInStatus === "On Time"
-                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/40"
-                        : "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-300 dark:border-rose-500/40"
-                    }`}
+                    className={`px-3 py-1 text-xs font-extrabold rounded-full flex items-center gap-1.5 shadow-xs ${todayData?.checkInStatus === "On Time"
+                      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/40"
+                      : "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-300 dark:border-rose-500/40"
+                      }`}
                   >
                     {todayData?.checkInStatus === "On Time" ? (
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-300" />
@@ -1379,11 +1371,10 @@ export default function TeacherAttendancePage() {
               <button
                 onClick={handleCheckIn}
                 disabled={isCheckedIn || submittingCheckIn}
-                className={`w-full py-3.5 px-5 rounded-2xl font-black text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                  isCheckedIn
-                    ? "bg-slate-100 dark:bg-white/[0.05] text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-200 dark:border-white/10"
-                    : "bg-gradient-to-r from-[#022014] via-emerald-900 to-emerald-800 dark:from-amber-400 dark:via-amber-500 dark:to-amber-400 text-amber-200 dark:text-slate-950 shadow-[0_10px_25px_rgba(2,32,20,0.25)] dark:shadow-[0_10px_30px_rgba(245,158,11,0.35)] active:scale-[0.98]"
-                }`}
+                className={`w-full py-3.5 px-5 rounded-2xl font-black text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer ${isCheckedIn
+                  ? "bg-slate-100 dark:bg-white/[0.05] text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-200 dark:border-white/10"
+                  : "bg-gradient-to-r from-[#022014] via-emerald-900 to-emerald-800 dark:from-amber-400 dark:via-amber-500 dark:to-amber-400 text-amber-200 dark:text-slate-950 shadow-[0_10px_25px_rgba(2,32,20,0.25)] dark:shadow-[0_10px_30px_rgba(245,158,11,0.35)] active:scale-[0.98]"
+                  }`}
               >
                 {submittingCheckIn ? (
                   <>
@@ -1426,11 +1417,10 @@ export default function TeacherAttendancePage() {
                 {/* Check-Out Status Badge */}
                 {isCheckedOut ? (
                   <span
-                    className={`px-3 py-1 text-xs font-extrabold rounded-full flex items-center gap-1.5 shadow-xs ${
-                      todayData?.checkOutStatus === "On Time"
-                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/40"
-                        : "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-400/40"
-                    }`}
+                    className={`px-3 py-1 text-xs font-extrabold rounded-full flex items-center gap-1.5 shadow-xs ${todayData?.checkOutStatus === "On Time"
+                      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/40"
+                      : "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-400/40"
+                      }`}
                   >
                     {todayData?.checkOutStatus === "On Time" ? (
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-300" />
@@ -1487,11 +1477,10 @@ export default function TeacherAttendancePage() {
               <button
                 onClick={handleCheckOut}
                 disabled={!isCheckedIn || isCheckedOut || submittingCheckOut}
-                className={`w-full py-3.5 px-5 rounded-2xl font-black text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                  !isCheckedIn || isCheckedOut
-                    ? "bg-slate-100 dark:bg-white/[0.05] text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-200 dark:border-white/10"
-                    : "bg-gradient-to-r from-[#022014] via-teal-900 to-emerald-900 dark:from-emerald-500 dark:to-teal-600 text-amber-200 dark:text-white active:scale-[0.98]"
-                }`}
+                className={`w-full py-3.5 px-5 rounded-2xl font-black text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer ${!isCheckedIn || isCheckedOut
+                  ? "bg-slate-100 dark:bg-white/[0.05] text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-200 dark:border-white/10"
+                  : "bg-gradient-to-r from-[#022014] via-teal-900 to-emerald-900 dark:from-emerald-500 dark:to-teal-600 text-amber-200 dark:text-white active:scale-[0.98]"
+                  }`}
               >
                 {submittingCheckOut ? (
                   <>
@@ -1718,8 +1707,8 @@ export default function TeacherAttendancePage() {
 
                     const completedCount = hasShifts
                       ? Object.values(item.shifts).filter(
-                          (s) => !!s?.checkInTime
-                        ).length
+                        (s) => !!s?.checkInTime
+                      ).length
                       : 0;
 
                     return (
@@ -1742,9 +1731,8 @@ export default function TeacherAttendancePage() {
                                   {text.shiftDetailsBtn} ({completedCount}/3)
                                 </span>
                                 <ChevronDown
-                                  className={`w-3 h-3 transition-transform ${
-                                    isExpanded ? "rotate-180" : ""
-                                  }`}
+                                  className={`w-3 h-3 transition-transform ${isExpanded ? "rotate-180" : ""
+                                    }`}
                                 />
                               </button>
                             )}
@@ -1754,11 +1742,10 @@ export default function TeacherAttendancePage() {
                           </td>
                           <td className="py-3.5 px-4 whitespace-nowrap">
                             <span
-                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                                item.checkInStatus === "On Time"
-                                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
-                                  : "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300"
-                              }`}
+                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold ${item.checkInStatus === "On Time"
+                                ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                                : "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300"
+                                }`}
                             >
                               {item.checkInStatus === "On Time"
                                 ? "On Time"
@@ -1771,11 +1758,10 @@ export default function TeacherAttendancePage() {
                           <td className="py-3.5 px-4 whitespace-nowrap">
                             {item.checkOutStatus ? (
                               <span
-                                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                                  item.checkOutStatus === "On Time"
-                                    ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
-                                    : "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
-                                }`}
+                                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold ${item.checkOutStatus === "On Time"
+                                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                                  : "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
+                                  }`}
                               >
                                 {item.checkOutStatus === "On Time"
                                   ? "On Time"
@@ -1844,19 +1830,18 @@ export default function TeacherAttendancePage() {
                                         item.category === "hifz"
                                           ? HIFZ_ATTENDANCE_RULES[shiftKey]
                                           : RESIDENTIAL_ATTENDANCE_RULES[
-                                              shiftKey
-                                            ];
+                                          shiftKey
+                                          ];
                                       const hasIn = !!sRecord?.checkInTime;
                                       const hasOut = !!sRecord?.checkOutTime;
 
                                       return (
                                         <div
                                           key={shiftKey}
-                                          className={`p-3 rounded-xl border text-xs space-y-1.5 ${
-                                            hasIn
-                                              ? "bg-white dark:bg-[#041e14] border-slate-200 dark:border-amber-400/25 shadow-xs"
-                                              : "bg-slate-100/60 dark:bg-white/[0.03] border-slate-200/60 dark:border-white/10 opacity-75"
-                                          }`}
+                                          className={`p-3 rounded-xl border text-xs space-y-1.5 ${hasIn
+                                            ? "bg-white dark:bg-[#041e14] border-slate-200 dark:border-amber-400/25 shadow-xs"
+                                            : "bg-slate-100/60 dark:bg-white/[0.03] border-slate-200/60 dark:border-white/10 opacity-75"
+                                            }`}
                                         >
                                           <div className="flex items-center justify-between border-b border-slate-100 dark:border-emerald-800/40 pb-1 font-bold text-slate-800 dark:text-white">
                                             <span>
@@ -1878,12 +1863,11 @@ export default function TeacherAttendancePage() {
                                                   sRecord.checkInTime
                                                 )}{" "}
                                                 <span
-                                                  className={`px-1 py-0.2 rounded text-[9px] font-bold ${
-                                                    sRecord.checkInStatus ===
+                                                  className={`px-1 py-0.2 rounded text-[9px] font-bold ${sRecord.checkInStatus ===
                                                     "On Time"
-                                                      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-                                                      : "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300"
-                                                  }`}
+                                                    ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                                                    : "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300"
+                                                    }`}
                                                 >
                                                   {sRecord.checkInStatus}
                                                 </span>
@@ -1905,12 +1889,11 @@ export default function TeacherAttendancePage() {
                                                   sRecord.checkOutTime
                                                 )}{" "}
                                                 <span
-                                                  className={`px-1 py-0.2 rounded text-[9px] font-bold ${
-                                                    sRecord.checkOutStatus ===
+                                                  className={`px-1 py-0.2 rounded text-[9px] font-bold ${sRecord.checkOutStatus ===
                                                     "On Time"
-                                                      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-                                                      : "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
-                                                  }`}
+                                                    ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                                                    : "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                                                    }`}
                                                 >
                                                   {sRecord.checkOutStatus}
                                                 </span>
@@ -1924,25 +1907,25 @@ export default function TeacherAttendancePage() {
 
                                           {(sRecord?.checkInComment ||
                                             sRecord?.checkOutComment) && (
-                                            <div className="pt-1 border-t border-slate-100 dark:border-emerald-800/40 text-[10px] space-y-0.5">
-                                              {sRecord.checkInComment && (
-                                                <div className="text-rose-700 dark:text-rose-300 truncate">
-                                                  <strong>
-                                                    {text.lateShort}:
-                                                  </strong>{" "}
-                                                  {sRecord.checkInComment}
-                                                </div>
-                                              )}
-                                              {sRecord.checkOutComment && (
-                                                <div className="text-amber-700 dark:text-amber-300 truncate">
-                                                  <strong>
-                                                    {text.earlyShort}:
-                                                  </strong>{" "}
-                                                  {sRecord.checkOutComment}
-                                                </div>
-                                              )}
-                                            </div>
-                                          )}
+                                              <div className="pt-1 border-t border-slate-100 dark:border-emerald-800/40 text-[10px] space-y-0.5">
+                                                {sRecord.checkInComment && (
+                                                  <div className="text-rose-700 dark:text-rose-300 truncate">
+                                                    <strong>
+                                                      {text.lateShort}:
+                                                    </strong>{" "}
+                                                    {sRecord.checkInComment}
+                                                  </div>
+                                                )}
+                                                {sRecord.checkOutComment && (
+                                                  <div className="text-amber-700 dark:text-amber-300 truncate">
+                                                    <strong>
+                                                      {text.earlyShort}:
+                                                    </strong>{" "}
+                                                    {sRecord.checkOutComment}
+                                                  </div>
+                                                )}
+                                              </div>
+                                            )}
                                         </div>
                                       );
                                     }
@@ -1969,22 +1952,20 @@ export default function TeacherAttendancePage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div
-                  className={`p-2.5 rounded-2xl ${
-                    commentModalType === "late"
-                      ? "bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-300"
-                      : "bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-300"
-                  }`}
+                  className={`p-2.5 rounded-2xl ${commentModalType === "late"
+                    ? "bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-300"
+                    : "bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-300"
+                    }`}
                 >
                   <MessageSquare className="w-5 h-5" />
                 </div>
                 <div>
                   <h3 className="text-base font-black text-slate-900 dark:text-white">
                     {targetShiftId && activeShiftRules?.[targetShiftId]
-                      ? `${activeShiftRules[targetShiftId].name}: ${
-                          commentModalType === "late"
-                            ? text.modalLateTitle
-                            : text.modalEarlyTitle
-                        }`
+                      ? `${activeShiftRules[targetShiftId].name}: ${commentModalType === "late"
+                        ? text.modalLateTitle
+                        : text.modalEarlyTitle
+                      }`
                       : commentModalType === "late"
                         ? text.modalLateTitle
                         : text.modalEarlyTitle}
@@ -2071,8 +2052,8 @@ export default function TeacherAttendancePage() {
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#022014] to-emerald-800 dark:from-amber-400 dark:to-amber-500 text-xs font-black text-amber-200 dark:text-slate-950 shadow-md active:scale-[0.98] transition disabled:opacity-50 cursor-pointer"
               >
                 {submittingCheckIn ||
-                submittingCheckOut ||
-                !!submittingShiftId ? (
+                  submittingCheckOut ||
+                  !!submittingShiftId ? (
                   <>
                     <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                     <span>{text.submittingBtn}</span>
