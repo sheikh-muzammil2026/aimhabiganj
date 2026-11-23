@@ -364,21 +364,21 @@ const DashboardLayout = ({ children }) => {
   }
 
   return (
-    <div className="flex h-screen bg-[#E3F2FD]/40 text-slate-800 antialiased font-sans w-full selection:bg-[#0D47A1] selection:text-white overflow-hidden">
+    <div className="flex h-[100dvh] bg-[#E3F2FD]/40 text-slate-800 antialiased font-sans w-full selection:bg-[#0D47A1] selection:text-white overflow-hidden">
       {/* ১. সাইডবার কম্পোনেন্ট */}
       <Sidebar />
 
       {/* ২. মেইন কন্টেন্ট এরিয়া */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 h-[100dvh] overflow-hidden">
         {/* ৩. প্রফেশনাল প্রাতিষ্ঠানিক ব্লু টপ নেভিগেশন বার */}
-        <header className="relative bg-[#0D47A1] border-b border-[#90CAF9]/30 h-16 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-md flex-shrink-0 print:hidden text-white">
+        <header className="relative bg-[#0D47A1] border-b border-[#90CAF9]/30 h-14 sm:h-16 px-3 sm:px-6 flex items-center justify-between gap-2 sticky top-0 z-30 shadow-md flex-shrink-0 print:hidden text-white">
           <div className="pointer-events-none absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-[#90CAF9]/40 to-transparent" />
 
           {/* বাম পাশ: মূল ওয়েবসাইটে ফিরে যাওয়ার প্রফেশনাল বাটন এবং টাইটেল */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <Link
               href="/"
-              className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-white bg-white/10 hover:bg-[#2196F3] border border-[#90CAF9]/40 rounded-xl transition-all shadow-xs"
+              className="flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-bold text-white bg-white/10 hover:bg-[#2196F3] border border-[#90CAF9]/40 rounded-xl transition-all shadow-xs shrink-0"
               title={
                 language === "ar"
                   ? "العودة إلى الصفحة الرئيسية"
@@ -390,8 +390,8 @@ const DashboardLayout = ({ children }) => {
               <span>🏠</span>
             </Link>
 
-            <div className="flex flex-col">
-              <h2 className="font-black text-sm sm:text-base text-white tracking-wide lg:block hidden">
+            <div className="flex flex-col min-w-0">
+              <h2 className="font-black text-sm sm:text-base text-white tracking-wide lg:block hidden truncate">
                 {language === "ar"
                   ? "لوحة التحكم"
                   : language === "en"
@@ -402,7 +402,7 @@ const DashboardLayout = ({ children }) => {
           </div>
 
           {/* ডান পাশ: ভাষা পরিবর্তন, তারিখ, ডার্ক মোড ও প্রোফাইল কুইক অ্যাকশন */}
-          <div className="flex items-center gap-2.5 sm:gap-3.5">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {/* বর্তমান তারিখ */}
             <div className="hidden md:flex items-center gap-2 bg-white/10 border border-[#90CAF9]/30 px-3 py-1.5 rounded-xl text-xs font-bold text-[#E3F2FD]">
               <span>📅</span>
@@ -419,30 +419,13 @@ const DashboardLayout = ({ children }) => {
             {/* ৩-ভাষা পরিবর্তনকারী (বাংলা, English, العربية) */}
             <LanguageSwitcher />
 
-            {/* ডার্ক মোড টগল বাটন */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-xl border border-[#90CAF9]/30 bg-white/10 hover:bg-[#2196F3] text-white transition-all focus:outline-none cursor-pointer"
-              title={
-                theme === "light" ? "ডার্ক মোড চালু করুন" : "লাইট মোড চালু করুন"
-              }
-            >
-              <span className="text-sm">{theme === "light" ? "🌙" : "☀️"}</span>
-            </button>
 
-            {/* কুইক নোটিফিকেশন আইকন */}
-            <button
-              className="relative p-2 rounded-xl border border-[#90CAF9]/30 bg-white/10 hover:bg-[#2196F3] text-white transition-all focus:outline-hidden cursor-pointer"
-              title="নোটিফিকেশন"
-            >
-              <span className="text-sm">🔔</span>
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#2196F3] rounded-full ring-2 ring-[#0D47A1]"></span>
-            </button>
+
 
             {/* প্রোফাইল সেটিংস লিংক */}
             <Link
               href="/dashboard/profile-settings"
-              className="p-2 rounded-xl border border-[#90CAF9]/30 bg-white/10 hover:bg-[#2196F3] text-white transition-all focus:outline-hidden"
+              className="p-1.5 sm:p-2 rounded-xl border border-[#90CAF9]/30 bg-white/10 hover:bg-[#2196F3] text-white transition-all focus:outline-hidden"
               title="প্রোফাইল সেটিংস"
             >
               <span className="text-sm">⚙️</span>
@@ -451,7 +434,7 @@ const DashboardLayout = ({ children }) => {
         </header>
 
         {/* ৪. ড্যাশবোর্ড পেজের স্ক্রলযোগ্য কন্টেন্ট বডি */}
-        <main className="flex-1 overflow-y-auto pb-28 sm:pb-24 px-5 sm:px-8 lg:px-10 py-6 sm:py-8 bg-[#E3F2FD]/40 scroll-smooth transition-colors duration-300">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden pb-24 sm:pb-20 lg:pb-10 px-3 sm:px-6 lg:px-8 py-4 sm:py-6 bg-[#E3F2FD]/40 scroll-smooth transition-colors duration-300">
           {children}
         </main>
       </div>

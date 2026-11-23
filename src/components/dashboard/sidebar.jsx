@@ -19,6 +19,7 @@ import {
   Shield,
   Settings,
   MessageSquareQuote,
+  Frame,
 } from "lucide-react";
 import { IoNotificationsCircle } from "react-icons/io5";
 
@@ -296,9 +297,9 @@ export default function Sidebar() {
     },
     {
       id: "gallery",
-      title: "মিডিয়া গ্যালারি",
+      title: "গ্যালারি",
       icon: "🖼️",
-      lucideIcon: <Sparkles className="w-5 h-5" />,
+      lucideIcon: <Frame className="w-5 h-5" />,
       roles: ["admin", "teacher"],
       permissions: ["manage_gallery"],
       dropdown: [

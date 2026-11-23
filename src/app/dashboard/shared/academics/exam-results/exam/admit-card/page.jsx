@@ -8,6 +8,7 @@ import PrintSignatures from "@/components/shared/print/PrintSignatures";
 import PrintSocialFooter from "@/components/shared/print/PrintSocialFooter";
 import {
   getStudentClassDetails,
+
   RECENT_SESSION_YEARS,
 } from "@/lib/studentUtils";
 import Image from "next/image";
@@ -344,11 +345,10 @@ export default function AdmitCardGenerator() {
           <button
             onClick={handlePrint}
             disabled={selectedIds.length === 0 || isPrinting}
-            className={`w-full sm:w-auto px-4 sm:px-6 py-2.5 rounded-md font-bold text-sm sm:text-base text-white transition flex items-center justify-center gap-2 ${
-              selectedIds.length === 0 || isPrinting
+            className={`w-full sm:w-auto px-4 sm:px-6 py-2.5 rounded-md font-bold text-sm sm:text-base text-white transition flex items-center justify-center gap-2 ${selectedIds.length === 0 || isPrinting
                 ? "bg-gray-400 dark:bg-gray-800 dark:text-gray-500 cursor-not-allowed"
                 : "bg-teal-600 hover:bg-teal-700 shadow-lg"
-            }`}
+              }`}
           >
             {isPrinting ? (
               <>
@@ -432,8 +432,8 @@ export default function AdmitCardGenerator() {
                         </td>
                         <td className="p-3">
                           {student?.studentImage &&
-                          typeof student.studentImage === "string" &&
-                          student.studentImage.trim() !== "" ? (
+                            typeof student.studentImage === "string" &&
+                            student.studentImage.trim() !== "" ? (
                             <div className="w-8 h-8 rounded-full overflow-hidden relative border dark:border-slate-700">
                               <Image
                                 src={student.studentImage}
@@ -585,8 +585,8 @@ export default function AdmitCardGenerator() {
                       {/* ৩. ডানে স্টুডেন্ট ফটো */}
                       <div className="w-16 h-20 border border-[#C5A059] rounded-lg bg-white p-0.5 shadow-sm relative overflow-hidden flex-shrink-0 flex items-center justify-center mt-1">
                         {card?.studentImage &&
-                        typeof card.studentImage === "string" &&
-                        card.studentImage.trim() !== "" ? (
+                          typeof card.studentImage === "string" &&
+                          card.studentImage.trim() !== "" ? (
                           <Image
                             src={card.studentImage}
                             alt={card.studentNameEnglish || "Student Photo"}
@@ -767,7 +767,7 @@ export default function AdmitCardGenerator() {
                       </p>
                       <ul className="list-disc list-inside space-y-0.5 font-medium pl-1">
                         {!card.instructions ||
-                        card.instructions.length === 0 ? (
+                          card.instructions.length === 0 ? (
                           <li className="text-gray-500">
                             কোনো নির্দেশাবলী পাওয়া যায়নি
                           </li>

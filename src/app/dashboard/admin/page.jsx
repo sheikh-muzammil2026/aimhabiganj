@@ -99,72 +99,71 @@ export default function AdminDashboardOverview() {
   // তারিখ ফরম্যাটিং
   const today = new Date();
   const dayNameBn = BENGALI_DAYS[today.getDay()];
-  const formattedDateBn = `${dayNameBn}, ${toBengaliDigits(today.getDate())} ${
-    data?.meta?.currentMonthLabel || "নভেম্বর ২০২৬"
-  }`;
+  const formattedDateBn = `${dayNameBn}, ${toBengaliDigits(today.getDate())} ${data?.meta?.currentMonthLabel || "নভেম্বর ২০২৬"
+    }`;
 
   return (
-    <div className="dashboard-container space-y-6 font-bornomala text-slate-800 antialiased selection:bg-[#0D47A1] selection:text-white">
+    <div className="w-full max-w-[1440px] mx-auto space-y-4 sm:space-y-6 font-bornomala text-slate-800 antialiased selection:bg-[#0D47A1] selection:text-white">
       {/* ----------------- ১. টপ এক্সিকিউটিভ হেডার ও অ্যাকশন বার ----------------- */}
-      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#90CAF9]/40 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden">
-        <div className="flex items-center gap-3.5 min-w-0">
-          <div className="w-13 h-13 rounded-2xl bg-[#0D47A1] flex items-center justify-center text-white shadow-sm shrink-0 border border-[#90CAF9]/40">
-            <School className="w-7 h-7 text-white" />
+      <div className="bg-white p-3.5 sm:p-5 lg:p-6 rounded-2xl border border-[#90CAF9]/40 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3.5 sm:gap-4 relative overflow-hidden">
+        <div className="flex items-start sm:items-center gap-3 sm:gap-3.5 min-w-0">
+          <div className="w-11 h-11 sm:w-13 sm:h-13 rounded-2xl bg-[#0D47A1] flex items-center justify-center text-white shadow-sm shrink-0 border border-[#90CAF9]/40">
+            <School className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
           </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="bg-[#E3F2FD] text-[#0D47A1] text-[11px] font-black px-2.5 py-0.5 rounded-full border border-[#90CAF9]">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+              <span className="bg-[#E3F2FD] text-[#0D47A1] text-[10px] sm:text-[11px] font-black px-2 sm:px-2.5 py-0.5 rounded-full border border-[#90CAF9]">
                 কেন্দ্রীয় প্রশাসনিক ড্যাশবোর্ড
               </span>
-              <span className="text-slate-400 text-xs">•</span>
-              <span className="text-xs font-bold text-slate-500 font-ubuntu">
+              <span className="text-slate-400 text-xs hidden sm:inline">•</span>
+              <span className="text-[11px] sm:text-xs font-bold text-slate-500 font-ubuntu">
                 {formattedDateBn}
               </span>
             </div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#0D47A1] tracking-tight mt-0.5 truncate">
+            <h1 className="text-lg sm:text-2xl lg:text-3xl font-black text-[#0D47A1] tracking-tight mt-1 leading-snug break-words">
               আস-সালাম আইডিয়াল মাদরাসা
             </h1>
-            <p className="text-xs text-slate-500 font-medium truncate">
+            <p className="text-[11px] sm:text-xs text-slate-500 font-medium leading-relaxed mt-0.5">
               দৈনিক প্রাতিষ্ঠানিক প্রতিবেদন, লাইভ পরিসংখ্যান এবং আর্থিক পর্যালোচনা
             </p>
           </div>
         </div>
 
         {/* অ্যাকশন বাটনসমূহ */}
-        <div className="flex items-center gap-2.5 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-2.5 w-full md:w-auto shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
           <button
             type="button"
             onClick={fetchDashboardSummary}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3.5 py-2.5 rounded-xl text-xs transition-colors cursor-pointer disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3.5 py-2.5 rounded-xl text-xs transition-colors cursor-pointer disabled:opacity-50 shrink-0"
             title="ডাটা রিফ্রেশ করুন"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-            <span className="hidden sm:inline">রিফ্রেশ</span>
+            <RefreshCw className={`w-4 h-4 sm:w-3.5 sm:h-3.5 ${loading ? "animate-spin" : ""}`} />
+            <span className="sm:inline">রিফ্রেশ</span>
           </button>
 
           <button
             type="button"
             onClick={handlePrint}
             disabled={loading || !data || isPrinting}
-            className="inline-flex items-center gap-2 bg-[#0D47A1] hover:bg-[#0A3880] text-white font-black px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-sm transition-all active:scale-95 disabled:opacity-50 cursor-pointer border border-[#0D47A1]"
+            className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 bg-[#0D47A1] hover:bg-[#0A3880] text-white font-black px-3.5 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-sm transition-all active:scale-95 disabled:opacity-50 cursor-pointer border border-[#0D47A1]"
           >
-            <Printer className="w-4 h-4" />
-            <span>দৈনিক সামারি প্রিন্ট (A4)</span>
+            <Printer className="w-4 h-4 shrink-0" />
+            <span className="truncate">দৈনিক সামারি প্রিন্ট</span>
           </button>
         </div>
       </div>
 
       {/* ----------------- কুইক অ্যাকশন শর্টকাট পিলস ----------------- */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs no-scrollbar">
-        <span className="text-[11px] font-black text-slate-500 shrink-0 uppercase tracking-wider pl-1">
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        <span className="text-[11px] font-black text-slate-500 shrink-0 uppercase tracking-wider pl-0.5 w-full sm:w-auto">
           দ্রুত লিঙ্ক:
         </span>
         <Link
           href="/dashboard/admin/students-management"
-          className="inline-flex items-center gap-1.5 bg-white hover:bg-[#E3F2FD] text-slate-700 hover:text-[#0D47A1] px-3 py-1.5 rounded-lg border border-[#90CAF9]/60 hover:border-[#2196F3] font-bold shrink-0 transition-colors shadow-2xs"
+          className="inline-flex items-center gap-1.5 bg-white hover:bg-[#E3F2FD] text-slate-700 hover:text-[#0D47A1] px-2.5 sm:px-3 py-1.5 rounded-lg border border-[#90CAF9]/60 hover:border-[#2196F3] font-bold transition-colors shadow-2xs"
         >
-          <UserCheck className="w-3.5 h-3.5 text-[#2196F3]" />
+          <UserCheck className="w-3.5 h-3.5 text-[#2196F3] shrink-0" />
           <span>শিক্ষার্থী অনুমোদন</span>
           {data?.students?.pendingTotal > 0 && (
             <span className="bg-amber-100 text-amber-900 text-[10px] px-1.5 py-0.2 rounded font-black font-ubuntu ml-0.5">
@@ -174,44 +173,44 @@ export default function AdminDashboardOverview() {
         </Link>
         <Link
           href="/dashboard/shared/academics/exam-results/exam/seat-plan/hall-map"
-          className="inline-flex items-center gap-1.5 bg-white hover:bg-[#E3F2FD] text-slate-700 hover:text-[#0D47A1] px-3 py-1.5 rounded-lg border border-[#90CAF9]/60 hover:border-[#2196F3] font-bold shrink-0 transition-colors shadow-2xs"
+          className="inline-flex items-center gap-1.5 bg-white hover:bg-[#E3F2FD] text-slate-700 hover:text-[#0D47A1] px-2.5 sm:px-3 py-1.5 rounded-lg border border-[#90CAF9]/60 hover:border-[#2196F3] font-bold transition-colors shadow-2xs"
         >
-          <BookOpen className="w-3.5 h-3.5 text-[#2196F3]" />
+          <BookOpen className="w-3.5 h-3.5 text-[#2196F3] shrink-0" />
           <span>আসন প্ল্যান ও হল ম্যাপ</span>
         </Link>
         <Link
           href="/dashboard/accountant/finance"
-          className="inline-flex items-center gap-1.5 bg-white hover:bg-[#E3F2FD] text-slate-700 hover:text-[#0D47A1] px-3 py-1.5 rounded-lg border border-[#90CAF9]/60 hover:border-[#2196F3] font-bold shrink-0 transition-colors shadow-2xs"
+          className="inline-flex items-center gap-1.5 bg-white hover:bg-[#E3F2FD] text-slate-700 hover:text-[#0D47A1] px-2.5 sm:px-3 py-1.5 rounded-lg border border-[#90CAF9]/60 hover:border-[#2196F3] font-bold transition-colors shadow-2xs"
         >
-          <CreditCard className="w-3.5 h-3.5 text-[#2196F3]" />
+          <CreditCard className="w-3.5 h-3.5 text-[#2196F3] shrink-0" />
           <span>হিসাব ও ভাউচার</span>
         </Link>
         <Link
           href="/dashboard/admin/teachers-management"
-          className="inline-flex items-center gap-1.5 bg-white hover:bg-[#E3F2FD] text-slate-700 hover:text-[#0D47A1] px-3 py-1.5 rounded-lg border border-[#90CAF9]/60 hover:border-[#2196F3] font-bold shrink-0 transition-colors shadow-2xs"
+          className="inline-flex items-center gap-1.5 bg-white hover:bg-[#E3F2FD] text-slate-700 hover:text-[#0D47A1] px-2.5 sm:px-3 py-1.5 rounded-lg border border-[#90CAF9]/60 hover:border-[#2196F3] font-bold transition-colors shadow-2xs"
         >
-          <Clock className="w-3.5 h-3.5 text-[#2196F3]" />
+          <Clock className="w-3.5 h-3.5 text-[#2196F3] shrink-0" />
           <span>হাজিরা রিপোর্ট</span>
         </Link>
         <Link
           href="/dashboard/admin/notice"
-          className="inline-flex items-center gap-1.5 bg-white hover:bg-[#E3F2FD] text-slate-700 hover:text-[#0D47A1] px-3 py-1.5 rounded-lg border border-[#90CAF9]/60 hover:border-[#2196F3] font-bold shrink-0 transition-colors shadow-2xs"
+          className="inline-flex items-center gap-1.5 bg-white hover:bg-[#E3F2FD] text-slate-700 hover:text-[#0D47A1] px-2.5 sm:px-3 py-1.5 rounded-lg border border-[#90CAF9]/60 hover:border-[#2196F3] font-bold transition-colors shadow-2xs"
         >
-          <FileText className="w-3.5 h-3.5 text-[#2196F3]" />
+          <FileText className="w-3.5 h-3.5 text-[#2196F3] shrink-0" />
           <span>নোটিশ প্রকাশ</span>
         </Link>
       </div>
 
       {/* ----------------- এরর স্টেট ----------------- */}
       {error && (
-        <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="p-3.5 sm:p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2 min-w-0">
             <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-            <span className="font-bold">{error}</span>
+            <span className="font-bold break-words">{error}</span>
           </div>
           <button
             onClick={fetchDashboardSummary}
-            className="underline font-bold hover:text-rose-950 cursor-pointer"
+            className="underline font-bold hover:text-rose-950 cursor-pointer self-start sm:self-auto shrink-0"
           >
             পুনরায় চেষ্টা করুন
           </button>
@@ -219,12 +218,12 @@ export default function AdminDashboardOverview() {
       )}
 
       {/* ----------------- ২. ROW 1: ৪টি প্রধান KPI সামারি কার্ড ----------------- */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
         {/* KPI ১: সক্রিয় শিক্ষার্থী */}
-        <div className="bg-white p-5 rounded-2xl border border-[#90CAF9]/40 shadow-xs relative overflow-hidden flex flex-col justify-between">
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#90CAF9]/40 shadow-xs relative overflow-hidden flex flex-col justify-between min-w-0">
           <div className="flex items-center justify-between gap-2 mb-2">
             <span className="text-xs font-bold text-slate-500">মোট শিক্ষার্থী (সক্রিয়)</span>
-            <div className="w-9 h-9 rounded-xl bg-[#E3F2FD] text-[#0D47A1] flex items-center justify-center border border-[#90CAF9]">
+            <div className="w-9 h-9 rounded-xl bg-[#E3F2FD] text-[#0D47A1] flex items-center justify-center border border-[#90CAF9] shrink-0">
               <Users className="w-5 h-5" />
             </div>
           </div>
@@ -232,11 +231,11 @@ export default function AdminDashboardOverview() {
             <SkeletonText width="60%" height="28px" />
           ) : (
             <div>
-              <div className="text-2xl lg:text-3xl font-black text-slate-900 font-ubuntu tracking-tight">
+              <div className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 font-ubuntu tracking-tight break-words">
                 {toBengaliDigits(data?.students?.totalActiveApproved || 0)}{" "}
                 <span className="text-sm font-bold text-slate-500 font-bornomala">জন</span>
               </div>
-              <div className="flex items-center gap-2 mt-2 text-[11px]">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2 text-[11px]">
                 <span className="bg-[#E3F2FD] text-[#0D47A1] font-bold px-2 py-0.5 rounded border border-[#90CAF9]">
                   অনুমোদিত ও সক্রিয়
                 </span>
@@ -253,10 +252,10 @@ export default function AdminDashboardOverview() {
         </div>
 
         {/* KPI ২: আজকের স্টাফ হাজিরা */}
-        <div className="bg-white p-5 rounded-2xl border border-[#90CAF9]/40 shadow-xs relative overflow-hidden flex flex-col justify-between">
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#90CAF9]/40 shadow-xs relative overflow-hidden flex flex-col justify-between min-w-0">
           <div className="flex items-center justify-between gap-2 mb-2">
             <span className="text-xs font-bold text-slate-500">আজকের শিক্ষক/স্টাফ হাজিরা</span>
-            <div className="w-9 h-9 rounded-xl bg-[#E3F2FD] text-[#0D47A1] flex items-center justify-center border border-[#90CAF9]">
+            <div className="w-9 h-9 rounded-xl bg-[#E3F2FD] text-[#0D47A1] flex items-center justify-center border border-[#90CAF9] shrink-0">
               <Clock className="w-5 h-5" />
             </div>
           </div>
@@ -264,14 +263,14 @@ export default function AdminDashboardOverview() {
             <SkeletonText width="70%" height="28px" />
           ) : (
             <div>
-              <div className="text-2xl lg:text-3xl font-black text-slate-900 font-ubuntu tracking-tight">
+              <div className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 font-ubuntu tracking-tight break-words">
                 {toBengaliDigits(data?.staffFaculty?.attendance?.present || 0)}/
                 {toBengaliDigits(data?.staffFaculty?.total || 0)}{" "}
                 <span className="text-sm font-bold text-slate-500 font-ubuntu">
                   ({toBengaliDigits(data?.staffFaculty?.attendance?.percentage || 0)}%)
                 </span>
               </div>
-              <div className="flex items-center gap-2 mt-2 text-[11px] font-ubuntu">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2 text-[11px] font-ubuntu">
                 <span className="bg-[#E3F2FD] text-[#0D47A1] font-bold px-2 py-0.5 rounded border border-[#90CAF9]">
                   উপস্থিত: {toBengaliDigits(data?.staffFaculty?.attendance?.present || 0)}
                 </span>
@@ -284,10 +283,10 @@ export default function AdminDashboardOverview() {
         </div>
 
         {/* KPI ৩: আজকের নেট ক্যাশফ্লো */}
-        <div className="bg-white p-5 rounded-2xl border border-[#90CAF9]/40 shadow-xs relative overflow-hidden flex flex-col justify-between">
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#90CAF9]/40 shadow-xs relative overflow-hidden flex flex-col justify-between min-w-0">
           <div className="flex items-center justify-between gap-2 mb-2">
             <span className="text-xs font-bold text-slate-500">আজকের নেট ক্যাশফ্লো</span>
-            <div className="w-9 h-9 rounded-xl bg-[#E3F2FD] text-[#0D47A1] flex items-center justify-center border border-[#90CAF9]">
+            <div className="w-9 h-9 rounded-xl bg-[#E3F2FD] text-[#0D47A1] flex items-center justify-center border border-[#90CAF9] shrink-0">
               <Wallet className="w-5 h-5" />
             </div>
           </div>
@@ -295,10 +294,10 @@ export default function AdminDashboardOverview() {
             <SkeletonText width="65%" height="28px" />
           ) : (
             <div>
-              <div className="text-2xl lg:text-3xl font-black text-slate-900 font-ubuntu tracking-tight">
+              <div className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 font-ubuntu tracking-tight break-words">
                 ৳{toBengaliDigits(data?.finance?.today?.net?.toLocaleString("en-IN") || 0)}
               </div>
-              <div className="flex items-center gap-2 mt-2 text-[11px] font-ubuntu font-bold">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2 text-[11px] font-ubuntu font-bold">
                 <span className="text-[#0D47A1] bg-[#E3F2FD] px-1.5 py-0.5 rounded border border-[#90CAF9]">
                   আদায়: +৳{toBengaliDigits(data?.finance?.today?.income?.toLocaleString("en-IN") || 0)}
                 </span>
@@ -311,12 +310,12 @@ export default function AdminDashboardOverview() {
         </div>
 
         {/* KPI ৪: চলতি মাসের উদ্বৃত্ত / ব্যালেন্স */}
-        <div className="bg-white p-5 rounded-2xl border border-[#90CAF9]/40 shadow-xs relative overflow-hidden flex flex-col justify-between">
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#90CAF9]/40 shadow-xs relative overflow-hidden flex flex-col justify-between min-w-0">
           <div className="flex items-center justify-between gap-2 mb-2">
             <span className="text-xs font-bold text-slate-500">
               চলতি মাসের উদ্বৃত্ত ({data?.finance?.month?.monthLabel?.split(" ")[0] || "নভেম্বর"})
             </span>
-            <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-800 flex items-center justify-center border border-amber-200">
+            <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-800 flex items-center justify-center border border-amber-200 shrink-0">
               <TrendingUp className="w-5 h-5" />
             </div>
           </div>
@@ -325,14 +324,13 @@ export default function AdminDashboardOverview() {
           ) : (
             <div>
               <div
-                className={`text-2xl lg:text-3xl font-black font-ubuntu tracking-tight ${
-                  (data?.finance?.month?.net || 0) >= 0 ? "text-[#0D47A1]" : "text-rose-600"
-                }`}
+                className={`text-xl sm:text-2xl lg:text-3xl font-black font-ubuntu tracking-tight break-words ${(data?.finance?.month?.net || 0) >= 0 ? "text-[#0D47A1]" : "text-rose-600"
+                  }`}
               >
                 {(data?.finance?.month?.net || 0) >= 0 ? "+" : ""}৳
                 {toBengaliDigits(data?.finance?.month?.net?.toLocaleString("en-IN"))}
               </div>
-              <div className="flex items-center gap-2 mt-2 text-[11px] font-ubuntu font-bold">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2 text-[11px] font-ubuntu font-bold">
                 <span className="text-[#0D47A1]">
                   আয়: ৳{toBengaliDigits(data?.finance?.month?.income?.toLocaleString("en-IN") || 0)}
                 </span>
@@ -347,23 +345,23 @@ export default function AdminDashboardOverview() {
       </div>
 
       {/* ----------------- ৩. ROW 2: ফিন্যান্সিয়াল চার্ট ও শ্রেণিভিত্তিক বণ্টন (2-Column Grid) ----------------- */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
         {/* Left (7 Cols): মাসিক আয় বনাম ব্যয় ভিজ্যুয়াল পর্যালোচনা */}
-        <div className="lg:col-span-7 bg-white p-5 sm:p-6 rounded-2xl border border-[#90CAF9]/40 shadow-xs flex flex-col justify-between">
+        <div className="lg:col-span-7 bg-white p-4 sm:p-6 rounded-2xl border border-[#90CAF9]/40 shadow-xs flex flex-col justify-between min-w-0">
           <div>
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-              <div>
-                <h3 className="font-black text-slate-900 text-sm sm:text-base flex items-center gap-2">
-                  <span className="text-[#2196F3]">📊</span>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 border-b border-slate-100 pb-3 mb-4">
+              <div className="min-w-0">
+                <h3 className="font-black text-slate-900 text-sm sm:text-base flex items-start sm:items-center gap-2 leading-snug">
+                  <span className="text-[#2196F3] shrink-0">📊</span>
                   <span>মাসিক আয় বনাম ব্যয় পর্যালোচনা (বিগত মাসসমূহ)</span>
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5">
                   প্রতিষ্ঠানটির ক্যাশফ্লো ভারসাম্য এবং বাজেট সাশ্রয় বিশ্লেষণ
                 </p>
               </div>
               <Link
                 href="/dashboard/accountant/finance"
-                className="text-xs font-bold text-[#2196F3] hover:underline flex items-center gap-1 shrink-0"
+                className="text-xs font-bold text-[#2196F3] hover:underline inline-flex items-center gap-1 shrink-0 self-start sm:self-auto"
               >
                 <span>লেজার দেখুন</span>
                 <ChevronRight className="w-3.5 h-3.5" />
@@ -383,13 +381,13 @@ export default function AdminDashboardOverview() {
             ) : (
               <div className="space-y-4 pt-1">
                 {/* লেজেন্ড */}
-                <div className="flex items-center justify-end gap-4 text-xs font-bold mb-2">
+                <div className="flex flex-wrap items-center justify-start sm:justify-end gap-3 sm:gap-4 text-xs font-bold mb-2">
                   <div className="flex items-center gap-1.5">
-                    <span className="w-3 h-3 rounded bg-[#0D47A1]"></span>
+                    <span className="w-3 h-3 rounded bg-[#0D47A1] shrink-0"></span>
                     <span className="text-slate-700">আদায় (Income)</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="w-3 h-3 rounded bg-amber-500"></span>
+                    <span className="w-3 h-3 rounded bg-amber-500 shrink-0"></span>
                     <span className="text-slate-700">ব্যয় (Expense)</span>
                   </div>
                 </div>
@@ -407,14 +405,13 @@ export default function AdminDashboardOverview() {
 
                   return (
                     <div key={item.monthKey} className="space-y-1.5">
-                      <div className="flex items-center justify-between text-xs">
+                      <div className="flex flex-wrap items-center justify-between gap-1.5 text-xs">
                         <span className="font-bold text-slate-800">{item.monthLabel}</span>
                         <span
-                          className={`font-black font-ubuntu text-[11px] px-1.5 py-0.2 rounded ${
-                            item.net >= 0
+                          className={`font-black font-ubuntu text-[11px] px-1.5 py-0.5 rounded ${item.net >= 0
                               ? "bg-[#E3F2FD] text-[#0D47A1] border border-[#90CAF9]"
                               : "bg-rose-50 text-rose-900 border border-rose-200"
-                          }`}
+                            }`}
                         >
                           উদ্বৃত্ত: {item.net >= 0 ? "+" : ""}৳
                           {toBengaliDigits(item.net.toLocaleString("en-IN"))}
@@ -423,26 +420,26 @@ export default function AdminDashboardOverview() {
 
                       {/* ইনকাম বার */}
                       <div className="flex items-center gap-2">
-                        <div className="flex-1 bg-slate-100 rounded-full h-3 overflow-hidden">
+                        <div className="flex-1 bg-slate-100 rounded-full h-2.5 sm:h-3 overflow-hidden min-w-0">
                           <div
                             className="bg-[#0D47A1] h-full rounded-full transition-all duration-500"
                             style={{ width: `${incomeWidth}%` }}
                           ></div>
                         </div>
-                        <span className="text-[11px] font-bold font-ubuntu text-[#0D47A1] w-24 text-right">
+                        <span className="text-[11px] font-bold font-ubuntu text-[#0D47A1] min-w-[70px] sm:w-24 text-right shrink-0">
                           ৳{toBengaliDigits(item.income.toLocaleString("en-IN"))}
                         </span>
                       </div>
 
                       {/* এক্সপেন্স বার */}
                       <div className="flex items-center gap-2">
-                        <div className="flex-1 bg-slate-100 rounded-full h-3 overflow-hidden">
+                        <div className="flex-1 bg-slate-100 rounded-full h-2.5 sm:h-3 overflow-hidden min-w-0">
                           <div
                             className="bg-amber-500 h-full rounded-full transition-all duration-500"
                             style={{ width: `${expenseWidth}%` }}
                           ></div>
                         </div>
-                        <span className="text-[11px] font-bold font-ubuntu text-slate-600 w-24 text-right">
+                        <span className="text-[11px] font-bold font-ubuntu text-slate-600 min-w-[70px] sm:w-24 text-right shrink-0">
                           ৳{toBengaliDigits(item.expense.toLocaleString("en-IN"))}
                         </span>
                       </div>
@@ -453,26 +450,26 @@ export default function AdminDashboardOverview() {
             )}
           </div>
 
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-bold">
+          <div className="mt-4 pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] sm:text-xs text-slate-500 font-bold">
             <span>সরাসরি ক্যাশ ও ব্যাংক ভাউচার থেকে সমাহারকৃত</span>
             <span className="text-[#0D47A1] font-ubuntu">স্বয়ংক্রিয় হিসাব মিলকরণ সক্রিয়</span>
           </div>
         </div>
 
         {/* Right (5 Cols): শ্রেণিভিত্তিক শিক্ষার্থী বণ্টন (Play to Hifz) */}
-        <div className="lg:col-span-5 bg-white p-5 sm:p-6 rounded-2xl border border-[#90CAF9]/40 shadow-xs flex flex-col justify-between">
+        <div className="lg:col-span-5 bg-white p-4 sm:p-6 rounded-2xl border border-[#90CAF9]/40 shadow-xs flex flex-col justify-between min-w-0">
           <div>
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-              <div>
-                <h3 className="font-black text-slate-900 text-sm sm:text-base flex items-center gap-2">
-                  <span className="text-[#2196F3]">🏫</span>
+            <div className="flex items-start sm:items-center justify-between gap-2 border-b border-slate-100 pb-3 mb-4">
+              <div className="min-w-0">
+                <h3 className="font-black text-slate-900 text-sm sm:text-base flex items-start sm:items-center gap-2 leading-snug">
+                  <span className="text-[#2196F3] shrink-0">🏫</span>
                   <span>শ্রেণিভিত্তিক শিক্ষার্থী বণ্টন (প্লে থেকে হিফজ)</span>
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5">
                   সক্রিয় শিক্ষার্থীদের ক্রমভিত্তিক শ্রেণি বিন্যাস
                 </p>
               </div>
-              <span className="bg-[#E3F2FD] text-[#0D47A1] text-xs font-black px-2.5 py-0.5 rounded-full border border-[#90CAF9] font-ubuntu">
+              <span className="bg-[#E3F2FD] text-[#0D47A1] text-[11px] sm:text-xs font-black px-2.5 py-0.5 rounded-full border border-[#90CAF9] font-ubuntu shrink-0">
                 {toBengaliDigits(data?.students?.totalActiveApproved || 0)} জন
               </span>
             </div>
@@ -489,11 +486,11 @@ export default function AdminDashboardOverview() {
                 কোনো শ্রেণির শিক্ষার্থী তথ্য পাওয়া যায়নি।
               </div>
             ) : (
-              <div className="space-y-2.5 max-h-[350px] overflow-y-auto pr-1">
+              <div className="space-y-2 sm:space-y-2.5 max-h-[320px] sm:max-h-[350px] overflow-y-auto pr-1">
                 {data?.students?.classDistribution?.map((cls, idx) => (
                   <div
                     key={idx}
-                    className="p-2 rounded-xl bg-slate-50/80 hover:bg-[#E3F2FD]/50 border border-slate-200/80 transition-colors flex items-center justify-between gap-3 text-xs"
+                    className="p-2 rounded-xl bg-slate-50/80 hover:bg-[#E3F2FD]/50 border border-slate-200/80 transition-colors flex items-center justify-between gap-2 sm:gap-3 text-xs"
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="w-5 h-5 rounded-md bg-[#E3F2FD] text-[#0D47A1] font-black text-[10px] flex items-center justify-center font-ubuntu shrink-0 border border-[#90CAF9]/50">
@@ -505,13 +502,13 @@ export default function AdminDashboardOverview() {
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
-                      <div className="w-16 sm:w-24 bg-slate-200 rounded-full h-2 overflow-hidden hidden sm:block">
+                      <div className="w-12 sm:w-24 bg-slate-200 rounded-full h-2 overflow-hidden">
                         <div
                           className="bg-[#2196F3] h-full rounded-full"
                           style={{ width: `${cls.percentage}%` }}
                         ></div>
                       </div>
-                      <span className="font-black text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-300 font-ubuntu text-[11px] min-w-[55px] text-center">
+                      <span className="font-black text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-300 font-ubuntu text-[11px] min-w-[52px] text-center">
                         {toBengaliDigits(cls.count)} জন
                       </span>
                     </div>
@@ -527,24 +524,24 @@ export default function AdminDashboardOverview() {
               className="text-[#2196F3] font-bold hover:underline inline-flex items-center gap-1"
             >
               <span>সকল শিক্ষার্থীর বিস্তারিত তালিকা দেখুন</span>
-              <ChevronRight className="w-3.5 h-3.5" />
+              <ChevronRight className="w-3.5 h-3.5 shrink-0" />
             </Link>
           </div>
         </div>
       </div>
 
       {/* ----------------- ৪. ROW 3: শিক্ষক হাজিরা স্ন্যাপশট ও সাম্প্রতিক আর্থিক ভাউচার ----------------- */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
         {/* Left (6 Cols): শিক্ষক ও স্টাফ হাজিরা স্ন্যাপশট */}
-        <div className="lg:col-span-6 bg-white p-5 sm:p-6 rounded-2xl border border-[#90CAF9]/40 shadow-xs flex flex-col justify-between">
+        <div className="lg:col-span-6 bg-white p-4 sm:p-6 rounded-2xl border border-[#90CAF9]/40 shadow-xs flex flex-col justify-between min-w-0">
           <div>
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
-              <div>
-                <h3 className="font-black text-slate-900 text-sm sm:text-base flex items-center gap-2">
-                  <span className="text-[#2196F3]">⏱️</span>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3 mb-3">
+              <div className="min-w-0">
+                <h3 className="font-black text-slate-900 text-sm sm:text-base flex items-start sm:items-center gap-2 leading-snug">
+                  <span className="text-[#2196F3] shrink-0">⏱️</span>
                   <span>শিক্ষক ও স্টাফ হাজিরা স্ন্যাপশট</span>
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5">
                   {data?.staffFaculty?.isUsingRecentAttendanceFallback
                     ? "আজকের এন্ট্রি না থাকায় সর্বশেষ কর্মদিবসের উপস্থিতি তালিকা"
                     : "আজকের লাইভ প্রবেশ হাজিরা ও সময়ানুবর্তিতা"}
@@ -552,7 +549,7 @@ export default function AdminDashboardOverview() {
               </div>
               <Link
                 href="/dashboard/admin/teachers-management"
-                className="text-xs font-bold text-[#2196F3] hover:underline flex items-center gap-1 shrink-0"
+                className="text-xs font-bold text-[#2196F3] hover:underline inline-flex items-center gap-1 shrink-0 self-start sm:self-auto"
               >
                 <span>সম্পূর্ণ তালিকা</span>
                 <ChevronRight className="w-3.5 h-3.5" />
@@ -574,10 +571,10 @@ export default function AdminDashboardOverview() {
                 {data?.staffFaculty?.todayRecords?.map((rec, i) => {
                   const checkInFormatted = rec.checkInTime
                     ? new Date(rec.checkInTime).toLocaleTimeString("en-US", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: true,
-                      })
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                    })
                     : "—";
 
                   const isLate = rec.checkInStatus === "Late";
@@ -585,33 +582,32 @@ export default function AdminDashboardOverview() {
                   return (
                     <div
                       key={rec._id || i}
-                      className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/70 border border-slate-200 flex items-center justify-between gap-3 text-xs transition-colors"
+                      className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/70 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 text-xs transition-colors"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div className="w-8 h-8 rounded-full bg-[#E3F2FD] text-[#0D47A1] font-black text-xs flex items-center justify-center shrink-0 border border-[#90CAF9]">
                           👤
                         </div>
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                           <h4 className="font-black text-slate-900 truncate">
                             {rec.teacherName || rec.staffName || "শিক্ষক/স্টাফ"}
                           </h4>
-                          <span className="text-[10px] text-slate-500 font-ubuntu">
+                          <span className="text-[10px] text-slate-500 font-ubuntu block truncate">
                             {rec.date ? toBengaliDigits(rec.date) : ""}{" "}
                             {rec.teacherId ? `• আইডি: ${toBengaliDigits(rec.teacherId)}` : ""}
                           </span>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex items-center justify-between sm:justify-end gap-2 pl-10 sm:pl-0 shrink-0">
                         <span className="font-ubuntu text-[11px] font-bold text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200">
                           {toBengaliDigits(checkInFormatted)}
                         </span>
                         <span
-                          className={`font-black text-[10px] px-2 py-0.5 rounded ${
-                            isLate
+                          className={`font-black text-[10px] px-2 py-0.5 rounded ${isLate
                               ? "bg-amber-100 text-amber-900 border border-amber-300"
                               : "bg-emerald-100 text-emerald-950 border border-emerald-300"
-                          }`}
+                            }`}
                         >
                           {isLate ? "বিলম্বে (Late)" : "উপস্থিত"}
                         </span>
@@ -623,7 +619,7 @@ export default function AdminDashboardOverview() {
             )}
           </div>
 
-          <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-bold">
+          <div className="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-1.5 text-[11px] sm:text-xs text-slate-500 font-bold">
             <span>মোট অনুষদ: {toBengaliDigits(data?.staffFaculty?.total || 0)} জন</span>
             <span className="text-[#0D47A1] font-ubuntu">
               হাজিরা শতকরা: {toBengaliDigits(data?.staffFaculty?.attendance?.percentage || 0)}%
@@ -632,21 +628,21 @@ export default function AdminDashboardOverview() {
         </div>
 
         {/* Right (6 Cols): সাম্প্রতিক আয় ও ব্যয় ভাউচার তালিকা */}
-        <div className="lg:col-span-6 bg-white p-5 sm:p-6 rounded-2xl border border-[#90CAF9]/40 shadow-xs flex flex-col justify-between">
+        <div className="lg:col-span-6 bg-white p-4 sm:p-6 rounded-2xl border border-[#90CAF9]/40 shadow-xs flex flex-col justify-between min-w-0">
           <div>
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
-              <div>
-                <h3 className="font-black text-slate-900 text-sm sm:text-base flex items-center gap-2">
-                  <span className="text-[#2196F3]">🧾</span>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3 mb-3">
+              <div className="min-w-0">
+                <h3 className="font-black text-slate-900 text-sm sm:text-base flex items-start sm:items-center gap-2 leading-snug">
+                  <span className="text-[#2196F3] shrink-0">🧾</span>
                   <span>সাম্প্রতিক আয় ও ব্যয় ভাউচার ট্রানজেকশন</span>
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5">
                   সর্বশেষ নিবন্ধিত আর্থিক জমা ও খরচসমূহের সংক্ষিপ্তসার
                 </p>
               </div>
               <Link
                 href="/dashboard/accountant/finance"
-                className="text-xs font-bold text-[#2196F3] hover:underline flex items-center gap-1 shrink-0"
+                className="text-xs font-bold text-[#2196F3] hover:underline inline-flex items-center gap-1 shrink-0 self-start sm:self-auto"
               >
                 <span>সকল ভাউচার</span>
                 <ChevronRight className="w-3.5 h-3.5" />
@@ -671,15 +667,14 @@ export default function AdminDashboardOverview() {
                   return (
                     <div
                       key={tx.id}
-                      className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/70 border border-slate-200 flex items-center justify-between gap-3 text-xs transition-colors"
+                      className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/70 border border-slate-200 flex items-center justify-between gap-2.5 sm:gap-3 text-xs transition-colors"
                     >
-                      <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
                         <div
-                          className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs shrink-0 ${
-                            isIncome
+                          className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs shrink-0 ${isIncome
                               ? "bg-[#E3F2FD] text-[#0D47A1] border border-[#90CAF9]/50"
                               : "bg-rose-100 text-rose-800"
-                          }`}
+                            }`}
                         >
                           {isIncome ? (
                             <ArrowUpRight className="w-4 h-4" />
@@ -687,11 +682,11 @@ export default function AdminDashboardOverview() {
                             <ArrowDownRight className="w-4 h-4" />
                           )}
                         </div>
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                           <h4 className="font-black text-slate-900 truncate">
                             {tx.title}
                           </h4>
-                          <span className="text-[10px] text-slate-500 font-ubuntu">
+                          <span className="text-[10px] text-slate-500 font-ubuntu block truncate">
                             {tx.id} • {tx.category} • {toBengaliDigits(tx.date)}
                           </span>
                         </div>
@@ -699,9 +694,8 @@ export default function AdminDashboardOverview() {
 
                       <div className="text-right shrink-0">
                         <span
-                          className={`font-black font-ubuntu text-xs sm:text-sm block ${
-                            isIncome ? "text-[#0D47A1]" : "text-rose-600"
-                          }`}
+                          className={`font-black font-ubuntu text-xs sm:text-sm block ${isIncome ? "text-[#0D47A1]" : "text-rose-600"
+                            }`}
                         >
                           {isIncome ? "+" : "-"}৳{toBengaliDigits(tx.amount.toLocaleString("en-IN"))}
                         </span>
@@ -716,7 +710,7 @@ export default function AdminDashboardOverview() {
             )}
           </div>
 
-          <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-bold">
+          <div className="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[11px] sm:text-xs text-slate-500 font-bold">
             <span>নিবন্ধিত সক্রিয় হিসাব বই</span>
             <Link
               href="/dashboard/accountant/finance"
@@ -731,15 +725,9 @@ export default function AdminDashboardOverview() {
       {/* ----------------- ৫. অফ-স্ক্রিন প্রিন্ট এলিমেন্ট (A4 Portrait Executive Summary) ----------------- */}
       <div
         aria-hidden="true"
-        style={{
-          position: "absolute",
-          left: "-9999px",
-          top: "-9999px",
-          width: "210mm",
-          overflow: "hidden",
-        }}
+        className="fixed -left-[9999px] -top-[9999px] w-0 h-0 overflow-hidden pointer-events-none"
       >
-        <div ref={printAreaRef}>
+        <div ref={printAreaRef} style={{ width: "210mm" }}>
           {data && (
             <ExecutivePrintSummarySheet
               data={data}
@@ -932,9 +920,8 @@ function ExecutivePrintSummarySheet({ data, formattedDateBn }) {
                       </span>
                     </div>
                     <strong
-                      className={`font-ubuntu shrink-0 ${
-                        tx.type === "income" ? "text-emerald-800" : "text-rose-800"
-                      }`}
+                      className={`font-ubuntu shrink-0 ${tx.type === "income" ? "text-emerald-800" : "text-rose-800"
+                        }`}
                     >
                       {tx.type === "income" ? "+" : "-"}৳
                       {toBengaliDigits(tx.amount.toLocaleString("en-IN"))}

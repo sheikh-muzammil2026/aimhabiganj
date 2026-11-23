@@ -23,6 +23,13 @@ const extractDigits = (val) => {
   return match ? match[0] : String(val).trim();
 };
 
+const normalizeYearBn = (raw) => {
+  const clean = String(raw || "").split(/[-–/]/)[0].trim();
+  if (!clean) return "";
+  const enDigits = bnToEn(clean).match(/\d{4}/)?.[0];
+  return enDigits ? enToBn(enDigits) : "";
+};
+
 /**
  * GET /api/seat-plan?hallNo=1&semester=২য় সাময়িক পরীক্ষা
  * Returns active & approved students allocated to the specified hall
@@ -32,6 +39,15 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const hallNo = searchParams.get("hallNo");
     const semester = searchParams.get("semester") || "২য় সাময়িক পরীক্ষা";
+    const requestedYearParam = (
+      searchParams.get("year") ||
+      searchParams.get("sessionYear") ||
+      ""
+    ).trim();
+    const requestedYearBn =
+      requestedYearParam && requestedYearParam.toLowerCase() !== "all"
+        ? normalizeYearBn(requestedYearParam)
+        : "";
 
     if (!hallNo) {
       return NextResponse.json(
@@ -45,9 +61,10 @@ export async function GET(req) {
 
     const db = getDatabase();
     const studentsCollection = db.collection("students");
+    const routinesCollection = db.collection("routines");
 
     // Fetch active & approved students allocated to this hall
-    const students = await studentsCollection
+    const allHallStudents = await studentsCollection
       .find({
         status: { $regex: /^approved$/i },
         activity: { $regex: /^active$/i },
@@ -63,6 +80,57 @@ export async function GET(req) {
         ],
       })
       .toArray();
+
+    const yearSet = new Set();
+    allHallStudents.forEach((s) => {
+      const y = normalizeYearBn(s.sessionYear);
+      if (y) yearSet.add(y);
+    });
+
+    let routineYearBn = "";
+    try {
+      if (semester) {
+        const matchedRoutine = await routinesCollection.findOne(
+          { examTitle: { $regex: new RegExp(`^${String(semester).trim()}$`, "i") } },
+          { sort: { updatedAt: -1 } }
+        );
+        if (matchedRoutine?.gregorianYear) {
+          routineYearBn = normalizeYearBn(matchedRoutine.gregorianYear);
+          if (routineYearBn) yearSet.add(routineYearBn);
+        }
+      }
+      const [studentSessionYears, routineYears] = await Promise.all([
+        studentsCollection.distinct("sessionYear", {
+          status: { $regex: /^approved$/i },
+          activity: { $regex: /^active$/i },
+        }),
+        routinesCollection.distinct("gregorianYear"),
+      ]);
+      [...studentSessionYears, ...routineYears].forEach((rawY) => {
+        const y = normalizeYearBn(rawY);
+        if (y) yearSet.add(y);
+      });
+    } catch (yrErr) {
+      console.warn("Could not fetch local academic years for seat plan:", yrErr);
+    }
+
+    if (requestedYearBn) {
+      yearSet.add(requestedYearBn);
+    }
+
+    const years = Array.from(yearSet).sort(
+      (a, b) => Number(bnToEn(b)) - Number(bnToEn(a))
+    );
+    const academicYear = requestedYearBn || routineYearBn || years[0] || "২০২৬";
+    if (!years.includes(academicYear)) {
+      years.unshift(academicYear);
+    }
+
+    const students = requestedYearBn
+      ? allHallStudents.filter(
+          (s) => normalizeYearBn(s.sessionYear) === requestedYearBn
+        )
+      : allHallStudents;
 
     const data = students
       .map((student) => {
@@ -122,7 +190,7 @@ export async function GET(req) {
       .sort((a, b) => a.seatNo - b.seatNo);
 
     return NextResponse.json(
-      { success: true, data },
+      { success: true, data, academicYear, years },
       {
         headers: {
           "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",

@@ -18,7 +18,22 @@ import {
   Sparkles,
 } from "lucide-react";
 import { toBengaliDigits, getStudentClassDetails } from "@/lib/studentUtils";
+import { formatAcademicYear } from "@/lib/academicYear";
 import siteConfig from "@/config/siteConfig";
+
+const DEFAULT_ACADEMIC_YEAR = toBengaliDigits(
+  formatAcademicYear(
+    siteConfig.academicSession?.currentBn ||
+    siteConfig.academicSession?.currentEn ||
+    "২০২৬"
+  ) || "২০২৬"
+);
+
+const normalizeYearDisplay = (val) => {
+  if (!val || typeof val === "object") return "";
+  const cleaned = formatAcademicYear(val);
+  return cleaned ? toBengaliDigits(cleaned) : "";
+};
 
 export const FALLBACK_AVATAR_DATA_URI =
   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%2394a3b8'><circle cx='50' cy='36' r='20'/><path d='M20 86c0-16.5 13.5-30 30-30s30 13.5 30 30z'/></svg>";
@@ -112,18 +127,19 @@ const API_BASE_URL = (
 
 export default function ExamHallMapPage() {
   const printAreaRef = useRef(null);
+  const requestSeqRef = useRef(0);
 
   // স্টেটসমূহ
   const [selectedHall, setSelectedHall] = useState(1);
-  const [selectedSemester, setSelectedSemester] = useState("২য় সাময়িক পরীক্ষা");
+  const [selectedSemester, setSelectedSemester] = useState("বার্ষিক পরীক্ষা");
   const [examList, setExamList] = useState([
     "১ম সাময়িক পরীক্ষা",
     "২য় সাময়িক পরীক্ষা",
     "বার্ষিক পরীক্ষা",
   ]);
-  const [examYear, setExamYear] = useState(
-    siteConfig.academicSession || "২০২৬"
-  );
+  const [examYear, setExamYear] = useState(DEFAULT_ACADEMIC_YEAR);
+  const [selectedYear, setSelectedYear] = useState("");
+  const [availableYears, setAvailableYears] = useState([DEFAULT_ACADEMIC_YEAR]);
   const [showPhotos, setShowPhotos] = useState(true);
 
   const [students, setStudents] = useState([]);
@@ -164,6 +180,7 @@ export default function ExamHallMapPage() {
 
   // ব্যাকএন্ড থেকে শিক্ষার্থীদের ডাটা ফেচ করা (শুধুমাত্র Approved ও Active)
   const fetchHallData = useCallback(async () => {
+    const requestId = ++requestSeqRef.current;
     try {
       setLoading(true);
       setError(null);
@@ -171,9 +188,15 @@ export default function ExamHallMapPage() {
       let studentList = [];
 
       // ১. নির্দিষ্ট হলের সিট প্ল্যান ডাটা লোড
-      const hallUrl = `${API_BASE_URL}/api/seat-plan?hallNo=${selectedHall}&semester=${encodeURIComponent(
-        selectedSemester,
-      )}`;
+      const queryParams = new URLSearchParams({
+        hallNo: String(selectedHall),
+        semester: selectedSemester,
+      });
+      if (selectedYear) {
+        queryParams.set("year", selectedYear);
+      }
+
+      const hallUrl = `${API_BASE_URL}/api/seat-plan?${queryParams.toString()}`;
 
       let data = null;
       try {
@@ -192,9 +215,7 @@ export default function ExamHallMapPage() {
       if (!data || !data.success) {
         try {
           const localRes = await fetch(
-            `/api/seat-plan?hallNo=${selectedHall}&semester=${encodeURIComponent(
-              selectedSemester,
-            )}`,
+            `/api/seat-plan?${queryParams.toString()}`,
             { cache: "no-store" }
           );
           if (localRes.ok) {
@@ -205,14 +226,38 @@ export default function ExamHallMapPage() {
         }
       }
 
+      if (requestId !== requestSeqRef.current) return;
+
+      if (data?.success) {
+        const serverYears = Array.isArray(data.years)
+          ? Array.from(
+            new Set(data.years.map(normalizeYearDisplay).filter(Boolean))
+          )
+          : [];
+        const serverAcademicYear =
+          normalizeYearDisplay(data.academicYear) ||
+          serverYears[0] ||
+          DEFAULT_ACADEMIC_YEAR;
+
+        const mergedYears =
+          serverYears.length > 0
+            ? serverYears.includes(serverAcademicYear)
+              ? serverYears
+              : [serverAcademicYear, ...serverYears]
+            : [serverAcademicYear];
+
+        setAvailableYears(mergedYears);
+        setExamYear(selectedYear || serverAcademicYear);
+      }
+
       if (data?.success && Array.isArray(data.data) && data.data.length > 0) {
         studentList = data.data.map((s) => ({
           ...s,
           seatNo: parseSeatNumber(s.seatNo),
           hallNo: parseHallNumber(s.hallNo) || selectedHall,
         }));
-      } else {
-        // ফলব্যাক ২: যদি /api/seat-plan খালি থাকে, তাহলে মূল /api/students থেকে ওই হলের একটিভ শিক্ষার্থীদের ফিল্টার
+      } else if (!selectedYear) {
+        // ফলব্যাক ২: যদি /api/seat-plan খালি থাকে (এবং নির্দিষ্ট বছর ফিল্টার না থাকে), মূল /api/students থেকে ওই হলের একটিভ শিক্ষার্থীদের ফিল্টার
         let fallbackData = null;
         try {
           const fallbackRes = await fetch(
@@ -226,7 +271,26 @@ export default function ExamHallMapPage() {
           console.warn("External students fallback failed:", e);
         }
 
+        if (requestId !== requestSeqRef.current) return;
+
         if (fallbackData?.success && Array.isArray(fallbackData.data)) {
+          const derivedYears = Array.from(
+            new Set(
+              fallbackData.data
+                .map((s) => normalizeYearDisplay(s.sessionYear))
+                .filter(Boolean)
+            )
+          ).sort((a, b) => Number(bnToEnDigits(b)) - Number(bnToEnDigits(a)));
+
+          if (derivedYears.length > 0) {
+            setAvailableYears((prev) =>
+              Array.from(new Set([...derivedYears, ...prev]))
+            );
+            if (!data?.academicYear) {
+              setExamYear(derivedYears[0]);
+            }
+          }
+
           studentList = fallbackData.data
             .filter((s) => {
               const h = s.seatPlan?.hallNo || s.hallNo;
@@ -260,15 +324,19 @@ export default function ExamHallMapPage() {
         }
       }
 
+      if (requestId !== requestSeqRef.current) return;
       setStudents(studentList);
     } catch (err) {
+      if (requestId !== requestSeqRef.current) return;
       console.error("Error loading hall map data:", err);
       setError("সার্ভার থেকে হল ম্যাপ ডাটা লোড করতে সমস্যা হয়েছে।");
       toast.error("সিট প্ল্যান লোড করা যায়নি!");
     } finally {
-      setLoading(false);
+      if (requestId === requestSeqRef.current) {
+        setLoading(false);
+      }
     }
-  }, [selectedHall, selectedSemester]);
+  }, [selectedHall, selectedSemester, selectedYear]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -523,9 +591,21 @@ export default function ExamHallMapPage() {
 
             <div className="flex items-center gap-1.5">
               <span className="font-bold text-slate-600">শিক্ষাবর্ষ:</span>
-              <span className="bg-slate-100 border border-slate-300 rounded-lg px-2.5 py-1 font-bold text-slate-800 font-ubuntu">
-                {toBengaliDigits(examYear)}
-              </span>
+              <select
+                value={selectedYear || examYear}
+                onChange={(e) => {
+                  const nextYear = e.target.value;
+                  setSelectedYear(nextYear);
+                  setExamYear(nextYear);
+                }}
+                className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1 font-bold text-slate-800 font-ubuntu focus:outline-emerald-600 cursor-pointer"
+              >
+                {availableYears.map((yr) => (
+                  <option key={yr} value={yr}>
+                    {toBengaliDigits(yr)}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
