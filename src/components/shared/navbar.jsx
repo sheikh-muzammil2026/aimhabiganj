@@ -477,6 +477,11 @@ export default function Navbar() {
 
 
           </div>
+
+        </div>
+        {/* Notice Ticker aligned to same container width */}
+        <div className="site-container pb-4">
+          <NavbarTicker />
         </div>
       </header>
 

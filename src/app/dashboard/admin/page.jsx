@@ -23,7 +23,6 @@ import {
   UserCheck,
   CreditCard,
   ChevronRight,
-  Sparkles,
 } from "lucide-react";
 import { toBengaliDigits } from "@/lib/studentUtils";
 import siteConfig from "@/config/siteConfig";
@@ -186,7 +185,7 @@ export default function AdminDashboardOverview() {
           <span>হিসাব ও ভাউচার</span>
         </Link>
         <Link
-          href="/dashboard/admin/teachers-management"
+          href="/dashboard/admin/teachers-management/attendance"
           className="inline-flex items-center gap-1.5 bg-white hover:bg-[#E3F2FD] text-slate-700 hover:text-[#0D47A1] px-2.5 sm:px-3 py-1.5 rounded-lg border border-[#90CAF9]/60 hover:border-[#2196F3] font-bold transition-colors shadow-2xs"
         >
           <Clock className="w-3.5 h-3.5 text-[#2196F3] shrink-0" />
@@ -409,8 +408,8 @@ export default function AdminDashboardOverview() {
                         <span className="font-bold text-slate-800">{item.monthLabel}</span>
                         <span
                           className={`font-black font-ubuntu text-[11px] px-1.5 py-0.5 rounded ${item.net >= 0
-                              ? "bg-[#E3F2FD] text-[#0D47A1] border border-[#90CAF9]"
-                              : "bg-rose-50 text-rose-900 border border-rose-200"
+                            ? "bg-[#E3F2FD] text-[#0D47A1] border border-[#90CAF9]"
+                            : "bg-rose-50 text-rose-900 border border-rose-200"
                             }`}
                         >
                           উদ্বৃত্ত: {item.net >= 0 ? "+" : ""}৳
@@ -569,6 +568,7 @@ export default function AdminDashboardOverview() {
             ) : (
               <div className="space-y-2">
                 {data?.staffFaculty?.todayRecords?.map((rec, i) => {
+
                   const checkInFormatted = rec.checkInTime
                     ? new Date(rec.checkInTime).toLocaleTimeString("en-US", {
                       hour: "2-digit",
@@ -605,8 +605,8 @@ export default function AdminDashboardOverview() {
                         </span>
                         <span
                           className={`font-black text-[10px] px-2 py-0.5 rounded ${isLate
-                              ? "bg-amber-100 text-amber-900 border border-amber-300"
-                              : "bg-emerald-100 text-emerald-950 border border-emerald-300"
+                            ? "bg-amber-100 text-amber-900 border border-amber-300"
+                            : "bg-emerald-100 text-emerald-950 border border-emerald-300"
                             }`}
                         >
                           {isLate ? "বিলম্বে (Late)" : "উপস্থিত"}
@@ -672,8 +672,8 @@ export default function AdminDashboardOverview() {
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
                         <div
                           className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs shrink-0 ${isIncome
-                              ? "bg-[#E3F2FD] text-[#0D47A1] border border-[#90CAF9]/50"
-                              : "bg-rose-100 text-rose-800"
+                            ? "bg-[#E3F2FD] text-[#0D47A1] border border-[#90CAF9]/50"
+                            : "bg-rose-100 text-rose-800"
                             }`}
                         >
                           {isIncome ? (

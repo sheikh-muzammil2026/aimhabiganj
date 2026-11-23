@@ -133,8 +133,9 @@ export default function HeroSection() {
         />
       </div>
 
+
       {/* Main Content Container */}
-      <div className="relative z-10 min-h-[820px] site-container pt-36 sm:pt-40 lg:pt-44 pb-12 sm:pb-16">
+      <div className="relative z-10 min-h-[720px] site-container pt-36 sm:pt-40 lg:pt-44 pb-12 sm:pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
           {/* LEFT COLUMN: Editorial Typography & CTAs (7 Cols) */}
           <div className="lg:col-span-7 space-y-6">
@@ -299,10 +300,7 @@ export default function HeroSection() {
         </div>
 
       </div>
-      {/* Notice Ticker aligned to same container width */}
-      <div className="site-container pb-4">
-        <NavbarTicker />
-      </div>
+
       {/* Bottom Accent Line */}
       <div className="relative z-10 h-1 w-full bg-gradient-to-r from-[#0D47A1] via-[#2196F3] to-[#90CAF9]" />
     </section>

@@ -103,7 +103,7 @@ export async function GET() {
       db.collection("teacherattendance")
         .find({})
         .sort({ date: -1, _id: -1 })
-        .limit(8)
+        .limit(15)
         .toArray(),
 
       // ৩. ফিন্যান্স (আজকের আয়-ব্যয়)
@@ -314,8 +314,8 @@ export async function GET() {
           },
           todayRecords:
             teacherAttToday.length > 0
-              ? teacherAttToday.slice(0, 6)
-              : recentAttendanceList.slice(0, 6),
+              ? teacherAttToday.slice(0, 15)
+              : recentAttendanceList.slice(0, 15),
           isUsingRecentAttendanceFallback: teacherAttToday.length === 0 && recentAttendanceList.length > 0,
         },
         finance: {
