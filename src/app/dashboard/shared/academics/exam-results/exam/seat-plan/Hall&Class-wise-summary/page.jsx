@@ -44,6 +44,10 @@ const SUMMARY_PAGE_STYLE = `
     }
 `;
 
+const API_BASE_URL = (
+    process.env.NEXT_PUBLIC_SERVER_API || 'http://localhost:5000'
+).replace(/\/$/, '');
+
 const DEFAULT_ACADEMIC_YEAR = toBengaliDigits(
     formatAcademicYear(
         siteConfig.academicSession?.currentBn ||
@@ -166,31 +170,12 @@ export default function SeatPlanSummary() {
                 ? `?year=${encodeURIComponent(selectedYear)}`
                 : '';
 
-            let result = null;
-            // ১. এক্সটার্নাল API
-            try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/seat-plans/summary${queryStr}`, {
-                    cache: "no-store",
-                    headers: { "Cache-Control": "no-cache" }
-                });
-                if (response.ok) {
-                    result = await response.json();
-                }
-            } catch (err) {
-                console.warn("External summary fetch failed, trying local fallback:", err);
-            }
-
-            // ২. লোকাল Next.js API ফলব্যাক
-            if (!result || !result.success) {
-                try {
-                    const localRes = await fetch(`/api/seat-plans/summary${queryStr}`, { cache: "no-store" });
-                    if (localRes.ok) {
-                        result = await localRes.json();
-                    }
-                } catch (localErr) {
-                    console.warn("Local summary fetch failed:", localErr);
-                }
-            }
+            // aim-server API থেকে হল ও শ্রেণিভিত্তিক সামারি লোড
+            const response = await fetch(`${API_BASE_URL}/api/seat-plans/summary${queryStr}`, {
+                cache: "no-store",
+                headers: { "Cache-Control": "no-cache" }
+            });
+            const result = response.ok ? await response.json() : null;
 
             if (requestId !== requestSeqRef.current) return;
 

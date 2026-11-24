@@ -41,7 +41,11 @@ export default function SeatStickersGeneratorPage() {
 
   // ফিল্টারিং স্টেটসমূহ
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedSession, setSelectedSession] = useState(siteConfig.academicSession || "২০২৬");
+  const [selectedSession, setSelectedSession] = useState(
+    siteConfig.academicSession?.currentBn ||
+      siteConfig.academicSession?.currentEn ||
+      "২০২৬"
+  );
   const [selectedDivision, setSelectedDivision] = useState("all");
   const [selectedAcademyType, setSelectedAcademyType] = useState("all");
   const [selectedClass, setSelectedClass] = useState("all");
@@ -78,36 +82,14 @@ export default function SeatStickersGeneratorPage() {
     try {
       setLoading(true);
       setError(null);
-      let data = null;
-
-      try {
-        const res = await fetch(
-          `${API_BASE_URL}/api/students?status=Approved&activity=active&limit=1000`,
-          {
-            cache: "no-store",
-            headers: { "Cache-Control": "no-cache" },
-          }
-        );
-        if (res.ok) {
-          data = await res.json();
+      const res = await fetch(
+        `${API_BASE_URL}/api/students?status=Approved&activity=active&limit=1000`,
+        {
+          cache: "no-store",
+          headers: { "Cache-Control": "no-cache" },
         }
-      } catch (err) {
-        console.warn("External students fetch failed, trying local fallback:", err);
-      }
-
-      if (!data || !data.success) {
-        try {
-          const localRes = await fetch(
-            `/api/students?status=Approved&activity=active&limit=1000`,
-            { cache: "no-store" }
-          );
-          if (localRes.ok) {
-            data = await localRes.json();
-          }
-        } catch (localErr) {
-          console.warn("Local students fetch failed:", localErr);
-        }
-      }
+      );
+      const data = res.ok ? await res.json() : null;
 
       if (data?.success && Array.isArray(data.data)) {
         // রোল এবং ক্লাস অনুযায়ী সর্ট করা

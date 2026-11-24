@@ -426,7 +426,7 @@ export default function Navbar() {
                 {/* Desktop Auth Action */}
                 <div className="hidden md:flex items-center">
                   {isLoggedIn ? (
-                    <div className="relative group/user">
+                    <div className="flex">
                       <Link
                         href={getDashboardPath()}
                         title={t("menu.dashboard")}
@@ -437,8 +437,16 @@ export default function Navbar() {
                           {t("menu.dashboard")}
                         </span>
                       </Link>
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-rose-300 hover:bg-rose-500/20 font-medium text-left transition-colors cursor-pointer"
+                      >
+                        <LogOut className="w-3.5 h-3.5" />
+                        {/* <span>{t("menu.logout")}</span> */}
+                      </button>
 
-                      <div className="absolute ltr:right-0 rtl:left-0 top-full pt-2 hidden group-hover/user:block z-50">
+                      {/* <div className="absolute ltr:right-0 rtl:left-0 top-full pt-2 hidden group-hover/user:block z-50">
                         <div className="bg-[#0D47A1] text-white rounded-xl shadow-2xl border border-[#90CAF9]/40 p-1.5 w-40 text-xs overflow-hidden backdrop-blur-xl">
                           <Link
                             href={getDashboardPath()}
@@ -447,16 +455,9 @@ export default function Navbar() {
                             <LayoutDashboard className="w-3.5 h-3.5" />
                             <span>{t("menu.dashboard")}</span>
                           </Link>
-                          <button
-                            type="button"
-                            onClick={handleLogout}
-                            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-rose-300 hover:bg-rose-500/20 font-medium text-left transition-colors cursor-pointer"
-                          >
-                            <LogOut className="w-3.5 h-3.5" />
-                            <span>{t("menu.logout")}</span>
-                          </button>
+                          
                         </div>
-                      </div>
+                      </div> */}
                     </div>
                   ) : (
                     <Link

@@ -44,6 +44,10 @@ export const getStudentPhoto = (student) => {
     );
 };
 
+const API_BASE_URL = (
+    process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000"
+).replace(/\/$/, "");
+
 const STANDARD_HALLS = [
     { id: "1", label: "হল নং ১ — নিচ তলা (নার্সারি)" },
     { id: "2", label: "হল নং ২ — ২য় তলা (ক্লাস থ্রি)" },
@@ -76,32 +80,11 @@ export default function AllStudentsPage() {
             setLoading(true);
             setError(null);
             
-            let result = null;
-            try {
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_SERVER_API}/api/students?status=Approved&activity=active&limit=1000`,
-                    { cache: "no-store", headers: { "Cache-Control": "no-cache" } }
-                );
-                if (response.ok) {
-                    result = await response.json();
-                }
-            } catch (err) {
-                console.warn("External students fetch failed, trying Next.js fallback:", err);
-            }
-
-            if (!result || !result.success) {
-                try {
-                    const localRes = await fetch(
-                        `/api/students?status=Approved&activity=active&limit=1000`,
-                        { cache: "no-store" }
-                    );
-                    if (localRes.ok) {
-                        result = await localRes.json();
-                    }
-                } catch (localErr) {
-                    console.warn("Next.js local students fetch failed:", localErr);
-                }
-            }
+            const response = await fetch(
+                `${API_BASE_URL}/api/students?status=Approved&activity=active&limit=1000`,
+                { cache: "no-store", headers: { "Cache-Control": "no-cache" } }
+            );
+            const result = response.ok ? await response.json() : null;
 
             if (result && result.success) {
                 // শ্রেণি অনুযায়ী (Play -> Hifz) এবং শ্রেণিভেদে রোল নম্বর অনুযায়ী সর্টিং
@@ -173,42 +156,15 @@ export default function AllStudentsPage() {
                 seatNo: seatData[studentId]?.seatNo || ""
             };
 
-            let success = false;
-            let resultMessage = "";
-
-            // ১. এক্সটার্নাল সার্ভারে রিকোয়েস্ট
-            try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/students/${studentId}/seat-plan`, {
-                    method: "PATCH",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
-                });
-                const resJson = await response.json();
-                if (response.ok && resJson.success) {
-                    success = true;
-                    resultMessage = resJson.message;
-                }
-            } catch (extErr) {
-                console.warn("External save failed, trying local Next.js route:", extErr);
-            }
-
-            // ২. লোকাল Next.js API ফলব্যাক
-            if (!success) {
-                try {
-                    const localRes = await fetch(`/api/students/${studentId}/seat-plan`, {
-                        method: "PATCH",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(payload)
-                    });
-                    const localJson = await localRes.json();
-                    if (localRes.ok && localJson.success) {
-                        success = true;
-                        resultMessage = localJson.message;
-                    }
-                } catch (localErr) {
-                    console.warn("Local save error:", localErr);
-                }
-            }
+            // aim-server-এ রিকোয়েস্ট
+            const response = await fetch(`${API_BASE_URL}/api/students/${studentId}/seat-plan`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            const resJson = await response.json();
+            const success = Boolean(response.ok && resJson.success);
+            const resultMessage = resJson.message || "";
 
             if (success) {
                 toast.success("সিট প্ল্যান সফলভাবে আপডেট করা হয়েছে!");
@@ -303,53 +259,39 @@ export default function AllStudentsPage() {
 
             let success = false;
 
-            // ১. বাল্ক API চেষ্টা
+            // ১. aim-server বাল্ক API চেষ্টা
             try {
-                const res = await fetch(`/api/students/bulk-seat-plan`, {
+                const extBulk = await fetch(`${API_BASE_URL}/api/students/bulk-seat-plan`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ updates })
                 });
-                if (res.ok) {
-                    const j = await res.json();
+                if (extBulk.ok) {
+                    const j = await extBulk.json();
                     if (j.success) success = true;
                 }
-            } catch (bulkErr) {
-                console.warn("Local bulk API error, trying parallel PATCH:", bulkErr);
+            } catch (e) {
+                console.warn("aim-server bulk seat-plan error, trying parallel PATCH:", e);
             }
 
+            // ২. যদি বাল্ক ব্যর্থ হয়, তবে প্যারালাল PATCH সেভ (aim-server)
             if (!success) {
-                // এক্সটার্নাল বাল্ক API অথবা প্যারালাল রিকোয়েস্ট
-                try {
-                    const extBulk = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/students/bulk-seat-plan`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ updates })
-                    });
-                    if (extBulk.ok) {
-                        const j = await extBulk.json();
-                        if (j.success) success = true;
-                    }
-                } catch (e) {
-                    console.warn("External bulk error:", e);
-                }
-            }
-
-            // যদি বাল্ক ব্যর্থ হয়, তবে প্যারালাল সেভ
-            if (!success) {
-                const promises = updates.map((u) =>
-                    fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/students/${u.id}/seat-plan`, {
-                        method: "PATCH",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            hallNo: u.hallNo,
-                            benchNo: u.benchNo,
-                            seatNo: u.seatNo
+                const results = await Promise.all(
+                    updates.map((u) =>
+                        fetch(`${API_BASE_URL}/api/students/${u.id}/seat-plan`, {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                hallNo: u.hallNo,
+                                benchNo: u.benchNo,
+                                seatNo: u.seatNo
+                            })
                         })
-                    }).catch(() => null)
+                            .then((r) => r.ok)
+                            .catch(() => false)
+                    )
                 );
-                await Promise.all(promises);
-                success = true;
+                success = results.some(Boolean);
             }
 
             if (success) {
