@@ -547,7 +547,7 @@ export default function AdminDashboardOverview() {
                 </p>
               </div>
               <Link
-                href="/dashboard/admin/teachers-management"
+                href="/dashboard/admin/teachers-management/attendance"
                 className="text-xs font-bold text-[#2196F3] hover:underline inline-flex items-center gap-1 shrink-0 self-start sm:self-auto"
               >
                 <span>সম্পূর্ণ তালিকা</span>

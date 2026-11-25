@@ -8,11 +8,13 @@ import {
   AlertCircle,
   Loader2,
   Eye,
+  Lock,
   Phone,
   Globe,
   Mail,
 } from "lucide-react";
 import dynamic from "next/dynamic";
+import { authClient } from "@/lib/auth-client";
 
 import { BsWhatsapp, BsYoutube } from "react-icons/bs";
 import { FaFacebook } from "react-icons/fa";
@@ -176,10 +178,58 @@ const parsePayerName = (payerName = "") => {
 };
 
 export default function FinanceDashboard() {
+  const { data: session } = authClient.useSession();
+  const [liveUserRole, setLiveUserRole] = useState("");
   const [activeTab, setActiveTab] = useState("overview"); // overview, income, expense, report
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+
+  const currentUserEmail = session?.user?.email || "";
+  const resolvedRole = (
+    liveUserRole ||
+    session?.user?.role ||
+    ""
+  ).toLowerCase();
+  const isAdmin =
+    resolvedRole === "admin" ||
+    resolvedRole === "superadmin" ||
+    resolvedRole === "administrator";
+
+  const getAuthHeaders = useCallback(
+    (includeJson = true) => {
+      const headers = {};
+      if (includeJson) headers["Content-Type"] = "application/json";
+      if (currentUserEmail) headers["x-user-email"] = currentUserEmail;
+      return headers;
+    },
+    [currentUserEmail],
+  );
+
+  // Sync live user role from DB so RBAC stays accurate even if role changed after login
+  useEffect(() => {
+    if (!currentUserEmail) {
+      setLiveUserRole("");
+      return;
+    }
+    let active = true;
+    fetch(
+      `${API_BASE_URL}/api/user/me?email=${encodeURIComponent(currentUserEmail)}`,
+      {
+        headers: { "x-user-email": currentUserEmail },
+      },
+    )
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (active && data?.success && data?.user?.role) {
+          setLiveUserRole(String(data.user.role).toLowerCase());
+        }
+      })
+      .catch(() => { });
+    return () => {
+      active = false;
+    };
+  }, [currentUserEmail]);
 
   // Date states
   const today = new Date();
@@ -374,13 +424,20 @@ export default function FinanceDashboard() {
   }, [setPendingLoading, setPendingTransactions]);
 
   const handleApprove = async (txId, type) => {
+    if (!isAdmin) {
+      triggerNotification(
+        "error",
+        "পেন্ডিং ভাউচার অনুমোদনের অনুমতি শুধুমাত্র অ্যাডমিনদের রয়েছে।",
+      );
+      return;
+    }
     if (!window.confirm("আপনি কি নিশ্চিত যে এই লেনদেনটি অনুমোদন করতে চান?"))
       return;
     try {
       setLoading(true);
       const res = await fetch(API_BASE_URL + "/api/finance/approve", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(true),
         body: JSON.stringify({ id: txId, type }),
       });
       const data = await res.json();
@@ -401,13 +458,20 @@ export default function FinanceDashboard() {
   };
 
   const handleDelete = async (txId, type) => {
+    if (!isAdmin) {
+      triggerNotification(
+        "error",
+        "পেন্ডিং ভাউচার মুছে ফেলার অনুমতি শুধুমাত্র অ্যাডমিনদের রয়েছে।",
+      );
+      return;
+    }
     if (!window.confirm("আপনি কি নিশ্চিত যে এই লেনদেনটি মুছে ফেলতে চান?"))
       return;
     try {
       setLoading(true);
       const res = await fetch(API_BASE_URL + "/api/finance/delete", {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(true),
         body: JSON.stringify({ id: txId, type }),
       });
       const data = await res.json();
@@ -428,6 +492,13 @@ export default function FinanceDashboard() {
   };
 
   const handleEdit = (tx) => {
+    if (tx?.status === "pending" && !isAdmin) {
+      triggerNotification(
+        "error",
+        "পেন্ডিং ভাউচার এডিট করার অনুমতি শুধুমাত্র অ্যাডমিনদের রয়েছে।",
+      );
+      return;
+    }
     setEditingId(tx._id);
     setEditingType(tx.type);
     if (tx.type === "income") {
@@ -449,9 +520,9 @@ export default function FinanceDashboard() {
         items:
           tx.items && tx.items.length > 0
             ? tx.items.map((it) => ({
-                head: it.head,
-                amount: it.amount.toString(),
-              }))
+              head: it.head,
+              amount: it.amount.toString(),
+            }))
             : [{ head: INCOME_HEADS[0], amount: "" }],
       });
       setActiveTab("income");
@@ -469,19 +540,19 @@ export default function FinanceDashboard() {
         items:
           tx.items && tx.items.length > 0
             ? tx.items.map((it) => ({
-                head: it.head,
-                amount: it.amount.toString(),
-                institutionName: it.institutionName || "",
-                shopVoucher: it.shopVoucher || "",
-              }))
+              head: it.head,
+              amount: it.amount.toString(),
+              institutionName: it.institutionName || "",
+              shopVoucher: it.shopVoucher || "",
+            }))
             : [
-                {
-                  head: EXPENSE_HEADS[0],
-                  amount: "",
-                  institutionName: "",
-                  shopVoucher: "",
-                },
-              ],
+              {
+                head: EXPENSE_HEADS[0],
+                amount: "",
+                institutionName: "",
+                shopVoucher: "",
+              },
+            ],
         reimbursement: tx.reimbursement || {
           method: "Cash",
           date: today.toISOString().split("T")[0],
@@ -552,7 +623,7 @@ export default function FinanceDashboard() {
 
       const res = await fetch(url, {
         method: method,
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(true),
         body: JSON.stringify({
           receiptNo: incomeForm.receiptNo,
           accountNumber: incomeForm.accountNumber || "19071310000015",
@@ -623,7 +694,7 @@ export default function FinanceDashboard() {
           `${API_BASE_URL}/api/finance/expense/${editingId}`,
           {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: getAuthHeaders(true),
             body: JSON.stringify({
               ...expenseForm,
               accountNumber: expenseForm.accountNumber || "19071310000015",
@@ -697,7 +768,7 @@ export default function FinanceDashboard() {
 
       const res = await fetch(url, {
         method: method,
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(true),
         body: JSON.stringify({
           ...expenseForm,
           accountNumber: expenseForm.accountNumber || "19071310000015",
@@ -902,11 +973,10 @@ export default function FinanceDashboard() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`py-2.5 sm:py-3 px-3 sm:px-5 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-all duration-200 rounded-t-lg shrink-0 ${
-                activeTab === tab.id
-                  ? "border-[#2196F3] text-[#0D47A1] bg-[#E3F2FD]"
-                  : "border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50"
-              }`}
+              className={`py-2.5 sm:py-3 px-3 sm:px-5 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-all duration-200 rounded-t-lg shrink-0 ${activeTab === tab.id
+                ? "border-[#2196F3] text-[#0D47A1] bg-[#E3F2FD]"
+                : "border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                }`}
             >
               {tab.label}
             </button>
@@ -994,13 +1064,21 @@ export default function FinanceDashboard() {
 
         {activeTab === "pending" && (
           <div className="bg-white rounded-2xl border border-emerald-900/10 shadow-xs p-4 sm:p-6 space-y-4 font-sans">
-            <div>
-              <h3 className="text-base sm:text-lg font-bold text-emerald-955">
-                পেন্ডিং ভাউচার/রসিদ তালিকা
-              </h3>
-              <p className="text-xs text-slate-400 font-medium">
-                অনুমোদনের জন্য অপেক্ষারত আয় ও ব্যয়ের সাম্প্রতিক এন্ট্রিসমূহ
-              </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-emerald-955">
+                  পেন্ডিং ভাউচার/রসিদ তালিকা
+                </h3>
+                <p className="text-xs text-slate-400 font-medium">
+                  অনুমোদনের জন্য অপেক্ষারত আয় ও ব্যয়ের সাম্প্রতিক এন্ট্রিসমূহ
+                </p>
+              </div>
+              {!isAdmin && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200 self-start sm:self-auto shrink-0">
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>শুধুমাত্র দেখার অনুমতি (Read-Only)</span>
+                </span>
+              )}
             </div>
 
             {pendingLoading ? (
@@ -1025,7 +1103,11 @@ export default function FinanceDashboard() {
                       <th className="p-3">নাম (দাতা/গ্রহীতা)</th>
                       <th className="p-3">খাত ও বিবরণ</th>
                       <th className="p-3 text-right">টাকার পরিমাণ</th>
-                      <th className="p-3 text-center w-48">অ্যাকশন</th>
+                      <th
+                        className={`p-3 text-center ${isAdmin ? "w-48" : "w-28"}`}
+                      >
+                        অ্যাকশন
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
@@ -1090,24 +1172,28 @@ export default function FinanceDashboard() {
                             <Eye className="w-3.5 h-3.5" />
                             <span>দেখুন</span>
                           </button>
-                          <button
-                            onClick={() => handleApprove(tx._id, tx.type)}
-                            className="px-2.5 py-1.5 bg-emerald-800 hover:bg-emerald-950 text-white rounded-lg text-[10px] font-black transition-colors"
-                          >
-                            এপ্রুভ
-                          </button>
-                          <button
-                            onClick={() => handleEdit(tx)}
-                            className="px-2.5 py-1.5 bg-blue-800 hover:bg-blue-950 text-white rounded-lg text-[10px] font-black transition-colors"
-                          >
-                            ইডিট
-                          </button>
-                          <button
-                            onClick={() => handleDelete(tx._id, tx.type)}
-                            className="px-2.5 py-1.5 bg-rose-700 hover:bg-rose-900 text-white rounded-lg text-[10px] font-black transition-colors"
-                          >
-                            ডিলিট
-                          </button>
+                          {isAdmin && (
+                            <>
+                              <button
+                                onClick={() => handleApprove(tx._id, tx.type)}
+                                className="px-2.5 py-1.5 bg-emerald-800 hover:bg-emerald-950 text-white rounded-lg text-[10px] font-black transition-colors"
+                              >
+                                এপ্রুভ
+                              </button>
+                              <button
+                                onClick={() => handleEdit(tx)}
+                                className="px-2.5 py-1.5 bg-blue-800 hover:bg-blue-950 text-white rounded-lg text-[10px] font-black transition-colors"
+                              >
+                                ইডিট
+                              </button>
+                              <button
+                                onClick={() => handleDelete(tx._id, tx.type)}
+                                className="px-2.5 py-1.5 bg-rose-700 hover:bg-rose-900 text-white rounded-lg text-[10px] font-black transition-colors"
+                              >
+                                ডিলিট
+                              </button>
+                            </>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -1123,9 +1209,8 @@ export default function FinanceDashboard() {
       {printData && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 print:hidden">
           <div
-            className={`bg-white rounded-2xl shadow-2xl border border-slate-200 w-full ${
-              printData.type === "income" ? "max-w-5xl" : "max-w-2xl"
-            } overflow-hidden flex flex-col max-h-[92vh] animate-slide-in`}
+            className={`bg-white rounded-2xl shadow-2xl border border-slate-200 w-full ${printData.type === "income" ? "max-w-5xl" : "max-w-2xl"
+              } overflow-hidden flex flex-col max-h-[92vh] animate-slide-in`}
           >
             {/* Modal Header */}
             <div className="px-6 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50">

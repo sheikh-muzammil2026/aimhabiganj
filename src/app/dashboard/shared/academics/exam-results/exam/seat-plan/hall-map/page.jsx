@@ -9,23 +9,23 @@ import {
   Printer,
   ArrowLeft,
   Loader2,
-  Image as ImageIcon,
-  CheckCircle2,
   Users,
   Eye,
   EyeOff,
-  School,
-  Sparkles,
+  LayoutGrid,
+  SlidersHorizontal,
+  Globe,
+  RotateCcw,
 } from "lucide-react";
-import { toBengaliDigits, getStudentClassDetails } from "@/lib/studentUtils";
+import { toBengaliDigits } from "@/lib/studentUtils";
 import { formatAcademicYear } from "@/lib/academicYear";
 import siteConfig from "@/config/siteConfig";
 
 const DEFAULT_ACADEMIC_YEAR = toBengaliDigits(
   formatAcademicYear(
     siteConfig.academicSession?.currentBn ||
-    siteConfig.academicSession?.currentEn ||
-    "২০২৬"
+      siteConfig.academicSession?.currentEn ||
+      "২০২৬"
   ) || "২০২৬"
 );
 
@@ -55,7 +55,18 @@ export const isValidImageUrl = (url) => {
 // Bengali to English digit mapping and digit extractor helpers
 export const bnToEnDigits = (str) => {
   if (!str && str !== 0) return "";
-  const bnDigits = { "০": "0", "১": "1", "২": "2", "৩": "3", "৪": "4", "৫": "5", "৬": "6", "৭": "7", "৮": "8", "৯": "9" };
+  const bnDigits = {
+    "০": "0",
+    "১": "1",
+    "২": "2",
+    "৩": "3",
+    "৪": "4",
+    "৫": "5",
+    "৬": "6",
+    "৭": "7",
+    "৮": "8",
+    "৯": "9",
+  };
   return String(str).replace(/[০-৯]/g, (d) => bnDigits[d] || d);
 };
 
@@ -72,6 +83,16 @@ export const parseHallNumber = (hall) => {
   const match = enStr.match(/\d+/);
   return match ? parseInt(match[0], 10) : 0;
 };
+
+const clampPositiveInt = (val, fallback = 1, max = 500) => {
+  const cleaned = bnToEnDigits(val);
+  const parsed = parseInt(cleaned, 10);
+  if (isNaN(parsed) || parsed < 1) return fallback;
+  return Math.min(max, parsed);
+};
+
+const SEATS_PER_TABLE_PRESETS = [2, 3, 4, 5];
+const STUDENTS_PER_HALL_PRESETS = [16, 24, 32, 44];
 
 // হলের কনফিগারেশন এবং অবস্থান
 export const HALL_CONFIGS = {
@@ -121,6 +142,32 @@ export const HALL_CONFIGS = {
   },
 };
 
+const ORDERED_HALL_NUMS = Object.keys(HALL_CONFIGS)
+  .map(Number)
+  .sort((a, b) => a - b);
+
+const createDefaultHallSettings = () => {
+  const initial = {};
+  ORDERED_HALL_NUMS.forEach((hNo) => {
+    initial[hNo] = {
+      seatsPerTable: 2,
+      studentsPerHall: HALL_CONFIGS[hNo].capacity,
+    };
+  });
+  return initial;
+};
+
+const getSeatPositionLabel = (index, totalPerTable) => {
+  if (totalPerTable === 1) return "একক";
+  if (totalPerTable === 2) return index === 0 ? "বাম আসন" : "ডান আসন";
+  if (totalPerTable === 3) {
+    if (index === 0) return "বাম";
+    if (index === 1) return "মাঝ";
+    return "ডান";
+  }
+  return `স্লট ${toBengaliDigits(index + 1)}`;
+};
+
 const API_BASE_URL = (
   process.env.NEXT_PUBLIC_SERVER_API || "http://localhost:5000"
 ).replace(/\/$/, "");
@@ -142,14 +189,115 @@ export default function ExamHallMapPage() {
   const [availableYears, setAvailableYears] = useState([DEFAULT_ACADEMIC_YEAR]);
   const [showPhotos, setShowPhotos] = useState(true);
 
-  const [students, setStudents] = useState([]);
+  // ডাইনামিক হল কনফিগারেশন স্টেট (প্রতি হল আলাদা অথবা সব হলে গ্লোবালি প্রয়োগ)
+  const [hallSettings, setHallSettings] = useState(createDefaultHallSettings);
+  const [applyGlobally, setApplyGlobally] = useState(false);
+
+  const activeSetting = hallSettings[selectedHall] || {
+    seatsPerTable: 2,
+    studentsPerHall: HALL_CONFIGS[selectedHall]?.capacity || 16,
+  };
+  const seatsPerTable = Math.max(1, activeSetting.seatsPerTable || 2);
+  const studentsPerHall = Math.max(1, activeSetting.studentsPerHall || 16);
+
+  // কাস্টম ইনপুট ড্রাফট স্টেট (যাতে ইউজার সংখ্যা টাইপ বা মুছে লিখতে পারেন)
+  const [customSeatsInput, setCustomSeatsInput] = useState(String(seatsPerTable));
+  const [customCapacityInput, setCustomCapacityInput] = useState(
+    String(studentsPerHall)
+  );
+
+  // সক্রিয় শিক্ষার্থীর তালিকা (aim-server থেকে লোড)
+  const [allStudents, setAllStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isPrinting, setIsPrinting] = useState(false);
 
-  const activeHallConfig = HALL_CONFIGS[selectedHall] || HALL_CONFIGS[1];
+  // নির্বাচিত হল বা কনফিগ পরিবর্তনে কাস্টম ইনপুট সিঙ্ক
+  const syncInputsForHall = useCallback((hallNo, settingsObj) => {
+    const cfg = settingsObj[hallNo] || { seatsPerTable: 2, studentsPerHall: 16 };
+    setCustomSeatsInput(String(cfg.seatsPerTable));
+    setCustomCapacityInput(String(cfg.studentsPerHall));
+  }, []);
 
-  // পরীক্ষার তালিকা লাইভ লোড
+  const handleSelectHall = (hallNo) => {
+    setSelectedHall(hallNo);
+    syncInputsForHall(hallNo, hallSettings);
+  };
+
+  // প্রতি টেবিলে আসন আপডেট (একক হল অথবা গ্লোবাল)
+  const updateSeatsPerTable = useCallback(
+    (nextVal) => {
+      const safeVal = clampPositiveInt(nextVal, 2, 12);
+      setCustomSeatsInput(String(safeVal));
+      setHallSettings((prev) => {
+        if (applyGlobally) {
+          const updated = {};
+          ORDERED_HALL_NUMS.forEach((hNo) => {
+            updated[hNo] = { ...prev[hNo], seatsPerTable: safeVal };
+          });
+          return updated;
+        }
+        return {
+          ...prev,
+          [selectedHall]: { ...prev[selectedHall], seatsPerTable: safeVal },
+        };
+      });
+    },
+    [applyGlobally, selectedHall]
+  );
+
+  // প্রতি হলে শিক্ষার্থী/ধারণক্ষমতা আপডেট (একক হল অথবা গ্লোবাল)
+  const updateStudentsPerHall = useCallback(
+    (nextVal) => {
+      const safeVal = clampPositiveInt(nextVal, 16, 300);
+      setCustomCapacityInput(String(safeVal));
+      setHallSettings((prev) => {
+        if (applyGlobally) {
+          const updated = {};
+          ORDERED_HALL_NUMS.forEach((hNo) => {
+            updated[hNo] = { ...prev[hNo], studentsPerHall: safeVal };
+          });
+          return updated;
+        }
+        return {
+          ...prev,
+          [selectedHall]: { ...prev[selectedHall], studentsPerHall: safeVal },
+        };
+      });
+    },
+    [applyGlobally, selectedHall]
+  );
+
+  // বর্তমান হলের সেটিংস এক ক্লিকে সব হলে প্রয়োগ করা
+  const handleApplyCurrentToAllHalls = () => {
+    setHallSettings((prev) => {
+      const updated = {};
+      ORDERED_HALL_NUMS.forEach((hNo) => {
+        updated[hNo] = {
+          ...prev[hNo],
+          seatsPerTable,
+          studentsPerHall,
+        };
+      });
+      return updated;
+    });
+    toast.success(
+      `সব হলে ${toBengaliDigits(seatsPerTable)} আসন/টেবিল এবং ${toBengaliDigits(
+        studentsPerHall
+      )} জন ধারণক্ষমতা প্রয়োগ করা হয়েছে।`
+    );
+  };
+
+  // ডিফল্ট কনফিগারেশনে রিসেট করা
+  const handleResetConfigs = () => {
+    const defaults = createDefaultHallSettings();
+    setHallSettings(defaults);
+    setApplyGlobally(false);
+    syncInputsForHall(selectedHall, defaults);
+    toast.info("সকল হলের আসন কনফিগারেশন ডিফল্টে রিসেট করা হয়েছে।");
+  };
+
+  // পরীক্ষার তালিকা লাইভ লোড (aim-server)
   useEffect(() => {
     let isMounted = true;
     const fetchExams = async () => {
@@ -166,7 +314,9 @@ export default function ExamHallMapPage() {
           data.data.length > 0
         ) {
           setExamList(data.data);
-          setSelectedSemester((prev) => (data.data.includes(prev) ? prev : data.data[0]));
+          setSelectedSemester((prev) =>
+            data.data.includes(prev) ? prev : data.data[0]
+          );
         }
       } catch (err) {
         console.warn("Could not fetch exam list, using defaults:", err);
@@ -178,13 +328,14 @@ export default function ExamHallMapPage() {
     };
   }, []);
 
-  // ব্যাকএন্ড থেকে শিক্ষার্থীদের ডাটা ফেচ করা (শুধুমাত্র Approved ও Active)
+  // aim-server থেকে সকল সক্রিয় ও অনুমোদিত শিক্ষার্থী লোড (hallNo=all)
   const fetchHallData = useCallback(async () => {
     const requestId = ++requestSeqRef.current;
     try {
       setLoading(true);
       setError(null);
 
+<<<<<<< HEAD
       let studentList = [];
 
       // ১. নির্দিষ্ট হলের সিট প্ল্যান ডাটা লোড
@@ -195,45 +346,33 @@ export default function ExamHallMapPage() {
         examName: String(selectedSemester || ""),
         semester: String(selectedSemester || ""),
         year: currentYearVal,
+=======
+      const queryParams = new URLSearchParams({
+        hallNo: "all",
+        semester: selectedSemester,
+>>>>>>> 306de04006955912fed5cdfda8df39bd8cb056b0
       });
 
-      const hallUrl = `${API_BASE_URL}/api/seat-plan?${queryParams.toString()}`;
-
-      let data = null;
-      try {
-        const res = await fetch(hallUrl, {
+      const res = await fetch(
+        `${API_BASE_URL}/api/seat-plan?${queryParams.toString()}`,
+        {
           cache: "no-store",
           headers: { "Cache-Control": "no-cache" },
-        });
-        if (res.ok) {
-          data = await res.json();
         }
-      } catch (e) {
-        console.warn("External API fetch failed, trying Next.js internal API:", e);
+      );
+
+      if (!res.ok) {
+        throw new Error(`aim-server returned ${res.status}`);
       }
 
-      // যদি এক্সটার্নাল সার্ভার না পাওয়া যায় বা এরর দেয়, ইন্টারনাল Next.js API-তে ফলব্যাক
-      if (!data || !data.success) {
-        try {
-          const localRes = await fetch(
-            `/api/seat-plan?${queryParams.toString()}`,
-            { cache: "no-store" }
-          );
-          if (localRes.ok) {
-            data = await localRes.json();
-          }
-        } catch (localErr) {
-          console.warn("Next.js internal API fallback error:", localErr);
-        }
-      }
-
+      const data = await res.json();
       if (requestId !== requestSeqRef.current) return;
 
       if (data?.success) {
         const serverYears = Array.isArray(data.years)
           ? Array.from(
-            new Set(data.years.map(normalizeYearDisplay).filter(Boolean))
-          )
+              new Set(data.years.map(normalizeYearDisplay).filter(Boolean))
+            )
           : [];
         const serverAcademicYear =
           normalizeYearDisplay(data.academicYear) ||
@@ -249,7 +388,20 @@ export default function ExamHallMapPage() {
 
         setAvailableYears(mergedYears);
         setExamYear(selectedYear || serverAcademicYear);
+
+        const normalizedList = Array.isArray(data.data)
+          ? data.data.map((s) => ({
+              ...s,
+              seatNo: parseSeatNumber(s.seatNo),
+              hallNo: parseHallNumber(s.hallNo),
+            }))
+          : [];
+
+        setAllStudents(normalizedList);
+      } else {
+        throw new Error(data?.message || "সিট প্ল্যান ডাটা পাওয়া যায়নি।");
       }
+<<<<<<< HEAD
 
       if (data?.success && Array.isArray(data.data) && data.data.length > 0) {
         studentList = data.data
@@ -329,6 +481,8 @@ export default function ExamHallMapPage() {
 
       if (requestId !== requestSeqRef.current) return;
       setStudents(studentList);
+=======
+>>>>>>> 306de04006955912fed5cdfda8df39bd8cb056b0
     } catch (err) {
       if (requestId !== requestSeqRef.current) return;
       console.error("Error loading hall map data:", err);
@@ -339,7 +493,7 @@ export default function ExamHallMapPage() {
         setLoading(false);
       }
     }
-  }, [selectedHall, selectedSemester, selectedYear]);
+  }, [selectedSemester, selectedYear]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -348,6 +502,7 @@ export default function ExamHallMapPage() {
     return () => clearTimeout(timer);
   }, [fetchHallData]);
 
+<<<<<<< HEAD
   // সিট নম্বর অনুযায়ী স্টুডেন্টদের ম্যাপ তৈরি (strictly match BOTH seat.hallNo === selectedHall AND seat.seatNo === slotNumber)
   const studentMapBySeatNo = useMemo(() => {
     const map = {};
@@ -365,14 +520,37 @@ export default function ExamHallMapPage() {
     });
     return map;
   }, [students, selectedHall]);
+=======
+  // প্রতিটি হলের studentsPerHall সীমা অনুযায়ী সক্রিয় শিক্ষার্থীদের ডাইনামিক স্লাইস ও বণ্টন
+  const distributedByHall = useMemo(() => {
+    const byHall = {};
+    let cursor = 0;
 
-  // ২ কলামের বেঞ্চ ও আইল রো স্ট্রাকচার তৈরি
-  const deskRows = useMemo(() => {
-    const rows = [];
-    const totalRows = activeHallConfig.rows;
-    let currentSeatNo = 1;
-    let benchNumber = 1;
+    ORDERED_HALL_NUMS.forEach((hNo) => {
+      const cfg = hallSettings[hNo] || {
+        seatsPerTable: 2,
+        studentsPerHall: HALL_CONFIGS[hNo].capacity,
+      };
+      const limit = Math.max(1, cfg.studentsPerHall || 1);
+      const slice = allStudents.slice(cursor, cursor + limit);
+      cursor += limit;
 
+      byHall[hNo] = {
+        students: slice,
+        capacity: limit,
+        seatsPerTable: Math.max(1, cfg.seatsPerTable || 2),
+        totalTables: Math.max(1, Math.ceil(limit / Math.max(1, cfg.seatsPerTable || 2))),
+      };
+    });
+>>>>>>> 306de04006955912fed5cdfda8df39bd8cb056b0
+
+    const unassignedStudents = allStudents.slice(cursor);
+    const totalCapacityAllHalls = ORDERED_HALL_NUMS.reduce(
+      (sum, hNo) => sum + (byHall[hNo]?.capacity || 0),
+      0
+    );
+
+<<<<<<< HEAD
     const getSeatStudent = (slotNumber) => {
       const candidate = studentMapBySeatNo[slotNumber];
       if (
@@ -421,15 +599,78 @@ export default function ExamHallMapPage() {
         },
       };
       currentSeatNo += 2;
+=======
+    return {
+      byHall,
+      unassignedStudents,
+      totalCapacityAllHalls,
+    };
+  }, [allStudents, hallSettings]);
 
-      rows.push({
-        rowIdx: r + 1,
-        rowLabel: `সারি ${toBengaliDigits(r + 1)}`,
-        leftDesk,
-        rightDesk,
+  const currentHallAllocation = useMemo(
+    () =>
+      distributedByHall.byHall[selectedHall] || {
+        students: [],
+        capacity: studentsPerHall,
+        seatsPerTable,
+        totalTables: Math.max(1, Math.ceil(studentsPerHall / seatsPerTable)),
+      },
+    [distributedByHall.byHall, selectedHall, studentsPerHall, seatsPerTable]
+  );
+>>>>>>> 306de04006955912fed5cdfda8df39bd8cb056b0
+
+  const activeHallConfig = useMemo(() => {
+    const base = HALL_CONFIGS[selectedHall] || HALL_CONFIGS[1];
+    const totalTables = Math.max(1, Math.ceil(studentsPerHall / seatsPerTable));
+    return {
+      ...base,
+      seatsPerTable,
+      capacity: studentsPerHall,
+      deskCount: totalTables,
+      rows: seatsPerTable >= 4 ? totalTables : Math.ceil(totalTables / 2),
+    };
+  }, [selectedHall, seatsPerTable, studentsPerHall]);
+
+  // ডাইনামিক টেবিল চাঙ্কিং (Math.ceil(studentsPerHall / seatsPerTable))
+  // এবং বিভাজ্য না হলে শেষ টেবিলে সারিবদ্ধ খালি প্লেসহোল্ডার স্লট যুক্ত করা
+  const { tables, deskRows } = useMemo(() => {
+    const perTable = Math.max(1, seatsPerTable);
+    const hallCap = Math.max(1, studentsPerHall);
+    const totalTables = Math.max(1, Math.ceil(hallCap / perTable));
+    const hallStudents = currentHallAllocation.students || [];
+
+    const builtTables = [];
+    for (let tIdx = 0; tIdx < totalTables; tIdx++) {
+      const startSeat = tIdx * perTable + 1;
+      const actualEndSeat = Math.min(startSeat + perTable - 1, hallCap);
+      const seats = [];
+
+      for (let sOffset = 0; sOffset < perTable; sOffset++) {
+        const seatNo = startSeat + sOffset;
+        const isPlaceholder = seatNo > hallCap;
+        const studentIdx = seatNo - 1;
+        seats.push({
+          seatNo,
+          isPlaceholder,
+          positionLabel: getSeatPositionLabel(sOffset, perTable),
+          student: isPlaceholder ? null : hallStudents[studentIdx] || null,
+        });
+      }
+
+      builtTables.push({
+        benchNo: tIdx + 1,
+        label: `টেবিল ${toBengaliDigits(tIdx + 1)}`,
+        seatRange:
+          startSeat === actualEndSeat
+            ? `আসন ${toBengaliDigits(startSeat)}`
+            : perTable === 2
+              ? `আসন ${toBengaliDigits(startSeat)} ও ${toBengaliDigits(actualEndSeat)}`
+              : `আসন ${toBengaliDigits(startSeat)}–${toBengaliDigits(actualEndSeat)}`,
+        seats,
       });
     }
 
+<<<<<<< HEAD
     return rows;
   }, [activeHallConfig, studentMapBySeatNo, selectedHall]);
 
@@ -457,30 +698,98 @@ export default function ExamHallMapPage() {
       totalStudentsFound: matchingStudents.length,
     };
   }, [activeHallConfig, studentMapBySeatNo, students, selectedHall]);
+=======
+    // ২ বা ৩ আসনের জন্য বাম/ডান ২-কলাম রো, ৪+ আসনের জন্য পূর্ণ-প্রস্থ একক-কলাম রো
+    const pairedRows = [];
+    if (perTable >= 4) {
+      builtTables.forEach((desk, idx) => {
+        pairedRows.push({
+          rowIdx: idx + 1,
+          rowLabel: `সারি ${toBengaliDigits(idx + 1)}`,
+          singleDesk: desk,
+        });
+      });
+    } else {
+      for (let i = 0; i < builtTables.length; i += 2) {
+        pairedRows.push({
+          rowIdx: Math.floor(i / 2) + 1,
+          rowLabel: `সারি ${toBengaliDigits(Math.floor(i / 2) + 1)}`,
+          leftDesk: builtTables[i],
+          rightDesk: builtTables[i + 1] || null,
+        });
+      }
+    }
+
+    return { tables: builtTables, deskRows: pairedRows };
+  }, [seatsPerTable, studentsPerHall, currentHallAllocation]);
+
+  // হলের পরিসংখ্যান
+  const stats = useMemo(() => {
+    const occupied = currentHallAllocation.students.length;
+    const capacity = activeHallConfig.capacity;
+    return {
+      capacity,
+      occupied,
+      vacant: Math.max(0, capacity - occupied),
+      totalTables: tables.length,
+      seatsPerTable,
+      totalActiveAllHalls: allStudents.length,
+      unassignedAllHalls: distributedByHall.unassignedStudents.length,
+    };
+  }, [
+    currentHallAllocation,
+    activeHallConfig,
+    tables.length,
+    seatsPerTable,
+    allStudents.length,
+    distributedByHall.unassignedStudents.length,
+  ]);
+>>>>>>> 306de04006955912fed5cdfda8df39bd8cb056b0
 
   // প্রিন্ট হ্যান্ডলার (react-to-print)
-  const handlePrint = useReactToPrint({
+  const reactToPrintFn = useReactToPrint({
     contentRef: printAreaRef,
-    documentTitle: `Exam-Hall-Map-${activeHallConfig.name}-${selectedSemester}-${examYear}`,
+    documentTitle: `Exam-Hall-Map-${activeHallConfig.name}-${seatsPerTable}x${tables.length}-${selectedSemester}-${examYear}`,
     suppressErrors: true,
-    onPrintError: (errorLocation, error) => {
-      console.warn("Print error suppressed:", errorLocation, error);
+    onPrintError: (errorLocation, err) => {
+      console.warn("Print error suppressed:", errorLocation, err);
+      setIsPrinting(false);
     },
-    onBeforePrint: () => {
+    onBeforePrint: async () => {
       setIsPrinting(true);
-      return Promise.resolve();
+      if (printAreaRef.current) {
+        const images = Array.from(printAreaRef.current.querySelectorAll("img"));
+        await Promise.all(
+          images.map((img) => {
+            if (img.complete && img.naturalWidth > 0) {
+              return typeof img.decode === "function"
+                ? img.decode().catch(() => {})
+                : Promise.resolve();
+            }
+            return new Promise((resolve) => {
+              img.addEventListener("load", resolve, { once: true });
+              img.addEventListener("error", resolve, { once: true });
+            });
+          })
+        );
+      }
     },
     onAfterPrint: () => {
       setIsPrinting(false);
     },
   });
 
+  const handlePrint = () => {
+    if (!printAreaRef.current || isPrinting) return;
+    reactToPrintFn();
+  };
+
   return (
-    <div className="p-3 sm:p-5 lg:p-8 bg-slate-50 min-h-screen space-y-6 font-bornomala text-slate-800">
+    <div className="p-3 sm:p-5 lg:p-8 bg-slate-50 min-h-screen space-y-5 font-bornomala text-slate-800">
       {/* ----------------- ১. পেজ হেডার ও নেভিগেশন বার ----------------- */}
-      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="print:hidden bg-white p-4 sm:p-6 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
+          <div className="flex flex-wrap items-center gap-2 mb-1.5">
             <Link
               href="/dashboard/shared/academics/exam-results/exam/seat-plan/seat-entry"
               className="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 hover:text-emerald-950 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 transition-colors"
@@ -496,29 +805,39 @@ export default function ExamHallMapPage() {
               <span>আসন স্টিকার</span>
             </Link>
             <span className="text-xs text-slate-400">•</span>
+            <Link
+              href="/dashboard/shared/academics/exam-results/exam/seat-plan/Hall&Class-wise-summary"
+              className="inline-flex items-center gap-1 text-xs font-bold text-slate-600 hover:text-emerald-800 transition-colors"
+            >
+              <span>হল সামারি</span>
+            </Link>
+            <span className="text-xs text-slate-400">•</span>
             <span className="text-xs font-bold text-slate-500">হল ম্যাপ</span>
           </div>
 
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#043e30] tracking-tight flex items-center gap-2">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#043e30] tracking-tight flex flex-wrap items-center gap-2">
             <span>পরীক্ষার হল ম্যাপ ও আসন বিন্যাস</span>
             <span className="bg-emerald-100 text-[#043e30] text-xs font-black px-2.5 py-0.5 rounded-full border border-emerald-300">
-              Classroom Floor Plan
+              Dynamic Floor Plan
             </span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 mt-1">
-            ২-সিটার বেঞ্চ, ওয়াকিং আইল এবং সম্মুখ শিক্ষক টেবিল সংবলিত বাস্তবসম্মত শ্রেণিকক্ষ আসন বিন্যাস।
+            {toBengaliDigits(seatsPerTable)}-সিটার টেবিল, মোট{" "}
+            {toBengaliDigits(stats.totalTables)} টি টেবিল ও{" "}
+            {toBengaliDigits(stats.capacity)} জন ধারণক্ষমতা সংবলিত ডাইনামিক শ্রেণিকক্ষ আসন বিন্যাস।
           </p>
         </div>
 
         {/* প্রিন্ট বাটন এবং ছবি টগল */}
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
           <button
             type="button"
             onClick={() => setShowPhotos((prev) => !prev)}
-            className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${showPhotos
-              ? "bg-emerald-50 text-emerald-900 border-emerald-300 shadow-2xs"
-              : "bg-slate-100 text-slate-600 border-slate-300"
-              }`}
+            className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
+              showPhotos
+                ? "bg-emerald-50 text-emerald-900 border-emerald-300 shadow-2xs"
+                : "bg-slate-100 text-slate-600 border-slate-300"
+            }`}
           >
             {showPhotos ? (
               <>
@@ -536,8 +855,8 @@ export default function ExamHallMapPage() {
           <button
             type="button"
             onClick={handlePrint}
-            disabled={loading || students.length === 0 || isPrinting}
-            className="inline-flex items-center gap-2 bg-[#043e30] hover:bg-[#065341] text-amber-300 hover:text-amber-200 font-black px-5 py-2.5 rounded-xl text-sm shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+            disabled={loading || isPrinting}
+            className="inline-flex items-center gap-2 bg-[#043e30] hover:bg-[#065341] text-amber-300 hover:text-amber-200 font-black px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
           >
             {isPrinting ? (
               <>
@@ -547,70 +866,289 @@ export default function ExamHallMapPage() {
             ) : (
               <>
                 <Printer className="w-4 h-4" />
-                <span>প্রিন্ট হল ম্যাপ (A4)</span>
+                <span>
+                  প্রিন্ট হল ম্যাপ ({seatsPerTable >= 3 ? "A4 Landscape" : "A4 Portrait"})
+                </span>
               </>
             )}
           </button>
         </div>
       </div>
 
-      {/* ----------------- ২. হল ও সেমিস্টার ফিল্টার কন্ট্রোল ----------------- */}
-      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
-        {/* হল নির্বাচন ট্যাবসমূহ */}
+      {/* ----------------- ২. ডাইনামিক কনফিগারেশন ও হল নির্বাচন কন্ট্রোল বার ----------------- */}
+      <div className="print:hidden bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
+        {/* ২.১ হল নির্বাচন ট্যাবসমূহ */}
         <div>
-          <label className="text-xs font-black text-slate-600 uppercase tracking-wider block mb-2">
-            হল ও কক্ষ নির্বাচন করুন:
-          </label>
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <label className="text-xs font-black text-slate-600 uppercase tracking-wider">
+              হল ও কক্ষ নির্বাচন করুন:
+            </label>
+            <span className="text-[11px] font-bold text-slate-500 font-ubuntu">
+              সক্রিয় মোট শিক্ষার্থী: {toBengaliDigits(stats.totalActiveAllHalls)} জন
+              {stats.unassignedAllHalls > 0 && (
+                <span className="ml-2 text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded">
+                  অবশিষ্ট (হল সীমার বাইরে): {toBengaliDigits(stats.unassignedAllHalls)} জন
+                </span>
+              )}
+            </span>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-            {Object.values(HALL_CONFIGS).map((hall) => {
-              const isSelected = selectedHall === hall.hallNo;
+            {ORDERED_HALL_NUMS.map((hNo) => {
+              const hall = HALL_CONFIGS[hNo];
+              const alloc = distributedByHall.byHall[hNo];
+              const isSelected = selectedHall === hNo;
               return (
                 <button
-                  key={hall.hallNo}
+                  key={hNo}
                   type="button"
-                  onClick={() => setSelectedHall(hall.hallNo)}
-                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between ${isSelected
-                    ? "bg-[#043e30] text-white border-[#043e30] shadow-sm ring-2 ring-emerald-600/30"
-                    : "bg-slate-50 hover:bg-emerald-50/50 text-slate-700 border-slate-200 hover:border-emerald-300"
-                    }`}
+                  onClick={() => handleSelectHall(hNo)}
+                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between gap-1.5 ${
+                    isSelected
+                      ? "bg-[#043e30] text-white border-[#043e30] shadow-sm ring-2 ring-emerald-600/30"
+                      : "bg-slate-50 hover:bg-emerald-50/50 text-slate-700 border-slate-200 hover:border-emerald-300"
+                  }`}
                 >
-                  <div className="flex items-center justify-between gap-1 mb-1">
+                  <div className="flex items-center justify-between gap-1">
                     <span
-                      className={`text-xs font-black px-2 py-0.5 rounded ${isSelected
-                        ? "bg-amber-300 text-slate-900"
-                        : "bg-emerald-100 text-emerald-900"
-                        }`}
+                      className={`text-xs font-black px-2 py-0.5 rounded ${
+                        isSelected
+                          ? "bg-amber-300 text-slate-900"
+                          : "bg-emerald-100 text-emerald-900"
+                      }`}
                     >
                       {hall.name}
                     </span>
                     <span
-                      className={`text-[10px] font-bold ${isSelected ? "text-emerald-200" : "text-slate-500"
-                        }`}
+                      className={`text-[10px] font-bold font-ubuntu ${
+                        isSelected ? "text-amber-200" : "text-emerald-800"
+                      }`}
                     >
-                      {toBengaliDigits(hall.capacity)} টি আসন
+                      {toBengaliDigits(alloc?.students.length || 0)}/
+                      {toBengaliDigits(alloc?.capacity || hall.capacity)} জন
                     </span>
                   </div>
                   <h4
-                    className={`text-xs font-bold leading-snug line-clamp-2 ${isSelected ? "text-white" : "text-slate-800"
-                      }`}
+                    className={`text-xs font-bold leading-snug line-clamp-1 ${
+                      isSelected ? "text-white" : "text-slate-800"
+                    }`}
                   >
                     {hall.location}
                   </h4>
+                  <div
+                    className={`text-[10px] font-bold font-ubuntu flex items-center justify-between ${
+                      isSelected ? "text-emerald-200" : "text-slate-500"
+                    }`}
+                  >
+                    <span>{toBengaliDigits(alloc?.totalTables || 1)} টেবিল</span>
+                    <span>•</span>
+                    <span>
+                      {toBengaliDigits(alloc?.seatsPerTable || 2)} আসন/টেবিল
+                    </span>
+                  </div>
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* সেমিস্টার, শিক্ষাবর্ষ এবং সামারি পরিসংখ্যান */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 text-xs">
+        {/* ২.২ ডাইনামিক টেবিল আসন ও হলের ধারণক্ষমতা কন্ট্রোল প্যানেল */}
+        <div className="p-3.5 rounded-xl bg-emerald-50/50 border border-emerald-200/80 space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-emerald-200/60">
+            <div className="flex items-center gap-1.5 text-xs font-black text-[#043e30]">
+              <SlidersHorizontal className="w-3.5 h-3.5 text-emerald-700" />
+              <span>
+                ডাইনামিক আসন কনফিগারেশন (
+                {applyGlobally ? "সকল হল" : activeHallConfig.name})
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 text-[11px]">
+              {/* একক হল বনাম গ্লোবাল মোড টগল */}
+              <div
+                role="radiogroup"
+                aria-label="Configuration Scope"
+                className="inline-flex items-center bg-white p-0.5 rounded-lg border border-slate-300"
+              >
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={!applyGlobally}
+                  onClick={() => setApplyGlobally(false)}
+                  className={`px-2 py-1 rounded-md font-bold transition-colors cursor-pointer ${
+                    !applyGlobally
+                      ? "bg-[#043e30] text-amber-300"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  শুধু এই হল
+                </button>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={applyGlobally}
+                  onClick={() => setApplyGlobally(true)}
+                  className={`px-2 py-1 rounded-md font-bold transition-colors cursor-pointer inline-flex items-center gap-1 ${
+                    applyGlobally
+                      ? "bg-[#043e30] text-amber-300"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  <Globe className="w-3 h-3" />
+                  <span>সব হল (Global)</span>
+                </button>
+              </div>
+
+              {!applyGlobally && (
+                <button
+                  type="button"
+                  onClick={handleApplyCurrentToAllHalls}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white hover:bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold transition-colors cursor-pointer"
+                  title="বর্তমান হলের সেটিংস সব হলে প্রয়োগ করুন"
+                >
+                  <Globe className="w-3 h-3" />
+                  <span>সব হলে প্রয়োগ করুন</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={handleResetConfigs}
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-600 border border-slate-300 font-bold transition-colors cursor-pointer"
+                title="ডিফল্ট সেটিংসে ফিরিয়ে নিন"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>রিসেট</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 text-xs">
+            {/* ক) প্রতি টেবিলে আসন (Seats per Table) */}
+            <div className="flex flex-wrap items-center gap-2 bg-white p-2.5 rounded-xl border border-slate-200">
+              <span className="font-black text-slate-700 flex items-center gap-1 shrink-0">
+                <Users className="w-3.5 h-3.5 text-emerald-700" />
+                প্রতি টেবিলে আসন:
+              </span>
+              <div className="inline-flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+                {SEATS_PER_TABLE_PRESETS.map((count) => {
+                  const active = seatsPerTable === count;
+                  return (
+                    <button
+                      key={count}
+                      type="button"
+                      onClick={() => updateSeatsPerTable(count)}
+                      className={`px-2.5 py-1 rounded-md font-bold font-ubuntu transition-all cursor-pointer ${
+                        active
+                          ? "bg-[#043e30] text-amber-300 shadow-2xs"
+                          : "text-slate-600 hover:text-slate-900"
+                      }`}
+                    >
+                      {toBengaliDigits(count)}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="flex items-center gap-1.5 ml-auto">
+                <label
+                  htmlFor="custom-seats-per-table"
+                  className="text-[11px] font-bold text-slate-500"
+                >
+                  কাস্টম:
+                </label>
+                <input
+                  id="custom-seats-per-table"
+                  type="number"
+                  min={1}
+                  max={12}
+                  value={customSeatsInput}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    setCustomSeatsInput(raw);
+                    const parsed = parseInt(raw, 10);
+                    if (!isNaN(parsed) && parsed >= 1) {
+                      updateSeatsPerTable(parsed);
+                    }
+                  }}
+                  onBlur={() => {
+                    const safe = clampPositiveInt(customSeatsInput, seatsPerTable, 12);
+                    updateSeatsPerTable(safe);
+                  }}
+                  className="w-16 px-2 py-1 rounded-lg border border-slate-300 bg-slate-50 font-bold font-ubuntu text-center text-slate-900 focus:outline-emerald-600"
+                />
+              </div>
+            </div>
+
+            {/* খ) প্রতি হলে শিক্ষার্থী / ধারণক্ষমতা (Students per Hall) */}
+            <div className="flex flex-wrap items-center gap-2 bg-white p-2.5 rounded-xl border border-slate-200">
+              <span className="font-black text-slate-700 flex items-center gap-1 shrink-0">
+                <LayoutGrid className="w-3.5 h-3.5 text-emerald-700" />
+                হলের ধারণক্ষমতা:
+              </span>
+              <div className="inline-flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+                {STUDENTS_PER_HALL_PRESETS.map((cap) => {
+                  const active = studentsPerHall === cap;
+                  return (
+                    <button
+                      key={cap}
+                      type="button"
+                      onClick={() => updateStudentsPerHall(cap)}
+                      className={`px-2.5 py-1 rounded-md font-bold font-ubuntu transition-all cursor-pointer ${
+                        active
+                          ? "bg-[#043e30] text-amber-300 shadow-2xs"
+                          : "text-slate-600 hover:text-slate-900"
+                      }`}
+                    >
+                      {toBengaliDigits(cap)}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="flex items-center gap-1.5 ml-auto">
+                <label
+                  htmlFor="custom-students-per-hall"
+                  className="text-[11px] font-bold text-slate-500"
+                >
+                  কাস্টম:
+                </label>
+                <input
+                  id="custom-students-per-hall"
+                  type="number"
+                  min={1}
+                  max={300}
+                  value={customCapacityInput}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    setCustomCapacityInput(raw);
+                    const parsed = parseInt(raw, 10);
+                    if (!isNaN(parsed) && parsed >= 1) {
+                      updateStudentsPerHall(parsed);
+                    }
+                  }}
+                  onBlur={() => {
+                    const safe = clampPositiveInt(
+                      customCapacityInput,
+                      studentsPerHall,
+                      300
+                    );
+                    updateStudentsPerHall(safe);
+                  }}
+                  className="w-16 px-2 py-1 rounded-lg border border-slate-300 bg-slate-50 font-bold font-ubuntu text-center text-slate-900 focus:outline-emerald-600"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ২.৩ পরীক্ষা, শিক্ষাবর্ষ ও লাইভ সামারি ব্যাজ */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 text-xs">
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-1.5">
               <span className="font-bold text-slate-600">পরীক্ষা:</span>
               <select
                 value={selectedSemester}
                 onChange={(e) => setSelectedSemester(e.target.value)}
-                className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1 font-bold text-slate-800 focus:outline-emerald-600"
+                className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1 font-bold text-slate-800 focus:outline-emerald-600 cursor-pointer"
               >
                 {examList.map((exam) => (
                   <option key={exam} value={exam}>
@@ -640,14 +1178,21 @@ export default function ExamHallMapPage() {
             </div>
           </div>
 
-          {/* স্ট্যাটাস কাউন্ট */}
-          <div className="flex items-center gap-2 font-ubuntu">
+          {/* লাইভ স্ট্যাটাস কাউন্ট */}
+          <div className="flex flex-wrap items-center gap-2 font-ubuntu">
             <span className="bg-emerald-50 text-emerald-900 border border-emerald-200 px-2.5 py-1 rounded-lg font-bold">
-              মোট বরাদ্দ:{" "}
+              মোট শিক্ষার্থী:{" "}
               <strong className="text-emerald-950 font-black">
                 {toBengaliDigits(stats.occupied)}
               </strong>
               /{toBengaliDigits(stats.capacity)}
+            </span>
+            <span className="bg-sky-50 text-sky-900 border border-sky-200 px-2.5 py-1 rounded-lg font-bold">
+              মোট টেবিল:{" "}
+              <strong className="text-sky-950 font-black">
+                {toBengaliDigits(stats.totalTables)}
+              </strong>{" "}
+              ({toBengaliDigits(stats.seatsPerTable)} আসন/টেবিল)
             </span>
             <span className="bg-amber-50 text-amber-900 border border-amber-200 px-2.5 py-1 rounded-lg font-bold">
               ফাঁকা আসন:{" "}
@@ -677,7 +1222,7 @@ export default function ExamHallMapPage() {
             </button>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-5">
             {/* রুম ইনফো টাইটেল ব্যানার */}
             <div className="bg-gradient-to-r from-[#043e30] to-[#085a47] text-white p-4 rounded-xl shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
               <div>
@@ -688,23 +1233,24 @@ export default function ExamHallMapPage() {
                   {activeHallConfig.fullTitle}
                 </h2>
                 <p className="text-xs text-emerald-100 mt-0.5">
-                  {selectedSemester} - {toBengaliDigits(examYear)} শিক্ষাবর্ষ • ধারণক্ষমতা:{" "}
-                  {toBengaliDigits(activeHallConfig.capacity)} জন
+                  {selectedSemester} - {toBengaliDigits(examYear)} শিক্ষাবর্ষ • মোট শিক্ষার্থী:{" "}
+                  {toBengaliDigits(stats.occupied)}/{toBengaliDigits(stats.capacity)} জন
                 </p>
               </div>
 
               <div className="bg-white/10 px-4 py-2 rounded-lg border border-white/20 text-center shrink-0">
                 <span className="text-[10px] text-emerald-200 block font-semibold">
-                  কক্ষের ধরন
+                  ডাইনামিক বিন্যাস ({toBengaliDigits(stats.totalTables)} টেবিল)
                 </span>
                 <span className="text-sm font-black text-white">
-                  ২ কলাম • কেন্দ্রীয় আইল
+                  প্রতি টেবিলে {toBengaliDigits(seatsPerTable)} আসন •{" "}
+                  {seatsPerTable >= 4 ? "পূর্ণ সারি" : "২ কলাম ও আইল"}
                 </span>
               </div>
             </div>
 
             {/* সম্মুখভাগ নির্দেশক (Whiteboard & Invigilator Desk) */}
-            <div className="bg-slate-800 text-white border-2 border-slate-700 rounded-xl p-3 shadow-xs flex items-center justify-between">
+            <div className="bg-slate-800 text-white border-2 border-slate-700 rounded-xl p-3 shadow-xs flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <span className="text-lg">🪑</span>
                 <div>
@@ -723,32 +1269,67 @@ export default function ExamHallMapPage() {
                 </span>
               </div>
 
-              <div className="text-[10px] font-bold text-slate-400 bg-slate-900/80 px-2.5 py-1 rounded border border-slate-700">
+              <div className="text-[10px] font-bold text-slate-400 bg-slate-900/80 px-2.5 py-1 rounded border border-slate-700 shrink-0">
                 প্রবেশদ্বার 🚪
               </div>
             </div>
 
-            {/* ক্লাসরুম গ্রিড: বামের কলাম + সেন্ট্রাল হাঁটার পথ (Aisle) + ডানের কলাম */}
+            {/* ক্লাসরুম গ্রিড */}
             <div className="space-y-4">
-              {deskRows.map((row) => (
-                <div
-                  key={`row-${row.rowIdx}`}
-                  className="grid grid-cols-[1fr_auto_1fr] gap-2 sm:gap-4 items-stretch"
-                >
-                  {/* বাম পাশের বেঞ্চ (২ সিটার) */}
-                  <DeskContainer desk={row.leftDesk} showPhoto={showPhotos} />
-
-                  {/* কেন্দ্রীয় হাঁটার পথ (Central Walking Aisle) */}
-                  <div className="w-10 sm:w-16 flex flex-col items-center justify-center border-x-2 border-dashed border-slate-300 bg-slate-100/70 rounded-md select-none py-2 text-center">
-                    <span className="text-[9px] font-black text-slate-400 tracking-widest uppercase [writing-mode:vertical-lr] rotate-180">
-                      হাঁটার পথ (AISLE)
-                    </span>
+              {deskRows.map((row) =>
+                row.singleDesk ? (
+                  <div key={`row-${row.rowIdx}`} className="w-full">
+                    <DeskContainer
+                      desk={row.singleDesk}
+                      seatsPerTable={seatsPerTable}
+                      showPhoto={showPhotos}
+                    />
                   </div>
+                ) : (
+                  <div
+                    key={`row-${row.rowIdx}`}
+                    className={`grid gap-2.5 sm:gap-3 items-stretch ${
+                      seatsPerTable === 3
+                        ? "grid-cols-1 xl:grid-cols-[1fr_auto_1fr]"
+                        : "grid-cols-1 md:grid-cols-[1fr_auto_1fr]"
+                    }`}
+                  >
+                    {/* বাম পাশের টেবিল */}
+                    <DeskContainer
+                      desk={row.leftDesk}
+                      seatsPerTable={seatsPerTable}
+                      showPhoto={showPhotos}
+                    />
 
-                  {/* ডান পাশের বেঞ্চ (২ সিটার) */}
-                  <DeskContainer desk={row.rightDesk} showPhoto={showPhotos} />
-                </div>
-              ))}
+                    {/* কেন্দ্রীয় হাঁটার পথ (Central Walking Aisle) */}
+                    <div
+                      className={`${
+                        seatsPerTable === 3 ? "hidden xl:flex" : "hidden md:flex"
+                      } w-10 sm:w-12 flex-col items-center justify-center border-x-2 border-dashed border-slate-300 bg-slate-100/70 rounded-md select-none py-2 text-center`}
+                    >
+                      <span className="text-[9px] font-black text-slate-400 tracking-widest uppercase [writing-mode:vertical-lr] rotate-180">
+                        হাঁটার পথ (AISLE)
+                      </span>
+                    </div>
+
+                    {/* ডান পাশের টেবিল (বিজোড় সংখ্যক টেবিল হলে সারিবদ্ধ খালি স্পেসার) */}
+                    {row.rightDesk ? (
+                      <DeskContainer
+                        desk={row.rightDesk}
+                        seatsPerTable={seatsPerTable}
+                        showPhoto={showPhotos}
+                      />
+                    ) : (
+                      <div
+                        aria-hidden="true"
+                        className="hidden md:flex items-center justify-center rounded-xl border-2 border-dashed border-slate-200/70 bg-slate-50/40 text-[11px] font-bold text-slate-300"
+                      >
+                        খালি স্থান
+                      </div>
+                    )}
+                  </div>
+                )
+              )}
             </div>
 
             {/* ক্লাসরুম পেছনের সীমানা নির্দেশক */}
@@ -759,24 +1340,22 @@ export default function ExamHallMapPage() {
         )}
       </div>
 
-      {/* ----------------- ৪. অফ-স্ক্রিন প্রিন্ট এলিমেন্ট (A4 Portrait Print View) ----------------- */}
+      {/* ----------------- ৪. অফ-স্ক্রিন প্রিন্ট এলিমেন্ট (A4 Print View via react-to-print) ----------------- */}
       <div
         aria-hidden="true"
-        style={{
-          position: "absolute",
-          left: "-9999px",
-          top: "-9999px",
-          width: "210mm",
-          overflow: "hidden",
-        }}
+        className="fixed -left-[9999px] -top-[9999px] w-0 h-0 overflow-hidden pointer-events-none"
       >
-        <div ref={printAreaRef}>
+        <div
+          ref={printAreaRef}
+          style={{ width: seatsPerTable >= 3 ? "297mm" : "210mm" }}
+        >
           <HallMapPrintTemplate
             hallConfig={activeHallConfig}
             semester={selectedSemester}
             year={examYear}
             deskRows={deskRows}
             stats={stats}
+            seatsPerTable={seatsPerTable}
             showPhoto={showPhotos}
           />
         </div>
@@ -786,36 +1365,74 @@ export default function ExamHallMapPage() {
 }
 
 // -------------------------------------------------------------
-// ২-সিটার বেঞ্চ কন্টেইনার কম্পোনেন্ট (Desk Container)
+// ডাইনামিক টেবিল/বেঞ্চ কন্টেইনার কম্পোনেন্ট (Desk Container)
 // -------------------------------------------------------------
-function DeskContainer({ desk, showPhoto = true, isPrint = false }) {
+function DeskContainer({ desk, seatsPerTable = 2, showPhoto = true, isPrint = false }) {
+  const isDense = seatsPerTable >= 3;
+  const isUltraDense = seatsPerTable >= 5;
+
+  // অন-স্ক্রিন রেসপন্সিভ গ্রিড (যাতে ২, ৩, ৪, ৫ বা কাস্টম N আসন কখনো ওভারফ্লো না করে)
+  const getScreenGridClass = () => {
+    if (seatsPerTable === 1) return "grid-cols-1";
+    if (seatsPerTable === 2) return "grid-cols-1 sm:grid-cols-2";
+    if (seatsPerTable === 3) return "grid-cols-1 sm:grid-cols-3";
+    if (seatsPerTable === 4) return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4";
+    if (seatsPerTable === 5) return "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5";
+    return "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
+  };
+
+  const useCustomInlineCols = isPrint || seatsPerTable > 5;
+  const inlineGridStyle = useCustomInlineCols
+    ? {
+        gridTemplateColumns: `repeat(${seatsPerTable}, minmax(${
+          isPrint ? "0" : "150px"
+        }, 1fr))`,
+      }
+    : undefined;
+
   return (
     <div
-      className={`bg-white border-2 border-slate-300 rounded-xl p-2 sm:p-2.5 shadow-2xs flex flex-col justify-between ${isPrint ? "print-desk-box" : ""
-        }`}
+      className={`bg-white border-2 border-slate-300 rounded-xl shadow-2xs flex flex-col justify-between min-w-0 ${
+        isPrint
+          ? isDense
+            ? "print-desk-box p-1.5"
+            : "print-desk-box p-2"
+          : "p-2 sm:p-2.5"
+      }`}
     >
-      {/* বেঞ্চের পরিচিতি হেডার */}
-      <div className="flex items-center justify-between border-b border-slate-200 pb-1 mb-1.5 text-[9px] sm:text-[10px] text-slate-600 font-bold">
-        <span className="bg-slate-100 text-slate-800 px-2 py-0.5 rounded font-ubuntu font-bold border border-slate-200">
+      {/* টেবিলের পরিচিতি হেডার */}
+      <div className="flex items-center justify-between gap-1 border-b border-slate-200 pb-1 mb-1.5 text-[9px] sm:text-[10px] text-slate-600 font-bold">
+        <span className="bg-slate-100 text-slate-800 px-2 py-0.5 rounded font-ubuntu font-bold border border-slate-200 shrink-0">
           {desk.label}
         </span>
-        <span className="text-slate-500 font-ubuntu">{desk.seatRange}</span>
+        <span className="text-slate-500 font-ubuntu truncate">{desk.seatRange}</span>
       </div>
 
-      {/* পাশাপাশি ২টি আসন */}
-      <div className="grid grid-cols-2 gap-1.5 sm:gap-2 items-stretch flex-1">
-        <StudentSeatCard
-          slot={desk.leftSeat}
-          positionLabel="বাম আসন"
-          showPhoto={showPhoto}
-          isPrint={isPrint}
-        />
-        <StudentSeatCard
-          slot={desk.rightSeat}
-          positionLabel="ডান আসন"
-          showPhoto={showPhoto}
-          isPrint={isPrint}
-        />
+      {/* ডাইনামিক আসন গ্রিড */}
+      <div className={!isPrint && seatsPerTable > 5 ? "overflow-x-auto pb-1" : ""}>
+        <div
+          style={inlineGridStyle}
+          className={`grid items-stretch flex-1 ${
+            isPrint
+              ? isUltraDense
+                ? "gap-1"
+                : "gap-1.5"
+              : useCustomInlineCols
+                ? "gap-1.5"
+                : `${getScreenGridClass()} gap-1.5 sm:gap-2`
+          }`}
+        >
+          {(desk.seats || []).map((slot) => (
+            <StudentSeatCard
+              key={slot.seatNo}
+              slot={slot}
+              positionLabel={slot.positionLabel}
+              seatsPerTable={seatsPerTable}
+              showPhoto={showPhoto}
+              isPrint={isPrint}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -824,27 +1441,79 @@ function DeskContainer({ desk, showPhoto = true, isPrint = false }) {
 // -------------------------------------------------------------
 // একক শিক্ষার্থীর আসন কার্ড কম্পোনেন্ট (Student Seat Card)
 // -------------------------------------------------------------
-function StudentSeatCard({ slot, positionLabel, showPhoto = true, isPrint = false }) {
-  const { seatNo, student } = slot;
+function StudentSeatCard({
+  slot,
+  positionLabel,
+  seatsPerTable = 2,
+  showPhoto = true,
+  isPrint = false,
+}) {
+  const { seatNo, student, isPlaceholder } = slot;
   const isOccupied = Boolean(student);
+  const isDense = seatsPerTable >= 3;
+  const isUltraDense = seatsPerTable >= 5;
+
+  // বিভাজ্য না হলে শেষ টেবিলের সারিবদ্ধতা রক্ষার জন্য অতিরিক্ত প্লেসহোল্ডার স্লট
+  if (isPlaceholder) {
+    return (
+      <div
+        className={`border border-dashed border-slate-200 rounded-lg flex flex-col items-center justify-center text-center bg-slate-50/30 text-slate-300 min-w-0 ${
+          isPrint
+            ? isUltraDense
+              ? "h-[22mm] p-1"
+              : isDense
+                ? "h-[24mm] p-1"
+                : "h-[34mm] p-2"
+            : isDense
+              ? "min-h-[80px] p-1.5"
+              : "min-h-[85px] p-2"
+        }`}
+      >
+        <span className="text-[8px] font-bold">খালি স্লট</span>
+      </div>
+    );
+  }
 
   if (!isOccupied) {
     return (
       <div
-        className={`border-2 border-dashed border-slate-300 rounded-lg p-2 flex flex-col items-center justify-between text-center bg-slate-50/50 text-slate-400 ${isPrint ? "h-[34mm]" : "min-h-[85px]"
-          }`}
+        className={`border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-between text-center bg-slate-50/50 text-slate-400 min-w-0 ${
+          isPrint
+            ? isUltraDense
+              ? "h-[22mm] p-1"
+              : isDense
+                ? "h-[24mm] p-1"
+                : "h-[34mm] p-2"
+            : isDense
+              ? "min-h-[80px] p-1.5"
+              : "min-h-[85px] p-2"
+        }`}
       >
-        <div className="flex items-center justify-between w-full">
-          <span className="bg-slate-200 text-slate-600 font-bold text-[9px] px-1.5 py-0.2 rounded font-ubuntu">
+        <div className="flex items-center justify-between w-full gap-0.5">
+          <span className="bg-slate-200 text-slate-600 font-bold text-[8.5px] px-1 py-0.2 rounded font-ubuntu shrink-0">
             আসন {toBengaliDigits(seatNo)}
           </span>
-          <span className="text-[8px] text-slate-400">{positionLabel}</span>
+          <span className="text-[7.5px] text-slate-400 truncate">
+            {positionLabel}
+          </span>
         </div>
         <div className="my-auto">
-          <span className="text-sm block opacity-40">🪑</span>
-          <span className="text-[9.5px] font-bold text-slate-400">ফাঁকা আসন</span>
+          <span
+            className={`${
+              isDense && isPrint ? "text-xs" : "text-sm"
+            } block opacity-40`}
+          >
+            🪑
+          </span>
+          <span
+            className={`${
+              isDense ? "text-[8.5px]" : "text-[9.5px]"
+            } font-bold text-slate-400`}
+          >
+            ফাঁকা আসন
+          </span>
         </div>
-        <span className="text-[7.5px] text-slate-400">অবরাদ্দকৃত</span>
+        <span className="text-[7px] text-slate-400">অবরাদ্দকৃত</span>
       </div>
     );
   }
@@ -855,23 +1524,64 @@ function StudentSeatCard({ slot, positionLabel, showPhoto = true, isPrint = fals
 
   return (
     <div
-      className={`bg-white border border-slate-300 rounded-lg p-1.5 sm:p-2 flex flex-col justify-between transition-all relative overflow-hidden shadow-2xs ${isPrint ? "h-[34mm] p-1.5" : "min-h-[85px]"
-        }`}
+      className={`bg-white border border-slate-300 rounded-lg flex flex-col justify-between transition-all relative overflow-hidden shadow-2xs min-w-0 ${
+        isPrint
+          ? isUltraDense
+            ? "h-[22mm] p-1"
+            : isDense
+              ? "h-[24mm] p-1"
+              : "h-[34mm] p-1.5"
+          : isDense
+            ? "min-h-[80px] p-1.5"
+            : "min-h-[85px] p-1.5 sm:p-2"
+      }`}
     >
       {/* ১. টপ বার: হাই-কন্ট্রাস্ট আসন ব্যাজ ও শ্রেণি */}
-      <div className="flex items-center justify-between gap-1 mb-1">
-        <span className="bg-[#043e30] text-amber-300 font-black px-1.5 py-0.2 rounded text-[10px] sm:text-[10.5px] font-ubuntu leading-tight shrink-0 shadow-2xs">
+      <div className="flex items-center justify-between gap-1 mb-0.5">
+        <span
+          className={`bg-[#043e30] text-amber-300 font-black px-1.5 py-0.2 rounded font-ubuntu leading-tight shrink-0 shadow-2xs ${
+            isUltraDense
+              ? "text-[8px]"
+              : isDense
+                ? "text-[9px]"
+                : "text-[10px] sm:text-[10.5px]"
+          }`}
+        >
           আসন {toBengaliDigits(seatNo)}
         </span>
-        <span className="bg-emerald-50 text-emerald-900 border border-emerald-200 font-bold text-[8.5px] sm:text-[9px] px-1.5 py-0.2 rounded truncate max-w-[85px]">
+        <span
+          className={`bg-emerald-50 text-emerald-900 border border-emerald-200 font-bold px-1 py-0.2 rounded truncate ${
+            isUltraDense
+              ? "text-[7.5px] max-w-[52px]"
+              : isDense
+                ? "text-[8px] max-w-[65px]"
+                : "text-[8.5px] sm:text-[9px] max-w-[85px]"
+          }`}
+        >
           {studentClass}
         </span>
       </div>
 
       {/* ২. মূল বডি: ছবি + নাম ও রোল */}
-      <div className="flex items-center gap-1.5 sm:gap-2 my-auto min-w-0">
+      <div
+        className={`flex items-center my-auto min-w-0 ${
+          isDense ? "gap-1" : "gap-1.5 sm:gap-2"
+        }`}
+      >
         {showPhoto && (
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-slate-300 overflow-hidden relative bg-slate-100 flex items-center justify-center shrink-0 shadow-2xs">
+          <div
+            className={`rounded-full border border-slate-300 overflow-hidden relative bg-slate-100 flex items-center justify-center shrink-0 shadow-2xs ${
+              isUltraDense
+                ? isPrint
+                  ? "w-5 h-5"
+                  : "w-6 h-6"
+                : isDense
+                  ? isPrint
+                    ? "w-6 h-6"
+                    : "w-7 h-7"
+                  : "w-8 h-8 sm:w-9 sm:h-9"
+            }`}
+          >
             {isValidImageUrl(student.studentImage) ? (
               <img
                 src={student.studentImage.trim()}
@@ -885,19 +1595,43 @@ function StudentSeatCard({ slot, positionLabel, showPhoto = true, isPrint = fals
                 }}
               />
             ) : (
-              <span className="text-xs sm:text-sm text-slate-400">👤</span>
+              <span className="text-[10px] sm:text-xs text-slate-400">👤</span>
             )}
           </div>
         )}
 
         <div className="flex-1 min-w-0">
-          <h4 className="text-[11px] sm:text-[11.5px] font-black text-slate-900 leading-tight truncate">
+          <h4
+            className={`font-black text-slate-900 leading-tight truncate ${
+              isUltraDense
+                ? isPrint
+                  ? "text-[8.5px]"
+                  : "text-[9.5px]"
+                : isDense
+                  ? isPrint
+                    ? "text-[9px]"
+                    : "text-[10.5px]"
+                  : "text-[11px] sm:text-[11.5px]"
+            }`}
+          >
             {student.name}
           </h4>
-          <div className="text-[8.5px] sm:text-[9px] text-slate-600 font-ubuntu font-bold flex items-center gap-1.5 mt-0.5">
+          <div
+            className={`text-slate-600 font-ubuntu font-bold flex items-center gap-1 mt-0.5 truncate ${
+              isUltraDense
+                ? isPrint
+                  ? "text-[6.5px]"
+                  : "text-[7.5px]"
+                : isDense
+                  ? isPrint
+                    ? "text-[7px]"
+                    : "text-[8px]"
+                  : "text-[8.5px] sm:text-[9px]"
+            }`}
+          >
             <span>রোল: {rollDisplay}</span>
             <span>•</span>
-            <span className="text-slate-500">আইডি: {idDisplay}</span>
+            <span className="text-slate-500 truncate">আইডি: {idDisplay}</span>
           </div>
         </div>
       </div>
@@ -906,7 +1640,7 @@ function StudentSeatCard({ slot, positionLabel, showPhoto = true, isPrint = fals
 }
 
 // -------------------------------------------------------------
-// A4 Portrait প্রিন্ট টেমপ্লেট কম্পোনেন্ট (HallMapPrintTemplate)
+// A4 ডাইনামিক প্রিন্ট টেমপ্লেট কম্পোনেন্ট (react-to-print)
 // -------------------------------------------------------------
 function HallMapPrintTemplate({
   hallConfig,
@@ -914,13 +1648,21 @@ function HallMapPrintTemplate({
   year,
   deskRows,
   stats,
+  seatsPerTable = 2,
   showPhoto = true,
 }) {
-  // হল ৪ (৪৪ সিট / ১১ রো) এর জন্য ২ পেজে ভাগ করা, বাকি হল ১, ২, ৩ এর জন্য ১ পেজেই সম্পূর্ণ ফিট
-  const isMultiPage = deskRows.length > 6;
-  const pages = isMultiPage
-    ? [deskRows.slice(0, 6), deskRows.slice(6)]
-    : [deskRows];
+  const isLandscape = seatsPerTable >= 3;
+  const isSingleColumn = seatsPerTable >= 4;
+  const rowsPerPage = seatsPerTable >= 5 ? 5 : isSingleColumn ? 4 : isLandscape ? 4 : 6;
+
+  const pages = [];
+  for (let i = 0; i < deskRows.length; i += rowsPerPage) {
+    pages.push(deskRows.slice(i, i + rowsPerPage));
+  }
+  if (pages.length === 0) {
+    pages.push([]);
+  }
+  const isMultiPage = pages.length > 1;
 
   return (
     <div className="font-bornomala text-slate-900 bg-white">
@@ -929,7 +1671,7 @@ function HallMapPrintTemplate({
         dangerouslySetInnerHTML={{
           __html: `
             @page {
-              size: A4 portrait;
+              size: A4 ${isLandscape ? "landscape" : "portrait"};
               margin: 8mm;
             }
             @media print {
@@ -948,9 +1690,9 @@ function HallMapPrintTemplate({
                 display: none !important;
               }
               .hall-print-sheet {
-                width: 194mm !important;
-                min-height: 275mm !important;
-                max-height: 281mm !important;
+                width: ${isLandscape ? "281mm" : "194mm"} !important;
+                min-height: ${isLandscape ? "190mm" : "275mm"} !important;
+                max-height: ${isLandscape ? "194mm" : "281mm"} !important;
                 margin: 0 auto !important;
                 padding: 0 !important;
                 box-sizing: border-box !important;
@@ -982,18 +1724,20 @@ function HallMapPrintTemplate({
       {pages.map((pageRows, pageIdx) => (
         <div
           key={`page-${pageIdx}`}
-          className="hall-print-sheet w-[194mm] h-[278mm] mx-auto p-0 flex flex-col justify-between overflow-hidden bg-white"
+          className={`hall-print-sheet ${
+            isLandscape ? "w-[281mm] h-[192mm]" : "w-[194mm] h-[278mm]"
+          } mx-auto p-0 flex flex-col justify-between overflow-hidden bg-white`}
         >
           {/* ১. প্রাতিষ্ঠানিক প্রিন্ট হেডার */}
-          <div className="border-b-2 border-[#043e30] pb-2 flex-shrink-0">
+          <div className="border-b-2 border-[#043e30] pb-1.5 flex-shrink-0">
             <div className="flex items-center justify-between gap-2">
               {/* লোগো */}
-              <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-white border border-emerald-900/30">
+              <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-white border border-emerald-900/30">
                 <img
                   src={siteConfig.assets.logo}
                   alt={`${siteConfig.name.short} Logo`}
-                  width={56}
-                  height={56}
+                  width={48}
+                  height={48}
                   loading="eager"
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover scale-[1.05]"
@@ -1006,14 +1750,15 @@ function HallMapPrintTemplate({
 
               {/* মাদ্রাসার নাম ও হলের টাইটেল */}
               <div className="flex-1 text-center min-w-0">
-                <h2 className="text-xl font-black text-[#043e30] tracking-tight leading-tight">
+                <h2 className="text-lg font-black text-[#043e30] tracking-tight leading-tight">
                   {siteConfig.name.bn}
                 </h2>
-                <p className="text-[10px] text-slate-600 font-bold">
+                <p className="text-[9.5px] text-slate-600 font-bold">
                   {siteConfig.address.bn}
                 </p>
-                <div className="inline-block bg-[#043e30] text-amber-300 font-black text-xs px-3 py-0.5 rounded-full mt-1 font-ubuntu shadow-2xs">
-                  {hallConfig.fullTitle}
+                <div className="inline-block bg-[#043e30] text-amber-300 font-black text-[11px] px-3 py-0.5 rounded-full mt-0.5 font-ubuntu shadow-2xs">
+                  {hallConfig.fullTitle} • {toBengaliDigits(stats.totalTables)} টেবিল ×{" "}
+                  {toBengaliDigits(seatsPerTable)} আসন
                 </div>
               </div>
 
@@ -1046,47 +1791,70 @@ function HallMapPrintTemplate({
             <span className="text-slate-300">প্রবেশ পথ 🚪</span>
           </div>
 
-          {/* ৩. মূল ক্লাসরুম ডেস্ক ও হাঁটার পথ (Aisle) গ্রিড */}
+          {/* ৩. মূল ক্লাসরুম টেবিল গ্রিড */}
           <div className="flex-1 flex flex-col justify-around py-0.5">
-            {pageRows.map((row) => (
-              <div
-                key={`print-row-${row.rowIdx}`}
-                className="grid grid-cols-[89mm_12mm_89mm] gap-x-1 items-stretch my-0.5"
-              >
-                {/* বাম পাশের বেঞ্চ */}
-                <DeskContainer
-                  desk={row.leftDesk}
-                  showPhoto={showPhoto}
-                  isPrint={true}
-                />
-
-                {/* হাঁটার পথ (Central Aisle) */}
-                <div className="flex flex-col items-center justify-around border-x border-dashed border-slate-300 bg-slate-50 rounded select-none py-1 text-center">
-                  <span className="text-[7px] font-black text-slate-400 tracking-wider uppercase [writing-mode:vertical-lr] rotate-180">
-                    আইল
-                  </span>
-                  <div className="w-1 h-1 rounded-full bg-slate-300"></div>
-                  <span className="text-[7px] font-black text-slate-400 tracking-wider uppercase [writing-mode:vertical-lr] rotate-180">
-                    আইল
-                  </span>
+            {pageRows.map((row) =>
+              row.singleDesk ? (
+                <div key={`print-row-${row.rowIdx}`} className="w-full my-0.5">
+                  <DeskContainer
+                    desk={row.singleDesk}
+                    seatsPerTable={seatsPerTable}
+                    showPhoto={showPhoto}
+                    isPrint={true}
+                  />
                 </div>
+              ) : (
+                <div
+                  key={`print-row-${row.rowIdx}`}
+                  className={`grid gap-x-1 items-stretch my-0.5 ${
+                    isLandscape
+                      ? "grid-cols-[134mm_11mm_134mm]"
+                      : "grid-cols-[89mm_12mm_89mm]"
+                  }`}
+                >
+                  {/* বাম পাশের টেবিল */}
+                  <DeskContainer
+                    desk={row.leftDesk}
+                    seatsPerTable={seatsPerTable}
+                    showPhoto={showPhoto}
+                    isPrint={true}
+                  />
 
-                {/* ডান পাশের বেঞ্চ */}
-                <DeskContainer
-                  desk={row.rightDesk}
-                  showPhoto={showPhoto}
-                  isPrint={true}
-                />
-              </div>
-            ))}
+                  {/* হাঁটার পথ (Central Aisle) */}
+                  <div className="flex flex-col items-center justify-around border-x border-dashed border-slate-300 bg-slate-50 rounded select-none py-1 text-center">
+                    <span className="text-[7px] font-black text-slate-400 tracking-wider uppercase [writing-mode:vertical-lr] rotate-180">
+                      আইল
+                    </span>
+                    <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                    <span className="text-[7px] font-black text-slate-400 tracking-wider uppercase [writing-mode:vertical-lr] rotate-180">
+                      আইল
+                    </span>
+                  </div>
+
+                  {/* ডান পাশের টেবিল */}
+                  {row.rightDesk ? (
+                    <DeskContainer
+                      desk={row.rightDesk}
+                      seatsPerTable={seatsPerTable}
+                      showPhoto={showPhoto}
+                      isPrint={true}
+                    />
+                  ) : (
+                    <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/40" />
+                  )}
+                </div>
+              )
+            )}
           </div>
 
           {/* ৪. প্রিন্ট ফুটার (স্বাক্ষর ও পরিসংখ্যান) */}
           <div className="border-t border-slate-300 pt-1.5 flex items-end justify-between text-[9px] text-slate-600 flex-shrink-0">
             <div className="font-ubuntu space-y-0.5">
               <div>
-                মোট আসন: <strong>{toBengaliDigits(hallConfig.capacity)}</strong> টি
-                | উপস্থিত শিক্ষার্থী:{" "}
+                ধারণক্ষমতা: <strong>{toBengaliDigits(stats.capacity)}</strong> জন |
+                মোট টেবিল: <strong>{toBengaliDigits(stats.totalTables)}</strong> টি |
+                প্রতি টেবিলে: <strong>{toBengaliDigits(seatsPerTable)}</strong> আসন |
+                উপস্থিত শিক্ষার্থী:{" "}
                 <strong>{toBengaliDigits(stats.occupied)}</strong> জন
               </div>
               <div className="text-[7.5px] text-slate-400">

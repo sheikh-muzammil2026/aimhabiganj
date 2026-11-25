@@ -308,7 +308,7 @@ export default function BottomNavbar() {
       {/* ২. "অন্যান্য" বটম শিট ড্রয়ার */}
       {isMenuOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs md:hidden transition-all duration-300"
+          className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-xs md:hidden transition-all duration-300"
           onClick={() => setIsMenuOpen(false)}
         >
           <div
