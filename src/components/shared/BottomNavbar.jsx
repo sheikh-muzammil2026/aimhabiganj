@@ -242,7 +242,7 @@ export default function BottomNavbar() {
   return (
     <>
       {/* ১. মূল বটম নেভিগেশন বার (মোবাইল ভিউ) */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0D47A1] border-t border-[#90CAF9]/40 shadow-xl rounded-t-xl md:hidden pb-safe print:hidden transition-colors duration-300 text-white">
+      <div className="fixed bottom-0 left-0 right-0 z-[70] bg-[#0D47A1] border-t border-[#90CAF9]/40 shadow-xl rounded-t-xl md:hidden pb-safe print:hidden transition-colors duration-300 text-white">
         <div className="flex justify-around items-center h-16 px-2">
           {primaryItems.map((item, idx) => {
             const isActive = pathname === item.href;
@@ -312,7 +312,7 @@ export default function BottomNavbar() {
       {/* ২. "অন্যান্য" বটম শিট ড্রয়ার */}
       {isMenuOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs md:hidden transition-all duration-300"
+          className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-xs md:hidden transition-all duration-300"
           onClick={() => setIsMenuOpen(false)}
         >
           <div

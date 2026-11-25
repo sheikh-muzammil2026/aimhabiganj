@@ -373,9 +373,9 @@ export default function Navbar() {
         className="sticky top-2.5 sm:top-3.5 z-50 w-full font-bornomala print:hidden transition-all duration-300"
       >
         {/* Width-Synchronized Container matching HeroSection */}
-        <div className="site-container">
+        <div className="site-container relative z-30">
           <div
-            className="rounded-2xl px-4 sm:px-6 py-2.5 sm:py-3 transition-all duration-300 bg-[#0D47A1] border border-[#90CAF9]/40 shadow-xl shadow-[#0D47A1]/25 backdrop-blur-xl text-white"
+            className="relative rounded-2xl px-4 sm:px-6 py-2.5 sm:py-3 transition-all duration-300 bg-[#0D47A1] border border-[#90CAF9]/40 shadow-xl shadow-[#0D47A1]/25 backdrop-blur-xl text-white"
           >
             <div className="flex items-center justify-between gap-3 lg:gap-5">
               {/* 1. Left Section: Institutional Emblem & Compact Title */}
