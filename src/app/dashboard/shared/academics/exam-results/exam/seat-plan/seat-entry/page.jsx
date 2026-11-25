@@ -51,10 +51,31 @@ const STANDARD_HALLS = [
     { id: "4", label: "হল নং ৪ — ৩য় তলা (হিফজ বিভাগ)" },
 ];
 
+const HALL_CAPACITIES = {
+    "1": 16,
+    "2": 16,
+    "3": 16,
+    "4": 44,
+};
+
+const bnToEnDigits = (str) => {
+    if (!str && str !== 0) return "";
+    const bnDigits = { "০": "0", "১": "1", "২": "2", "৩": "3", "৪": "4", "৫": "5", "৬": "6", "৭": "7", "৮": "8", "৯": "9" };
+    return String(str).replace(/[০-৯]/g, (d) => bnDigits[d] || d);
+};
+
 export default function AllStudentsPage() {
     const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    // পরীক্ষার তথ্য স্টেট
+    const [examName, setExamName] = useState("২য় সাময়িক পরীক্ষা");
+    const [examList, setExamList] = useState([
+        "১ম সাময়িক পরীক্ষা",
+        "২য় সাময়িক পরীক্ষা",
+        "বার্ষিক পরীক্ষা",
+    ]);
 
     // ভিউ মোড: 'seatPlan' = সিট প্ল্যান ইনপুট/টেবিল, 'seatPlanPreview' = সিট প্ল্যান প্রিভিউ ও প্রিন্ট
     const [viewMode, setViewMode] = useState("seatPlan");
@@ -70,6 +91,30 @@ export default function AllStudentsPage() {
     const [selectedDivision, setSelectedDivision] = useState("all"); // preHifz, hifz, academy
     const [selectedAcademyType, setSelectedAcademyType] = useState("all");
     const [selectedClass, setSelectedClass] = useState("all");
+
+    // পরীক্ষার তালিকা লাইভ লোড করা
+    useEffect(() => {
+        let isMounted = true;
+        const fetchExams = async () => {
+            try {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/admit-cards/exams`, {
+                    cache: "no-store",
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (isMounted && data?.success && Array.isArray(data.data) && data.data.length > 0) {
+                    setExamList(data.data);
+                    setExamName(data.data[0]);
+                }
+            } catch (err) {
+                console.warn("Could not fetch exam list on seat-entry, using defaults:", err);
+            }
+        };
+        fetchExams();
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     const fetchStudents = useCallback(async () => {
         try {
@@ -137,6 +182,42 @@ export default function AllStudentsPage() {
         return () => clearTimeout(timer);
     }, [fetchStudents]);
 
+    // লোড হওয়া শিক্ষার্থীদের আসন অনুযায়ী প্রতিটি হলের বুকড সিটের ম্যাপিং: { [hallNo]: { [seatNo]: occupantInfo } }
+    const bookedSeatsMap = useMemo(() => {
+        const map = {};
+        students.forEach((s) => {
+            const sId = s._id?.$oid || s._id;
+            const current = seatData[sId];
+            const h = String(current?.hallNo || s.seatPlan?.hallNo || s.hallNo || "").trim();
+            const cleanH = bnToEnDigits(h).replace(/\D/g, "");
+            const seat = String(current?.seatNo || s.seatPlan?.seatNo || s.seatNo || "").trim();
+            const cleanS = bnToEnDigits(seat).replace(/\D/g, "");
+            if (cleanH && cleanS) {
+                if (!map[cleanH]) map[cleanH] = {};
+                const details = getStudentClassDetails(s);
+                map[cleanH][cleanS] = {
+                    studentId: sId,
+                    name: s.studentNameBangla || s.studentNameEnglish || s.name || "শিক্ষার্থী",
+                    roll: s.roll || s.officeUse?.rollNumber || "N/A",
+                    className: details.className || "N/A",
+                };
+            }
+        });
+        return map;
+    }, [students, seatData]);
+
+    // নির্দিষ্ট শিক্ষার্থীর জন্য কোনো নির্দিষ্ট সিট অন্য কারও দ্বারা বুকড কিনা যাচাই
+    const getSeatOccupant = useCallback((studentId, hallVal, seatVal) => {
+        const cleanH = bnToEnDigits(String(hallVal || "")).replace(/\D/g, "");
+        const cleanS = bnToEnDigits(String(seatVal || "")).replace(/\D/g, "");
+        if (!cleanH || !cleanS) return null;
+        const occupant = bookedSeatsMap[cleanH]?.[cleanS];
+        if (occupant && String(occupant.studentId) !== String(studentId)) {
+            return occupant;
+        }
+        return null;
+    }, [bookedSeatsMap]);
+
     // সিট, বেঞ্চ বা হলের ইনপুট চ্যাঞ্জ হ্যান্ডলার (সিট নম্বর দিলে বেঞ্চ নম্বর অটো-ক্যালকুলেট)
     const handleSeatInputChange = (id, field, value) => {
         setSeatData((prev) => {
@@ -167,10 +248,26 @@ export default function AllStudentsPage() {
     const handleSaveSeatPlan = async (studentId) => {
         try {
             setSavingId(studentId);
+            const currentObj = seatData[studentId] || {};
+            const curHall = String(currentObj.hallNo || "").trim();
+            const curSeat = String(currentObj.seatNo || "").trim();
+
+            // ফ্রন্টএন্ডে তাত্ক্ষণিক ডুপ্লিকেট সিট ভ্যালিডেশন
+            const occupant = getSeatOccupant(studentId, curHall, curSeat);
+            if (occupant) {
+                const cleanSeatDigits = bnToEnDigits(curSeat).replace(/\D/g, "");
+                const cleanHallDigits = bnToEnDigits(curHall).replace(/\D/g, "");
+                toast.error(`Seat No ${cleanSeatDigits || curSeat} in Hall ${cleanHallDigits || curHall} is already booked for ${occupant.name} (Roll: ${occupant.roll}, Class: ${occupant.className}).`);
+                return;
+            }
+
+            const activeYear = selectedSession !== "all" ? selectedSession : (siteConfig.academicSession || "২০২৬");
             const payload = {
-                hallNo: seatData[studentId]?.hallNo || "",
-                benchNo: seatData[studentId]?.benchNo || "",
-                seatNo: seatData[studentId]?.seatNo || ""
+                hallNo: curHall,
+                benchNo: currentObj.benchNo || "",
+                seatNo: curSeat,
+                academicYear: activeYear,
+                examName: examName,
             };
 
             let success = false;
@@ -187,6 +284,13 @@ export default function AllStudentsPage() {
                 if (response.ok && resJson.success) {
                     success = true;
                     resultMessage = resJson.message;
+                } else {
+                    resultMessage = resJson.message || "সিট প্ল্যান সেভ করতে সমস্যা হয়েছে।";
+                    // সার্ভার থেকে 409 কনফ্লিক্ট বা ভ্যালিডেশন এরর আসলে ফর্ম ক্লিয়ার না করে নোটিফাই করা
+                    if (response.status === 409 || response.status === 400) {
+                        toast.error(resultMessage);
+                        return;
+                    }
                 }
             } catch (extErr) {
                 console.warn("External save failed, trying local Next.js route:", extErr);
@@ -204,6 +308,12 @@ export default function AllStudentsPage() {
                     if (localRes.ok && localJson.success) {
                         success = true;
                         resultMessage = localJson.message;
+                    } else {
+                        resultMessage = localJson.message || resultMessage;
+                        if (localRes.status === 409 || localRes.status === 400) {
+                            toast.error(resultMessage);
+                            return;
+                        }
                     }
                 } catch (localErr) {
                     console.warn("Local save error:", localErr);
@@ -226,7 +336,9 @@ export default function AllStudentsPage() {
                                     ...s.seatPlan,
                                     hallNo: payload.hallNo,
                                     benchNo: payload.benchNo,
-                                    seatNo: payload.seatNo
+                                    seatNo: payload.seatNo,
+                                    academicYear: payload.academicYear,
+                                    examName: payload.examName,
                                 }
                             };
                         }
@@ -282,81 +394,93 @@ export default function AllStudentsPage() {
         try {
             setIsSavingAll(true);
             const updates = [];
+            const activeYear = selectedSession !== "all" ? selectedSession : (siteConfig.academicSession || "২০২৬");
 
-            filteredStudents.forEach((s) => {
+            for (const s of filteredStudents) {
                 const id = s._id?.$oid || s._id;
                 const current = seatData[id];
                 if (current && (current.hallNo || current.benchNo || current.seatNo)) {
+                    const occ = getSeatOccupant(id, current.hallNo, current.seatNo);
+                    if (occ) {
+                        const cleanS = bnToEnDigits(String(current.seatNo || "")).replace(/\D/g, "");
+                        const cleanH = bnToEnDigits(String(current.hallNo || "")).replace(/\D/g, "");
+                        toast.error(`Seat No ${cleanS || current.seatNo} in Hall ${cleanH || current.hallNo} is already booked for ${occ.name} (Roll: ${occ.roll}, Class: ${occ.className}).`);
+                        setIsSavingAll(false);
+                        return;
+                    }
                     updates.push({
                         id,
                         hallNo: current.hallNo || "",
                         benchNo: current.benchNo || "",
-                        seatNo: current.seatNo || ""
+                        seatNo: current.seatNo || "",
+                        academicYear: activeYear,
+                        examName: examName,
                     });
                 }
-            });
+            }
 
             if (updates.length === 0) {
                 toast.info("কোনো নতুন সিট প্ল্যান তথ্য পাওয়া যায়নি।");
+                setIsSavingAll(false);
                 return;
             }
 
             let success = false;
+            let resultMessage = "";
 
-            // ১. বাল্ক API চেষ্টা
+            // ১. এক্সটার্নাল বাল্ক API
             try {
-                const res = await fetch(`/api/students/bulk-seat-plan`, {
+                const extBulk = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/students/bulk-seat-plan`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ updates })
+                    body: JSON.stringify({ updates, academicYear: activeYear, examName: examName })
                 });
-                if (res.ok) {
-                    const j = await res.json();
-                    if (j.success) success = true;
+                const j = await extBulk.json();
+                if (extBulk.ok && j.success) {
+                    success = true;
+                    resultMessage = j.message;
+                } else {
+                    resultMessage = j.message || "বাল্ক সেভ করতে সমস্যা হয়েছে।";
+                    if (extBulk.status === 409 || extBulk.status === 400) {
+                        toast.error(resultMessage);
+                        setIsSavingAll(false);
+                        return;
+                    }
                 }
-            } catch (bulkErr) {
-                console.warn("Local bulk API error, trying parallel PATCH:", bulkErr);
+            } catch (e) {
+                console.warn("External bulk error, trying local fallback:", e);
             }
 
+            // ২. লোকাল Next.js বাল্ক API ফলব্যাক
             if (!success) {
-                // এক্সটার্নাল বাল্ক API অথবা প্যারালাল রিকোয়েস্ট
                 try {
-                    const extBulk = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/students/bulk-seat-plan`, {
+                    const res = await fetch(`/api/students/bulk-seat-plan`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ updates })
+                        body: JSON.stringify({ updates, academicYear: activeYear, examName: examName })
                     });
-                    if (extBulk.ok) {
-                        const j = await extBulk.json();
-                        if (j.success) success = true;
+                    const j = await res.json();
+                    if (res.ok && j.success) {
+                        success = true;
+                        resultMessage = j.message;
+                    } else {
+                        resultMessage = j.message || resultMessage;
+                        if (res.status === 409 || res.status === 400) {
+                            toast.error(resultMessage);
+                            setIsSavingAll(false);
+                            return;
+                        }
                     }
-                } catch (e) {
-                    console.warn("External bulk error:", e);
+                } catch (bulkErr) {
+                    console.warn("Local bulk API error:", bulkErr);
                 }
-            }
-
-            // যদি বাল্ক ব্যর্থ হয়, তবে প্যারালাল সেভ
-            if (!success) {
-                const promises = updates.map((u) =>
-                    fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/students/${u.id}/seat-plan`, {
-                        method: "PATCH",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            hallNo: u.hallNo,
-                            benchNo: u.benchNo,
-                            seatNo: u.seatNo
-                        })
-                    }).catch(() => null)
-                );
-                await Promise.all(promises);
-                success = true;
             }
 
             if (success) {
                 toast.success(`${toBengaliDigits(updates.length)} জন শিক্ষার্থীর সিট প্ল্যান সফলভাবে সেভ করা হয়েছে!`);
                 fetchStudents();
             } else {
-                toast.error("সিট প্ল্যান সেভ করতে সমস্যা হয়েছে।");
+                toast.error(resultMessage || "সিট প্ল্যান সেভ করতে সমস্যা হয়েছে।");
             }
         } catch (err) {
             console.error("Bulk save error:", err);
@@ -391,6 +515,20 @@ export default function AllStudentsPage() {
 
                 {/* মোড সুইচিং এবং প্রিন্ট বাটন */}
                 <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                    {/* পরীক্ষা নির্বাচন ড্রপডাউন */}
+                    <div className="flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
+                        <span className="text-xs font-bold text-slate-600">পরীক্ষা:</span>
+                        <select
+                            value={examName}
+                            onChange={(e) => setExamName(e.target.value)}
+                            className="text-xs font-bold bg-white border border-slate-300 rounded-lg px-2 py-1 text-slate-800 focus:outline-emerald-600 cursor-pointer"
+                        >
+                            {examList.map((exam) => (
+                                <option key={exam} value={exam}>{exam}</option>
+                            ))}
+                        </select>
+                    </div>
+
                     {/* সকল পরিবর্তন একসাথে সেভ বাটন */}
                     <button
                         type="button"
@@ -506,6 +644,9 @@ export default function AllStudentsPage() {
                                 const rollNo = student?.roll;
                                 const photo = getStudentPhoto(student);
                                 const currentHall = String(seatData[id]?.hallNo || "");
+                                const currentSeat = String(seatData[id]?.seatNo || "");
+                                const occupant = getSeatOccupant(id, currentHall, currentSeat);
+                                const hallCapacity = HALL_CAPACITIES[currentHall] || 16;
 
                                 return (
                                     <div key={id} className="bg-white border border-slate-200 p-4 rounded-xl shadow-xs space-y-3">
@@ -574,11 +715,38 @@ export default function AllStudentsPage() {
                                                 <label className="block text-slate-500 mb-1 font-semibold">Seat (সিট)</label>
                                                 <input
                                                     type="text"
+                                                    list={`seat-options-m-${id}`}
                                                     placeholder="যেমন: ১"
-                                                    value={seatData[id]?.seatNo || ""}
+                                                    value={currentSeat}
                                                     onChange={(e) => handleSeatInputChange(id, "seatNo", e.target.value)}
-                                                    className="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 bg-white font-medium"
+                                                    className={`w-full px-2 py-1.5 text-xs border rounded-lg focus:outline-none bg-white font-medium transition-colors ${
+                                                        occupant
+                                                            ? "border-rose-500 bg-rose-50 text-rose-900 ring-2 ring-rose-200 font-bold"
+                                                            : "border-slate-300 focus:border-emerald-600"
+                                                    }`}
                                                 />
+                                                <datalist id={`seat-options-m-${id}`}>
+                                                    {currentHall && Array.from({ length: hallCapacity }, (_, idx) => idx + 1).map((num) => {
+                                                        const sStr = String(num);
+                                                        const sBn = toBengaliDigits(sStr);
+                                                        const occ = getSeatOccupant(id, currentHall, sStr);
+                                                        return (
+                                                            <option
+                                                                key={sStr}
+                                                                value={sStr}
+                                                                disabled={Boolean(occ)}
+                                                                label={occ ? `সিট ${sBn} (বুকড - ${occ.name})` : `সিট ${sBn} (ফাঁকা)`}
+                                                            >
+                                                                {occ ? `সিট ${sBn} — ⚠️ বুকড (${occ.name})` : `সিট ${sBn} — ফাঁকা`}
+                                                            </option>
+                                                        );
+                                                    })}
+                                                </datalist>
+                                                {occupant && (
+                                                    <span className="text-[10px] text-rose-600 font-bold block mt-1 leading-tight">
+                                                        ⚠️ আসন {toBengaliDigits(currentSeat)} বুকড: {occupant.name} (রোল: {toBengaliDigits(occupant.roll)})
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
 
@@ -615,6 +783,9 @@ export default function AllStudentsPage() {
                                         const rollNo = student.roll;
                                         const photo = getStudentPhoto(student);
                                         const currentHall = String(seatData[id]?.hallNo || "");
+                                        const currentSeat = String(seatData[id]?.seatNo || "");
+                                        const occupant = getSeatOccupant(id, currentHall, currentSeat);
+                                        const hallCapacity = HALL_CAPACITIES[currentHall] || 16;
 
                                         return (
                                             <tr key={id} className="hover:bg-emerald-50/40 transition-colors">
@@ -693,11 +864,38 @@ export default function AllStudentsPage() {
                                                 <td className="py-3 px-4">
                                                     <input
                                                         type="text"
+                                                        list={`seat-options-t-${id}`}
                                                         placeholder="যেমন: ১"
-                                                        value={seatData[id]?.seatNo || ""}
+                                                        value={currentSeat}
                                                         onChange={(e) => handleSeatInputChange(id, "seatNo", e.target.value)}
-                                                        className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 bg-white font-medium"
+                                                        className={`w-full px-2.5 py-1.5 text-xs border rounded-lg focus:outline-none bg-white font-medium transition-colors ${
+                                                            occupant
+                                                                ? "border-rose-500 bg-rose-50 text-rose-900 ring-2 ring-rose-200 font-bold"
+                                                                : "border-slate-300 focus:border-emerald-600"
+                                                        }`}
                                                     />
+                                                    <datalist id={`seat-options-t-${id}`}>
+                                                        {currentHall && Array.from({ length: hallCapacity }, (_, idx) => idx + 1).map((num) => {
+                                                            const sStr = String(num);
+                                                            const sBn = toBengaliDigits(sStr);
+                                                            const occ = getSeatOccupant(id, currentHall, sStr);
+                                                            return (
+                                                                <option
+                                                                    key={sStr}
+                                                                    value={sStr}
+                                                                    disabled={Boolean(occ)}
+                                                                    label={occ ? `সিট ${sBn} (বুকড - ${occ.name})` : `সিট ${sBn} (ফাঁকা)`}
+                                                                >
+                                                                    {occ ? `সিট ${sBn} — ⚠️ বুকড (${occ.name})` : `সিট ${sBn} — ফাঁকা`}
+                                                                </option>
+                                                            );
+                                                        })}
+                                                    </datalist>
+                                                    {occupant && (
+                                                        <span className="text-[10px] text-rose-600 font-bold block mt-1 leading-tight">
+                                                            ⚠️ আসন {toBengaliDigits(currentSeat)} বুকড: {occupant.name} (রোল: {toBengaliDigits(occupant.roll)})
+                                                        </span>
+                                                    )}
                                                 </td>
 
                                                 {/* সেভ বাটন */}

@@ -38,8 +38,13 @@ export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
     const hallNo = searchParams.get("hallNo");
-    const semester = searchParams.get("semester") || "২য় সাময়িক পরীক্ষা";
+    const requestedExam = (
+      searchParams.get("examName") ||
+      searchParams.get("semester") ||
+      "২য় সাময়িক পরীক্ষা"
+    ).trim();
     const requestedYearParam = (
+      searchParams.get("academicYear") ||
       searchParams.get("year") ||
       searchParams.get("sessionYear") ||
       ""
@@ -48,6 +53,7 @@ export async function GET(req) {
       requestedYearParam && requestedYearParam.toLowerCase() !== "all"
         ? normalizeYearBn(requestedYearParam)
         : "";
+    const requestedYearEn = bnToEn(requestedYearBn);
 
     if (!hallNo) {
       return NextResponse.json(
@@ -56,29 +62,66 @@ export async function GET(req) {
       );
     }
 
-    const cleanHall = extractDigits(hallNo);
-    const bnHall = enToBn(cleanHall);
+    const isAllHalls = String(hallNo).trim().toLowerCase() === "all";
+    const cleanHall = isAllHalls ? "" : extractDigits(hallNo);
+    const bnHall = isAllHalls ? "" : enToBn(cleanHall);
+    const numHall = isAllHalls ? 0 : parseInt(cleanHall, 10);
+
+    if (!isAllHalls && (!cleanHall || isNaN(numHall))) {
+      return NextResponse.json(
+        { success: false, message: "Valid hall number is required" },
+        { status: 400 }
+      );
+    }
 
     const db = getDatabase();
     const studentsCollection = db.collection("students");
     const routinesCollection = db.collection("routines");
 
-    // Fetch active & approved students allocated to this hall
-    const allHallStudents = await studentsCollection
-      .find({
-        status: { $regex: /^approved$/i },
-        activity: { $regex: /^active$/i },
+    // Fetch active & approved students allocated strictly to this hall, academic year and exam
+    const studentQuery = {
+      status: { $regex: /^approved$/i },
+      activity: { $regex: /^active$/i },
+      $and: [],
+    };
+
+    if (!isAllHalls) {
+      studentQuery.$and.push({
         $or: [
           { hallNo: cleanHall },
-          { hallNo: Number(cleanHall) },
+          { hallNo: numHall },
           { hallNo: bnHall },
-          { hallNo: { $regex: new RegExp(`(হল|hall)?\\s*[-—]?\\s*(${cleanHall}|${bnHall})`, "i") } },
+          { hallNo: { $regex: new RegExp(`^(?:(হল|hall)\\s*(নং|no\\.?)?\\s*[-—]?)?\\s*(${cleanHall}|${bnHall})$`, "i") } },
           { "seatPlan.hallNo": cleanHall },
-          { "seatPlan.hallNo": Number(cleanHall) },
+          { "seatPlan.hallNo": numHall },
           { "seatPlan.hallNo": bnHall },
-          { "seatPlan.hallNo": { $regex: new RegExp(`(হল|hall)?\\s*[-—]?\\s*(${cleanHall}|${bnHall})`, "i") } },
+          { "seatPlan.hallNo": { $regex: new RegExp(`^(?:(হল|hall)\\s*(নং|no\\.?)?\\s*[-—]?)?\\s*(${cleanHall}|${bnHall})$`, "i") } },
         ],
-      })
+      });
+    }
+
+    if (requestedYearBn) {
+      studentQuery.$and.push({
+        $or: [
+          { sessionYear: requestedYearBn },
+          { sessionYear: requestedYearEn },
+          { sessionYear: { $regex: new RegExp(requestedYearEn || requestedYearBn, "i") } },
+          { academicYear: requestedYearBn },
+          { academicYear: requestedYearEn },
+          { "seatPlan.academicYear": requestedYearBn },
+          { "seatPlan.academicYear": requestedYearEn },
+          { "seatPlan.sessionYear": requestedYearBn },
+          { "seatPlan.sessionYear": requestedYearEn },
+        ],
+      });
+    }
+
+    if (studentQuery.$and.length === 0) {
+      delete studentQuery.$and;
+    }
+
+    const allHallStudents = await studentsCollection
+      .find(studentQuery)
       .toArray();
 
     const yearSet = new Set();
@@ -89,9 +132,9 @@ export async function GET(req) {
 
     let routineYearBn = "";
     try {
-      if (semester) {
+      if (requestedExam) {
         const matchedRoutine = await routinesCollection.findOne(
-          { examTitle: { $regex: new RegExp(`^${String(semester).trim()}$`, "i") } },
+          { examTitle: { $regex: new RegExp(`^${requestedExam}$`, "i") } },
           { sort: { updatedAt: -1 } }
         );
         if (matchedRoutine?.gregorianYear) {
@@ -150,6 +193,17 @@ export async function GET(req) {
         }
 
         const currentSeatPlan = student.seatPlan || {};
+        const rawStudentHall = student.hallNo || currentSeatPlan.hallNo || "";
+        const studentHallDigits = extractDigits(rawStudentHall);
+        const parsedStudentHall = parseInt(studentHallDigits, 10) || 0;
+
+        // নির্দিষ্ট হলের ফিল্টারে অন্য হলের শিক্ষার্থী আসলে বাদ দেওয়া
+        if (!isAllHalls && parsedStudentHall !== numHall) {
+          return null;
+        }
+
+        const actualHallNo = isAllHalls ? parsedStudentHall : numHall;
+
         const rawSeatNo = student.seatNo || currentSeatPlan.seatNo || "";
         const seatDigits = extractDigits(rawSeatNo);
         const actualSeatNo = parseInt(seatDigits, 10) || 0;
@@ -159,7 +213,7 @@ export async function GET(req) {
 
         return {
           _id: student._id.toString(),
-          hallNo: Number(cleanHall) || 1,
+          hallNo: actualHallNo,
           seatNo: actualSeatNo,
           benchNo: benchDigits ? Number(benchDigits) : (actualSeatNo > 0 ? Math.ceil(actualSeatNo / 2) : ""),
           class: classVal,
@@ -183,10 +237,10 @@ export async function GET(req) {
             student.image ||
             student.avatar ||
             "",
-          semester,
+          semester: requestedExam,
         };
       })
-      .filter((s) => s.seatNo > 0)
+      .filter((s) => Boolean(s) && (isAllHalls ? true : s.seatNo > 0 && s.hallNo === numHall))
       .sort((a, b) => a.seatNo - b.seatNo);
 
     return NextResponse.json(

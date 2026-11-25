@@ -188,13 +188,14 @@ export default function ExamHallMapPage() {
       let studentList = [];
 
       // ১. নির্দিষ্ট হলের সিট প্ল্যান ডাটা লোড
+      const currentYearVal = String(selectedYear || examYear || "");
       const queryParams = new URLSearchParams({
         hallNo: String(selectedHall),
-        semester: selectedSemester,
+        academicYear: currentYearVal,
+        examName: String(selectedSemester || ""),
+        semester: String(selectedSemester || ""),
+        year: currentYearVal,
       });
-      if (selectedYear) {
-        queryParams.set("year", selectedYear);
-      }
 
       const hallUrl = `${API_BASE_URL}/api/seat-plan?${queryParams.toString()}`;
 
@@ -251,11 +252,13 @@ export default function ExamHallMapPage() {
       }
 
       if (data?.success && Array.isArray(data.data) && data.data.length > 0) {
-        studentList = data.data.map((s) => ({
-          ...s,
-          seatNo: parseSeatNumber(s.seatNo),
-          hallNo: parseHallNumber(s.hallNo) || selectedHall,
-        }));
+        studentList = data.data
+          .map((s) => ({
+            ...s,
+            seatNo: parseSeatNumber(s.seatNo),
+            hallNo: parseHallNumber(s.hallNo),
+          }))
+          .filter((s) => s.hallNo === Number(selectedHall) && s.seatNo > 0);
       } else if (!selectedYear) {
         // ফলব্যাক ২: যদি /api/seat-plan খালি থাকে (এবং নির্দিষ্ট বছর ফিল্টার না থাকে), মূল /api/students থেকে ওই হলের একটিভ শিক্ষার্থীদের ফিল্টার
         let fallbackData = null;
@@ -345,17 +348,23 @@ export default function ExamHallMapPage() {
     return () => clearTimeout(timer);
   }, [fetchHallData]);
 
-  // সিট নম্বর অনুযায়ী স্টুডেন্টদের ম্যাপ তৈরি
+  // সিট নম্বর অনুযায়ী স্টুডেন্টদের ম্যাপ তৈরি (strictly match BOTH seat.hallNo === selectedHall AND seat.seatNo === slotNumber)
   const studentMapBySeatNo = useMemo(() => {
     const map = {};
     students.forEach((s) => {
+      const studentHall = parseHallNumber(s.hallNo);
       const seat = parseSeatNumber(s.seatNo);
-      if (seat && !isNaN(seat) && seat > 0) {
+      if (
+        studentHall === Number(selectedHall) &&
+        seat &&
+        !isNaN(seat) &&
+        seat > 0
+      ) {
         map[seat] = s;
       }
     });
     return map;
-  }, [students]);
+  }, [students, selectedHall]);
 
   // ২ কলামের বেঞ্চ ও আইল রো স্ট্রাকচার তৈরি
   const deskRows = useMemo(() => {
@@ -363,6 +372,18 @@ export default function ExamHallMapPage() {
     const totalRows = activeHallConfig.rows;
     let currentSeatNo = 1;
     let benchNumber = 1;
+
+    const getSeatStudent = (slotNumber) => {
+      const candidate = studentMapBySeatNo[slotNumber];
+      if (
+        candidate &&
+        parseHallNumber(candidate.hallNo) === Number(selectedHall) &&
+        parseSeatNumber(candidate.seatNo) === slotNumber
+      ) {
+        return candidate;
+      }
+      return null;
+    };
 
     for (let r = 0; r < totalRows; r++) {
       // বামের বেঞ্চ (Left Desk)
@@ -374,11 +395,11 @@ export default function ExamHallMapPage() {
         seatRange: `আসন ${toBengaliDigits(leftSeat1No)} ও ${toBengaliDigits(leftSeat2No)}`,
         leftSeat: {
           seatNo: leftSeat1No,
-          student: studentMapBySeatNo[leftSeat1No] || null,
+          student: getSeatStudent(leftSeat1No),
         },
         rightSeat: {
           seatNo: leftSeat2No,
-          student: studentMapBySeatNo[leftSeat2No] || null,
+          student: getSeatStudent(leftSeat2No),
         },
       };
       currentSeatNo += 2;
@@ -392,11 +413,11 @@ export default function ExamHallMapPage() {
         seatRange: `আসন ${toBengaliDigits(rightSeat1No)} ও ${toBengaliDigits(rightSeat2No)}`,
         leftSeat: {
           seatNo: rightSeat1No,
-          student: studentMapBySeatNo[rightSeat1No] || null,
+          student: getSeatStudent(rightSeat1No),
         },
         rightSeat: {
           seatNo: rightSeat2No,
-          student: studentMapBySeatNo[rightSeat2No] || null,
+          student: getSeatStudent(rightSeat2No),
         },
       };
       currentSeatNo += 2;
@@ -410,22 +431,32 @@ export default function ExamHallMapPage() {
     }
 
     return rows;
-  }, [activeHallConfig, studentMapBySeatNo]);
+  }, [activeHallConfig, studentMapBySeatNo, selectedHall]);
 
   // মোট বরাদ্দকৃত সিট এবং ফাঁকা সিটের পরিসংখ্যান
   const stats = useMemo(() => {
     let occupied = 0;
     const capacity = activeHallConfig.capacity;
     for (let i = 1; i <= capacity; i++) {
-      if (studentMapBySeatNo[i]) occupied++;
+      const candidate = studentMapBySeatNo[i];
+      if (
+        candidate &&
+        parseHallNumber(candidate.hallNo) === Number(selectedHall) &&
+        parseSeatNumber(candidate.seatNo) === i
+      ) {
+        occupied++;
+      }
     }
+    const matchingStudents = students.filter(
+      (s) => parseHallNumber(s.hallNo) === Number(selectedHall) && parseSeatNumber(s.seatNo) > 0
+    );
     return {
       capacity,
       occupied,
       vacant: capacity - occupied,
-      totalStudentsFound: students.length,
+      totalStudentsFound: matchingStudents.length,
     };
-  }, [activeHallConfig, studentMapBySeatNo, students]);
+  }, [activeHallConfig, studentMapBySeatNo, students, selectedHall]);
 
   // প্রিন্ট হ্যান্ডলার (react-to-print)
   const handlePrint = useReactToPrint({

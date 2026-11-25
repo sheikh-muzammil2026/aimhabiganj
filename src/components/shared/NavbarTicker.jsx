@@ -90,7 +90,7 @@ export default function NavbarTicker() {
   return (
     <>
       {/* Notice / Announcement Bar: #E3F2FD banner framed with a #90CAF9 border and a #2196F3 badge/icon */}
-      <div className="w-full bg-[#E3F2FD] border border-[#90CAF9] text-[#0D47A1] font-medium py-2 px-3 sm:px-5 lg:px-6 rounded-xl flex items-center overflow-hidden shadow-xs transition-colors duration-300 relative z-20 print:hidden">
+      <div className="w-full bg-[#E3F2FD] border border-[#90CAF9] text-[#0D47A1] font-medium py-2 px-3 sm:px-5 lg:px-6 rounded-xl flex items-center overflow-hidden shadow-xs transition-colors duration-300 relative z-10 print:hidden">
         <div className="mx-auto w-full flex items-center gap-3">
           {/* Ticker Label Badge: #2196F3 with white text and icon */}
           <div className="flex-shrink-0 flex items-center gap-1.5 bg-[#2196F3] text-white px-2.5 py-1 rounded-md text-[11px] md:text-xs font-bold uppercase tracking-wider select-none z-10 shadow-xs">
@@ -98,8 +98,8 @@ export default function NavbarTicker() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-80" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
             </span>
-            <Megaphone className="w-3.5 h-3.5 text-white" />
-            <span className="whitespace-nowrap font-bold">নোটিশ</span>
+            <Megaphone className="hidden md:block w-3.5 h-3.5 text-white" />
+            <span className="hidden md:block whitespace-nowrap font-bold">নোটিশ</span>
           </div>
 
           {/* Marquee Content with Soft Edge Mask */}

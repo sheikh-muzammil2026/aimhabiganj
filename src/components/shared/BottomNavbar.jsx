@@ -224,15 +224,15 @@ export default function BottomNavbar() {
     },
     isLoggedIn
       ? {
-          name: t("menu.dashboard"),
-          href: getDashboardPath(),
-          icon: <UserCheck className="w-[21px] h-[21px]" />,
-        }
+        name: t("menu.dashboard"),
+        href: getDashboardPath(),
+        icon: <UserCheck className="w-[21px] h-[21px]" />,
+      }
       : {
-          name: t("menu.login"),
-          href: "/login",
-          icon: <LogIn className="w-[21px] h-[21px]" />,
-        },
+        name: t("menu.login"),
+        href: "/login",
+        icon: <LogIn className="w-[21px] h-[21px]" />,
+      },
   ];
 
   const toggleDropdown = (index) => {
@@ -242,7 +242,7 @@ export default function BottomNavbar() {
   return (
     <>
       {/* ১. মূল বটম নেভিগেশন বার (মোবাইল ভিউ) */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0D47A1] border-t border-[#90CAF9]/40 shadow-xl rounded-t-xl md:hidden pb-safe print:hidden transition-colors duration-300 text-white">
+      <div className="fixed bottom-0 left-0 right-0 z-[70] bg-[#0D47A1] border-t border-[#90CAF9]/40 shadow-xl rounded-t-xl md:hidden pb-safe print:hidden transition-colors duration-300 text-white">
         <div className="flex justify-around items-center h-16 px-2">
           {primaryItems.map((item, idx) => {
             const isActive = pathname === item.href;
@@ -252,21 +252,19 @@ export default function BottomNavbar() {
                 key={idx}
                 href={item.href}
                 onClick={(e) => handleSubmenuClick(e, item.href)}
-                className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative group ${
-                  isActive
-                    ? "text-white font-bold"
-                    : "text-[#E3F2FD]/70 hover:text-white"
-                }`}
+                className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative group ${isActive
+                  ? "text-white font-bold"
+                  : "text-[#E3F2FD]/70 hover:text-white"
+                  }`}
               >
                 {isActive && (
                   <span className="absolute top-0 w-8 h-1 bg-[#2196F3] rounded-full shadow-[0_2px_10px_rgba(33,150,243,0.6)]" />
                 )}
                 <div
-                  className={`transition-transform duration-300 ${
-                    isActive
-                      ? "text-[#2196F3] scale-110 drop-shadow-[0_2px_6px_rgba(33,150,243,0.4)]"
-                      : "group-hover:scale-105"
-                  }`}
+                  className={`transition-transform duration-300 ${isActive
+                    ? "text-[#2196F3] scale-110 drop-shadow-[0_2px_6px_rgba(33,150,243,0.4)]"
+                    : "group-hover:scale-105"
+                    }`}
                 >
                   {item.icon}
                 </div>
@@ -280,21 +278,19 @@ export default function BottomNavbar() {
           <button
             type="button"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative group cursor-pointer ${
-              isMenuOpen
-                ? "text-white font-bold"
-                : "text-[#E3F2FD]/70 hover:text-white"
-            }`}
+            className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative group cursor-pointer ${isMenuOpen
+              ? "text-white font-bold"
+              : "text-[#E3F2FD]/70 hover:text-white"
+              }`}
           >
             {isMenuOpen && (
               <span className="absolute top-0 w-8 h-1 bg-[#2196F3] rounded-full" />
             )}
             <div
-              className={`p-1.5 rounded-xl transition-all duration-300 ${
-                isMenuOpen
-                  ? "bg-[#2196F3] text-white rotate-90"
-                  : "bg-white/10 text-white border border-[#90CAF9]/30 hover:bg-white/20"
-              }`}
+              className={`p-1.5 rounded-xl transition-all duration-300 ${isMenuOpen
+                ? "bg-[#2196F3] text-white rotate-90"
+                : "bg-white/10 text-white border border-[#90CAF9]/30 hover:bg-white/20"
+                }`}
             >
               {isMenuOpen ? (
                 <X className="w-5 h-5" />
@@ -316,7 +312,7 @@ export default function BottomNavbar() {
           onClick={() => setIsMenuOpen(false)}
         >
           <div
-            className="fixed bottom-16 left-0 right-0 max-h-[75vh] bg-[#E3F2FD] rounded-t-2xl overflow-y-auto p-4 shadow-2xl border-t border-[#90CAF9]"
+            className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-xs md:hidden transition-all duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-16 h-1.5 bg-[#90CAF9] rounded-full mx-auto mb-4" />
@@ -370,19 +366,17 @@ export default function BottomNavbar() {
                         <button
                           type="button"
                           onClick={() => toggleDropdown(idx)}
-                          className={`w-full flex justify-between items-center p-3.5 text-left font-medium transition-colors cursor-pointer ${
-                            isDropdownOpen
-                              ? "bg-[#E3F2FD] text-[#0D47A1]"
-                              : "text-[#1E293B] hover:bg-[#E3F2FD]/50 hover:text-[#0D47A1]"
-                          }`}
+                          className={`w-full flex justify-between items-center p-3.5 text-left font-medium transition-colors cursor-pointer ${isDropdownOpen
+                            ? "bg-[#E3F2FD] text-[#0D47A1]"
+                            : "text-[#1E293B] hover:bg-[#E3F2FD]/50 hover:text-[#0D47A1]"
+                            }`}
                         >
                           <div className="flex items-center gap-3">
                             <div
-                              className={`p-1.5 rounded-lg ${
-                                isDropdownOpen
-                                  ? "bg-[#2196F3] text-white"
-                                  : "bg-[#E3F2FD] text-[#0D47A1] border border-[#90CAF9]/40"
-                              }`}
+                              className={`p-1.5 rounded-lg ${isDropdownOpen
+                                ? "bg-[#2196F3] text-white"
+                                : "bg-[#E3F2FD] text-[#0D47A1] border border-[#90CAF9]/40"
+                                }`}
                             >
                               {item.icon}
                             </div>
@@ -391,9 +385,8 @@ export default function BottomNavbar() {
                             </span>
                           </div>
                           <ChevronRight
-                            className={`w-4 h-4 text-[#90CAF9] transition-transform duration-300 ${
-                              isDropdownOpen ? "rotate-90 text-[#2196F3]" : ""
-                            }`}
+                            className={`w-4 h-4 text-[#90CAF9] transition-transform duration-300 ${isDropdownOpen ? "rotate-90 text-[#2196F3]" : ""
+                              }`}
                           />
                         </button>
 

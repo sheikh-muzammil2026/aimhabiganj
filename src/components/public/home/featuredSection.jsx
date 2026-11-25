@@ -219,12 +219,11 @@ export default function FeaturedSections() {
       <div className="relative z-10 site-container">
         {/* সেকশন হেডার */}
         <div
-          className={`text-center max-w-3xl mx-auto mb-16 md:mb-20 space-y-4 transition-all duration-1000 ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
-          }`}
+          className={`text-center max-w-3xl mx-auto mb-16 md:mb-20 space-y-4 transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+            }`}
         >
           <div className="inline-flex items-center gap-2 bg-white border border-[#90CAF9] px-4 py-1.5 rounded-full shadow-xs">
-            <Layers className="w-3.5 h-3.5 text-[#2196F3]" />
+
             <span className="text-[#0D47A1] font-bold text-xs uppercase tracking-widest">
               {active.badge}
             </span>
@@ -250,11 +249,10 @@ export default function FeaturedSections() {
 
         {/* ২টি ডিপার্টমেন্ট শোকেস কার্ড */}
         <div
-          className={`grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 transition-all duration-1000 ease-out ${
-            isVisible
-              ? "opacity-100 translate-y-0"
-              : "opacity-0 translate-y-12"
-          }`}
+          className={`grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 transition-all duration-1000 ease-out ${isVisible
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-12"
+            }`}
         >
           {active.departments.map((dept) => {
             const IconComponent = dept.icon;
@@ -286,7 +284,7 @@ export default function FeaturedSections() {
                       <span
                         className="inline-flex items-center gap-1.5 text-[11px] font-extrabold px-3.5 py-1.5 rounded-full uppercase tracking-wider bg-[#E3F2FD] text-[#0D47A1] border border-[#90CAF9]"
                       >
-                        <Sparkles className="w-3.5 h-3.5 text-[#2196F3]" />
+
                         <span>{dept.tag}</span>
                       </span>
 

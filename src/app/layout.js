@@ -55,7 +55,7 @@ export default function RootLayout({ children }) {
       </head>
       <body className="min-h-full flex flex-col bg-slate-50 dark:bg-[#06152B]">
         <Providers>
-          <CursorTrail />
+          {/* <CursorTrail /> */}
           <main>{children}</main>
           <AIChatbot />
           <WhatsAppButton />

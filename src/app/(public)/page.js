@@ -1,10 +1,10 @@
 import FeaturedSections from "@/components/public/home/featuredSection";
 import HeroSection from "@/components/public/home/hero";
-import ReviewSection from "@/components/public/home/reviews";
-import StatsSection from "@/components/public/home/statsSection";
+
 import WhyChooseUs from "@/components/public/home/whyChooseUs";
 import HomeCtaBanner from "@/components/public/home/ctaBanner";
 import React from "react";
+import Faculty from "@/components/public/home/Faculty";
 
 const page = () => {
   return (
@@ -12,8 +12,8 @@ const page = () => {
       <HeroSection />
       <WhyChooseUs />
       <FeaturedSections />
-      <StatsSection />
-      <ReviewSection />
+
+      <Faculty />
       <HomeCtaBanner />
     </div>
   );

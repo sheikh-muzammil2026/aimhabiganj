@@ -196,7 +196,7 @@ export default function WhyChooseUs() {
         {/* সেকশন হেডার */}
         <div className="text-center max-w-3xl mx-auto mb-16 md:mb-20 space-y-4">
           <div className="inline-flex items-center gap-2 bg-[#E3F2FD] border border-[#90CAF9] px-4 py-1.5 rounded-full shadow-xs">
-            <Sparkles className="w-3.5 h-3.5 text-[#2196F3]" />
+
             <span className="text-[#0D47A1] font-bold text-xs uppercase tracking-widest">
               {active.badge}
             </span>
