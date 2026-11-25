@@ -12,6 +12,7 @@ import React, {
   useState,
 } from "react";
 import { toast } from "react-toastify";
+import { useReactToPrint } from "react-to-print";
 import { authClient } from "@/lib/auth-client";
 import { formatSubjectName } from "@/lib/subjectFormatter";
 import { toBengaliDigits, toEnglishDigits } from "@/lib/studentUtils";
@@ -19,6 +20,56 @@ import PrintInstitutionalHeader from "@/components/shared/print/PrintInstitution
 import PrintSignatures from "@/components/shared/print/PrintSignatures";
 import PrintSocialFooter from "@/components/shared/print/PrintSocialFooter";
 import siteConfig from "@/config/siteConfig";
+
+const RESULT_SHEET_PAGE_STYLE = `
+  @page {
+    size: A4 portrait;
+    margin: 0mm !important;
+  }
+
+  @media print {
+    html,
+    body {
+      width: 210mm !important;
+      height: auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #ffffff !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    .print-area-container {
+      display: block !important;
+      width: 210mm !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      gap: 0 !important;
+    }
+
+    .page-break {
+      width: 210mm !important;
+      max-width: 210mm !important;
+      min-height: 297mm !important;
+      height: 297mm !important;
+      max-height: 297mm !important;
+      margin: 0 auto !important;
+      padding: 7mm 9mm !important;
+      box-sizing: border-box !important;
+      page-break-after: always !important;
+      break-after: page !important;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+      overflow: hidden !important;
+      box-shadow: none !important;
+    }
+
+    .page-break:last-child {
+      page-break-after: auto !important;
+      break-after: auto !important;
+    }
+  }
+`;
 
 /**
  * Grade to remark conversion utility based on institutional academic standards.
@@ -123,6 +174,70 @@ export const parseExamData = (examObj) => {
   return ctNum + examNum;
 };
 
+export const isAnnualExamType = (examName) => {
+  if (!examName || typeof examName !== "string") return false;
+  const normalized = examName.replace(/\s+/g, " ").trim();
+  return (
+    normalized === "বার্ষিক পরীক্ষা" ||
+    normalized === "বার্ষিক পরিক্ষা" ||
+    normalized === "বার্ষিক" ||
+    normalized.toLowerCase() === "annual"
+  );
+};
+
+// ডাটাবেজের 'বার্ষিক পরীক্ষা' / 'বার্ষিক পরিক্ষা' লেবেলকে UI-তে '৩য় সাময়িক পরীক্ষা' (অথবা সংক্ষিপ্ত '৩য় সাময়িক') হিসেবে প্রদর্শন
+export const formatExamDisplayLabel = (examName, { short = false } = {}) => {
+  if (!examName || typeof examName !== "string") return examName || "";
+  if (isAnnualExamType(examName)) {
+    return short ? "৩য় সাময়িক" : "৩য় সাময়িক পরীক্ষা";
+  }
+  return examName.trim();
+};
+
+// একক টার্মের জন্য একটি বিষয়ের পূর্ণমান (Full Marks) নির্ধারণ (ডিফল্ট ১০০)
+export const getTermFullMark = (item, termKey) => {
+  const termData =
+    termKey === "term1"
+      ? item?.term1 || item?.["১ম সাময়িক পরীক্ষা"] || {}
+      : termKey === "term2"
+        ? item?.term2 || item?.["২য় সাময়িক পরীক্ষা"] || {}
+        : item?.annual || item?.["বার্ষিক পরীক্ষা"] || {};
+
+  const candidates = [
+    termData?.fullMarks,
+    termData?.fullMark,
+    termData?.totalMarks,
+    item?.fullMarks,
+    item?.fullMark,
+    item?.totalMarks,
+  ];
+  for (const val of candidates) {
+    const parsed = typeof val === "number" ? val : parseFloat(val);
+    if (!Number.isNaN(parsed) && parsed > 0) {
+      return parsed;
+    }
+  }
+  return 100;
+};
+
+// সক্রিয় পরীক্ষার ধরন অনুযায়ী একটি বিষয়ের মোট পূর্ণমান (বার্ষিক/৩য় সাময়িকে ৩ টার্মের যোগফল, নতুবা একক টার্ম)
+export const getSubjectTotalFullMarks = (item, currentExamType) => {
+  if (isAnnualExamType(currentExamType)) {
+    return (
+      getTermFullMark(item, "term1") +
+      getTermFullMark(item, "term2") +
+      getTermFullMark(item, "annual")
+    );
+  }
+  if (currentExamType === "১ম সাময়িক পরীক্ষা") {
+    return getTermFullMark(item, "term1");
+  }
+  if (currentExamType === "২য় সাময়িক পরীক্ষা") {
+    return getTermFullMark(item, "term2");
+  }
+  return getTermFullMark(item, "term1");
+};
+
 // সাবজেক্ট অনুসারে নির্দিষ্ট পরীক্ষার জন্য মার্কস বের করার হেলপার
 export const getMarkForExamType = (item, currentExamType) => {
   const term1Data = item.term1 || item["১ম সাময়িক পরীক্ষা"] || {};
@@ -137,7 +252,7 @@ export const getMarkForExamType = (item, currentExamType) => {
     return t1;
   } else if (currentExamType === "২য় সাময়িক পরীক্ষা") {
     return t2;
-  } else if (currentExamType === "বার্ষিক পরীক্ষা") {
+  } else if (isAnnualExamType(currentExamType)) {
     if (ann === "অনুঃ" || t1 === "অনুঃ" || t2 === "অনুঃ") return "অনুঃ";
 
     const num1 = typeof t1 === "number" ? t1 : 0;
@@ -189,7 +304,7 @@ export const getFinalSubjectGradeForAnnual = (item) => {
 export const getNormalizedMarkForGrade = (item, currentExamType) => {
   const mark = getMarkForExamType(item, currentExamType);
   if (mark === "অনুঃ" || mark === "-") return mark;
-  if (currentExamType === "বার্ষিক পরীক্ষা") {
+  if (isAnnualExamType(currentExamType)) {
     const term1Data = item.term1 || item["১ম সাময়িক পরীক্ষা"] || {};
     const term2Data = item.term2 || item["২য় সাময়িক পরীক্ষা"] || {};
     const annualData = item.annual || item["বার্ষিক পরীক্ষা"] || {};
@@ -213,7 +328,7 @@ export const isSubjectAbsent = (item, currentExamType) => {
     termData = item.term1 || item["১ম সাময়িক পরীক্ষা"] || {};
   } else if (currentExamType === "২য় সাময়িক পরীক্ষা") {
     termData = item.term2 || item["২য় সাময়িক পরীক্ষা"] || {};
-  } else if (currentExamType === "বার্ষিক পরীক্ষা") {
+  } else if (isAnnualExamType(currentExamType)) {
     termData = item.annual || item["বার্ষিক পরীক্ষা"] || {};
   }
 
@@ -261,11 +376,11 @@ export const deduplicateSubjects = (resultsList = []) => {
       resultsList.map((item, idx) => [
         String(
           item?.subjectCode ||
-            item?.subjectId ||
-            item?.subjectName ||
-            formatSubjectName(item?.subject) ||
-            item?.subject ||
-            `subject-${idx}`,
+          item?.subjectId ||
+          item?.subjectName ||
+          formatSubjectName(item?.subject) ||
+          item?.subject ||
+          `subject-${idx}`,
         ).trim(),
         item,
       ]),
@@ -278,6 +393,7 @@ export const calculateSummary = (resultsList = [], currentExamType) => {
   const uniqueResults = deduplicateSubjects(resultsList);
   if (!uniqueResults || uniqueResults.length === 0) {
     return {
+      totalFullMarks: "০",
       totalObtained: "০",
       average: "০.০০",
       grade: "-",
@@ -288,7 +404,9 @@ export const calculateSummary = (resultsList = [], currentExamType) => {
   }
 
   const totalSubjects = uniqueResults.length;
+  const isAnnual = isAnnualExamType(currentExamType);
   let absentCount = 0;
+  let totalFullMarks = 0;
   let totalObtained = 0;
   let validCount = 0;
   let hasFailedCompulsory = false;
@@ -296,6 +414,7 @@ export const calculateSummary = (resultsList = [], currentExamType) => {
   let totalNormalizedMarks = 0;
 
   uniqueResults.forEach((item) => {
+    totalFullMarks += getSubjectTotalFullMarks(item, currentExamType);
     const isAbsent = isSubjectAbsent(item, currentExamType);
     if (isAbsent) {
       absentCount++;
@@ -307,7 +426,7 @@ export const calculateSummary = (resultsList = [], currentExamType) => {
       }
 
       let subGrade;
-      if (currentExamType === "বার্ষিক পরীক্ষা") {
+      if (isAnnual) {
         subGrade = getFinalSubjectGradeForAnnual(item);
         const normMark = getNormalizedMarkForGrade(item, currentExamType);
         if (typeof normMark === "number") {
@@ -330,6 +449,7 @@ export const calculateSummary = (resultsList = [], currentExamType) => {
 
   if (absentCount === totalSubjects) {
     return {
+      totalFullMarks: toBengaliDigits(totalFullMarks),
       totalObtained: "অনুঃ",
       average: "-",
       grade: "অনুঃ",
@@ -341,16 +461,15 @@ export const calculateSummary = (resultsList = [], currentExamType) => {
 
   if (absentCount > 0) {
     return {
+      totalFullMarks: toBengaliDigits(totalFullMarks),
       totalObtained: toBengaliDigits(totalObtained),
       average:
         validCount > 0
           ? toBengaliDigits(
-              (
-                (currentExamType === "বার্ষিক পরীক্ষা"
-                  ? totalNormalizedMarks
-                  : totalObtained) / validCount
-              ).toFixed(2),
-            )
+            (
+              (isAnnual ? totalNormalizedMarks : totalObtained) / validCount
+            ).toFixed(2),
+          )
           : "০.০০",
       grade: "অসম্পূর্ণ",
       gpa: "০.০০",
@@ -361,15 +480,14 @@ export const calculateSummary = (resultsList = [], currentExamType) => {
 
   const avgMarks =
     validCount > 0
-      ? (
-          (currentExamType === "বার্ষিক পরীক্ষা"
-            ? totalNormalizedMarks
-            : totalObtained) / validCount
-        ).toFixed(2)
+      ? ((isAnnual ? totalNormalizedMarks : totalObtained) / validCount).toFixed(
+        2,
+      )
       : "0.00";
 
   if (hasFailedCompulsory) {
     return {
+      totalFullMarks: toBengaliDigits(totalFullMarks),
       totalObtained: toBengaliDigits(totalObtained),
       average: toBengaliDigits(avgMarks),
       grade: "F",
@@ -384,6 +502,7 @@ export const calculateSummary = (resultsList = [], currentExamType) => {
   const overallGrade = getOverallGradeFromGPA(rawGPA);
 
   return {
+    totalFullMarks: toBengaliDigits(totalFullMarks),
     totalObtained: toBengaliDigits(totalObtained),
     average: toBengaliDigits(avgMarks),
     grade: overallGrade,
@@ -1262,283 +1381,287 @@ function ResultSheetGeneratorContent() {
     return map;
   }, [resultSheets, activeExamType]);
 
+  const printRef = useRef(null);
+
+  const reactToPrintFn = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: `Result-Sheet-${formatExamDisplayLabel(activeExamType)}-${activeYear || ""}`,
+    pageStyle: RESULT_SHEET_PAGE_STYLE,
+  });
+
   const handlePrint = () => {
-    window.print();
+    if (!printRef.current) return;
+    reactToPrintFn();
   };
 
   return (
-    <div className="w-full text-[#1E293B] p-3 sm:p-4 md:p-6">
-      <div className="print:hidden site-container mb-8 font-sans">
-        {/* ড্যাশবোর্ড মেইন কার্ড - প্রাতিষ্ঠানিক থিম */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#90CAF9] shadow-xl text-[#1E293B] relative overflow-hidden">
-          {/* ব্যাকগ্রাউন্ড ব্লু গ্লো */}
-          <div className="absolute -top-24 -right-24 w-80 h-80 bg-[#2196F3]/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-[#0D47A1]/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="w-full text-[#1E293B] site-container">
+      {/* ----------------- ১. স্মার্ট কন্ট্রোল প্যানেল (প্রিন্টে হাইড থাকবে) ----------------- */}
+      <div className="print:hidden mb-8 font-sans">
+        <div className="bg-white rounded-3xl border border-[#90CAF9]/80 shadow-lg shadow-[#0D47A1]/5 text-[#1E293B] relative overflow-hidden">
+          {/* টপ অ্যাকসেন্ট বার ও ব্যাকগ্রাউন্ড গ্লো */}
+          <div className="h-1.5 w-full bg-gradient-to-r from-[#0D47A1] via-[#2196F3] to-[#90CAF9]" />
+          <div className="absolute -top-24 -right-24 w-72 h-72 bg-[#2196F3]/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-[#0D47A1]/5 rounded-full blur-3xl pointer-events-none" />
 
-          {/* ১. হেডার ও প্রিন্ট / শেয়ার বাটন */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 mb-6 border-b border-[#90CAF9]/40">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[#0D47A1] bg-[#E3F2FD] border border-[#90CAF9] px-3.5 py-1 rounded-full inline-block mb-2 shadow-inner">
-                ✦ রেজাল্ট ম্যানেজমেন্ট প্যানেল ✦
-              </span>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0D47A1] flex items-center gap-2">
-                রেজাল্ট শিট জেনারেটর
-              </h1>
-            </div>
+          <div className="p-5 sm:p-7 relative z-10">
+            {/* হেডার ও রেজাল্ট মোড সুইচার এক লাইনে */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 mb-6 border-b border-[#E3F2FD]">
+              <div>
+                <div className="inline-flex items-center gap-1.5 text-[11px] font-bold tracking-wider text-[#0D47A1] bg-[#E3F2FD] border border-[#90CAF9] px-3 py-1 rounded-full mb-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#2196F3] animate-pulse" />
+                  <span>রেজাল্ট ম্যানেজমেন্ট প্যানেল</span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0D47A1]">
+                  রেজাল্ট শিট জেনারেটর
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                  শিক্ষার্থীর আইডি, শিক্ষাবর্ষ ও পরীক্ষা নির্বাচন করে তাৎক্ষণিক মার্কসীট তৈরি ও প্রিন্ট করুন
+                </p>
+              </div>
 
-          </div>
-
-          {/* এরর নোটিফিকেশন */}
-          {error && (
-            <div className="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-sm font-medium flex items-center gap-3 backdrop-blur-md animate-fade-in">
-              <span className="p-1.5 bg-rose-100 rounded-lg text-rose-700 text-base">
-                ⚠️
-              </span>
-              <span>{error}</span>
-            </div>
-          )}
-
-          {/* রেজাল্ট টাইপ নির্বাচক (টার্ম পরীক্ষা বনাম ক্লাস টেস্ট CT) */}
-          <div className="mb-6 pb-5 border-b border-[#90CAF9]/40">
-            <label className="block text-[11px] font-extrabold text-[#0D47A1] uppercase tracking-wider mb-2">
-              ১. ফলাফলের ধরন নির্বাচন করুন (Select Result Type)
-            </label>
-            <div className="inline-flex p-1.5 bg-[#E3F2FD]/60 rounded-2xl border border-[#90CAF9] gap-1.5 shadow-inner flex-wrap">
-              <button
-                type="button"
-                onClick={() => {
-                  setResultMode("term");
-                  setActiveResultMode("term");
-                }}
-                className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all duration-200 flex items-center gap-2 cursor-pointer ${
-                  resultMode === "term"
-                    ? "bg-[#2196F3] text-white shadow-md border border-[#2196F3]"
-                    : "text-[#0D47A1] hover:text-[#0D47A1] hover:bg-[#E3F2FD]"
-                }`}
-              >
-                <span>📑</span>
-                <span>সাময়িক পরীক্ষা (Term Exam)</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setResultMode("ct");
-                  setActiveResultMode("ct");
-                }}
-                className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all duration-200 flex items-center gap-2 cursor-pointer ${
-                  resultMode === "ct"
-                    ? "bg-[#2196F3] text-white shadow-md border border-[#2196F3]"
-                    : "text-[#0D47A1] hover:text-[#0D47A1] hover:bg-[#E3F2FD]"
-                }`}
-              >
-                <span>📝</span>
-                <span>ক্লাস টেস্ট (CT Result)</span>
-              </button>
-            </div>
-          </div>
-
-          {/* ২. ফিল্টার ও সার্চ সিস্টেম */}
-          <form onSubmit={handleSearch} className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* ২. শিক্ষার্থী আইডি */}
-              <div className="bg-[#E3F2FD]/30 p-3.5 rounded-2xl border border-[#90CAF9] focus-within:border-[#2196F3] focus-within:ring-1 focus-within:ring-[#2196F3] transition-all">
-                <label className="block text-[11px] font-extrabold text-[#0D47A1] uppercase tracking-wider mb-1.5">
-                  ২. শিক্ষার্থীর আইডি
-                </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    placeholder="শিক্ষার্থীর আইডি (ঐচ্ছিক)..."
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                    className="w-full bg-white text-[#1E293B] placeholder-slate-400 border border-[#90CAF9] rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#2196F3] transition-all"
-                  />
+              {/* ১. ফলাফলের ধরন (Segmented Pill Switcher) */}
+              <div className="flex flex-col sm:items-end gap-1.5">
+                <span className="text-[11px] font-bold text-[#0D47A1]/80 uppercase tracking-wider">
+                  ফলাফলের ধরন
+                </span>
+                <div className="inline-flex p-1 bg-[#E3F2FD]/80 rounded-2xl border border-[#90CAF9] shadow-inner">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setResultMode("term");
+                      setActiveResultMode("term");
+                    }}
+                    className={`px-4 sm:px-5 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all duration-200 flex items-center gap-2 cursor-pointer ${resultMode === "term"
+                        ? "bg-[#0D47A1] text-white shadow-md shadow-[#0D47A1]/20"
+                        : "text-[#0D47A1] hover:bg-white/70"
+                      }`}
+                  >
+                    <span>📑</span>
+                    <span>সাময়িক পরীক্ষা</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setResultMode("ct");
+                      setActiveResultMode("ct");
+                    }}
+                    className={`px-4 sm:px-5 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all duration-200 flex items-center gap-2 cursor-pointer ${resultMode === "ct"
+                        ? "bg-[#2196F3] text-white shadow-md shadow-[#2196F3]/25"
+                        : "text-[#0D47A1] hover:bg-white/70"
+                      }`}
+                  >
+                    <span>📝</span>
+                    <span>ক্লাস টেস্ট (CT)</span>
+                  </button>
                 </div>
               </div>
-
-              {/* ৩. শিক্ষাবর্ষ */}
-              <div className="bg-[#E3F2FD]/30 p-3.5 rounded-2xl border border-[#90CAF9] focus-within:border-[#2196F3] transition-all">
-                <label className="block text-[11px] font-extrabold text-[#0D47A1] uppercase tracking-wider mb-1.5">
-                  ৩. শিক্ষাবর্ষ
-                </label>
-                <select
-                  value={targetYear}
-                  onChange={(e) => setTargetYear(e.target.value)}
-                  className="w-full bg-white text-[#1E293B] border border-[#90CAF9] rounded-xl py-2 px-3 text-sm font-medium focus:outline-none focus:border-[#2196F3] cursor-pointer"
-                >
-                  {sessionYears.map((year) => (
-                    <option
-                      key={year}
-                      value={year}
-                      className="bg-white text-[#1E293B]"
-                    >
-                      {year}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* ৪. পরীক্ষার নাম */}
-              <div className="bg-[#E3F2FD]/30 p-3.5 rounded-2xl border border-[#90CAF9] focus-within:border-[#2196F3] transition-all">
-                <label className="block text-[11px] font-extrabold text-[#0D47A1] uppercase tracking-wider mb-1.5">
-                  ৪. পরীক্ষার নাম
-                </label>
-                <select
-                  value={examType}
-                  onChange={(e) => setExamType(e.target.value)}
-                  className="w-full bg-white text-[#1E293B] border border-[#90CAF9] rounded-xl py-2 px-3 text-sm font-medium focus:outline-none focus:border-[#2196F3] cursor-pointer"
-                >
-                  <option
-                    value="১ম সাময়িক পরীক্ষা"
-                    className="bg-white text-[#1E293B]"
-                  >
-                    ১ম সাময়িক পরীক্ষা
-                  </option>
-                  <option
-                    value="২য় সাময়িক পরীক্ষা"
-                    className="bg-white text-[#1E293B]"
-                  >
-                    ২য় সাময়িক পরীক্ষা
-                  </option>
-                  <option
-                    value="বার্ষিক পরীক্ষা"
-                    className="bg-white text-[#1E293B]"
-                  >
-                    বার্ষিক পরীক্ষা
-                  </option>
-                </select>
-              </div>
-              {/* ৫. খুঁজুন বাটন */}
-              <div className="flex justify-end pt-2">
-                <button
-                  type="submit"
-                  className="btn-primary w-full sm:w-auto px-8 py-3.5 rounded-2xl text-sm flex items-center justify-center gap-2.5 active:scale-95 cursor-pointer"
-                >
-                  <Search className="w-4 h-4 stroke-[2.5]" />
-                  <span>খুঁজুন</span>
-                </button>
-              </div>
             </div>
 
+            {/* এরর নোটিফিকেশন */}
+            {error && (
+              <div className="mb-6 p-3.5 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-sm font-medium flex items-center gap-3">
+                <span className="w-8 h-8 rounded-xl bg-rose-100 flex items-center justify-center text-base shrink-0">
+                  ⚠️
+                </span>
+                <span>{error}</span>
+              </div>
+            )}
 
-          </form>
+            {/* ২. ফিল্টার ও সার্চ গ্রিড */}
+            <form onSubmit={handleSearch}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 items-end">
+                {/* শিক্ষার্থী আইডি (৪ কলাম) */}
+                <div className="lg:col-span-4">
+                  <label className="flex items-center justify-between text-xs font-extrabold text-[#0D47A1] mb-1.5 px-1">
+                    <span>শিক্ষার্থীর আইডি</span>
+                    <span className="text-[10px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">
+                      ঐচ্ছিক
+                    </span>
+                  </label>
+                  <div className="relative flex items-center">
+                    <input
+                      type="text"
+                      placeholder="যেমন: 04348 (খালি রাখলে সবার আসবে)"
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
+                      className="w-full bg-[#E3F2FD]/25 hover:bg-[#E3F2FD]/40 focus:bg-white text-[#1E293B] placeholder-slate-400 border border-[#90CAF9] rounded-2xl py-3 pl-4 pr-9 text-sm font-medium focus:outline-none focus:border-[#2196F3] focus:ring-4 focus:ring-[#2196F3]/15 transition-all"
+                    />
+                    {searchInput && (
+                      <button
+                        type="button"
+                        onClick={() => setSearchInput("")}
+                        title="মুছুন"
+                        className="absolute right-3 text-slate-400 hover:text-rose-500 text-xs font-bold p-1 cursor-pointer"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* শিক্ষাবর্ষ (৩ কলাম) */}
+                <div className="lg:col-span-3">
+                  <label className="block text-xs font-extrabold text-[#0D47A1] mb-1.5 px-1">
+                    শিক্ষাবর্ষ
+                  </label>
+                  <select
+                    value={targetYear}
+                    onChange={(e) => setTargetYear(e.target.value)}
+                    className="w-full bg-[#E3F2FD]/25 hover:bg-[#E3F2FD]/40 focus:bg-white text-[#1E293B] border border-[#90CAF9] rounded-2xl py-3 px-3.5 text-sm font-semibold focus:outline-none focus:border-[#2196F3] focus:ring-4 focus:ring-[#2196F3]/15 transition-all cursor-pointer"
+                  >
+                    {sessionYears.map((year) => (
+                      <option
+                        key={year}
+                        value={year}
+                        className="bg-white text-[#1E293B]"
+                      >
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* পরীক্ষার নাম (৩ কলাম) */}
+                <div className="lg:col-span-3">
+                  <label className="block text-xs font-extrabold text-[#0D47A1] mb-1.5 px-1">
+                    পরীক্ষার নাম
+                  </label>
+                  <select
+                    value={examType}
+                    onChange={(e) => setExamType(e.target.value)}
+                    className="w-full bg-[#E3F2FD]/25 hover:bg-[#E3F2FD]/40 focus:bg-white text-[#1E293B] border border-[#90CAF9] rounded-2xl py-3 px-3.5 text-sm font-semibold focus:outline-none focus:border-[#2196F3] focus:ring-4 focus:ring-[#2196F3]/15 transition-all cursor-pointer"
+                  >
+                    <option
+                      value="১ম সাময়িক পরীক্ষা"
+                      className="bg-white text-[#1E293B]"
+                    >
+                      ১ম সাময়িক পরীক্ষা
+                    </option>
+                    <option
+                      value="২য় সাময়িক পরীক্ষা"
+                      className="bg-white text-[#1E293B]"
+                    >
+                      ২য় সাময়িক পরীক্ষা
+                    </option>
+                    <option
+                      value="বার্ষিক পরীক্ষা"
+                      className="bg-white text-[#1E293B]"
+                    >
+                      ৩য় সাময়িক পরীক্ষা
+                    </option>
+                  </select>
+                </div>
+
+                {/* খুঁজুন বাটন (২ কলাম) */}
+                <div className="lg:col-span-2">
+                  <button
+                    type="submit"
+                    className="btn-primary w-full py-3 px-6 rounded-2xl text-sm font-extrabold bg-gradient-to-r from-[#0D47A1] to-[#2196F3] hover:from-[#0D47A1] hover:to-[#0D47A1] text-white shadow-md shadow-[#2196F3]/25 flex items-center justify-center gap-2 active:scale-[0.98] transition-all cursor-pointer"
+                  >
+                    <Search className="w-4 h-4 stroke-[2.5]" />
+                    <span>খুঁজুন</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
 
-      {/* ----------------- ২. রেজাল্ট শিট প্রিভিউ (প্রিন্ট লেআউট) ----------------- */}
-      <style jsx global>{`
-        @media print {
-          @page {
-            size: A4 portrait;
-            margin: 0mm !important;
-          }
-
-          html,
-          body {
-            width: 210mm !important;
-            height: 297mm !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            background: #fff !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-
-          body * {
-            visibility: hidden;
-          }
-
-          .print-area-container,
-          .print-area-container * {
-            visibility: visible;
-          }
-
-          .print-area-container {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 210mm !important;
-            margin: 0 !important;
-            padding: 0 !important;
-          }
-
-          .page-break {
-            width: 210mm !important;
-            min-height: 297mm !important;
-            height: 297mm !important;
-            max-height: 297mm !important;
-            margin: 0 auto !important;
-            padding: 7mm 9mm !important;
-            box-sizing: border-box !important;
-            page-break-after: always !important;
-            break-after: page !important;
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-            overflow: hidden !important;
-          }
-        }
-      `}</style>
-
+      {/* ----------------- ২. লোডিং, এরর ও রেজাল্ট শিট প্রিভিউ ----------------- */}
       {loadingResults || loading ? (
-        <div className="print:hidden text-center py-12 bg-white dark:bg-[#0f172a] rounded-lg p-4 max-w-7xl mx-auto text-teal-600 font-bold">
-          রেজাল্ট লোড হচ্ছে...
+        <div className="print:hidden w-full max-w-[210mm] mx-auto bg-white rounded-3xl p-8 border border-[#90CAF9]/70 shadow-sm space-y-5 animate-pulse">
+          <div className="flex items-center justify-between border-b border-[#E3F2FD] pb-5">
+            <div className="w-16 h-16 rounded-2xl bg-[#E3F2FD]" />
+            <div className="space-y-2 flex-1 max-w-xs mx-auto text-center">
+              <div className="h-5 bg-[#E3F2FD] rounded-full w-32 mx-auto" />
+              <div className="h-3.5 bg-slate-100 rounded-full w-48 mx-auto" />
+            </div>
+            <div className="w-24 h-16 rounded-xl bg-[#E3F2FD]" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="h-4 bg-slate-100 rounded-lg" />
+            <div className="h-4 bg-slate-100 rounded-lg" />
+            <div className="h-4 bg-slate-100 rounded-lg" />
+            <div className="h-4 bg-slate-100 rounded-lg" />
+          </div>
+          <div className="space-y-2 pt-2">
+            <div className="h-9 bg-[#E3F2FD]/70 rounded-xl w-full" />
+            <div className="h-8 bg-slate-50 rounded-lg w-full" />
+            <div className="h-8 bg-slate-50 rounded-lg w-full" />
+            <div className="h-8 bg-slate-50 rounded-lg w-full" />
+          </div>
+          <p className="text-center text-xs font-bold text-[#0D47A1] pt-2">
+            রেজাল্ট শিট প্রস্তুত হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...
+          </p>
         </div>
       ) : resultsError ? (
-        <div className="print:hidden text-center py-12 bg-white dark:bg-[#0f172a] rounded-2xl p-8 max-w-2xl mx-auto shadow-sm border border-rose-200 dark:border-rose-900/40 text-rose-600 dark:text-rose-400 font-bold text-base flex flex-col items-center gap-3">
-          <span className="text-3xl">⚠️</span>
+        <div className="print:hidden text-center py-10 bg-white rounded-3xl p-8 max-w-xl mx-auto shadow-sm border border-rose-200 text-rose-700 font-bold text-sm sm:text-base flex flex-col items-center gap-3">
+          <span className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center text-2xl">
+            ⚠️
+          </span>
           <span>{resultsError}</span>
         </div>
       ) : resultSheets.length > 0 ? (
         <>
-          {/* প্রদর্শিত ফলাফল শিটের উপরে শেয়ার / লিংক কপি ও প্রিন্ট অ্যাকশন বার */}
-          <div className="print:hidden w-full max-w-[210mm] mx-auto mb-3 flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-[#063226] via-[#04241b] to-[#021812] px-4 py-3 rounded-2xl border border-emerald-600/30 shadow-lg text-emerald-50">
-            {/* শিট মোড টগল (টার্ম বনাম সিটি) */}
-            <div className="inline-flex p-1 bg-[#031d16] rounded-xl border border-emerald-700/60 gap-1">
-              <button
-                type="button"
-                onClick={() => handleSwitchMode("term")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
-                  activeResultMode === "term"
-                    ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow border border-emerald-400/50"
-                    : "text-emerald-300 hover:text-white hover:bg-emerald-800/40"
-                }`}
-              >
-                <span>📑</span>
-                <span>টার্ম শিট</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSwitchMode("ct")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
-                  activeResultMode === "ct"
-                    ? "bg-gradient-to-r from-amber-400 to-amber-500 text-emerald-950 font-extrabold shadow border border-amber-300"
-                    : "text-emerald-300 hover:text-white hover:bg-emerald-800/40"
-                }`}
-              >
-                <span>📝</span>
-                <span>সিটি (CT) শিট</span>
-              </button>
+          {/* স্মার্ট অ্যাকশন বার (শেয়ার / লিংক কপি ও প্রিন্ট) */}
+          <div className="print:hidden w-full max-w-[210mm] mx-auto mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-r from-[#063226] via-[#04241b] to-[#021812] px-3.5 sm:px-4 py-3 rounded-2xl border border-emerald-600/30 shadow-lg text-emerald-50">
+            <div className="flex items-center justify-between sm:justify-start gap-2.5 flex-wrap">
+              {/* শিট মোড টগল (টার্ম বনাম সিটি) */}
+              <div className="inline-flex p-1 bg-[#031d16] rounded-xl border border-emerald-700/60 gap-1">
+                <button
+                  type="button"
+                  onClick={() => handleSwitchMode("term")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${activeResultMode === "term"
+                      ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow border border-emerald-400/50"
+                      : "text-emerald-300 hover:text-white hover:bg-emerald-800/40"
+                    }`}
+                >
+                  <span>📑</span>
+                  <span>টার্ম শিট</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSwitchMode("ct")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${activeResultMode === "ct"
+                      ? "bg-gradient-to-r from-amber-400 to-amber-500 text-emerald-950 font-extrabold shadow border border-amber-300"
+                      : "text-emerald-300 hover:text-white hover:bg-emerald-800/40"
+                    }`}
+                >
+                  <span>📝</span>
+                  <span>সিটি (CT) শিট</span>
+                </button>
+              </div>
+
+              {/* মোট শিট কাউন্টার ব্যাজ */}
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold bg-emerald-900/70 text-emerald-200 border border-emerald-600/40 px-3 py-1.5 rounded-xl">
+                <span>মোট শিট:</span>
+                <span className="text-amber-300 font-extrabold">
+                  {toBengaliDigits(resultSheets.length)} টি
+                </span>
+              </span>
             </div>
 
-            <div className="flex items-center gap-2.5">
+            <div className="grid grid-cols-2 sm:flex items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={handleCopyShareLink}
                 aria-label="Copy shareable result link"
-                className={`px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 flex items-center gap-2 border cursor-pointer ${copiedLink
-                  ? "bg-emerald-600 text-white border-emerald-400/60 shadow-md shadow-emerald-900/40"
-                  : "bg-[#083c2e] hover:bg-emerald-800/80 text-amber-300 border-amber-400/40 active:scale-95"
+                className={`px-3.5 sm:px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 flex items-center justify-center gap-2 border cursor-pointer ${copiedLink
+                    ? "bg-emerald-600 text-white border-emerald-400/60 shadow-md shadow-emerald-900/40"
+                    : "bg-[#083c2e] hover:bg-emerald-800/80 text-amber-300 border-amber-400/40 active:scale-95"
                   }`}
               >
                 {copiedLink ? (
                   <>
                     <Check className="w-4 h-4 stroke-[2.5]" />
-                    <span>Copied! (কপি হয়েছে)</span>
+                    <span>কপি হয়েছে!</span>
                   </>
                 ) : (
                   <>
                     <Copy className="w-4 h-4 stroke-[2.2]" />
-                    <span>Copy Link / শেয়ার</span>
+                    <span>লিংক কপি</span>
                   </>
                 )}
               </button>
@@ -1546,24 +1669,26 @@ function ResultSheetGeneratorContent() {
               <button
                 type="button"
                 onClick={handlePrint}
-                className="px-4 py-2 rounded-xl font-extrabold text-xs sm:text-sm bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-emerald-950 transition-all duration-200 flex items-center gap-1.5 shadow-md shadow-amber-500/20 active:scale-95 cursor-pointer"
+                className="px-3.5 sm:px-4 py-2 rounded-xl font-extrabold text-xs sm:text-sm bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-emerald-950 transition-all duration-200 flex items-center justify-center gap-1.5 shadow-md shadow-amber-500/20 active:scale-95 cursor-pointer"
               >
                 <span>🖨️</span>
-                <span>প্রিন্ট</span>
+                <span>প্রিন্ট করুন</span>
               </button>
             </div>
           </div>
 
-          <div className="print-area-container flex flex-col items-center gap-8">
+          {/* ----------------- প্রিন্ট এরিয়া কন্টেইনার ----------------- */}
+          <div
+            ref={printRef}
+            className="print-area-container flex flex-col items-center gap-6 sm:gap-8 print:block print:gap-0"
+          >
             {resultSheets.map((resData, index) => {
-              // ১. রেজাল্ট ডাটা থেকে স্টুডেন্ট আইডি বের করা
               const currentStudentId =
                 resData.studentId ||
                 resData.student?.studentId ||
                 resData.student?.id ||
                 resData.student;
 
-              // ২. 'students' স্টেট থেকে আসল স্টুডেন্টের সব ইনফরমেশন খুঁজে বের করা
               const matchedStudent =
                 students.find(
                   (s) =>
@@ -1571,7 +1696,6 @@ function ResultSheetGeneratorContent() {
                     String(currentStudentId).trim(),
                 ) || {};
 
-              // ৩. ফলব্যাক বা ব্যাকআপ অবজেক্ট তৈরি
               const student = {
                 ...resData.student,
                 ...matchedStudent,
@@ -1623,6 +1747,7 @@ function ResultSheetGeneratorContent() {
 
               const results = deduplicateSubjects(resData.results || []);
 
+              /* ================= CT RESULT SHEET ================= */
               if (activeResultMode === "ct") {
                 const ctSummary = calculateCTSummary(results, activeExamType);
                 const ctStudentMerit =
@@ -1631,14 +1756,14 @@ function ResultSheetGeneratorContent() {
                 return (
                   <div
                     key={`ct-${student.studentId || currentStudentId || index}`}
-                    className="page-break relative bg-white box-border flex flex-col justify-between text-black w-full max-w-[210mm] min-h-[297mm] shadow-xl rounded-sm my-4 font-bornomala"
+                    className="page-break relative bg-white box-border flex flex-col justify-between text-black w-full max-w-[210mm] min-h-0 md:min-h-[297mm] print:w-[210mm] print:max-w-[210mm] print:min-h-[297mm] print:h-[297mm] shadow-xl ring-1 ring-slate-200 print:shadow-none print:ring-0 rounded-sm my-2 overflow-hidden font-bornomala"
                   >
                     {/* কার্ডের গোল্ডেন ট্রিপল আউটার বর্ডার */}
-                    <div className="w-full h-full border-[3px] border-[#C5A059] p-1 box-border relative">
-                      <div className="w-full h-full border border-[#C5A059] p-2 flex flex-col justify-between box-border relative">
+                    <div className="w-full h-full flex-1 border-[3px] border-[#C5A059] p-1 box-border relative flex flex-col">
+                      <div className="w-full h-full flex-1 border border-[#C5A059] p-2 sm:p-2.5 print:p-2 flex flex-col justify-between box-border relative overflow-hidden">
                         {/* ব্যাকগ্রাউন্ড ওয়াটারমার্ক */}
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0 opacity-[0.05]">
-                          <div className="w-[420px] h-[420px] rounded-full overflow-hidden flex items-center justify-center">
+                          <div className="w-[220px] h-[220px] sm:w-[420px] sm:h-[420px] print:w-[420px] print:h-[420px] rounded-full overflow-hidden flex items-center justify-center">
                             <Image
                               src={siteConfig.assets.logo}
                               alt="Watermark Logo"
@@ -1653,26 +1778,25 @@ function ResultSheetGeneratorContent() {
                         {/* মূল কন্টেন্ট */}
                         <div className="relative z-10 flex-1 flex flex-col justify-between">
                           <div className="flex-1 flex flex-col">
-                            {/* হেডার: লোগো ও মাদরাসার নাম */}
                             <div>
                               <PrintInstitutionalHeader
                                 bannerSrc="/banner_routine.png"
-                                logoWrapperClassName="w-20 h-20 md:w-45 md:h-45 print:!w-36 print:!h-36 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-3"
+                                logoWrapperClassName="w-14 h-14 sm:w-24 sm:h-24 md:w-45 md:h-45 print:!w-36 print:!h-36 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-1 sm:-mr-3 print:-mr-3"
                                 logoWidth={200}
                                 logoHeight={200}
                                 logoClassName="w-full h-full object-cover scale-[1.08] transform-gpu"
                                 bannerWidth={1000}
                                 bannerHeight={400}
-                                bannerClassName="w-full h-auto max-h-45 object-fill mx-auto print:max-h-45"
+                                bannerClassName="w-full h-auto max-h-20 sm:max-h-32 md:max-h-45 object-contain sm:object-fill mx-auto print:max-h-45 print:object-fill"
                               />
 
                               {/* ডাবল গোল্ডেন লাইন সেপারেটর */}
                               <div className="border-t-2 border-b border-[#C5A059] my-2 py-0.5"></div>
 
                               {/* রেজাল্ট ব্যাজ ও হেডলাইন */}
-                              <div className="flex justify-between items-center my-2 px-1">
+                              <div className="flex flex-col sm:flex-row print:flex-row justify-between items-center gap-3 sm:gap-2 print:gap-2 my-2 px-1">
                                 {/* বাম পাশে শিক্ষার্থীর ছবি */}
-                                <div className="w-16 h-18 border-2 border-gray-300 rounded-lg flex items-center justify-center bg-gray-50 overflow-hidden text-[9px] text-gray-400 font-bold shadow-xs">
+                                <div className="w-20 h-24 sm:w-16 sm:h-18 print:w-16 print:h-18 border-2 border-[#C5A059]/70 rounded-lg flex items-center justify-center bg-[#fcf8ed] overflow-hidden text-[10px] sm:text-[9px] print:text-[9px] text-gray-500 font-bold shadow-xs shrink-0">
                                   {studentPhoto ? (
                                     <Image
                                       src={studentPhoto}
@@ -1690,25 +1814,25 @@ function ResultSheetGeneratorContent() {
 
                                 {/* মাঝখানে ক্যাপসুল টাইটেল */}
                                 <div className="text-center">
-                                  <div className="bg-[#043e30] text-amber-300 px-5 py-1 rounded-full inline-block font-bold text-xs tracking-wide shadow-sm">
+                                  <div className="bg-[#043e30] text-amber-300 px-5 py-1 rounded-full inline-block font-bold text-xs tracking-wide shadow-sm border border-[#C5A059]/40">
                                     ক্লাস টেস্ট (CT) ফলাফল বিবরণী
                                   </div>
-                                  <p className="text-[11px] font-bold text-gray-800 mt-1">
-                                    {activeExamType} -{" "}
+                                  <p className="text-xs sm:text-[11px] print:text-[11px] font-bold text-gray-800 mt-1">
+                                    {formatExamDisplayLabel(activeExamType)} -{" "}
                                     {toBengaliDigits(
                                       (resData.year || "")
                                         .split(/[-–/]/)[0]
                                         .trim(),
                                     )}
                                   </p>
-                                  <p className="text-[11px] font-bold text-gray-800">
+                                  <p className="text-xs sm:text-[11px] print:text-[11px] font-bold text-gray-800">
                                     শ্রেণি: {studentClass}
                                   </p>
                                 </div>
 
                                 {/* ডান পাশে সিটি গ্রেডিং স্কেল বিবরণী */}
-                                <div className="flex justify-end">
-                                  <table className="border-collapse border border-slate-600 text-[6.5px] sm:text-[7px] leading-tight text-center bg-white shadow-xs">
+                                <div className="w-full sm:w-auto print:w-auto flex justify-center sm:justify-end print:justify-end overflow-x-auto print:overflow-visible">
+                                  <table className="border-collapse border border-slate-600 text-[9.5px] sm:text-[7px] print:text-[7px] leading-tight text-center bg-white shadow-xs">
                                     <thead>
                                       <tr className="bg-[#043e30] text-amber-300 font-bold">
                                         <th className="border border-slate-500 px-1 py-0.5 whitespace-nowrap">
@@ -1795,9 +1919,9 @@ function ResultSheetGeneratorContent() {
                               </div>
 
                               {/* পরীক্ষার্থীর ডট ডট তথ্যাবলী */}
-                              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] my-3 px-1">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 print:grid-cols-2 gap-x-5 gap-y-2 sm:gap-y-1.5 print:gap-y-1.5 text-xs sm:text-[11px] print:text-[11px] my-3 px-1">
                                 <div className="flex items-end">
-                                  <span className="font-bold w-20 shrink-0">
+                                  <span className="font-bold w-24 sm:w-20 print:w-20 shrink-0 text-gray-700">
                                     পরীক্ষার্থীর নাম:
                                   </span>
                                   <span className="font-bold border-b border-dashed border-gray-400 flex-1 truncate">
@@ -1805,7 +1929,7 @@ function ResultSheetGeneratorContent() {
                                   </span>
                                 </div>
                                 <div className="flex items-end">
-                                  <span className="font-bold w-16 shrink-0">
+                                  <span className="font-bold w-24 sm:w-18 print:w-18 shrink-0 text-gray-700">
                                     আইডি:
                                   </span>
                                   <span className="font-bold border-b border-dashed border-gray-400 flex-1">
@@ -1813,7 +1937,7 @@ function ResultSheetGeneratorContent() {
                                   </span>
                                 </div>
                                 <div className="flex items-end">
-                                  <span className="font-bold w-20 shrink-0">
+                                  <span className="font-bold w-24 sm:w-20 print:w-20 shrink-0 text-gray-700">
                                     পিতার নাম:
                                   </span>
                                   <span className="border-b border-dashed border-gray-400 flex-1 truncate">
@@ -1821,7 +1945,7 @@ function ResultSheetGeneratorContent() {
                                   </span>
                                 </div>
                                 <div className="flex items-end">
-                                  <span className="font-bold w-16 shrink-0">
+                                  <span className="font-bold w-24 sm:w-18 print:w-18 shrink-0 text-gray-700">
                                     রোল নং:
                                   </span>
                                   <span className="border-b border-dashed border-gray-400 flex-1">
@@ -1831,7 +1955,7 @@ function ResultSheetGeneratorContent() {
                                   </span>
                                 </div>
                                 <div className="flex items-end">
-                                  <span className="font-bold w-20 shrink-0">
+                                  <span className="font-bold w-24 sm:w-20 print:w-20 shrink-0 text-gray-700">
                                     উপজেলা:
                                   </span>
                                   <span className="border-b border-dashed border-gray-400 flex-1">
@@ -1839,7 +1963,7 @@ function ResultSheetGeneratorContent() {
                                   </span>
                                 </div>
                                 <div className="flex items-end">
-                                  <span className="font-bold w-16 shrink-0">
+                                  <span className="font-bold w-24 sm:w-18 print:w-18 shrink-0 text-gray-700">
                                     জেলা:
                                   </span>
                                   <span className="border-b border-dashed border-gray-400 flex-1">
@@ -1847,7 +1971,7 @@ function ResultSheetGeneratorContent() {
                                   </span>
                                 </div>
                                 <div className="flex items-end">
-                                  <span className="font-bold w-20 shrink-0">
+                                  <span className="font-bold w-24 sm:w-20 print:w-20 shrink-0 text-gray-700">
                                     শ্রেণি:
                                   </span>
                                   <span className="border-b border-dashed border-gray-400 flex-1 truncate">
@@ -1855,7 +1979,7 @@ function ResultSheetGeneratorContent() {
                                   </span>
                                 </div>
                                 <div className="flex items-end">
-                                  <span className="font-bold w-16 shrink-0">
+                                  <span className="font-bold w-24 sm:w-18 print:w-18 shrink-0 text-gray-700">
                                     সিটি মেধাস্থান:
                                   </span>
                                   <span className="border-b border-dashed border-gray-400 flex-1 font-bold text-[#043e30]">
@@ -1867,14 +1991,14 @@ function ResultSheetGeneratorContent() {
                               </div>
 
                               {/* টেবিল হেডার টাইটেল */}
-                              <div className="text-center font-bold text-xs my-1 text-gray-800">
+                              <div className="text-center font-bold text-xs my-1.5 text-[#043e30] tracking-wide">
                                 ক্লাস টেস্ট (CT) নম্বর বিবরণী
                               </div>
                             </div>
 
                             {/* সিটি নম্বর টেবিল */}
-                            <div className="my-1 flex-shrink-0">
-                              <table className="w-full border-collapse border border-[#C5A059] text-center text-xs">
+                            <div className="my-1 flex-shrink-0 w-full overflow-x-auto print:overflow-visible">
+                              <table className="w-full min-w-[440px] sm:min-w-0 print:min-w-0 border-collapse border border-[#C5A059] text-center text-xs">
                                 <thead>
                                   <tr className="bg-[#fcf8ed] font-bold text-gray-800 text-xs">
                                     <th className="border border-[#C5A059] p-1.5 w-12">
@@ -1914,13 +2038,13 @@ function ResultSheetGeneratorContent() {
                                         <tr
                                           key={String(
                                             item.subjectCode ||
-                                              item.subjectId ||
-                                              item.subjectName ||
-                                              formatSubjectName(item.subject) ||
-                                              item.subject ||
-                                              idx,
+                                            item.subjectId ||
+                                            item.subjectName ||
+                                            formatSubjectName(item.subject) ||
+                                            item.subject ||
+                                            idx,
                                           ).trim()}
-                                          className="border-b border-[#C5A059]"
+                                          className="border-b border-[#C5A059] odd:bg-white even:bg-[#fcf8ed]/45"
                                         >
                                           <td className="border border-[#C5A059] p-1.5">
                                             {toBengaliDigits(idx + 1)}
@@ -1944,12 +2068,11 @@ function ResultSheetGeneratorContent() {
                                             )}
                                           </td>
                                           <td
-                                            className={`border border-[#C5A059] p-1.5 font-bold ${
-                                              ctData.grade === "F" ||
-                                              ctData.isAbsent
+                                            className={`border border-[#C5A059] p-1.5 font-bold ${ctData.grade === "F" ||
+                                                ctData.isAbsent
                                                 ? "text-red-600"
                                                 : "text-[#043e30]"
-                                            }`}
+                                              }`}
                                           >
                                             {ctData.remark}
                                           </td>
@@ -1962,33 +2085,33 @@ function ResultSheetGeneratorContent() {
                             </div>
 
                             {/* সিটি সামারি সেকশন */}
-                            <div className="mt-1 border border-[#C5A059] bg-[#fcf8ed] p-2 rounded-sm flex-shrink-0">
-                              <div className="grid grid-cols-6 gap-2 text-center text-xs font-bold text-gray-800">
-                                <div>
+                            <div className="mt-2 sm:mt-1.5 print:mt-1.5 border border-[#C5A059] bg-[#fcf8ed] p-2 rounded-sm flex-shrink-0">
+                              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 print:grid-cols-6 gap-2 text-center text-xs font-bold text-gray-800 items-center">
+                                <div className="bg-white/70 sm:bg-transparent print:bg-transparent rounded p-1 sm:p-0 print:p-0">
                                   <span className="block text-[10px] text-gray-600 font-normal">
                                     মোট পূর্ণমান
                                   </span>
                                   {ctSummary.totalFullMarks}
                                 </div>
-                                <div>
+                                <div className="bg-white/70 sm:bg-transparent print:bg-transparent rounded p-1 sm:p-0 print:p-0">
                                   <span className="block text-[10px] text-gray-600 font-normal">
                                     মোট প্রাপ্ত নম্বর
                                   </span>
                                   {ctSummary.totalObtained}
                                 </div>
-                                <div>
+                                <div className="bg-white/70 sm:bg-transparent print:bg-transparent rounded p-1 sm:p-0 print:p-0">
                                   <span className="block text-[10px] text-gray-600 font-normal">
                                     শতকরা হার
                                   </span>
                                   {ctSummary.percentage}
                                 </div>
-                                <div>
+                                <div className="bg-white/70 sm:bg-transparent print:bg-transparent rounded p-1 sm:p-0 print:p-0">
                                   <span className="block text-[10px] text-gray-600 font-normal">
                                     গড় নম্বর
                                   </span>
                                   {ctSummary.average}
                                 </div>
-                                <div className="bg-[#043e30]/10 rounded-sm py-0.5 border border-[#043e30]/20">
+                                <div className="bg-[#043e30]/10 rounded-sm py-1 sm:py-0.5 print:py-0.5 border border-[#043e30]/20">
                                   <span className="block text-[10px] text-[#043e30] font-bold">
                                     সিটি মেধাস্থান
                                   </span>
@@ -1998,30 +2121,30 @@ function ResultSheetGeneratorContent() {
                                       : "-"}
                                   </span>
                                 </div>
-                                <div>
+                                <div className="bg-white/70 sm:bg-transparent print:bg-transparent rounded p-1 sm:p-0 print:p-0">
                                   <span className="block text-[10px] text-gray-600 font-normal">
                                     মন্তব্য
                                   </span>
                                   <span
-                                    className={`whitespace-nowrap ${
-                                      ctSummary.grade === "F" ||
-                                      ctSummary.grade === "অনুঃ"
+                                    className={`whitespace-nowrap ${ctSummary.grade === "F" ||
+                                        ctSummary.grade === "অনুঃ"
                                         ? "text-red-600"
                                         : "text-[#043e30]"
-                                    }`}
+                                      }`}
                                   >
-                                    {ctSummary.remark ||
-                                      ctSummary.status ||
-                                      "-"}
+                                    {ctSummary.remark || ctSummary.status || "-"}
                                   </span>
                                 </div>
                               </div>
                             </div>
                           </div>
 
-                          {/* ফুটার লেআউট (স্বাক্ষর এরিয়া এবং সোশ্যাল ও কন্টাক্ট ইনফো) */}
-                          <div className="mt-auto flex-shrink-0 pt-2 relative z-10">
-                            <PrintSignatures principalTopClass="-top-2" />
+                          {/* ফুটার লেআউট */}
+                          <div className="mt-4 md:mt-auto print:mt-auto flex-shrink-0 pt-2 relative z-10">
+                            <PrintSignatures
+                              principalTopClass="-top-2"
+                              className="flex justify-between items-end my-1 px-1 sm:px-4 print:px-4 flex-shrink-0 gap-2"
+                            />
                             <PrintSocialFooter />
                           </div>
                         </div>
@@ -2031,6 +2154,7 @@ function ResultSheetGeneratorContent() {
                 );
               }
 
+              /* ================= TERM / ANNUAL MARKSHEET ================= */
               const summary = calculateSummary(results, activeExamType);
               const studentMerit =
                 resData.meritPosition && resData.meritPosition !== "-"
@@ -2040,14 +2164,14 @@ function ResultSheetGeneratorContent() {
               return (
                 <div
                   key={student.studentId || currentStudentId || index}
-                  className="page-break relative bg-white box-border flex flex-col justify-between text-black w-full max-w-[210mm] min-h-[297mm] shadow-xl rounded-sm my-4"
+                  className="page-break relative bg-white box-border flex flex-col justify-between text-black w-full max-w-[210mm] min-h-0 md:min-h-[297mm] print:w-[210mm] print:max-w-[210mm] print:min-h-[297mm] print:h-[297mm] shadow-xl ring-1 ring-slate-200 print:shadow-none print:ring-0 rounded-sm my-2 overflow-hidden"
                 >
                   {/* কার্ডের গোল্ডেন ট্রিপল আউটার বর্ডার */}
-                  <div className="w-full h-full border-[3px] border-[#C5A059] p-1 box-border relative">
-                    <div className="w-full h-full border border-[#C5A059] p-2 flex flex-col justify-between box-border relative">
+                  <div className="w-full h-full flex-1 border-[3px] border-[#C5A059] p-1 box-border relative flex flex-col">
+                    <div className="w-full h-full flex-1 border border-[#C5A059] p-2 sm:p-2.5 print:p-2 flex flex-col justify-between box-border relative overflow-hidden">
                       {/* ব্যাকগ্রাউন্ড ওয়াটারমার্ক */}
                       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0 opacity-[0.05]">
-                        <div className="w-[420px] h-[420px] rounded-full overflow-hidden flex items-center justify-center">
+                        <div className="w-[220px] h-[220px] sm:w-[420px] sm:h-[420px] print:w-[420px] print:h-[420px] rounded-full overflow-hidden flex items-center justify-center">
                           <Image
                             src={siteConfig.assets.logo}
                             alt="Watermark Logo"
@@ -2062,26 +2186,25 @@ function ResultSheetGeneratorContent() {
                       {/* মূল কন্টেন্ট */}
                       <div className="relative z-10 flex-1 flex flex-col justify-between">
                         <div className="flex-1 flex flex-col">
-                          {/* হেডার: লোগো ও মাদরাসার নাম */}
                           <div>
                             <PrintInstitutionalHeader
                               bannerSrc="/banner_routine.png"
-                              logoWrapperClassName="w-20 h-20 md:w-45 md:h-45 print:!w-36 print:!h-36 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-3"
+                              logoWrapperClassName="w-14 h-14 sm:w-24 sm:h-24 md:w-45 md:h-45 print:!w-36 print:!h-36 rounded-full overflow-hidden flex-shrink-0 bg-transparent relative flex items-center justify-center -mr-1 sm:-mr-3 print:-mr-3"
                               logoWidth={200}
                               logoHeight={200}
                               logoClassName="w-full h-full object-cover scale-[1.08] transform-gpu"
                               bannerWidth={1000}
                               bannerHeight={400}
-                              bannerClassName="w-full h-auto max-h-45 object-fill mx-auto print:max-h-45"
+                              bannerClassName="w-full h-auto max-h-20 sm:max-h-32 md:max-h-45 object-contain sm:object-fill mx-auto print:max-h-45 print:object-fill"
                             />
 
                             {/* ডাবল গোল্ডেন লাইন সেপারেটর */}
                             <div className="border-t-2 border-b border-[#C5A059] my-2 py-0.5"></div>
 
                             {/* রেজাল্ট ব্যাজ ও হেডলাইন */}
-                            <div className="flex justify-between items-center my-2 px-1">
-                              {/* বাম পাশে শিক্ষার্থীর ছবি (QR কোডের স্থানে) */}
-                              <div className="w-16 h-18 border-2 border-gray-300 rounded-lg flex items-center justify-center bg-gray-50 overflow-hidden text-[9px] text-gray-400 font-bold shadow-xs">
+                            <div className="flex flex-col sm:flex-row print:flex-row justify-between items-center gap-3 sm:gap-2 print:gap-2 my-2 px-1">
+                              {/* বাম পাশে শিক্ষার্থীর ছবি */}
+                              <div className="w-20 h-24 sm:w-16 sm:h-18 print:w-16 print:h-18 border-2 border-[#C5A059]/70 rounded-lg flex items-center justify-center bg-[#fcf8ed] overflow-hidden text-[10px] sm:text-[9px] print:text-[9px] text-gray-500 font-bold shadow-xs shrink-0">
                                 {studentPhoto ? (
                                   <Image
                                     src={studentPhoto}
@@ -2098,25 +2221,23 @@ function ResultSheetGeneratorContent() {
 
                               {/* মাঝখানে ক্যাপসুল টাইটেল */}
                               <div className="text-center">
-                                <div className="bg-[#043e30] text-white px-5 py-1 rounded-full inline-block font-bold text-xs tracking-wide shadow-sm">
+                                <div className="bg-[#043e30] text-white px-5 py-1 rounded-full inline-block font-bold text-xs tracking-wide shadow-sm border border-[#C5A059]/40">
                                   মার্কসীট
                                 </div>
-                                <p className="text-[11px] font-bold text-gray-800 mt-1">
-                                  {activeExamType} -{" "}
+                                <p className="text-xs sm:text-[11px] print:text-[11px] font-bold text-gray-800 mt-1">
+                                  {formatExamDisplayLabel(activeExamType)} -{" "}
                                   {toBengaliDigits(
-                                    (resData.year || "")
-                                      .split(/[-–/]/)[0]
-                                      .trim(),
+                                    (resData.year || "").split(/[-–/]/)[0].trim(),
                                   )}
                                 </p>
-                                <p className="text-[11px] font-bold text-gray-800">
+                                <p className="text-xs sm:text-[11px] print:text-[11px] font-bold text-gray-800">
                                   শ্রেণি: {studentClass}
                                 </p>
                               </div>
 
-                              {/* ডান পাশে গ্রেডিং সিস্টেম বিবরণী (শিক্ষার্থীর ছবির স্থানে) */}
-                              <div className="flex justify-end">
-                                <table className="border-collapse border border-slate-600 text-[6.5px] sm:text-[7px] leading-tight text-center bg-white shadow-xs">
+                              {/* ডান পাশে গ্রেডিং সিস্টেম বিবরণী */}
+                              <div className="w-full sm:w-auto print:w-auto flex justify-center sm:justify-end print:justify-end overflow-x-auto print:overflow-visible">
+                                <table className="border-collapse border border-slate-600 text-[9.5px] sm:text-[7px] print:text-[7px] leading-tight text-center bg-white shadow-xs">
                                   <thead>
                                     <tr className="bg-[#043e30] text-amber-300 font-bold">
                                       <th className="border border-slate-500 px-1 py-0.5 whitespace-nowrap">
@@ -2203,10 +2324,9 @@ function ResultSheetGeneratorContent() {
                             </div>
 
                             {/* পরীক্ষার্থীর ডট ডট তথ্যাবলী */}
-                            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] my-3 px-1">
-                              {/* ১ম পরীক্ষার্থীর নাম */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 print:grid-cols-2 gap-x-5 gap-y-2 sm:gap-y-1.5 print:gap-y-1.5 text-xs sm:text-[11px] print:text-[11px] my-3 px-1">
                               <div className="flex items-end">
-                                <span className="font-bold w-20 shrink-0">
+                                <span className="font-bold w-24 sm:w-20 print:w-20 shrink-0 text-gray-700">
                                   পরীক্ষার্থীর নাম:
                                 </span>
                                 <span className="font-bold border-b border-dashed border-gray-400 flex-1 truncate">
@@ -2214,9 +2334,8 @@ function ResultSheetGeneratorContent() {
                                 </span>
                               </div>
 
-                              {/* ২. আইডি */}
                               <div className="flex items-end">
-                                <span className="font-bold w-16 shrink-0">
+                                <span className="font-bold w-24 sm:w-16 print:w-16 shrink-0 text-gray-700">
                                   আইডি:
                                 </span>
                                 <span className="font-bold border-b border-dashed border-gray-400 flex-1">
@@ -2224,9 +2343,8 @@ function ResultSheetGeneratorContent() {
                                 </span>
                               </div>
 
-                              {/* ৩. পিতার নাম */}
                               <div className="flex items-end">
-                                <span className="font-bold w-20 shrink-0">
+                                <span className="font-bold w-24 sm:w-20 print:w-20 shrink-0 text-gray-700">
                                   পিতার নাম:
                                 </span>
                                 <span className="border-b border-dashed border-gray-400 flex-1 truncate">
@@ -2234,9 +2352,8 @@ function ResultSheetGeneratorContent() {
                                 </span>
                               </div>
 
-                              {/* ৪. রোল নং */}
                               <div className="flex items-end">
-                                <span className="font-bold w-16 shrink-0">
+                                <span className="font-bold w-24 sm:w-16 print:w-16 shrink-0 text-gray-700">
                                   রোল নং:
                                 </span>
                                 <span className="border-b border-dashed border-gray-400 flex-1">
@@ -2246,9 +2363,8 @@ function ResultSheetGeneratorContent() {
                                 </span>
                               </div>
 
-                              {/* ৫. উপজেলা */}
                               <div className="flex items-end">
-                                <span className="font-bold w-20 shrink-0">
+                                <span className="font-bold w-24 sm:w-20 print:w-20 shrink-0 text-gray-700">
                                   উপজেলা:
                                 </span>
                                 <span className="border-b border-dashed border-gray-400 flex-1">
@@ -2256,9 +2372,8 @@ function ResultSheetGeneratorContent() {
                                 </span>
                               </div>
 
-                              {/* ৬. জেলা */}
                               <div className="flex items-end">
-                                <span className="font-bold w-16 shrink-0">
+                                <span className="font-bold w-24 sm:w-16 print:w-16 shrink-0 text-gray-700">
                                   জেলা:
                                 </span>
                                 <span className="border-b border-dashed border-gray-400 flex-1">
@@ -2266,9 +2381,8 @@ function ResultSheetGeneratorContent() {
                                 </span>
                               </div>
 
-                              {/* ৭. শ্রেণি */}
                               <div className="flex items-end">
-                                <span className="font-bold w-20 shrink-0">
+                                <span className="font-bold w-24 sm:w-20 print:w-20 shrink-0 text-gray-700">
                                   শ্রেণি:
                                 </span>
                                 <span className="border-b border-dashed border-gray-400 flex-1 truncate">
@@ -2276,9 +2390,8 @@ function ResultSheetGeneratorContent() {
                                 </span>
                               </div>
 
-                              {/* ৮. মেধাস্থান */}
                               <div className="flex items-end">
-                                <span className="font-bold w-16 shrink-0">
+                                <span className="font-bold w-24 sm:w-16 print:w-16 shrink-0 text-gray-700">
                                   মেধাস্থান:
                                 </span>
                                 <span className="border-b border-dashed border-gray-400 flex-1 font-bold text-[#043e30]">
@@ -2288,45 +2401,57 @@ function ResultSheetGeneratorContent() {
                                 </span>
                               </div>
                             </div>
+
                             {/* টেবিল হেডার টাইটেল */}
-                            <div className="text-center font-bold text-xs my-1 text-gray-800">
+                            <div className="text-center font-bold text-xs my-1.5 text-[#043e30] tracking-wide">
                               বিষয়ভিত্তিক নম্বর বিবরণী
                             </div>
                           </div>
 
                           {/* নম্বর টেবিল */}
-                          <div className="my-1 flex-shrink-0">
-                            <table className="w-full border-collapse border border-[#C5A059] text-center text-xs">
+                          <div className="my-1 flex-shrink-0 w-full overflow-x-auto print:overflow-visible">
+                            <table
+                              className={`w-full ${
+                                isAnnualExamType(activeExamType)
+                                  ? "min-w-[540px]"
+                                  : "min-w-[340px]"
+                              } sm:min-w-0 print:min-w-0 border-collapse border border-[#C5A059] text-center text-xs print:text-[11px]`}
+                            >
                               <thead>
-                                <tr className="bg-[#fcf8ed] font-bold text-gray-800 text-xs">
+                                <tr className="bg-[#fcf8ed] font-bold text-gray-800 text-[11px] sm:text-xs">
                                   <th className="border border-[#C5A059] p-1.5 text-left px-2.5">
                                     বিষয়
                                   </th>
 
-                                  {activeExamType === "বার্ষিক পরীক্ষা" && (
+                                  {isAnnualExamType(activeExamType) && (
                                     <>
-                                      <th className="border border-[#C5A059] p-1.5 w-16">
+                                      <th className="border border-[#C5A059] p-1 w-14 whitespace-nowrap">
                                         ১ম সাময়িক
                                       </th>
-                                      <th className="border border-[#C5A059] p-1.5 w-16">
+                                      <th className="border border-[#C5A059] p-1 w-14 whitespace-nowrap">
                                         ২য় সাময়িক
                                       </th>
-                                      <th className="border border-[#C5A059] p-1.5 w-16">
-                                        বার্ষিক
+                                      <th className="border border-[#C5A059] p-1 w-14 whitespace-nowrap">
+                                        {formatExamDisplayLabel(activeExamType, {
+                                          short: true,
+                                        })}
+                                      </th>
+                                      <th className="border border-[#C5A059] p-1 w-16 font-bold whitespace-nowrap">
+                                        মোট মার্ক
                                       </th>
                                     </>
                                   )}
 
-                                  <th className="border border-[#C5A059] p-1.5 w-20 font-bold">
-                                    {activeExamType === "বার্ষিক পরীক্ষা"
-                                      ? "মোট নম্বর"
+                                  <th className="border border-[#C5A059] p-1.5 w-16 font-bold whitespace-nowrap">
+                                    {isAnnualExamType(activeExamType)
+                                      ? "প্রাপ্ত মার্ক"
                                       : "প্রাপ্ত নম্বর"}
                                   </th>
-                                  <th className="border border-[#C5A059] p-1.5 w-16">
+                                  <th className="border border-[#C5A059] p-1.5 w-14 whitespace-nowrap">
                                     গ্রেড
                                   </th>
-                                  <th className="border border-[#C5A059] p-1.5 w-14">
-                                    গ্রেড পয়েন্ট
+                                  <th className="border border-[#C5A059] p-1.5 w-14 whitespace-nowrap">
+                                    গ্রেড পয়েন্ট
                                   </th>
                                 </tr>
                               </thead>
@@ -2335,9 +2460,7 @@ function ResultSheetGeneratorContent() {
                                   <tr>
                                     <td
                                       colSpan={
-                                        activeExamType === "বার্ষিক পরীক্ষা"
-                                          ? 7
-                                          : 4
+                                        isAnnualExamType(activeExamType) ? 8 : 4
                                       }
                                       className="p-3 text-center border border-[#C5A059]"
                                     >
@@ -2355,6 +2478,11 @@ function ResultSheetGeneratorContent() {
                                     const ann = parseExamData(
                                       item.annual || item["বার্ষিক পরীক্ষা"],
                                     );
+                                    const subjectTotalFullMark =
+                                      getSubjectTotalFullMarks(
+                                        item,
+                                        activeExamType,
+                                      );
 
                                     const finalMark = getMarkForExamType(
                                       item,
@@ -2362,7 +2490,7 @@ function ResultSheetGeneratorContent() {
                                     );
 
                                     let gradeInfo;
-                                    if (activeExamType === "বার্ষিক পরীক্ষা") {
+                                    if (isAnnualExamType(activeExamType)) {
                                       gradeInfo =
                                         getFinalSubjectGradeForAnnual(item);
                                     } else {
@@ -2402,35 +2530,39 @@ function ResultSheetGeneratorContent() {
                                           item.subject ||
                                           idx,
                                         ).trim()}
-                                        className="border-b border-[#C5A059]"
+                                        className="border-b border-[#C5A059] odd:bg-white even:bg-[#fcf8ed]/45"
                                       >
                                         <td className="border border-[#C5A059] p-1.5 text-left px-2.5 font-semibold">
                                           {formatSubjectName(item.subject)}
                                         </td>
 
-                                        {activeExamType ===
-                                          "বার্ষিক পরীক্ষা" && (
-                                            <>
-                                              <td className="border border-[#C5A059] p-1.5">
-                                                {formatVal(t1)}
-                                              </td>
-                                              <td className="border border-[#C5A059] p-1.5">
-                                                {formatVal(t2)}
-                                              </td>
-                                              <td className="border border-[#C5A059] p-1.5">
-                                                {formatVal(ann)}
-                                              </td>
-                                            </>
-                                          )}
+                                        {isAnnualExamType(activeExamType) && (
+                                          <>
+                                            <td className="border border-[#C5A059] p-1">
+                                              {formatVal(t1)}
+                                            </td>
+                                            <td className="border border-[#C5A059] p-1">
+                                              {formatVal(t2)}
+                                            </td>
+                                            <td className="border border-[#C5A059] p-1">
+                                              {formatVal(ann)}
+                                            </td>
+                                            <td className="border border-[#C5A059] p-1 font-semibold">
+                                              {toBengaliDigits(
+                                                subjectTotalFullMark,
+                                              )}
+                                            </td>
+                                          </>
+                                        )}
 
                                         <td className="border border-[#C5A059] p-1.5 font-bold">
                                           {formatVal(finalMark)}
                                         </td>
                                         <td
                                           className={`border border-[#C5A059] p-1.5 font-bold ${gradeInfo.grade === "F" ||
-                                            gradeInfo.grade === "অনুঃ"
-                                            ? "text-red-600"
-                                            : ""
+                                              gradeInfo.grade === "অনুঃ"
+                                              ? "text-red-600"
+                                              : ""
                                             }`}
                                         >
                                           {gradeInfo.grade}
@@ -2449,35 +2581,41 @@ function ResultSheetGeneratorContent() {
                           </div>
 
                           {/* সামারি সেকশন */}
-                          <div className="mt-1 border border-[#C5A059] bg-[#fcf8ed] p-2 rounded-sm flex-shrink-0">
-                            <div className="grid grid-cols-6 gap-2 text-center text-xs font-bold text-gray-800">
-                              <div>
-                                <span className="block text-[10px] text-gray-600 font-normal">
+                          <div className="mt-2 sm:mt-1.5 print:mt-1.5 border border-[#C5A059] bg-[#fcf8ed] px-2 sm:px-1.5 print:px-1.5 py-2 rounded-sm flex-shrink-0">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 print:grid-cols-7 gap-2 md:gap-1 print:gap-1 text-center text-xs md:text-[11px] print:text-[11px] font-bold text-gray-800 items-center">
+                              <div className="bg-white/70 md:bg-transparent print:bg-transparent rounded p-1 md:p-0 print:p-0">
+                                <span className="block text-[10px] md:text-[9.5px] print:text-[9.5px] text-gray-600 font-normal whitespace-nowrap">
                                   মোট নম্বর
+                                </span>
+                                {summary.totalFullMarks}
+                              </div>
+                              <div className="bg-white/70 md:bg-transparent print:bg-transparent rounded p-1 md:p-0 print:p-0">
+                                <span className="block text-[10px] md:text-[9.5px] print:text-[9.5px] text-gray-600 font-normal whitespace-nowrap">
+                                  প্রাপ্ত নম্বর
                                 </span>
                                 {summary.totalObtained}
                               </div>
-                              <div>
-                                <span className="block text-[10px] text-gray-600 font-normal">
+                              <div className="bg-white/70 md:bg-transparent print:bg-transparent rounded p-1 md:p-0 print:p-0">
+                                <span className="block text-[10px] md:text-[9.5px] print:text-[9.5px] text-gray-600 font-normal whitespace-nowrap">
                                   গড় নম্বর
                                 </span>
                                 {summary.average}
                               </div>
-                              <div>
-                                <span className="block text-[10px] text-gray-600 font-normal">
+                              <div className="bg-white/70 md:bg-transparent print:bg-transparent rounded p-1 md:p-0 print:p-0">
+                                <span className="block text-[10px] md:text-[9.5px] print:text-[9.5px] text-gray-600 font-normal whitespace-nowrap">
                                   ফাইনাল গ্রেড
                                 </span>
                                 {summary.grade}
                               </div>
-                              <div>
-                                <span className="block text-[10px] text-gray-600 font-normal">
+                              <div className="bg-white/70 md:bg-transparent print:bg-transparent rounded p-1 md:p-0 print:p-0">
+                                <span className="block text-[10px] md:text-[9.5px] print:text-[9.5px] text-gray-600 font-normal whitespace-nowrap">
                                   ফাইনাল জিপিএ
                                 </span>
                                 {summary.gpa}
                               </div>
 
-                              <div className="bg-[#043e30]/10 rounded-sm py-0.5 border border-[#043e30]/20">
-                                <span className="block text-[10px] text-[#043e30] font-bold">
+                              <div className="bg-[#043e30]/10 rounded-sm py-1 md:py-0.5 print:py-0.5 px-1 border border-[#043e30]/20">
+                                <span className="block text-[10px] md:text-[9.5px] print:text-[9.5px] text-[#043e30] font-bold whitespace-nowrap">
                                   মেধাস্থান
                                 </span>
                                 <span className="text-[#043e30] font-black">
@@ -2486,11 +2624,11 @@ function ResultSheetGeneratorContent() {
                                     : "-"}
                                 </span>
                               </div>
-                              <div>
-                                <span className="block text-[10px] text-gray-600 font-normal">
+                              <div className="col-span-2 sm:col-span-1 md:col-span-1 print:col-span-1 bg-white/70 md:bg-transparent print:bg-transparent rounded p-1 md:p-0 print:p-0">
+                                <span className="block text-[10px] md:text-[9.5px] print:text-[9.5px] text-gray-600 font-normal whitespace-nowrap">
                                   মন্তব্য
                                 </span>
-                                <span className="whitespace-nowrap">
+                                <span className="whitespace-nowrap text-[11px] md:text-[10.5px] print:text-[10.5px]">
                                   {summary.remark ||
                                     getGradeRemark(summary.grade) ||
                                     "-"}
@@ -2500,12 +2638,12 @@ function ResultSheetGeneratorContent() {
                           </div>
                         </div>
 
-                        {/* ফুটার লেআউট (স্বাক্ষর এরিয়া এবং সোশ্যাল ও কন্টাক্ট ইনফো) */}
-                        <div className="mt-auto flex-shrink-0 pt-2 relative z-10">
-                          {/* ৪. স্বাক্ষর সেকশন */}
-                          <PrintSignatures principalTopClass="-top-2" />
-
-                          {/* সোশ্যাল ও কন্টাক্ট ইনফো */}
+                        {/* ফুটার লেআউট */}
+                        <div className="mt-4 md:mt-auto print:mt-auto flex-shrink-0 pt-2 relative z-10">
+                          <PrintSignatures
+                            principalTopClass="-top-2"
+                            className="flex justify-between items-end my-1 px-1 sm:px-4 print:px-4 flex-shrink-0 gap-2"
+                          />
                           <PrintSocialFooter />
                         </div>
                       </div>
@@ -2517,11 +2655,13 @@ function ResultSheetGeneratorContent() {
           </div>
         </>
       ) : searchTerm ? (
-        <div className="print:hidden text-center py-12 bg-white dark:bg-[#0f172a] rounded-2xl p-8 max-w-2xl mx-auto shadow-sm border border-rose-200 dark:border-rose-900/40 text-rose-600 dark:text-rose-400 font-bold text-base flex flex-col items-center gap-3">
-          <span className="text-3xl">🔍</span>
+        <div className="print:hidden text-center py-12 bg-white rounded-3xl p-8 max-w-xl mx-auto shadow-sm border border-[#90CAF9]/70 text-[#0D47A1] font-bold text-sm sm:text-base flex flex-col items-center gap-3">
+          <span className="w-12 h-12 rounded-2xl bg-[#E3F2FD] border border-[#90CAF9] flex items-center justify-center text-2xl">
+            🔍
+          </span>
           <span>
-            কোনো ফলাফল পাওয়া যায়নি (No result found)। সঠিক আইডি প্রদান করে
-            আবার অনুসন্ধান করুন।
+            কোনো ফলাফল পাওয়া যায়নি। সঠিক আইডি বা পরীক্ষা নির্বাচন করে আবার
+            অনুসন্ধান করুন।
           </span>
         </div>
       ) : null}

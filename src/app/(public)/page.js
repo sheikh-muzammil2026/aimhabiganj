@@ -3,6 +3,7 @@ import HeroSection from "@/components/public/home/hero";
 import ReviewSection from "@/components/public/home/reviews";
 import StatsSection from "@/components/public/home/statsSection";
 import WhyChooseUs from "@/components/public/home/whyChooseUs";
+import GallerySection from "@/components/public/home/GallerySection";
 import HomeCtaBanner from "@/components/public/home/ctaBanner";
 import React from "react";
 
@@ -14,6 +15,7 @@ const page = () => {
       <FeaturedSections />
       <StatsSection />
       <ReviewSection />
+      <GallerySection />
       <HomeCtaBanner />
     </div>
   );
