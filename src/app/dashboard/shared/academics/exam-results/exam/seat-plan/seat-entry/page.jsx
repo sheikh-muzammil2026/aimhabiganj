@@ -124,7 +124,7 @@ export default function AllStudentsPage() {
         try {
             setLoading(true);
             setError(null);
-            
+
             const response = await fetch(
                 `${API_BASE_URL}/api/students?status=Approved&activity=active&limit=1000`,
                 { cache: "no-store", headers: { "Cache-Control": "no-cache" } }
@@ -253,13 +253,12 @@ export default function AllStudentsPage() {
                 examName: examName,
             };
 
-<<<<<<< HEAD
             let success = false;
             let resultMessage = "";
 
             // ১. এক্সটার্নাল সার্ভারে রিকোয়েস্ট
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/students/${studentId}/seat-plan`, {
+                const response = await fetch(`${API_BASE_URL}/api/students/${studentId}/seat-plan`, {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
@@ -303,17 +302,6 @@ export default function AllStudentsPage() {
                     console.warn("Local save error:", localErr);
                 }
             }
-=======
-            // aim-server-এ রিকোয়েস্ট
-            const response = await fetch(`${API_BASE_URL}/api/students/${studentId}/seat-plan`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-            const resJson = await response.json();
-            const success = Boolean(response.ok && resJson.success);
-            const resultMessage = resJson.message || "";
->>>>>>> 306de04006955912fed5cdfda8df39bd8cb056b0
 
             if (success) {
                 toast.success("সিট প্ল্যান সফলভাবে আপডেট করা হয়েছে!");
@@ -423,20 +411,13 @@ export default function AllStudentsPage() {
             let success = false;
             let resultMessage = "";
 
-<<<<<<< HEAD
             // ১. এক্সটার্নাল বাল্ক API
             try {
-                const extBulk = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API}/api/students/bulk-seat-plan`, {
-=======
-            // ১. aim-server বাল্ক API চেষ্টা
-            try {
                 const extBulk = await fetch(`${API_BASE_URL}/api/students/bulk-seat-plan`, {
->>>>>>> 306de04006955912fed5cdfda8df39bd8cb056b0
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ updates, academicYear: activeYear, examName: examName })
                 });
-<<<<<<< HEAD
                 const j = await extBulk.json();
                 if (extBulk.ok && j.success) {
                     success = true;
@@ -476,34 +457,6 @@ export default function AllStudentsPage() {
                 } catch (bulkErr) {
                     console.warn("Local bulk API error:", bulkErr);
                 }
-=======
-                if (extBulk.ok) {
-                    const j = await extBulk.json();
-                    if (j.success) success = true;
-                }
-            } catch (e) {
-                console.warn("aim-server bulk seat-plan error, trying parallel PATCH:", e);
-            }
-
-            // ২. যদি বাল্ক ব্যর্থ হয়, তবে প্যারালাল PATCH সেভ (aim-server)
-            if (!success) {
-                const results = await Promise.all(
-                    updates.map((u) =>
-                        fetch(`${API_BASE_URL}/api/students/${u.id}/seat-plan`, {
-                            method: "PATCH",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({
-                                hallNo: u.hallNo,
-                                benchNo: u.benchNo,
-                                seatNo: u.seatNo
-                            })
-                        })
-                            .then((r) => r.ok)
-                            .catch(() => false)
-                    )
-                );
-                success = results.some(Boolean);
->>>>>>> 306de04006955912fed5cdfda8df39bd8cb056b0
             }
 
             if (success) {
@@ -531,9 +484,9 @@ export default function AllStudentsPage() {
         <div className="p-3 sm:p-5 lg:p-8 bg-slate-50 min-h-screen space-y-5">
 
             {/* ১. পেজ হেডার এবং ভিউ টগল (সিট প্ল্যান / সিট প্ল্যান প্রিভিউ) */}
-            <div className="bg-white p-4 sm:p-6 rounded-2xl border border-emerald-900/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4 print:hidden">
-                <div>
-                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#043e30] tracking-tight">
+            <div className="bg-white p-3.5 sm:p-5 lg:p-6 rounded-2xl border border-emerald-900/10 shadow-xs flex flex-col xl:flex-row xl:items-center justify-between gap-3.5 sm:gap-4 print:hidden">
+                <div className="min-w-0">
+                    <h1 className="text-lg sm:text-2xl lg:text-3xl font-black text-[#043e30] tracking-tight leading-snug">
                         {viewMode === "seatPlanPreview" ? "পরীক্ষা/হল সিট প্ল্যান প্রিভিউ" : "পরীক্ষা/হল সিট প্ল্যান ম্যানেজমেন্ট"}
                     </h1>
                     <p className="text-xs sm:text-sm text-emerald-700/80 mt-0.5 font-medium">
@@ -544,14 +497,14 @@ export default function AllStudentsPage() {
                 </div>
 
                 {/* মোড সুইচিং এবং প্রিন্ট বাটন */}
-                <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center xl:justify-end gap-2 w-full xl:w-auto min-w-0">
                     {/* পরীক্ষা নির্বাচন ড্রপডাউন */}
-                    <div className="flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
-                        <span className="text-xs font-bold text-slate-600">পরীক্ষা:</span>
+                    <div className="col-span-2 sm:w-auto flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 min-w-0">
+                        <span className="text-xs font-bold text-slate-600 shrink-0">পরীক্ষা:</span>
                         <select
                             value={examName}
                             onChange={(e) => setExamName(e.target.value)}
-                            className="text-xs font-bold bg-white border border-slate-300 rounded-lg px-2 py-1 text-slate-800 focus:outline-emerald-600 cursor-pointer"
+                            className="flex-1 sm:flex-initial min-w-0 text-xs font-bold bg-white border border-slate-300 rounded-lg px-2 py-1 text-slate-800 focus:outline-emerald-600 cursor-pointer"
                         >
                             {examList.map((exam) => (
                                 <option key={exam} value={exam}>{exam}</option>
@@ -564,7 +517,7 @@ export default function AllStudentsPage() {
                         type="button"
                         onClick={handleBulkSave}
                         disabled={isSavingAll || loading}
-                        className="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                        className="col-span-2 sm:col-span-1 sm:w-auto px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-bold rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer disabled:opacity-50"
                     >
                         <span>💾</span>
                         <span>{isSavingAll ? "সংরক্ষণ হচ্ছে..." : "সব সিট একসাথে সেভ"}</span>
@@ -572,7 +525,7 @@ export default function AllStudentsPage() {
 
                     <Link
                         href="/dashboard/shared/academics/exam-results/exam/seat-plan/hall-map"
-                        className="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 text-xs sm:text-sm font-bold rounded-xl shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+                        className="px-3 sm:px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 text-xs sm:text-sm font-bold rounded-xl shadow-2xs transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer"
                     >
                         <span>🗺️</span>
                         <span>হল ম্যাপ</span>
@@ -580,40 +533,46 @@ export default function AllStudentsPage() {
 
                     <Link
                         href="/dashboard/shared/academics/exam-results/exam/seat-plan/seat-stickers"
-                        className="px-3.5 py-2 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs sm:text-sm font-bold rounded-xl shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+                        className="px-3 sm:px-3.5 py-2 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs sm:text-sm font-bold rounded-xl shadow-2xs transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer"
                     >
                         <span>🏷️</span>
                         <span>আসন স্টিকার</span>
                     </Link>
 
-                    <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
+                    <div className="col-span-2 sm:w-auto grid grid-cols-2 sm:inline-flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200">
                         <button
+                            type="button"
                             onClick={() => setViewMode("seatPlan")}
-                            className={`px-3.5 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all ${viewMode === "seatPlan"
+                            className={`px-2.5 sm:px-3.5 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-1 whitespace-nowrap cursor-pointer ${viewMode === "seatPlan"
                                 ? "bg-[#043e30] text-white shadow-sm"
                                 : "text-slate-600 hover:text-slate-900"
                                 }`}
                         >
-                            🪑 সিট প্ল্যান
+                            <span>🪑</span>
+                            <span>সিট প্ল্যান</span>
                         </button>
                         <button
+                            type="button"
                             onClick={() => setViewMode("seatPlanPreview")}
-                            className={`px-3.5 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all ${viewMode === "seatPlanPreview"
+                            className={`px-2.5 sm:px-3.5 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-1 whitespace-nowrap cursor-pointer ${viewMode === "seatPlanPreview"
                                 ? "bg-[#043e30] text-white shadow-sm"
                                 : "text-slate-600 hover:text-slate-900"
                                 }`}
                         >
-                            👁️ সিট প্ল্যান প্রিভিউ
+                            <span>👁️</span>
+                            <span>সিট প্ল্যান প্রিভিউ</span>
                         </button>
                     </div>
 
                     {/* প্রিন্ট বাটন (শুধু প্রিভিউ মোডে দেখাবে) */}
                     {viewMode === "seatPlanPreview" && (
                         <button
+                            type="button"
                             onClick={handlePrint}
-                            className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-bold rounded-xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
+                            className="col-span-2 sm:w-auto px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-bold rounded-xl shadow-sm transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer"
                         >
-                            🖨️ প্রিন্ট করুন
+                            <span>🖨️</span>
+                            <span>প্রিন্ট করুন</span>
                         </button>
                     )}
                 </div>
@@ -749,11 +708,10 @@ export default function AllStudentsPage() {
                                                     placeholder="যেমন: ১"
                                                     value={currentSeat}
                                                     onChange={(e) => handleSeatInputChange(id, "seatNo", e.target.value)}
-                                                    className={`w-full px-2 py-1.5 text-xs border rounded-lg focus:outline-none bg-white font-medium transition-colors ${
-                                                        occupant
+                                                    className={`w-full px-2 py-1.5 text-xs border rounded-lg focus:outline-none bg-white font-medium transition-colors ${occupant
                                                             ? "border-rose-500 bg-rose-50 text-rose-900 ring-2 ring-rose-200 font-bold"
                                                             : "border-slate-300 focus:border-emerald-600"
-                                                    }`}
+                                                        }`}
                                                 />
                                                 <datalist id={`seat-options-m-${id}`}>
                                                     {currentHall && Array.from({ length: hallCapacity }, (_, idx) => idx + 1).map((num) => {
@@ -898,11 +856,10 @@ export default function AllStudentsPage() {
                                                         placeholder="যেমন: ১"
                                                         value={currentSeat}
                                                         onChange={(e) => handleSeatInputChange(id, "seatNo", e.target.value)}
-                                                        className={`w-full px-2.5 py-1.5 text-xs border rounded-lg focus:outline-none bg-white font-medium transition-colors ${
-                                                            occupant
+                                                        className={`w-full px-2.5 py-1.5 text-xs border rounded-lg focus:outline-none bg-white font-medium transition-colors ${occupant
                                                                 ? "border-rose-500 bg-rose-50 text-rose-900 ring-2 ring-rose-200 font-bold"
                                                                 : "border-slate-300 focus:border-emerald-600"
-                                                        }`}
+                                                            }`}
                                                     />
                                                     <datalist id={`seat-options-t-${id}`}>
                                                         {currentHall && Array.from({ length: hallCapacity }, (_, idx) => idx + 1).map((num) => {
