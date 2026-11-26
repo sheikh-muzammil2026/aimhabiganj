@@ -328,14 +328,13 @@ export default function ExamHallMapPage() {
     };
   }, []);
 
-  // aim-server থেকে সকল সক্রিয় ও অনুমোদিত শিক্ষার্থী লোড (hallNo=all)
+  // aim-server থেকে নির্দিষ্ট হলের সক্রিয় ও অনুমোদিত শিক্ষার্থী লোড
   const fetchHallData = useCallback(async () => {
     const requestId = ++requestSeqRef.current;
     try {
       setLoading(true);
       setError(null);
 
-<<<<<<< HEAD
       let studentList = [];
 
       // ১. নির্দিষ্ট হলের সিট প্ল্যান ডাটা লোড
@@ -346,11 +345,6 @@ export default function ExamHallMapPage() {
         examName: String(selectedSemester || ""),
         semester: String(selectedSemester || ""),
         year: currentYearVal,
-=======
-      const queryParams = new URLSearchParams({
-        hallNo: "all",
-        semester: selectedSemester,
->>>>>>> 306de04006955912fed5cdfda8df39bd8cb056b0
       });
 
       const res = await fetch(
@@ -388,20 +382,9 @@ export default function ExamHallMapPage() {
 
         setAvailableYears(mergedYears);
         setExamYear(selectedYear || serverAcademicYear);
-
-        const normalizedList = Array.isArray(data.data)
-          ? data.data.map((s) => ({
-              ...s,
-              seatNo: parseSeatNumber(s.seatNo),
-              hallNo: parseHallNumber(s.hallNo),
-            }))
-          : [];
-
-        setAllStudents(normalizedList);
       } else {
         throw new Error(data?.message || "সিট প্ল্যান ডাটা পাওয়া যায়নি।");
       }
-<<<<<<< HEAD
 
       if (data?.success && Array.isArray(data.data) && data.data.length > 0) {
         studentList = data.data
@@ -453,15 +436,31 @@ export default function ExamHallMapPage() {
               return studentHallNo === Number(selectedHall);
             })
             .map((s) => {
-              const details = getStudentClassDetails(s);
               const seatNum = parseSeatNumber(s.seatPlan?.seatNo || s.seatNo);
+              const className =
+                (s.divisionPreHifz?.active && s.divisionPreHifz.class) ||
+                (s.divisionHifz?.active && s.divisionHifz.class) ||
+                (s.divisionAcademy?.active && s.divisionAcademy.class) ||
+                s.officeUse?.recommendedClass ||
+                s.class ||
+                "N/A";
+              const divisionName = s.divisionPreHifz?.active
+                ? "প্রি-হিফজ"
+                : s.divisionHifz?.active
+                  ? "হিফজ"
+                  : s.divisionAcademy?.active
+                    ? "একাডেমিক"
+                    : s.divisionName || "অন্যান্য";
               return {
                 _id: s._id?.$oid || s._id || s.studentId,
                 hallNo: Number(selectedHall),
                 seatNo: seatNum,
-                benchNo: s.seatPlan?.benchNo || s.benchNo || (seatNum > 0 ? Math.ceil(seatNum / 2) : ""),
-                class: details.className || "N/A",
-                divisionName: details.divisionName,
+                benchNo:
+                  s.seatPlan?.benchNo ||
+                  s.benchNo ||
+                  (seatNum > 0 ? Math.ceil(seatNum / 2) : ""),
+                class: className,
+                divisionName,
                 name: s.studentNameBangla || s.studentNameEnglish || s.name || "নাম নেই",
                 studentId: s.studentId || "",
                 roll: s.roll || s.officeUse?.rollNumber || "",
@@ -480,9 +479,7 @@ export default function ExamHallMapPage() {
       }
 
       if (requestId !== requestSeqRef.current) return;
-      setStudents(studentList);
-=======
->>>>>>> 306de04006955912fed5cdfda8df39bd8cb056b0
+      setAllStudents(studentList);
     } catch (err) {
       if (requestId !== requestSeqRef.current) return;
       console.error("Error loading hall map data:", err);
@@ -493,7 +490,7 @@ export default function ExamHallMapPage() {
         setLoading(false);
       }
     }
-  }, [selectedSemester, selectedYear]);
+  }, [selectedHall, selectedSemester, selectedYear, examYear]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -502,11 +499,10 @@ export default function ExamHallMapPage() {
     return () => clearTimeout(timer);
   }, [fetchHallData]);
 
-<<<<<<< HEAD
   // সিট নম্বর অনুযায়ী স্টুডেন্টদের ম্যাপ তৈরি (strictly match BOTH seat.hallNo === selectedHall AND seat.seatNo === slotNumber)
   const studentMapBySeatNo = useMemo(() => {
     const map = {};
-    students.forEach((s) => {
+    allStudents.forEach((s) => {
       const studentHall = parseHallNumber(s.hallNo);
       const seat = parseSeatNumber(s.seatNo);
       if (
@@ -519,105 +515,7 @@ export default function ExamHallMapPage() {
       }
     });
     return map;
-  }, [students, selectedHall]);
-=======
-  // প্রতিটি হলের studentsPerHall সীমা অনুযায়ী সক্রিয় শিক্ষার্থীদের ডাইনামিক স্লাইস ও বণ্টন
-  const distributedByHall = useMemo(() => {
-    const byHall = {};
-    let cursor = 0;
-
-    ORDERED_HALL_NUMS.forEach((hNo) => {
-      const cfg = hallSettings[hNo] || {
-        seatsPerTable: 2,
-        studentsPerHall: HALL_CONFIGS[hNo].capacity,
-      };
-      const limit = Math.max(1, cfg.studentsPerHall || 1);
-      const slice = allStudents.slice(cursor, cursor + limit);
-      cursor += limit;
-
-      byHall[hNo] = {
-        students: slice,
-        capacity: limit,
-        seatsPerTable: Math.max(1, cfg.seatsPerTable || 2),
-        totalTables: Math.max(1, Math.ceil(limit / Math.max(1, cfg.seatsPerTable || 2))),
-      };
-    });
->>>>>>> 306de04006955912fed5cdfda8df39bd8cb056b0
-
-    const unassignedStudents = allStudents.slice(cursor);
-    const totalCapacityAllHalls = ORDERED_HALL_NUMS.reduce(
-      (sum, hNo) => sum + (byHall[hNo]?.capacity || 0),
-      0
-    );
-
-<<<<<<< HEAD
-    const getSeatStudent = (slotNumber) => {
-      const candidate = studentMapBySeatNo[slotNumber];
-      if (
-        candidate &&
-        parseHallNumber(candidate.hallNo) === Number(selectedHall) &&
-        parseSeatNumber(candidate.seatNo) === slotNumber
-      ) {
-        return candidate;
-      }
-      return null;
-    };
-
-    for (let r = 0; r < totalRows; r++) {
-      // বামের বেঞ্চ (Left Desk)
-      const leftSeat1No = currentSeatNo;
-      const leftSeat2No = currentSeatNo + 1;
-      const leftDesk = {
-        benchNo: benchNumber++,
-        label: `বেঞ্চ ${toBengaliDigits(benchNumber - 1)}`,
-        seatRange: `আসন ${toBengaliDigits(leftSeat1No)} ও ${toBengaliDigits(leftSeat2No)}`,
-        leftSeat: {
-          seatNo: leftSeat1No,
-          student: getSeatStudent(leftSeat1No),
-        },
-        rightSeat: {
-          seatNo: leftSeat2No,
-          student: getSeatStudent(leftSeat2No),
-        },
-      };
-      currentSeatNo += 2;
-
-      // ডানের বেঞ্চ (Right Desk)
-      const rightSeat1No = currentSeatNo;
-      const rightSeat2No = currentSeatNo + 1;
-      const rightDesk = {
-        benchNo: benchNumber++,
-        label: `বেঞ্চ ${toBengaliDigits(benchNumber - 1)}`,
-        seatRange: `আসন ${toBengaliDigits(rightSeat1No)} ও ${toBengaliDigits(rightSeat2No)}`,
-        leftSeat: {
-          seatNo: rightSeat1No,
-          student: getSeatStudent(rightSeat1No),
-        },
-        rightSeat: {
-          seatNo: rightSeat2No,
-          student: getSeatStudent(rightSeat2No),
-        },
-      };
-      currentSeatNo += 2;
-=======
-    return {
-      byHall,
-      unassignedStudents,
-      totalCapacityAllHalls,
-    };
-  }, [allStudents, hallSettings]);
-
-  const currentHallAllocation = useMemo(
-    () =>
-      distributedByHall.byHall[selectedHall] || {
-        students: [],
-        capacity: studentsPerHall,
-        seatsPerTable,
-        totalTables: Math.max(1, Math.ceil(studentsPerHall / seatsPerTable)),
-      },
-    [distributedByHall.byHall, selectedHall, studentsPerHall, seatsPerTable]
-  );
->>>>>>> 306de04006955912fed5cdfda8df39bd8cb056b0
+  }, [allStudents, selectedHall]);
 
   const activeHallConfig = useMemo(() => {
     const base = HALL_CONFIGS[selectedHall] || HALL_CONFIGS[1];
@@ -637,7 +535,6 @@ export default function ExamHallMapPage() {
     const perTable = Math.max(1, seatsPerTable);
     const hallCap = Math.max(1, studentsPerHall);
     const totalTables = Math.max(1, Math.ceil(hallCap / perTable));
-    const hallStudents = currentHallAllocation.students || [];
 
     const builtTables = [];
     for (let tIdx = 0; tIdx < totalTables; tIdx++) {
@@ -648,12 +545,11 @@ export default function ExamHallMapPage() {
       for (let sOffset = 0; sOffset < perTable; sOffset++) {
         const seatNo = startSeat + sOffset;
         const isPlaceholder = seatNo > hallCap;
-        const studentIdx = seatNo - 1;
         seats.push({
           seatNo,
           isPlaceholder,
           positionLabel: getSeatPositionLabel(sOffset, perTable),
-          student: isPlaceholder ? null : hallStudents[studentIdx] || null,
+          student: isPlaceholder ? null : studentMapBySeatNo[seatNo] || null,
         });
       }
 
@@ -670,35 +566,6 @@ export default function ExamHallMapPage() {
       });
     }
 
-<<<<<<< HEAD
-    return rows;
-  }, [activeHallConfig, studentMapBySeatNo, selectedHall]);
-
-  // মোট বরাদ্দকৃত সিট এবং ফাঁকা সিটের পরিসংখ্যান
-  const stats = useMemo(() => {
-    let occupied = 0;
-    const capacity = activeHallConfig.capacity;
-    for (let i = 1; i <= capacity; i++) {
-      const candidate = studentMapBySeatNo[i];
-      if (
-        candidate &&
-        parseHallNumber(candidate.hallNo) === Number(selectedHall) &&
-        parseSeatNumber(candidate.seatNo) === i
-      ) {
-        occupied++;
-      }
-    }
-    const matchingStudents = students.filter(
-      (s) => parseHallNumber(s.hallNo) === Number(selectedHall) && parseSeatNumber(s.seatNo) > 0
-    );
-    return {
-      capacity,
-      occupied,
-      vacant: capacity - occupied,
-      totalStudentsFound: matchingStudents.length,
-    };
-  }, [activeHallConfig, studentMapBySeatNo, students, selectedHall]);
-=======
     // ২ বা ৩ আসনের জন্য বাম/ডান ২-কলাম রো, ৪+ আসনের জন্য পূর্ণ-প্রস্থ একক-কলাম রো
     const pairedRows = [];
     if (perTable >= 4) {
@@ -721,12 +588,21 @@ export default function ExamHallMapPage() {
     }
 
     return { tables: builtTables, deskRows: pairedRows };
-  }, [seatsPerTable, studentsPerHall, currentHallAllocation]);
+  }, [seatsPerTable, studentsPerHall, studentMapBySeatNo]);
 
   // হলের পরিসংখ্যান
   const stats = useMemo(() => {
-    const occupied = currentHallAllocation.students.length;
     const capacity = activeHallConfig.capacity;
+    let occupied = 0;
+    for (let seatNo = 1; seatNo <= studentsPerHall; seatNo++) {
+      if (studentMapBySeatNo[seatNo]) {
+        occupied++;
+      }
+    }
+    const unassignedAllHalls = Math.max(
+      0,
+      Object.keys(studentMapBySeatNo).length - occupied
+    );
     return {
       capacity,
       occupied,
@@ -734,17 +610,16 @@ export default function ExamHallMapPage() {
       totalTables: tables.length,
       seatsPerTable,
       totalActiveAllHalls: allStudents.length,
-      unassignedAllHalls: distributedByHall.unassignedStudents.length,
+      unassignedAllHalls,
     };
   }, [
-    currentHallAllocation,
+    studentMapBySeatNo,
+    studentsPerHall,
     activeHallConfig,
     tables.length,
     seatsPerTable,
     allStudents.length,
-    distributedByHall.unassignedStudents.length,
   ]);
->>>>>>> 306de04006955912fed5cdfda8df39bd8cb056b0
 
   // প্রিন্ট হ্যান্ডলার (react-to-print)
   const reactToPrintFn = useReactToPrint({
@@ -896,7 +771,16 @@ export default function ExamHallMapPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
             {ORDERED_HALL_NUMS.map((hNo) => {
               const hall = HALL_CONFIGS[hNo];
-              const alloc = distributedByHall.byHall[hNo];
+              const cfg = hallSettings[hNo] || {
+                seatsPerTable: 2,
+                studentsPerHall: hall.capacity,
+              };
+              const hallSeatsPerTable = Math.max(1, cfg.seatsPerTable || 2);
+              const hallCapacity = Math.max(1, cfg.studentsPerHall || hall.capacity);
+              const hallTotalTables = Math.max(
+                1,
+                Math.ceil(hallCapacity / hallSeatsPerTable)
+              );
               const isSelected = selectedHall === hNo;
               return (
                 <button
@@ -924,8 +808,9 @@ export default function ExamHallMapPage() {
                         isSelected ? "text-amber-200" : "text-emerald-800"
                       }`}
                     >
-                      {toBengaliDigits(alloc?.students.length || 0)}/
-                      {toBengaliDigits(alloc?.capacity || hall.capacity)} জন
+                      {isSelected
+                        ? `${toBengaliDigits(stats.occupied)}/${toBengaliDigits(hallCapacity)} জন`
+                        : `${toBengaliDigits(hallCapacity)} আসন`}
                     </span>
                   </div>
                   <h4
@@ -940,10 +825,10 @@ export default function ExamHallMapPage() {
                       isSelected ? "text-emerald-200" : "text-slate-500"
                     }`}
                   >
-                    <span>{toBengaliDigits(alloc?.totalTables || 1)} টেবিল</span>
+                    <span>{toBengaliDigits(hallTotalTables)} টেবিল</span>
                     <span>•</span>
                     <span>
-                      {toBengaliDigits(alloc?.seatsPerTable || 2)} আসন/টেবিল
+                      {toBengaliDigits(hallSeatsPerTable)} আসন/টেবিল
                     </span>
                   </div>
                 </button>

@@ -15,8 +15,8 @@ const page = () => {
       <FeaturedSections />
 
       <Faculty />
-      <StatsSection />
-      <ReviewSection />
+
+
       <GallerySection />
       <HomeCtaBanner />
     </div>
