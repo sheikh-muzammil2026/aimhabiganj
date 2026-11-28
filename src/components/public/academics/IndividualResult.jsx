@@ -787,7 +787,7 @@ function ResultSheetGeneratorContent() {
   const [examType, setExamType] = useState(
     () =>
       (searchParams.get("exam") || searchParams.get("examType") || "").trim() ||
-      "২য় সাময়িক পরীক্ষা",
+      "বার্ষিক পরীক্ষা",
   );
   const [resultMode, setResultMode] = useState(() =>
     resolveTabFromSearchParams(searchParams),
@@ -1492,8 +1492,8 @@ function ResultSheetGeneratorContent() {
                       type="button"
                       onClick={() => handleSwitchMode("term")}
                       className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${resultMode === "term"
-                          ? "bg-[#0D47A1] text-white shadow-md shadow-[#0D47A1]/20"
-                          : "text-[#0D47A1] hover:bg-white/70"
+                        ? "bg-[#0D47A1] text-white shadow-md shadow-[#0D47A1]/20"
+                        : "text-[#0D47A1] hover:bg-white/70"
                         }`}
                     >
                       <span>📑</span>
@@ -1503,8 +1503,8 @@ function ResultSheetGeneratorContent() {
                       type="button"
                       onClick={() => handleSwitchMode("ct")}
                       className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${resultMode === "ct"
-                          ? "bg-[#2196F3] text-white shadow-md shadow-[#2196F3]/25"
-                          : "text-[#0D47A1] hover:bg-white/70"
+                        ? "bg-[#2196F3] text-white shadow-md shadow-[#2196F3]/25"
+                        : "text-[#0D47A1] hover:bg-white/70"
                         }`}
                     >
                       <span>📝</span>
@@ -1517,8 +1517,8 @@ function ResultSheetGeneratorContent() {
                     aria-label="Copy current tab shareable link"
                     title="শেয়ারেবল লিংক কপি করুন"
                     className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${copiedLink
-                        ? "bg-emerald-600 text-white border-emerald-500 shadow-sm"
-                        : "bg-[#E3F2FD]/60 hover:bg-[#E3F2FD] text-[#0D47A1] border-[#90CAF9]"
+                      ? "bg-emerald-600 text-white border-emerald-500 shadow-sm"
+                      : "bg-[#E3F2FD]/60 hover:bg-[#E3F2FD] text-[#0D47A1] border-[#90CAF9]"
                       }`}
                   >
                     {copiedLink ? (
@@ -1561,7 +1561,7 @@ function ResultSheetGeneratorContent() {
                   <div className="relative flex items-center">
                     <input
                       type="text"
-                      placeholder="যেমন: 04348 (খালি রাখলে সবার আসবে)"
+                      placeholder="যেমন: 04348"
                       value={searchInput}
                       onChange={(e) => setSearchInput(e.target.value)}
                       className="w-full bg-[#E3F2FD]/25 hover:bg-[#E3F2FD]/40 focus:bg-white text-[#1E293B] placeholder-slate-400 border border-[#90CAF9] rounded-2xl py-3 pl-4 pr-9 text-sm font-medium focus:outline-none focus:border-[#2196F3] focus:ring-4 focus:ring-[#2196F3]/15 transition-all"
@@ -1693,8 +1693,8 @@ function ResultSheetGeneratorContent() {
                   type="button"
                   onClick={() => handleSwitchMode("term")}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${activeResultMode === "term"
-                      ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow border border-emerald-400/50"
-                      : "text-emerald-300 hover:text-white hover:bg-emerald-800/40"
+                    ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow border border-emerald-400/50"
+                    : "text-emerald-300 hover:text-white hover:bg-emerald-800/40"
                     }`}
                 >
                   <span>📑</span>
@@ -1704,8 +1704,8 @@ function ResultSheetGeneratorContent() {
                   type="button"
                   onClick={() => handleSwitchMode("ct")}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${activeResultMode === "ct"
-                      ? "bg-gradient-to-r from-amber-400 to-amber-500 text-emerald-950 font-extrabold shadow border border-amber-300"
-                      : "text-emerald-300 hover:text-white hover:bg-emerald-800/40"
+                    ? "bg-gradient-to-r from-amber-400 to-amber-500 text-emerald-950 font-extrabold shadow border border-amber-300"
+                    : "text-emerald-300 hover:text-white hover:bg-emerald-800/40"
                     }`}
                 >
                   <span>📝</span>
@@ -1728,8 +1728,8 @@ function ResultSheetGeneratorContent() {
                 onClick={handleCopyShareLink}
                 aria-label="Copy shareable result link"
                 className={`px-3.5 sm:px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 flex items-center justify-center gap-2 border cursor-pointer ${copiedLink
-                    ? "bg-emerald-600 text-white border-emerald-400/60 shadow-md shadow-emerald-900/40"
-                    : "bg-[#083c2e] hover:bg-emerald-800/80 text-amber-300 border-amber-400/40 active:scale-95"
+                  ? "bg-emerald-600 text-white border-emerald-400/60 shadow-md shadow-emerald-900/40"
+                  : "bg-[#083c2e] hover:bg-emerald-800/80 text-amber-300 border-amber-400/40 active:scale-95"
                   }`}
               >
                 {copiedLink ? (
@@ -2148,9 +2148,9 @@ function ResultSheetGeneratorContent() {
                                           </td>
                                           <td
                                             className={`border border-[#C5A059] p-1.5 font-bold ${ctData.grade === "F" ||
-                                                ctData.isAbsent
-                                                ? "text-red-600"
-                                                : "text-[#043e30]"
+                                              ctData.isAbsent
+                                              ? "text-red-600"
+                                              : "text-[#043e30]"
                                               }`}
                                           >
                                             {ctData.remark}
@@ -2206,9 +2206,9 @@ function ResultSheetGeneratorContent() {
                                   </span>
                                   <span
                                     className={`whitespace-nowrap ${ctSummary.grade === "F" ||
-                                        ctSummary.grade === "অনুঃ"
-                                        ? "text-red-600"
-                                        : "text-[#043e30]"
+                                      ctSummary.grade === "অনুঃ"
+                                      ? "text-red-600"
+                                      : "text-[#043e30]"
                                       }`}
                                   >
                                     {ctSummary.remark || ctSummary.status || "-"}
@@ -2490,11 +2490,10 @@ function ResultSheetGeneratorContent() {
                           {/* নম্বর টেবিল */}
                           <div className="my-1 flex-shrink-0 w-full overflow-x-auto print:overflow-visible">
                             <table
-                              className={`w-full ${
-                                isAnnualExamType(activeExamType)
-                                  ? "min-w-[540px]"
-                                  : "min-w-[340px]"
-                              } sm:min-w-0 print:min-w-0 border-collapse border border-[#C5A059] text-center text-xs print:text-[11px]`}
+                              className={`w-full ${isAnnualExamType(activeExamType)
+                                ? "min-w-[540px]"
+                                : "min-w-[340px]"
+                                } sm:min-w-0 print:min-w-0 border-collapse border border-[#C5A059] text-center text-xs print:text-[11px]`}
                             >
                               <thead>
                                 <tr className="bg-[#fcf8ed] font-bold text-gray-800 text-[11px] sm:text-xs">
@@ -2639,9 +2638,9 @@ function ResultSheetGeneratorContent() {
                                         </td>
                                         <td
                                           className={`border border-[#C5A059] p-1.5 font-bold ${gradeInfo.grade === "F" ||
-                                              gradeInfo.grade === "অনুঃ"
-                                              ? "text-red-600"
-                                              : ""
+                                            gradeInfo.grade === "অনুঃ"
+                                            ? "text-red-600"
+                                            : ""
                                             }`}
                                         >
                                           {gradeInfo.grade}

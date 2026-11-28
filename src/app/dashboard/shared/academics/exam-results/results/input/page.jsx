@@ -468,7 +468,7 @@ function TeacherMarkInputContent() {
       if (!response.ok || !result || result.success !== true) {
         toast.error(
           result?.message ||
-            `সংরক্ষণ করতে ব্যর্থ হয়েছে (স্ট্যাটাস: ${response.status})।`,
+          `সংরক্ষণ করতে ব্যর্থ হয়েছে (স্ট্যাটাস: ${response.status})।`,
         );
         return;
       }
@@ -487,7 +487,7 @@ function TeacherMarkInputContent() {
 
   return (
     <div className="p-4 sm:p-6 bg-slate-50 dark:bg-[#09101d] min-h-screen">
-      <div className="max-w-6xl mx-auto bg-white dark:bg-[#0f172a] rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 p-5 sm:p-7">
+      <div className="w-full max-w-[1440px] mx-auto space-y-4 sm:space-y-6 font-bornomala text-slate-800 antialiased selection:bg-[#0D47A1] selection:text-white">
         {/* হেডার */}
         <div className="border-b border-slate-100 dark:border-slate-800 pb-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
@@ -497,8 +497,8 @@ function TeacherMarkInputContent() {
               </h1>
               <span
                 className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${isPublished
-                    ? "bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800"
-                    : "bg-slate-100 text-slate-600 border-slate-300 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700"
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800"
+                  : "bg-slate-100 text-slate-600 border-slate-300 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700"
                   }`}
               >
                 <span
