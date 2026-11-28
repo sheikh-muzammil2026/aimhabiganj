@@ -1555,7 +1555,7 @@ function ResultSheetGeneratorContent() {
                   <label className="flex items-center justify-between text-xs font-extrabold text-[#0D47A1] mb-1.5 px-1">
                     <span>শিক্ষার্থীর আইডি</span>
                     <span className="text-[10px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">
-                      ঐচ্ছিক
+                      আবশ্যক
                     </span>
                   </label>
                   <div className="relative flex items-center">
